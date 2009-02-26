@@ -1,0 +1,8 @@
+Release/
+debug/
+doc/
+.cproject
+.project
+Makefile*
+*~
+Thumbs.db
