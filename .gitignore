@@ -1,8 +1,10 @@
 Release/
 debug/
 doc/
+obj/
 .cproject
 .project
 Makefile*
 *~
+*.so*
 Thumbs.db
