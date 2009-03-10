@@ -15,6 +15,13 @@ LIBS += -L../fparser\
 LIBS += -L../tinyxml \
 	-ltinyxml
 }
+win32{
+DEFINES = BUILD_CSXCAD_LIB
+INCLUDEPATH += ../tinyxml 
+INCLUDEPATH += ../fparser 
+LIBS += ..\fparser\release\libfparser.a \
+    ..\tinyxml\release\libtinyxml.a
+}
 
 # Input
 HEADERS += ContinuousStructure.h \
