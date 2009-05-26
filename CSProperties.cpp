@@ -113,6 +113,12 @@ const char* CSProperties::GetTypeString()
 		case CSProperties::DUMPBOX:
 			sType=string("Dump-Box");
 			break;
+		case CSProperties::ANY:
+			sType=string("Any");
+			break;
+		default:
+			sType=string("Invalid Type");
+			break;
 	};
 	return sType.c_str();
 }

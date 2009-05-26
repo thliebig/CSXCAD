@@ -51,17 +51,23 @@ public:
 	//! Replace an existing property with a new one. \sa AddProperty, DeleteProperty
 	bool ReplaceProperty(CSProperties* oldProp, CSProperties* newProp);
 
-    void DeletePrimitive(size_t index);
-    void DeleteProperty(size_t index);
-    void DeletePrimitive(CSPrimitives* prim);
-    void DeleteProperty(CSProperties* prop);
+	//! Remove and delete Primitive with known index 
+	void DeletePrimitive(size_t index);
 
-    //! Get a Primitive by its internal index number. \sa GetQtyPrimitives
+	//! Remove and delete Property with known index 
+	void DeleteProperty(size_t index);
+
+	//! Remove and delete a known Primitive
+	void DeletePrimitive(CSPrimitives* prim);
+	//! Remove and delete a known Property
+	void DeleteProperty(CSProperties* prop);
+
+	//! Get a Primitive by its internal index number. \sa GetQtyPrimitives
 	CSPrimitives* GetPrimitive(size_t index);
 	//! Get a primitive by its unique ID.
 	CSPrimitives* GetPrimitiveByID(unsigned int ID);
 
-    //! Get a property by its internal index number. \sa GetQtyProperties
+	//! Get a property by its internal index number. \sa GetQtyProperties
 	CSProperties* GetProperty(size_t index);
 
 	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
@@ -137,6 +143,7 @@ public:
 	 */
 	const char* ReadFromXML(TiXmlNode* rootNode);
 
+	//! Get a Info-Line containing lib-name, -version etc. 
 	static string GetInfoLine();
 
 protected:

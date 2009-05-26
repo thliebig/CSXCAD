@@ -109,7 +109,7 @@ bool Parameter::ReadFromXML(TiXmlNode &root)
 
 Parameter* Parameter::GetParameterFromXML(TiXmlNode &root)
 {
-
+	return NULL;
 }
 
 LinearParameter::LinearParameter() : Parameter()
@@ -291,8 +291,10 @@ int ParameterSet::CountSweepSteps(int SweepMode)
 		case 1:
 			for (size_t i=0; i<vParameter.size();++i)
 				if (vParameter.at(i)->GetSweep())
+				{
 					if (count==0) count=vParameter.at(i)->CountSteps();
 					else count*=vParameter.at(i)->CountSteps();
+				}
 			return count;
 			break;
 		case 2:

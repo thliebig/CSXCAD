@@ -4,6 +4,8 @@ doc/
 obj/
 .cproject
 .project
+.cdt*
+.settings/
 Makefile*
 *~
 *.so*
