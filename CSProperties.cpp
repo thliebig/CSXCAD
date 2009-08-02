@@ -1,4 +1,6 @@
 #include "CSProperties.h"
+#include "CSPrimitives.h"
+#include "ParameterObjects.h"
 //#include <iostream>
 #include "tinyxml.h"
 

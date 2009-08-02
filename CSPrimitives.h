@@ -10,26 +10,16 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include "CSProperties.h"
 #include "ParameterObjects.h"
 #include "CSXCAD_Global.h"
 
-class CSPrimitives;
-	class CSPrimBox;
-	class CSPrimMultiBox;
-	class CSPrimSphere;
-	class CSPrimCylinder;
-	class CSPrimUserDefined;
-	//usw
+class CSPrimBox;
+class CSPrimMultiBox;
+class CSPrimSphere;
+class CSPrimCylinder;
+class CSPrimUserDefined;
+
 class CSProperties; //include VisualProperties
-	class CSPropUnknown;
-	class CSPropMaterial;
-	class CSPropMetal;
-	class CSPropElectrode;
-	class CSPropChargeBox;
-	class CSPropResBox;
-	class CSPropDumpBox;
-	//usw.
 
 class TiXmlNode;
 class FunctionParser;

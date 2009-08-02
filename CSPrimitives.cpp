@@ -1,4 +1,5 @@
 #include "CSPrimitives.h"
+#include "CSProperties.h"
 #include <sstream>
 #include <iostream>
 #include <limits>
@@ -585,7 +586,7 @@ double* CSPrimCylinder::GetBoundBox(bool &accurate)
 	double rad=psRadius.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
-		//vorerst ganz einfach... muss überarbeitet werden!!! //todo
+		//vorerst ganz einfach... muss ueberarbeitet werden!!! //todo
 		double min=dCoords[2*i];
 		double max=dCoords[2*i+1];
 		if (min<max)

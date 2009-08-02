@@ -11,26 +11,20 @@
 #include <string>
 #include <vector>
 #include "ParameterObjects.h"
-#include "CSPrimitives.h"
 #include "CSXCAD_Global.h"
 
 using namespace std;
 
 class CSPrimitives;
-	class CSPrimBox;
-	class CSPrimMultiBox;
-	class CSPrimSphere;
-	//usw
 
-class CSProperties; //include VisualProperties
-	class CSPropUnknown;
-	class CSPropMaterial;
-	class CSPropMetal;
-	class CSPropElectrode;
-	class CSPropChargeBox;
-	class CSPropResBox;
-	class CSPropDumpBox;
-	//usw.
+class CSPropUnknown;
+class CSPropMaterial;
+class CSPropMetal;
+class CSPropElectrode;
+class CSPropChargeBox;
+class CSPropResBox;
+class CSPropDumpBox;
+
 class TiXmlNode;
 
 typedef struct
