@@ -714,7 +714,385 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-/*********************CSPrimBox********************************************************************/
+/*********************CSPrimPolygon********************************************************************/
+CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
+{
+	Type=POLYGON;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : CSPrimitives(primPolygon,prop)
+{
+	Type=POLYGON;
+//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+}
+
+CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
+{
+	Type=POLYGON;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+
+CSPrimPolygon::~CSPrimPolygon()
+{
+}
+
+void CSPrimPolygon::SetCoord(int index, double val)
+{
+	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
+}
+
+void CSPrimPolygon::SetCoord(int index, const string val)
+{
+	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
+}
+
+void CSPrimPolygon::AddCoord(double val)
+{
+	vCoords.push_back(ParameterScalar(clParaSet,val));
+}
+
+void CSPrimPolygon::AddCoord(const string val)
+{
+	vCoords.push_back(ParameterScalar(clParaSet,val));
+}
+
+void CSPrimPolygon::RemoveCoords(int index)
+{
+	//not yet implemented
+}
+
+double CSPrimPolygon::GetCoord(int index)
+{
+	if ((index>=0) && (index<(int)vCoords.size())) return vCoords.at(index).GetValue();
+	return 0;
+}
+
+ParameterScalar* CSPrimPolygon::GetCoordPS(int index)
+{
+	if ((index>=0) && (index<(int)vCoords.size())) return &vCoords.at(index);
+	return NULL;
+}
+
+double* CSPrimPolygon::GetAllCoords(size_t &Qty, double* array)
+{
+	Qty=vCoords.size();
+	delete[] array;
+	array = new double[Qty];
+	for (size_t i=0;i<Qty;++i) array[i]=vCoords.at(i).GetValue();
+	return array;
+}
+
+
+double* CSPrimPolygon::GetBoundBox(bool &accurate)
+{
+//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+//	for (int i=0;i<3;++i)
+//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
+//		{
+//			double help=dBoundBox[2*i];
+//			dBoundBox[2*i]=dBoundBox[2*i+1];
+//			dBoundBox[2*i+1]=help;
+//		}
+//	accurate=true;
+	return dBoundBox;
+}
+
+bool CSPrimPolygon::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+
+	bool accBnd=false;
+	double* box=this->GetBoundBox(accBnd);
+
+	for (unsigned int n=0;n<3;++n)
+	{
+		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+	}
+	//more checking needed!!
+	return true;
+}
+
+
+bool CSPrimPolygon::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+//	for (int i=0;i<6;++i)
+//	{
+//		EC=psCoords[i].Evaluate();
+//		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+//		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+//		{
+//			bOK=false;
+//			stringstream stream;
+//			stream << endl << "Error in Box (ID: " << uiID << "): ";
+//			ErrStr->append(stream.str());
+//			PSErrorCode2Msg(EC,ErrStr);
+//		}
+//	}
+	return bOK;
+}
+
+bool CSPrimPolygon::Write2XML(TiXmlNode& root, bool parameterised)
+{
+	TiXmlElement elem("Polygon");
+
+	CSPrimitives::Write2XML(elem,parameterised);
+	
+	WriteTerm(Elevation,elem,"Elevation",parameterised);
+
+	elem.SetAttribute("QtyVertices",(int)vCoords.size()/2);
+	TiXmlElement NV("NormDir");
+	WriteTerm(NormDir[0],NV,"X",parameterised);	
+	WriteTerm(NormDir[1],NV,"Y",parameterised);	
+	WriteTerm(NormDir[2],NV,"Z",parameterised);	
+	elem.InsertEndChild(NV);
+
+	for (size_t i=0;i<vCoords.size()/2;++i)
+	{
+		TiXmlElement VT("Vertex");
+		WriteTerm(vCoords.at(i*2),VT,"X1",parameterised);
+		WriteTerm(vCoords.at(i*2+1),VT,"X2",parameterised);
+		elem.InsertEndChild(VT);
+	}
+
+	root.InsertEndChild(elem);
+	return true;
+}
+
+bool CSPrimPolygon::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimitives::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+	if (ReadTerm(Elevation,*elem,"Elevation")==false) return false;
+
+	TiXmlElement* NV=root.FirstChildElement("NormDir");
+	if (NV==NULL) return false;
+	if (ReadTerm(NormDir[0],*NV,"X")==false) return false;
+	if (ReadTerm(NormDir[1],*NV,"Y")==false) return false;
+	if (ReadTerm(NormDir[2],*NV,"Z")==false) return false;
+	
+	TiXmlElement *VT=root.FirstChildElement("Vertex");
+	if (vCoords.size()!=0) return false;
+	int i=0;
+	while (VT)
+	{
+		for (int n=0;n<2;++n) this->AddCoord(0.0);
+
+		if (ReadTerm(vCoords.at(i*2),*VT,"X1")==false) return false;
+		if (ReadTerm(vCoords.at(i*2+1),*VT,"X2")==false) return false;
+
+		VT=VT->NextSiblingElement("Vertex");
+		++i;
+	};
+	
+	return true;
+}
+
+/*********************CSPrimLinPoly********************************************************************/
+CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(ID,paraSet,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+}
+
+CSPrimLinPoly::CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+
+CSPrimLinPoly::~CSPrimLinPoly()
+{
+}
+
+double* CSPrimLinPoly::GetBoundBox(bool &accurate)
+{
+//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+//	for (int i=0;i<3;++i)
+//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
+//		{
+//			double help=dBoundBox[2*i];
+//			dBoundBox[2*i]=dBoundBox[2*i+1];
+//			dBoundBox[2*i+1]=help;
+//		}
+//	accurate=true;
+	return dBoundBox;
+}
+
+bool CSPrimLinPoly::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+
+	bool accBnd=false;
+	double* box=this->GetBoundBox(accBnd);
+
+	for (unsigned int n=0;n<3;++n)
+	{
+		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+	}
+	//more checking needed!!
+	return true;
+}
+
+
+bool CSPrimLinPoly::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+
+	return bOK;
+}
+
+bool CSPrimLinPoly::Write2XML(TiXmlNode& root, bool parameterised)
+{
+	TiXmlElement elem("LinPoly");
+
+	CSPrimPolygon::Write2XML(elem,parameterised);
+
+	WriteTerm(extrudeLength,elem,"Length",parameterised);
+
+
+	root.InsertEndChild(elem);
+	return true;
+}
+
+bool CSPrimLinPoly::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimPolygon::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+	if (ReadTerm(extrudeLength,*elem,"Length")==false) return false;
+
+	return true;
+}
+
+/*********************CSPrimLinPoly********************************************************************/
+CSPrimRotPoly::CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(ID,paraSet,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+CSPrimRotPoly::CSPrimRotPoly(CSPrimRotPoly* primRotPoly, CSProperties *prop) : CSPrimPolygon(primRotPoly,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+}
+
+CSPrimRotPoly::CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
+{
+	Type=LINPOLY;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+}
+
+
+CSPrimRotPoly::~CSPrimRotPoly()
+{
+}
+
+double* CSPrimRotPoly::GetBoundBox(bool &accurate)
+{
+//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+//	for (int i=0;i<3;++i)
+//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
+//		{
+//			double help=dBoundBox[2*i];
+//			dBoundBox[2*i]=dBoundBox[2*i+1];
+//			dBoundBox[2*i+1]=help;
+//		}
+//	accurate=true;
+	return dBoundBox;
+}
+
+bool CSPrimRotPoly::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+
+	bool accBnd=false;
+	double* box=this->GetBoundBox(accBnd);
+
+	for (unsigned int n=0;n<3;++n)
+	{
+		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+	}
+	//more checking needed!!
+	return true;
+}
+
+
+bool CSPrimRotPoly::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+//	for (int i=0;i<6;++i)
+//	{
+//		EC=psCoords[i].Evaluate();
+//		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+//		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+//		{
+//			bOK=false;
+//			stringstream stream;
+//			stream << endl << "Error in Box (ID: " << uiID << "): ";
+//			ErrStr->append(stream.str());
+//			PSErrorCode2Msg(EC,ErrStr);
+//		}
+//	}
+	return bOK;
+}
+
+bool CSPrimRotPoly::Write2XML(TiXmlNode& root, bool parameterised)
+{
+	TiXmlElement elem("RotPoly");
+
+	CSPrimPolygon::Write2XML(elem,parameterised);
+
+	TiXmlElement RT("RotAxis");
+	WriteTerm(RotAxis[0],RT,"X",parameterised);	
+	WriteTerm(RotAxis[1],RT,"Y",parameterised);	
+	WriteTerm(RotAxis[2],RT,"Z",parameterised);	
+	elem.InsertEndChild(RT);
+	
+	TiXmlElement Ang("Angles");
+	WriteTerm(StartStopAngle[0],Ang,"Start",parameterised);	
+	WriteTerm(StartStopAngle[1],Ang,"Stop",parameterised);	
+	elem.InsertEndChild(Ang);
+	
+	root.InsertEndChild(elem);
+	return true;
+}
+
+bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimPolygon::ReadFromXML(root)==false) return false;
+
+	TiXmlElement* NV=root.FirstChildElement("RotAxis");
+	if (NV==NULL) return false;
+	if (ReadTerm(NormDir[0],*NV,"X")==false) return false;
+	if (ReadTerm(NormDir[1],*NV,"Y")==false) return false;
+	if (ReadTerm(NormDir[2],*NV,"Z")==false) return false;
+	
+	NV=root.FirstChildElement("Angles");
+	if (NV==NULL) return false;
+	if (ReadTerm(StartStopAngle[0],*NV,"Start")==false) return false;
+	if (ReadTerm(StartStopAngle[1],*NV,"Stop")==false) return false;
+
+	return true;
+}
+
+/*********************CSPrimUserDefined********************************************************************/
 CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=USERDEFINED;

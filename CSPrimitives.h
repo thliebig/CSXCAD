@@ -17,6 +17,9 @@ class CSPrimBox;
 class CSPrimMultiBox;
 class CSPrimSphere;
 class CSPrimCylinder;
+class CSPrimPolygon;
+	class CSPrimLinPoly;
+	class CSPrimRotPoly;
 class CSPrimUserDefined;
 
 class CSProperties; //include VisualProperties
@@ -37,7 +40,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		BOX,MULTIBOX,SPHERE,CYLINDER,USERDEFINED
+		BOX,MULTIBOX,SPHERE,CYLINDER,POLYGON,LINPOLY,ROTPOLY,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -82,6 +85,12 @@ public:
 	CSPrimSphere* ToSphere() { return ( this && Type == SPHERE ) ? (CSPrimSphere*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
 	CSPrimCylinder* ToCylinder() { return ( this && Type == CYLINDER ) ? (CSPrimCylinder*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Polygon-Primitive or NULL in case of different type.
+	CSPrimPolygon* ToPolygon() { return ( this && Type == POLYGON ) ? (CSPrimPolygon*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing LinPoly-Primitive or NULL in case of different type.
+	CSPrimLinPoly* ToLinPoly() { return ( this && Type == LINPOLY ) ? (CSPrimLinPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
+	CSPrimRotPoly* ToRotPoly() { return ( this && Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing UserDefined-Primitive or NULL in case of different type.
 	CSPrimUserDefined* ToUserDefined() { return ( this && Type == USERDEFINED ) ? (CSPrimUserDefined*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 
@@ -235,6 +244,109 @@ public:
 protected:
 	ParameterScalar psCoords[6];
 	ParameterScalar psRadius;
+};
+
+class CSXCAD_EXPORT CSPrimPolygon : public CSPrimitives
+{
+public:
+	CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop=NULL);
+	CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimPolygon();
+
+	virtual CSPrimPolygon* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolygon(this,prop);};
+
+	void SetCoord(int index, double val);
+	void SetCoord(int index, const string val);
+
+	void AddCoord(double val);
+	void AddCoord(const string val);
+	
+	void RemoveCoords(int index);
+
+	double GetCoord(int index);
+	ParameterScalar* GetCoordPS(int index);
+
+	size_t GetQtyCoords() {return vCoords.size()/2;};
+	double* GetAllCoords(size_t &Qty, double* array);
+
+	virtual double* GetBoundBox(bool &accurate);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	///Vector describing the polygon, x1,y1,x2,y2 ... xn,yn
+	vector<ParameterScalar> vCoords;
+	///The polygon plane normal vector (only cartesian so far)
+	ParameterScalar NormDir[3];
+	///The polygon plane elevation in direction of the normal vector
+	ParameterScalar Elevation;
+};
+
+class CSXCAD_EXPORT CSPrimLinPoly : public CSPrimPolygon
+{
+public:
+	CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimLinPoly(CSPrimLinPoly* primPolygon, CSProperties *prop=NULL);
+	CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimLinPoly();
+
+	virtual CSPrimLinPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimLinPoly(this,prop);};
+
+	void SetLength(double val) {extrudeLength.SetValue(val);};
+	void SetLength(const string val) {extrudeLength.SetValue(val);};
+
+	double GetLength() {extrudeLength.GetValue();};
+	ParameterScalar* GetLengthPS() {return &extrudeLength;};
+
+	virtual double* GetBoundBox(bool &accurate);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	ParameterScalar extrudeLength;
+};
+
+class CSXCAD_EXPORT CSPrimRotPoly : public CSPrimPolygon
+{
+public:
+	CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimRotPoly(CSPrimRotPoly* primPolygon, CSProperties *prop=NULL);
+	CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimRotPoly();
+
+	virtual CSPrimRotPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimRotPoly(this,prop);};
+
+	void SetRotAxis(int index, double val) {if ((index>=0) && (index<3)) RotAxis[index].SetValue(val);};
+	void SetRotAxis(int index, const string val) {if ((index>=0) && (index<3)) RotAxis[index].SetValue(val);};
+
+	double GetRotAxis(int index) {if ((index>=0) && (index<3)) return RotAxis[index].GetValue(); else return 0;};
+	ParameterScalar* GetRotAxisPS(int index) {if ((index>=0) && (index<3)) return &RotAxis[index]; else return NULL;};
+
+	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);};
+	void SetAngle(int index, const string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);};
+
+	double GetAngle(int index) {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;};
+	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;};
+
+	virtual double* GetBoundBox(bool &accurate);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	//start-stop angle
+	ParameterScalar StartStopAngle[2];
+	//rot axis
+	ParameterScalar RotAxis[3];
 };
 
 class CSXCAD_EXPORT CSPrimUserDefined: public CSPrimitives
