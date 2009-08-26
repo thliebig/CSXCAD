@@ -30,7 +30,7 @@ class CSXCAD_EXPORT Parameter
 {
 public:
 	Parameter();
-	Parameter(const char* Paraname, double val);
+	Parameter(const string Paraname, double val);
 	Parameter(const Parameter* parameter) {sName=string(parameter->sName);dValue=parameter->dValue;bModified=true;Type=parameter->Type;bSweep=parameter->bSweep;};
 	virtual ~Parameter();
 	enum ParameterType
@@ -39,8 +39,8 @@ public:
 	};
 	ParameterType GetType() {return Type;};
 
-	const char* GetName() {return sName.c_str();};
-	void SetName(const char* Paraname) {sName=string(Paraname);bModified=true;};
+	const string GetName() {return sName;};
+	void SetName(const string Paraname) {sName=string(Paraname);bModified=true;};
 
 	virtual double GetValue() {return dValue;};
 	virtual void SetValue(double val) {dValue=val;bModified=true;};
@@ -85,7 +85,7 @@ class CSXCAD_EXPORT LinearParameter :  public Parameter
 {
 public:
 	LinearParameter();
-	LinearParameter(const char* Paraname, double val, double min, double max, double step);
+	LinearParameter(const string Paraname, double val, double min, double max, double step);
 	//copy-constructor
 	LinearParameter(const LinearParameter *parameter);
 	virtual ~LinearParameter(void) {};
@@ -137,8 +137,8 @@ public:
 	bool GetModified();
 	virtual void SetModified(bool mod=true);
 
-	const char* GetParameterString(const char* spacer=",");
-	const char* GetParameterValueString(const char* spacer=",", bool ValuesOnly=false);
+	const string GetParameterString(const string spacer=",");
+	const string GetParameterValueString(const string spacer=",", bool ValuesOnly=false);
 
 	size_t GetQtyParameter() {return vParameter.size();};
 	double* GetValueArray(double *array);
@@ -173,17 +173,17 @@ public:
     };
 	ParameterScalar();
 	ParameterScalar(ParameterSet* ParaSet, double value);
-	ParameterScalar(ParameterSet* ParaSet, const char* value);
+	ParameterScalar(ParameterSet* ParaSet, const string value);
 	ParameterScalar(ParameterScalar* ps);
 	~ParameterScalar();
 
 	void SetParameterSet(ParameterSet *paraSet) {clParaSet=paraSet;}
 
-	int SetValue(const char* value, bool Eval=true); ///returns eval-error-code
+	int SetValue(const string value, bool Eval=true); ///returns eval-error-code
 	void SetValue(double value);
 
 	bool GetMode() {return ParameterMode;};
-	const char* GetString() {if (sValue.empty()) return NULL; else return sValue.c_str();};
+	const string GetString() {return sValue;}; //if (sValue.empty()) return NULL; else return sValue.c_str();};
 
 	double GetValue();
 
@@ -205,11 +205,11 @@ public:
 	~ParameterVector();
 
 	void SetX(double val) {XCoord.SetValue(val);};
-	void SetX(const char* val) {XCoord.SetValue(val);};
+	void SetX(const string val) {XCoord.SetValue(val);};
 	void SetY(double val) {YCoord.SetValue(val);};
-	void SetY(const char* val) {YCoord.SetValue(val);};
+	void SetY(const string val) {YCoord.SetValue(val);};
 	void SetZ(double val) {ZCoord.SetValue(val);};
-	void SetZ(const char* val) {ZCoord.SetValue(val);};
+	void SetZ(const string val) {ZCoord.SetValue(val);};
 	void SetCoords(double x, double y, double z) {XCoord.SetValue(x);YCoord.SetValue(y);ZCoord.SetValue(z);};
 
 	int Evaluate() {return XCoord.Evaluate()+YCoord.Evaluate()+ZCoord.Evaluate();};

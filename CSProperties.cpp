@@ -2,6 +2,7 @@
 #include "CSPrimitives.h"
 #include "ParameterObjects.h"
 //#include <iostream>
+#include <sstream>
 #include "tinyxml.h"
 
 /*********************CSProperties********************************************************************/
@@ -64,8 +65,8 @@ void CSProperties::SetID(unsigned int ID) {uiID=ID;}
 unsigned int CSProperties::GetUniqueID() {return UniqueID;}
 void CSProperties::SetUniqueID(unsigned int uID) {UniqueID=uID;}
 
-void CSProperties::SetName(const char* name) {sName=string(name);}
-const char* CSProperties::GetName() {return sName.c_str();}
+void CSProperties::SetName(const string name) {sName=string(name);}
+const string CSProperties::GetName() {return sName;}
 
 void CSProperties::AddPrimitive(CSPrimitives *prim) {vPrimitives.push_back(prim);}
 
@@ -90,7 +91,7 @@ CSPropDumpBox* CSProperties::ToDumpBox() { return ( this && Type == DUMPBOX ) ? 
 
 bool CSProperties::Update(string *ErrStr) {return true;}
 
-const char* CSProperties::GetTypeString()
+const string CSProperties::GetTypeString()
 {
 	switch (Type)
 	{
@@ -231,8 +232,8 @@ CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSPropert
 CSPropUnknown::CSPropUnknown(CSProperties* prop) : CSProperties(prop) {Type=UNKNOWN;}
 CSPropUnknown::~CSPropUnknown() {}
 
-void CSPropUnknown::SetProperty(const char* val) {sUnknownProperty=string(val);}
-const char* CSPropUnknown::GetProperty() {return sUnknownProperty.c_str();}
+void CSPropUnknown::SetProperty(const string val) {sUnknownProperty=string(val);}
+const string CSPropUnknown::GetProperty() {return sUnknownProperty;}
 
 
 bool CSPropUnknown::Write2XML(TiXmlNode& root, bool parameterised)
@@ -263,19 +264,19 @@ CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSPrope
 CSPropMaterial::~CSPropMaterial() {}
 
 void CSPropMaterial::SetEpsilon(double val) {Epsilon.SetValue(val);}
-void CSPropMaterial::SetEpsilon(const char* val) {Epsilon.SetValue(val);}
+void CSPropMaterial::SetEpsilon(const string val) {Epsilon.SetValue(val);}
 double CSPropMaterial::GetEpsilon() {return Epsilon.GetValue();}
-const char* CSPropMaterial::GetEpsilonTerm() {return Epsilon.GetString();}
+const string CSPropMaterial::GetEpsilonTerm() {return Epsilon.GetString();}
 
 void CSPropMaterial::SetMue(double val) {Mue.SetValue(val);}
-void CSPropMaterial::SetMue(const char* val) {Mue.SetValue(val);}
+void CSPropMaterial::SetMue(const string val) {Mue.SetValue(val);}
 double CSPropMaterial::GetMue() {return Mue.GetValue();}
-const char* CSPropMaterial::GetMueTerm() {return Mue.GetString();}
+const string CSPropMaterial::GetMueTerm() {return Mue.GetString();}
 
 void CSPropMaterial::SetKappa(double val) {Kappa.SetValue(val);}
-void CSPropMaterial::SetKappa(const char* val) {Kappa.SetValue(val);}
+void CSPropMaterial::SetKappa(const string val) {Kappa.SetValue(val);}
 double CSPropMaterial::GetKappa() {return Kappa.GetValue();}
-const char* CSPropMaterial::GetKappaTerm() {return Kappa.GetString();}
+const string CSPropMaterial::GetKappaTerm() {return Kappa.GetString();}
 
 void CSPropMaterial::Init()
 {
@@ -295,36 +296,27 @@ bool CSPropMaterial::Update(string *ErrStr)
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		char buffer[33];
-		ErrStr->append("\nError in Material-Property Epsilon-Value (ID: ");
-		sprintf(buffer,"%d\0",uiID);
-		ErrStr->append(buffer);
-		//ErrStr->append(itoa(uiID,buffer,10));
-		ErrStr->append("): ");
+		stringstream stream;
+		stream << endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	EC=Mue.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		char buffer[33];
-		ErrStr->append("\nError in Material-Property Mue-Value (ID: ");
-		sprintf(buffer,"%d\0",uiID);
-		ErrStr->append(buffer);
-		//ErrStr->append(itoa(uiID,buffer,10));
-		ErrStr->append("): ");
+		stringstream stream;
+		stream << endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	EC=Kappa.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		char buffer[33];
-		ErrStr->append("\nError in Material-Property Kappa-Value (ID: ");
-		sprintf(buffer,"%d\0",uiID);
-		ErrStr->append(buffer);
-		//ErrStr->append(itoa(uiID,buffer,10));
-		ErrStr->append("): ");
+		stringstream stream;
+		stream << endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	return bOK;
@@ -396,7 +388,7 @@ void CSPropElectrode::SetExcitation(double val, int Component)
 	Excitation[Component].SetValue(val);
 }
 
-void CSPropElectrode::SetExcitation(const char* val, int Component)
+void CSPropElectrode::SetExcitation(const string val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	Excitation[Component].SetValue(val);
@@ -408,14 +400,14 @@ double CSPropElectrode::GetExcitation(int Component)
 	return Excitation[Component].GetValue();
 }
 
-const char* CSPropElectrode::GetExcitationString(int Comp)
+const string CSPropElectrode::GetExcitationString(int Comp)
 {
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return Excitation[Comp].GetString();
 }
 
-void CSPropElectrode::SetWeightFct(const char* fct, int ny) {if ((ny>=0) && (ny<3)) sWeightFct[ny]=string(fct);}
-const char* CSPropElectrode::GetWeightFct(int ny) {if ((ny>=0) && (ny<3)) {if (sWeightFct[ny].empty()) return NULL; else return sWeightFct[ny].c_str();} else return NULL;}
+void CSPropElectrode::SetWeightFct(const string fct, int ny) {if ((ny>=0) && (ny<3)) sWeightFct[ny]=string(fct);}
+const string CSPropElectrode::GetWeightFct(int ny) {if ((ny>=0) && (ny<3)) {return sWeightFct[ny];} else return string();}
 
 void CSPropElectrode::Init()
 {
@@ -438,12 +430,9 @@ bool CSPropElectrode::Update(string *ErrStr)
 		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
-			char buffer[33];
-			ErrStr->append("\nError in Electrode-Property Excitaion-Value [ID: ");
-			sprintf(buffer,"%d\0",uiID);
-			ErrStr->append(buffer);
-			//ErrStr->append(itoa(uiID,buffer,10));
-			ErrStr->append("]: ");
+			stringstream stream;
+			stream << endl << "Error in Electrode-Property Excitaion-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 			//cout << EC << endl;
 		}

@@ -53,7 +53,7 @@ public:
 	//! Get PropertyType \sa PropertyType and GetTypeString
 	int GetType();
 	//! Get PropertyType as a string \sa PropertyType and GetType
-	const char* GetTypeString();
+	const string GetTypeString();
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
 	unsigned int GetID();
 	//!Set ID to this property. USE ONLY WHEN YOU KNOW WHAT YOU ARE DOING!!!! \sa GetID
@@ -65,9 +65,9 @@ public:
 	void SetUniqueID(unsigned int uID);
 
 	//! Set Name for this Property. \sa GetName
-	void SetName(const char* name);
+	void SetName(const string name);
 	//! Get Name for this Property. \sa SetName
-	const char* GetName();
+	const string GetName();
 
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
@@ -148,8 +148,8 @@ public:
 	CSPropUnknown(CSProperties* prop);
 	virtual ~CSPropUnknown();
 
-	void SetProperty(const char* val);
-	const char* GetProperty();
+	void SetProperty(const string val);
+	const string GetProperty();
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
@@ -167,19 +167,19 @@ public:
 	virtual ~CSPropMaterial();
 
 	void SetEpsilon(double val);
-	void SetEpsilon(const char* val);
+	void SetEpsilon(const string val);
 	double GetEpsilon();
-	const char* GetEpsilonTerm();
+	const string GetEpsilonTerm();
 
 	void SetMue(double val);
-	void SetMue(const char* val);
+	void SetMue(const string val);
 	double GetMue();
-	const char* GetMueTerm();
+	const string GetMueTerm();
 
 	void SetKappa(double val);
-	void SetKappa(const char* val);
+	void SetKappa(const string val);
 	double GetKappa();
-	const char* GetKappaTerm();
+	const string GetKappaTerm();
 
 	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
@@ -218,12 +218,12 @@ public:
 	int GetExcitType();
 
 	void SetExcitation(double val, int Component=0);
-	void SetExcitation(const char* val, int Component=0);
+	void SetExcitation(const string val, int Component=0);
 	double GetExcitation(int Component=0);
-	const char* GetExcitationString(int Comp=0);
+	const string GetExcitationString(int Comp=0);
 
-	void SetWeightFct(const char* fct, int ny);
-	const char* GetWeightFct(int ny);
+	void SetWeightFct(const string fct, int ny);
+	const string GetWeightFct(int ny);
 
 //	void SetWeightVars(const char* vars,int ny) {if ((ny>=0) && (ny<3)) sWeightVars[ny]=string(vars);};
 //	const char* GetWeightVars(int ny) {if ((ny>=0) && (ny<3)) {if (sWeightVars[ny].empty()) return NULL; else return sWeightVars[ny].c_str();} else return NULL;};

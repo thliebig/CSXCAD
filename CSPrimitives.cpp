@@ -140,12 +140,9 @@ bool CSPrimBox::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			char buffer[33];
-			ErrStr->append("\nError in Box (ID: ");
-			sprintf(buffer,"%d\0",uiID);
-			ErrStr->append(buffer);
-			//ErrStr->append(itoa(uiID,buffer,10));
-			ErrStr->append("): ");
+			stringstream stream;
+			stream << endl << "Error in Box (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
@@ -266,12 +263,12 @@ ParameterScalar* CSPrimMultiBox::GetCoordPS(int index)
 	return NULL;
 }
 
-double* CSPrimMultiBox::GetAllCoords(int &Qty, double* array)
+double* CSPrimMultiBox::GetAllCoords(size_t &Qty, double* array)
 {
-	Qty=(int)vCoords.size();
+	Qty=vCoords.size();
 	delete[] array;
 	array = new double[Qty];
-	for (int i=0;i<Qty;++i) array[i]=vCoords.at(i).GetValue();
+	for (size_t i=0;i<Qty;++i) array[i]=vCoords.at(i).GetValue();
 	return array;
 }
 
@@ -363,12 +360,9 @@ bool CSPrimMultiBox::Update(string *ErrStr)
 		if ((EC!=0)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			char buffer[33];
-			ErrStr->append("\nError in MultiBox (ID: ");
-			sprintf(buffer,"%d\0",uiID);
-			ErrStr->append(buffer);
-			//ErrStr->append(itoa(uiID,buffer,10));
-			ErrStr->append("): ");
+			stringstream stream;
+			stream << endl << "Error in MultiBox (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
@@ -487,12 +481,9 @@ bool CSPrimSphere::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			char buffer[33];
-			ErrStr->append("\nError in Sphere Center Point (ID: ");
-			sprintf(buffer,"%d\0",uiID);
-			ErrStr->append(buffer);
-			//ErrStr->append(itoa(uiID,buffer,10));
-			ErrStr->append("): ");
+			stringstream stream;
+			stream << endl << "Error in Sphere Center Point (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
@@ -502,12 +493,9 @@ bool CSPrimSphere::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		char buffer[33];
-		ErrStr->append("\nError in Sphere Radius (ID: ");
-		sprintf(buffer,"%d\0",uiID);
-		ErrStr->append(buffer);
-		//ErrStr->append(itoa(uiID,buffer,10));
-		ErrStr->append("): ");
+		stringstream stream;
+		stream << endl << "Error in Sphere Radius (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 
@@ -658,12 +646,9 @@ bool CSPrimCylinder::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			char buffer[33];
-			ErrStr->append("\nError in Cylinder Coord (ID: ");
-			sprintf(buffer,"%d\0",uiID);
-			ErrStr->append(buffer);
-			//ErrStr->append(itoa(uiID,buffer,10));
-			ErrStr->append("): ");
+			stringstream stream;
+			stream << endl << "Error in Cylinder Coord (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
@@ -673,12 +658,9 @@ bool CSPrimCylinder::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		char buffer[33];
-		ErrStr->append("\nError in Cylinder Radius (ID: ");
-		sprintf(buffer,"%d\0",uiID);
-		ErrStr->append(buffer);
-		//ErrStr->append(itoa(uiID,buffer,10));
-		ErrStr->append("): ");
+		stringstream stream;
+		stream << endl << "Error in Cylinder Radius (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 

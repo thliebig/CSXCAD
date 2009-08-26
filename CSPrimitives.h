@@ -152,7 +152,7 @@ public:
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
 
-	double* GetAllCoords(int &Qty, double* array);
+	double* GetAllCoords(size_t &Qty, double* array);
 
 	void ClearOverlap();
 

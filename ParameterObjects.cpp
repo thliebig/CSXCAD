@@ -49,9 +49,9 @@ Parameter::Parameter()
 //	Set=NULL;
 }
 
-Parameter::Parameter(const char* Paraname, double val)
+Parameter::Parameter(const string Paraname, double val)
 {
-	sName=string(Paraname);
+	sName=Paraname;
 	SetValue(val);
 	Type=Const;
 	bSweep=true;
@@ -118,7 +118,7 @@ LinearParameter::LinearParameter() : Parameter()
 	dMin=dMax=dStep=0;
 }
 
-LinearParameter::LinearParameter(const char* Paraname, double val, double min, double max, double step) : Parameter(Paraname,val)
+LinearParameter::LinearParameter(const string Paraname, double val, double min, double max, double step) : Parameter(Paraname,val)
 {
 	//sName=string(Paraname);
 	if (max<min) max=min;
@@ -367,21 +367,21 @@ bool ParameterSet::NextSweepPos(int SweepMode)
 }
 
 
-const char* ParameterSet::GetParameterString(const char* spacer)
+const string ParameterSet::GetParameterString(const string spacer)
 {
-	if (spacer==NULL) spacer=",";
+//	if (spacer.empty()) spacer=",";
 	ParameterString.clear();
 	for (size_t i=0; i<vParameter.size();++i)
 	{
 		if (i>0) ParameterString+=spacer;
 		ParameterString+=vParameter.at(i)->GetName();
 	}
-	return ParameterString.c_str();
+	return ParameterString;
 }
 
-const char* ParameterSet::GetParameterValueString(const char* spacer, bool ValuesOnly)
+const string ParameterSet::GetParameterValueString(const string spacer, bool ValuesOnly)
 {
-	if (spacer==NULL) spacer=",";
+//	if (spacer.empty()) spacer=string(",");
 	ParameterValueString.clear();
 	for (size_t i=0; i<vParameter.size();++i)
 	{
@@ -400,10 +400,10 @@ const char* ParameterSet::GetParameterValueString(const char* spacer, bool Value
 
 void ParameterSet::PrintSelf(FILE* out)
 {
-	fprintf(out," Parameter-Set Printout, Qty of Parameter: %d\n",vParameter.size());
+	fprintf(out," Parameter-Set Printout, Qty of Parameter: %d\n",(int)vParameter.size());
 	for (size_t i=0; i<vParameter.size();++i)
 	{
-		fprintf(out,"----Nr. %d----\n",i);
+		fprintf(out,"----Nr. %d----\n",(int)i);
 		vParameter.at(i)->PrintSelf(out);
 	}
 }
@@ -453,12 +453,12 @@ ParameterScalar::ParameterScalar()
 	dValue=0;
 }
 
-ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const char* value)
+ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
 {
 	clParaSet=ParaSet;
 	bModified=true;
 	ParameterMode=true;
-	sValue=string(value);
+	sValue=value;
 	dValue=0;
 }
 
@@ -485,12 +485,12 @@ ParameterScalar::~ParameterScalar()
 {
 }
 
-int ParameterScalar::SetValue(const char* value, bool Eval)
+int ParameterScalar::SetValue(const string value, bool Eval)
 {
-	if (value==NULL) return -1;
+	if (value.empty()) return -1;
 	ParameterMode=true;
 	bModified=true;
-	sValue=string(value);
+	sValue=value;
 
 	if (Eval) return Evaluate();
 
