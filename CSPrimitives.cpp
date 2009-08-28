@@ -718,19 +718,28 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=POLYGON;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	NormDir[0].SetParameterSet(paraSet);
+	NormDir[1].SetParameterSet(paraSet);
+	NormDir[2].SetParameterSet(paraSet);
+	Elevation.SetParameterSet(paraSet);
 }
 
 CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : CSPrimitives(primPolygon,prop)
 {
 	Type=POLYGON;
-//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	NormDir[0] = ParameterScalar(primPolygon->NormDir[0]);
+	NormDir[1] = ParameterScalar(primPolygon->NormDir[1]);
+	NormDir[2] = ParameterScalar(primPolygon->NormDir[2]);
+	Elevation = ParameterScalar(primPolygon->Elevation);
 }
 
 CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=POLYGON;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	NormDir[0].SetParameterSet(paraSet);
+	NormDir[1].SetParameterSet(paraSet);
+	NormDir[2].SetParameterSet(paraSet);
+	Elevation.SetParameterSet(paraSet);
 }
 
 
@@ -787,22 +796,56 @@ double* CSPrimPolygon::GetAllCoords(size_t &Qty, double* array)
 
 double* CSPrimPolygon::GetBoundBox(bool &accurate)
 {
-//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
-//	for (int i=0;i<3;++i)
-//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
-//		{
-//			double help=dBoundBox[2*i];
-//			dBoundBox[2*i]=dBoundBox[2*i+1];
-//			dBoundBox[2*i+1]=help;
-//		}
-//	accurate=true;
+	accurate=false;
+	if (vCoords.size()<2) 
+	{
+		for (int i=0;i<6;++i) dBoundBox[i]=0;
+		return dBoundBox;
+	}
+	double xmin = vCoords.at(0).GetValue(), xmax = vCoords.at(0).GetValue();
+	double ymin = vCoords.at(1).GetValue(), ymax = vCoords.at(1).GetValue();
+	for (size_t i=1;i<vCoords.size()/2;++i)
+	{
+		double x = vCoords.at(2*i).GetValue();
+		double y = vCoords.at(2*i+1).GetValue();
+		if (x<xmin) xmin=x;
+		else if (x>xmax) xmax=x;
+		if (y<ymin) ymin=y;
+		else if (y>ymax) ymax=y;
+	}
+	//only cartesian so far...
+	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
+	{
+		dBoundBox[0] = dBoundBox[1] = Elevation.GetValue();
+		dBoundBox[2] = xmin;
+		dBoundBox[3] = xmax;
+		dBoundBox[4] = ymin;
+		dBoundBox[5] = ymax;
+	}
+	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
+	{
+		dBoundBox[2] = dBoundBox[3] = Elevation.GetValue();
+		dBoundBox[4] = xmin;
+		dBoundBox[5] = xmax;
+		dBoundBox[0] = ymin;
+		dBoundBox[1] = ymax;
+	}
+	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
+	{
+		dBoundBox[4] = dBoundBox[5] = Elevation.GetValue();
+		dBoundBox[0] = xmin;
+		dBoundBox[1] = xmax;
+		dBoundBox[2] = ymin;
+		dBoundBox[3] = ymax;
+	}
 	return dBoundBox;
 }
 
 bool CSPrimPolygon::IsInside(double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
-
+	if (vCoords.size()<2) return false;
+		
 	bool accBnd=false;
 	double* box=this->GetBoundBox(accBnd);
 
@@ -810,8 +853,54 @@ bool CSPrimPolygon::IsInside(double* Coord, double tol)
 	{
 		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
 	}
-	//more checking needed!!
-	return true;
+	double x,y;
+	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
+	{
+		x = Coord[1];
+		y = Coord[2];
+	}
+	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
+	{
+		x = Coord[2];
+		y = Coord[0];
+	}
+	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
+	{
+		x = Coord[0];
+		y = Coord[1];
+	}
+	
+	int wn = 0;
+
+	size_t np = vCoords.size()/2;
+	double x1 = vCoords[2*np-2].GetValue();
+	double y1 = vCoords[2*np-1].GetValue();
+	double x2 = vCoords[0].GetValue();
+	double y2 = vCoords[1].GetValue();
+	bool startover = y1 >= y ? true : false;
+	bool endover;
+	
+	for (size_t i=1;i<np;++i)
+	{
+		endover = y2 >= y ? true : false;
+		if (startover != endover) 
+		{
+			if ((y2 - y)*(x2 - x1) <= (y2 - y1)*(x2 - x)) 
+			{
+				if (endover) wn ++;
+			}
+			else
+			{
+				if (!endover) wn --;
+			}
+		}
+		startover = endover;
+		y1 = y2;
+		x1 = x2;
+		x2 = vCoords[2*i].GetValue();
+		y2 = vCoords[2*i+1].GetValue();
+	}
+	return wn == 0;
 }
 
 
@@ -819,19 +908,44 @@ bool CSPrimPolygon::Update(string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
-//	for (int i=0;i<6;++i)
-//	{
-//		EC=psCoords[i].Evaluate();
-//		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-//		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-//		{
-//			bOK=false;
-//			stringstream stream;
-//			stream << endl << "Error in Box (ID: " << uiID << "): ";
-//			ErrStr->append(stream.str());
-//			PSErrorCode2Msg(EC,ErrStr);
-//		}
-//	}
+	for (size_t i=1;i<vCoords.size();++i)
+	{
+		EC=vCoords[i].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		{
+			bOK=false;
+			stringstream stream;
+			stream << endl << "Error in Polygon (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
+	
+	EC=Elevation.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in Polygib Elevation (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+	
+	for (size_t i=1;i<3;++i)
+	{
+		EC=NormDir[i].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		{
+			bOK=false;
+			stringstream stream;
+			stream << endl << "Error in Polygon Normal Direction (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
 	return bOK;
 }
 
@@ -897,19 +1011,19 @@ bool CSPrimPolygon::ReadFromXML(TiXmlNode &root)
 CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(ID,paraSet,prop)
 {
 	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	extrudeLength.SetParameterSet(paraSet);
 }
 
 CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
 {
 	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	extrudeLength = ParameterScalar(primLinPoly->extrudeLength);
 }
 
 CSPrimLinPoly::CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	extrudeLength.SetParameterSet(paraSet);
 }
 
 
@@ -919,39 +1033,77 @@ CSPrimLinPoly::~CSPrimLinPoly()
 
 double* CSPrimLinPoly::GetBoundBox(bool &accurate)
 {
-//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
-//	for (int i=0;i<3;++i)
-//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
-//		{
-//			double help=dBoundBox[2*i];
-//			dBoundBox[2*i]=dBoundBox[2*i+1];
-//			dBoundBox[2*i+1]=help;
-//		}
-//	accurate=true;
+	CSPrimPolygon::GetBoundBox(accurate);
+	
+	double len = extrudeLength.GetValue();
+	
+	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
+	{
+		if (len>0)
+		{
+			dBoundBox[0] = Elevation.GetValue();
+			dBoundBox[1] = dBoundBox[0] + len;
+		}
+		else
+		{
+			dBoundBox[1] = Elevation.GetValue();
+			dBoundBox[0] = dBoundBox[1] + len;			
+		}
+	}
+	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
+	{
+		if (len>0)
+		{
+			dBoundBox[2] = Elevation.GetValue();
+			dBoundBox[3] = dBoundBox[2] + len;
+		}
+		else
+		{
+			dBoundBox[3] = Elevation.GetValue();
+			dBoundBox[2] = dBoundBox[3] + len;			
+		}
+	}
+	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
+	{
+		if (len>0)
+		{
+			dBoundBox[4] = Elevation.GetValue();
+			dBoundBox[5] = dBoundBox[4] + len;
+		}
+		else
+		{
+			dBoundBox[5] = Elevation.GetValue();
+			dBoundBox[4] = dBoundBox[5] + len;			
+		}
+	}
+	
 	return dBoundBox;
 }
 
 bool CSPrimLinPoly::IsInside(double* Coord, double tol)
 {
-	if (Coord==NULL) return false;
-
-	bool accBnd=false;
-	double* box=this->GetBoundBox(accBnd);
-
-	for (unsigned int n=0;n<3;++n)
-	{
-		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
-	}
-	//more checking needed!!
-	return true;
+	if (Coord==NULL) return false;	
+	return CSPrimPolygon::IsInside(Coord, tol);
 }
 
 
 bool CSPrimLinPoly::Update(string *ErrStr)
 {
 	int EC=0;
-	bool bOK=true;
 
+	bool bOK = CSPrimPolygon::Update(ErrStr);
+	
+	EC=extrudeLength.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in Polygib Elevation (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+	
 	return bOK;
 }
 
@@ -1005,6 +1157,7 @@ CSPrimRotPoly::~CSPrimRotPoly()
 
 double* CSPrimRotPoly::GetBoundBox(bool &accurate)
 {
+	accurate = false;
 //	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
 //	for (int i=0;i<3;++i)
 //		if (dBoundBox[2*i]>dBoundBox[2*i+1])
@@ -1013,7 +1166,6 @@ double* CSPrimRotPoly::GetBoundBox(bool &accurate)
 //			dBoundBox[2*i]=dBoundBox[2*i+1];
 //			dBoundBox[2*i+1]=help;
 //		}
-//	accurate=true;
 	return dBoundBox;
 }
 
@@ -1036,20 +1188,44 @@ bool CSPrimRotPoly::IsInside(double* Coord, double tol)
 bool CSPrimRotPoly::Update(string *ErrStr)
 {
 	int EC=0;
-	bool bOK=true;
-//	for (int i=0;i<6;++i)
-//	{
-//		EC=psCoords[i].Evaluate();
-//		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-//		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-//		{
-//			bOK=false;
-//			stringstream stream;
-//			stream << endl << "Error in Box (ID: " << uiID << "): ";
-//			ErrStr->append(stream.str());
-//			PSErrorCode2Msg(EC,ErrStr);
-//		}
-//	}
+	bool bOK = CSPrimPolygon::Update(ErrStr);
+
+	for (size_t i=1;i<3;++i)
+	{
+		EC=RotAxis[i].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		{
+			bOK=false;
+			stringstream stream;
+			stream << endl << "Error in Rot - Polygon Axis (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
+	
+	EC=StartStopAngle[0].Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in Polygib Start Angle (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+	
+	EC=StartStopAngle[1].Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in Polygib Stop Angle (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+	
 	return bOK;
 }
 

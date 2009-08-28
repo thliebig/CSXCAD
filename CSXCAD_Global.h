@@ -4,7 +4,7 @@
  * Author:	Thorsten Liebig
  * Date:	03-12-2008
  * Lib:		CSXCAD
- * Version:	0.1.1a
+ * Version:	0.1.2a
  */
 
 #define _CSXCAD_LIB_NAME_ "CSXCAD-Lib: Continuous Structure XML - CAD"
