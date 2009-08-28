@@ -15,6 +15,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	uiID=ID;
 	clParaSet=paraSet;
 	iPriority=0;
+	PrimTypeName = string("Base Type");
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
@@ -26,6 +27,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	uiID=prim->uiID;
 	clParaSet=prim->clParaSet;
 	iPriority=prim->iPriority;
+	PrimTypeName = string("Base Type");
 }
 
 
@@ -37,6 +39,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	clParaSet=paraSet;
 	uiID=0;
 	iPriority=0;
+	PrimTypeName = string("Base Type");
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)
@@ -81,18 +84,21 @@ CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 {
 	Type=BOX;
 	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Box");
 }
 
 CSPrimBox::CSPrimBox(CSPrimBox* primBox, CSProperties *prop) : CSPrimitives(primBox,prop)
 {
 	Type=BOX;
 	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	PrimTypeName = string("Box");
 }
 
 CSPrimBox::CSPrimBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=BOX;
 	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Box");
 }
 
 
@@ -194,17 +200,20 @@ bool CSPrimBox::ReadFromXML(TiXmlNode &root)
 CSPrimMultiBox::CSPrimMultiBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=MULTIBOX;
+	PrimTypeName = string("Multi Box");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : CSPrimitives(multiBox, prop)
 {
 	Type=MULTIBOX;
 	for (size_t i=0;i<multiBox->vCoords.size();++i) vCoords.push_back(ParameterScalar(multiBox->vCoords.at(i)));
+	PrimTypeName = string("Multi Box");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=MULTIBOX;
+	PrimTypeName = string("Multi Box");
 }
 
 CSPrimMultiBox::~CSPrimMultiBox()
@@ -430,6 +439,7 @@ CSPrimSphere::CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	Type=SPHERE;
 	for (int i=0;i<3;++i) {psCenter[i].SetParameterSet(paraSet);}
 	psRadius.SetParameterSet(paraSet);
+	PrimTypeName = string("Sphere");
 }
 
 CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimitives(sphere,prop)
@@ -437,6 +447,7 @@ CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimiti
 	Type=SPHERE;
 	for (int i=0;i<3;++i) {psCenter[i]=ParameterScalar(sphere->psCenter[i]);}
 	psRadius=ParameterScalar(sphere->psRadius);
+	PrimTypeName = string("Sphere");
 }
 
 CSPrimSphere::CSPrimSphere(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -444,6 +455,7 @@ CSPrimSphere::CSPrimSphere(ParameterSet* paraSet, CSProperties* prop) : CSPrimit
 	Type=SPHERE;
 	for (int i=0;i<3;++i) {psCenter[i].SetParameterSet(paraSet);}
 	psRadius.SetParameterSet(paraSet);
+	PrimTypeName = string("Sphere");
 }
 
 
@@ -543,6 +555,7 @@ CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSPropert
 	Type=CYLINDER;
 	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
 	psRadius.SetParameterSet(paraSet);
+	PrimTypeName = string("Cylinder");
 }
 
 CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : CSPrimitives(cylinder,prop)
@@ -550,6 +563,7 @@ CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : C
 	Type=CYLINDER;
 	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(cylinder->psCoords[i]);}
 	psRadius=ParameterScalar(cylinder->psRadius);
+	PrimTypeName = string("Cylinder");
 }
 
 CSPrimCylinder::CSPrimCylinder(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -557,6 +571,7 @@ CSPrimCylinder::CSPrimCylinder(ParameterSet* paraSet, CSProperties* prop) : CSPr
 	Type=CYLINDER;
 	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
 	psRadius.SetParameterSet(paraSet);
+	PrimTypeName = string("Cylinder");
 }
 
 
@@ -722,6 +737,7 @@ CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSPropertie
 	NormDir[1].SetParameterSet(paraSet);
 	NormDir[2].SetParameterSet(paraSet);
 	Elevation.SetParameterSet(paraSet);
+	PrimTypeName = string("Polygon");
 }
 
 CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : CSPrimitives(primPolygon,prop)
@@ -731,6 +747,7 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 	NormDir[1] = ParameterScalar(primPolygon->NormDir[1]);
 	NormDir[2] = ParameterScalar(primPolygon->NormDir[2]);
 	Elevation = ParameterScalar(primPolygon->Elevation);
+	PrimTypeName = string("Polygon");
 }
 
 CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -740,6 +757,7 @@ CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrim
 	NormDir[1].SetParameterSet(paraSet);
 	NormDir[2].SetParameterSet(paraSet);
 	Elevation.SetParameterSet(paraSet);
+	PrimTypeName = string("Polygon");
 }
 
 
@@ -1012,18 +1030,21 @@ CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
+	PrimTypeName = string("Lin-Poly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
 {
 	Type=LINPOLY;
 	extrudeLength = ParameterScalar(primLinPoly->extrudeLength);
+	PrimTypeName = string("Lin-Poly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
+	PrimTypeName = string("Lin-Poly");
 }
 
 
@@ -1136,18 +1157,21 @@ CSPrimRotPoly::CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=LINPOLY;
 //	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Rot-Poly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(CSPrimRotPoly* primRotPoly, CSProperties *prop) : CSPrimPolygon(primRotPoly,prop)
 {
 	Type=LINPOLY;
 //	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	PrimTypeName = string("Rot-Poly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=LINPOLY;
 //	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Rot-Poly");
 }
 
 
@@ -1277,6 +1301,7 @@ CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSP
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("User-Defined");
 }
 
 CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *prop) : CSPrimitives(primUDef,prop)
@@ -1287,6 +1312,7 @@ CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *
 	stFunction = string(primUDef->stFunction);
 	CoordSystem = primUDef->CoordSystem;
 	for (int i=0;i<3;++i) {dPosShift[i]=ParameterScalar(primUDef->dPosShift[i]);}
+	PrimTypeName = string("User-Defined");
 }
 
 CSPrimUserDefined::CSPrimUserDefined(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -1297,6 +1323,7 @@ CSPrimUserDefined::CSPrimUserDefined(ParameterSet* paraSet, CSProperties* prop) 
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("User-Defined");
 }
 
 

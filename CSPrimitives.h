@@ -55,6 +55,8 @@ public:
 
 	//! Get the type of this primitive. \sa PrimitiveType
 	int GetType() {return Type;};
+	
+	string GetTypeName() {return PrimTypeName;};
 
 	//! Create a copy of ths primitive with different property.
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
@@ -110,6 +112,7 @@ protected:
 	PrimitiveType Type;
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
+	string PrimTypeName;
 };
 
 class CSXCAD_EXPORT CSPrimBox : public CSPrimitives

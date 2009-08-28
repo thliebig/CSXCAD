@@ -123,7 +123,7 @@ const string CSProperties::GetTypeString()
 			sType=string("Invalid Type");
 			break;
 	};
-	return sType.c_str();
+	return sType;
 }
 
 bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised)
