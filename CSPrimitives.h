@@ -266,12 +266,25 @@ public:
 	void AddCoord(const string val);
 	
 	void RemoveCoords(int index);
+	void ClearCoords() {vCoords.clear();};
 
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
 
 	size_t GetQtyCoords() {return vCoords.size()/2;};
 	double* GetAllCoords(size_t &Qty, double* array);
+	
+	void SetNormDir(int index, double val) {if ((index>=0) && (index<3)) NormDir[index].SetValue(val);};
+	void SetNormDir(int index, const char* val) {if ((index>=0) && (index<3)) NormDir[index].SetValue(val);};
+
+	double GetNormDir(int index) {if ((index>=0) && (index<3)) return NormDir[index].GetValue(); else return 0;};
+	ParameterScalar* GetNormDirPS(int index) {if ((index>=0) && (index<3)) return &NormDir[index]; else return NULL;};
+
+	void SetElevation(double val) {Elevation.SetValue(val);};
+	void SetElevation(const char* val) {Elevation.SetValue(val);};
+
+	double GetElevation() {return Elevation.GetValue();};
+	ParameterScalar* GetElevationPS() {return &Elevation;};
 
 	virtual double* GetBoundBox(bool &accurate);
 	virtual bool IsInside(double* Coord, double tol=0);
