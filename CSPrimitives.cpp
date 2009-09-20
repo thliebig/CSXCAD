@@ -898,8 +898,10 @@ bool CSPrimPolygon::IsInside(double* Coord, double tol)
 	bool startover = y1 >= y ? true : false;
 	bool endover;
 	
-	for (size_t i=1;i<np;++i)
+	for (size_t i=0;i<np;++i)
 	{
+		x2 = vCoords[2*i].GetValue();
+		y2 = vCoords[2*i+1].GetValue();
 		endover = y2 >= y ? true : false;
 		if (startover != endover) 
 		{
@@ -915,10 +917,8 @@ bool CSPrimPolygon::IsInside(double* Coord, double tol)
 		startover = endover;
 		y1 = y2;
 		x1 = x2;
-		x2 = vCoords[2*i].GetValue();
-		y2 = vCoords[2*i+1].GetValue();
 	}
-	return wn == 0;
+	return wn != 0;
 }
 
 
