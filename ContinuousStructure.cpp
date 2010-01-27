@@ -71,7 +71,7 @@ bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* n
 
 void ContinuousStructure::DeletePrimitive(size_t index)
 {
-	if ((index<0) || (index>=vPrimitives.size())) return;
+	if (index>=vPrimitives.size()) return;
 	vector<CSPrimitives*>::iterator iter=vPrimitives.begin();
 	delete vPrimitives.at(index);
 	vPrimitives.erase(iter+index);
@@ -92,7 +92,7 @@ void ContinuousStructure::DeletePrimitive(CSPrimitives* prim)
 
 void ContinuousStructure::DeleteProperty(size_t index)
 {
-	if ((index<0) || (index>=vProperties.size())) return;
+	if (index>=vProperties.size()) return;
 	vector<CSProperties*>::iterator iter=vProperties.begin();
 	delete vProperties.at(index);
 	vProperties.erase(iter+index);
@@ -163,13 +163,13 @@ CSPrimitives* ContinuousStructure::GetPrimitiveByID(unsigned int ID)
 
 CSProperties* ContinuousStructure::GetProperty(size_t index)
 {
-	if ((index>=0) && (index<vProperties.size())) return vProperties.at(index);
+	if (index<vProperties.size()) return vProperties.at(index);
 	return NULL;
 }
 
 CSPrimitives* ContinuousStructure::GetPrimitive(size_t index)
 {
-	if ((index>=0) && (index<vPrimitives.size())) return vPrimitives.at(index);
+	if (index<vPrimitives.size()) return vPrimitives.at(index);
 	return NULL;
 }
 

@@ -252,7 +252,7 @@ void CSPrimMultiBox::AddBox(int initBox)
 
 void CSPrimMultiBox::DeleteBox(size_t box)
 {
-	if ((box*6<0) || ((box+1)*6>vCoords.size())) return;
+	if ((box+1)*6>vCoords.size()) return;
 	vector<ParameterScalar>::iterator start=vCoords.begin()+(box*6);
 	vector<ParameterScalar>::iterator end=vCoords.begin()+(box*6+6);
 
@@ -871,7 +871,7 @@ bool CSPrimPolygon::IsInside(double* Coord, double tol)
 	{
 		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
 	}
-	double x,y;
+	double x=0,y=0;
 	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
 	{
 		x = Coord[1];

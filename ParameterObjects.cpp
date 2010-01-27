@@ -227,7 +227,7 @@ size_t ParameterSet::LinkParameter(Parameter* newPara)
 
 size_t ParameterSet::DeleteParameter(size_t index)
 {
-	if ((index>=vParameter.size()) || (index<0)) return vParameter.size();
+	if (index>=vParameter.size()) return vParameter.size();
 	vector<Parameter*>::iterator pIter=vParameter.begin();
 	vParameter.erase(pIter+index);
 

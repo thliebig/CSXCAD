@@ -132,7 +132,7 @@ public:
 	virtual size_t LinkParameter(Parameter* newPara);
 	virtual size_t DeleteParameter(size_t index);
 	virtual size_t DeleteParameter(Parameter* para);
-	Parameter* GetParameter(size_t index) {if ((index>=0) && (index<vParameter.size())) return vParameter.at(index); else return NULL;}
+	Parameter* GetParameter(size_t index) {if (index<vParameter.size()) return vParameter.at(index); else return NULL;}
 
 	bool GetModified();
 	virtual void SetModified(bool mod=true);

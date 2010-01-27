@@ -315,7 +315,7 @@ public:
 	void SetLength(double val) {extrudeLength.SetValue(val);};
 	void SetLength(const string val) {extrudeLength.SetValue(val);};
 
-	double GetLength() {extrudeLength.GetValue();};
+	double GetLength() {return extrudeLength.GetValue();};
 	ParameterScalar* GetLengthPS() {return &extrudeLength;};
 
 	virtual double* GetBoundBox(bool &accurate);

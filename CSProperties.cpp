@@ -71,7 +71,7 @@ const string CSProperties::GetName() {return sName;}
 void CSProperties::AddPrimitive(CSPrimitives *prim) {vPrimitives.push_back(prim);}
 
 size_t CSProperties::GetQtyPrimitives() {return vPrimitives.size();}
-CSPrimitives* CSProperties::GetPrimitive(size_t index) {if ((index>=0) && (index<vPrimitives.size())) return vPrimitives.at(index); else return NULL;}
+CSPrimitives* CSProperties::GetPrimitive(size_t index) {if (index<vPrimitives.size()) return vPrimitives.at(index); else return NULL;}
 void CSProperties::SetFillColor(RGBa color) {FillColor.R=color.R;FillColor.G=color.G;FillColor.B=color.B;FillColor.a=color.a;}
 RGBa CSProperties::GetFillColor() {return FillColor;}
 
