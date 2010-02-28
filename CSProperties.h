@@ -54,6 +54,8 @@ public:
 	int GetType();
 	//! Get PropertyType as a string \sa PropertyType and GetType
 	const string GetTypeString();
+	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
+	bool GetMaterial() {return bMaterial;};
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
 	unsigned int GetID();
 	//!Set ID to this property. USE ONLY WHEN YOU KNOW WHAT YOU ARE DOING!!!! \sa GetID
@@ -128,6 +130,7 @@ protected:
 	CSProperties(unsigned int ID, ParameterSet* paraSet);
 	ParameterSet* clParaSet;
 	PropertyType Type;
+	bool bMaterial;
 	unsigned int uiID;
 	unsigned int UniqueID;
 	string sName;
@@ -166,29 +169,38 @@ public:
 	CSPropMaterial(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMaterial();
 
-	void SetEpsilon(double val);
-	void SetEpsilon(const string val);
-	double GetEpsilon();
-	const string GetEpsilonTerm();
+        void SetEpsilon(double val, int direction=0);
+        void SetEpsilon(const string val, int direction=0);
+        double GetEpsilon(int direction=0);
+        const string GetEpsilonTerm(int direction=0);
 
-	void SetMue(double val);
-	void SetMue(const string val);
-	double GetMue();
-	const string GetMueTerm();
+        void SetMue(double val, int direction=0);
+        void SetMue(const string val, int direction=0);
+        double GetMue(int direction=0);
+        const string GetMueTerm(int direction=0);
 
-	void SetKappa(double val);
-	void SetKappa(const string val);
-	double GetKappa();
-	const string GetKappaTerm();
+        void SetKappa(double val, int direction=0);
+        void SetKappa(const string val, int direction=0);
+        double GetKappa(int direction=0);
+        const string GetKappaTerm(int direction=0);
 
-	virtual void Init();
+        void SetSigma(double val, int direction=0);
+        void SetSigma(const string val, int direction=0);
+        double GetSigma(int direction=0);
+        const string GetSigmaTerm(int direction=0);
+
+        void SetIsotropy(bool val) {bIsotropy=val;};
+        bool GetIsotropy() {return bIsotropy;};
+
+        virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	ParameterScalar Epsilon,Mue,Kappa;
+        ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
+        bool bIsotropy;
 };
 
 class CSXCAD_EXPORT CSPropMetal : public CSProperties
@@ -225,6 +237,13 @@ public:
 	void SetWeightFct(const string fct, int ny);
 	const string GetWeightFct(int ny);
 
+	double GetWeightedExcitation(int ny, double* coords);
+
+	void SetDelay(double val);
+	void SetDelay(const string val);
+	double GetDelay();
+	const string GetDelayString();
+
 //	void SetWeightVars(const char* vars,int ny) {if ((ny>=0) && (ny<3)) sWeightVars[ny]=string(vars);};
 //	const char* GetWeightVars(int ny) {if ((ny>=0) && (ny<3)) {if (sWeightVars[ny].empty()) return NULL; else return sWeightVars[ny].c_str();} else return NULL;};
 
@@ -240,6 +259,7 @@ protected:
 	unsigned int uiNumber;
 	int iExcitType;
 	ParameterScalar Excitation[3];
+	ParameterScalar Delay;//only for transient solver
 };
 
 

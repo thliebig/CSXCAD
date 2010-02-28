@@ -1,7 +1,7 @@
 #include "CSProperties.h"
 #include "CSPrimitives.h"
 #include "ParameterObjects.h"
-//#include <iostream>
+#include <iostream>
 #include <sstream>
 #include "tinyxml.h"
 
@@ -9,6 +9,7 @@
 CSProperties::CSProperties(CSProperties* prop)
 {
 	uiID=prop->uiID;
+	bMaterial=false;
 	clParaSet=prop->clParaSet;
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
@@ -22,6 +23,7 @@ CSProperties::CSProperties(CSProperties* prop)
 CSProperties::CSProperties(ParameterSet* paraSet)
 {
 	uiID=0;
+	bMaterial=false;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -36,6 +38,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
+	bMaterial=false;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -263,62 +266,157 @@ CSPropMaterial::CSPropMaterial(CSProperties* prop) : CSProperties(prop) {Type=MA
 CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=MATERIAL;Init();}
 CSPropMaterial::~CSPropMaterial() {}
 
-void CSPropMaterial::SetEpsilon(double val) {Epsilon.SetValue(val);}
-void CSPropMaterial::SetEpsilon(const string val) {Epsilon.SetValue(val);}
-double CSPropMaterial::GetEpsilon() {return Epsilon.GetValue();}
-const string CSPropMaterial::GetEpsilonTerm() {return Epsilon.GetString();}
+void CSPropMaterial::SetEpsilon(double val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Epsilon[direction].SetValue(val);
+}
+void CSPropMaterial::SetEpsilon(const string val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Epsilon[direction].SetValue(val);
+}
+double CSPropMaterial::GetEpsilon(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Epsilon[direction].GetValue();
+}
+const string CSPropMaterial::GetEpsilonTerm(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Epsilon[direction].GetString();
+}
 
-void CSPropMaterial::SetMue(double val) {Mue.SetValue(val);}
-void CSPropMaterial::SetMue(const string val) {Mue.SetValue(val);}
-double CSPropMaterial::GetMue() {return Mue.GetValue();}
-const string CSPropMaterial::GetMueTerm() {return Mue.GetString();}
+void CSPropMaterial::SetMue(double val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Mue[direction].SetValue(val);
+}
+void CSPropMaterial::SetMue(const string val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Mue[direction].SetValue(val);
+}
+double CSPropMaterial::GetMue(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Mue[direction].GetValue();
+}
+const string CSPropMaterial::GetMueTerm(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Mue[direction].GetString();
+}
 
-void CSPropMaterial::SetKappa(double val) {Kappa.SetValue(val);}
-void CSPropMaterial::SetKappa(const string val) {Kappa.SetValue(val);}
-double CSPropMaterial::GetKappa() {return Kappa.GetValue();}
-const string CSPropMaterial::GetKappaTerm() {return Kappa.GetString();}
+void CSPropMaterial::SetKappa(double val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Kappa[direction].SetValue(val);
+}
+void CSPropMaterial::SetKappa(const string val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Kappa[direction].SetValue(val);
+}
+double CSPropMaterial::GetKappa(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Kappa[direction].GetValue();
+}
+const string CSPropMaterial::GetKappaTerm(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Kappa[direction].GetString();
+}
+
+void CSPropMaterial::SetSigma(double val, int direction)
+{
+    if ((direction>2) || (direction<0)) return;
+    Sigma[direction].SetValue(val);
+}
+void CSPropMaterial::SetSigma(const string val, int direction)
+{
+    if ((direction>2) || (direction<0)) return; Sigma[direction].SetValue(val);
+}
+double CSPropMaterial::GetSigma(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Sigma[direction].GetValue();
+}
+const string CSPropMaterial::GetSigmaTerm(int direction)
+{
+    if (bIsotropy) direction=0;
+    if ((direction>2) || (direction<0)) direction=0;
+    return Sigma[direction].GetString();
+}
 
 void CSPropMaterial::Init()
 {
-	Epsilon.SetValue(1);
-	Epsilon.SetParameterSet(clParaSet);
-	Mue.SetValue(1);
-	Mue.SetParameterSet(clParaSet);
-	Kappa.SetValue(0.0);
-	Kappa.SetParameterSet(clParaSet);
+    bIsotropy = true;
+	bMaterial=true;
+    for (int n=0;n<3;++n)
+    {
+        Epsilon[n].SetValue(1);
+        Epsilon[n].SetParameterSet(clParaSet);
+        Mue[n].SetValue(1);
+        Mue[n].SetParameterSet(clParaSet);
+        Kappa[n].SetValue(0.0);
+        Kappa[n].SetParameterSet(clParaSet);
+        Sigma[n].SetValue(0.0);
+        Sigma[n].SetParameterSet(clParaSet);
+    }
 }
 
 bool CSPropMaterial::Update(string *ErrStr)
 {
 	bool bOK=true;
-	int EC=0;
-	EC=Epsilon.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-	{
-		stringstream stream;
-		stream << endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
-		ErrStr->append(stream.str());
-		PSErrorCode2Msg(EC,ErrStr);
-	}
-	EC=Mue.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-	{
-		stringstream stream;
-		stream << endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
-		ErrStr->append(stream.str());
-		PSErrorCode2Msg(EC,ErrStr);
-	}
-	EC=Kappa.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-	{
-		stringstream stream;
-		stream << endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
-		ErrStr->append(stream.str());
-		PSErrorCode2Msg(EC,ErrStr);
-	}
+        int EC=0;
+        for (int n=0;n<3;++n)
+        {
+            EC=Epsilon[n].Evaluate();
+            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+            {
+                    stringstream stream;
+                    stream << endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
+                    ErrStr->append(stream.str());
+                    PSErrorCode2Msg(EC,ErrStr);
+            }
+            EC=Mue[n].Evaluate();
+            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+            {
+                    stringstream stream;
+                    stream << endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
+                    ErrStr->append(stream.str());
+                    PSErrorCode2Msg(EC,ErrStr);
+            }
+            EC=Kappa[n].Evaluate();
+            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+            {
+                    stringstream stream;
+                    stream << endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
+                    ErrStr->append(stream.str());
+                    PSErrorCode2Msg(EC,ErrStr);
+            }
+            EC=Sigma[n].Evaluate();
+            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+            {
+                    stringstream stream;
+                    stream << endl << "Error in Material-Property Sigma-Value (ID: " << uiID << "): ";
+                    ErrStr->append(stream.str());
+                    PSErrorCode2Msg(EC,ErrStr);
+            }
+        }
 	return bOK;
 }
 
@@ -326,12 +424,29 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("Material");
 	CSProperties::Write2XML(prop,parameterised);
+        prop.SetAttribute("Isotropy",bIsotropy);
 
-	TiXmlElement value("Property");
-	WriteTerm(Epsilon,value,"Epsilon",parameterised);
-	WriteTerm(Mue,value,"Mue",parameterised);
-	WriteTerm(Kappa,value,"Kappa",parameterised);
-	prop.InsertEndChild(value);
+        TiXmlElement value("Property");
+        WriteTerm(Epsilon[0],value,"Epsilon",parameterised);
+        WriteTerm(Mue[0],value,"Mue",parameterised);
+        WriteTerm(Kappa[0],value,"Kappa",parameterised);
+        WriteTerm(Sigma[0],value,"Sigma",parameterised);
+        prop.InsertEndChild(value);
+
+        value = TiXmlElement("PropertyY");
+        WriteTerm(Epsilon[1],value,"Epsilon",parameterised);
+        WriteTerm(Mue[1],value,"Mue",parameterised);
+        WriteTerm(Kappa[1],value,"Kappa",parameterised);
+        WriteTerm(Sigma[1],value,"Sigma",parameterised);
+        prop.InsertEndChild(value);
+
+        value = TiXmlElement("PropertyZ");
+        WriteTerm(Epsilon[2],value,"Epsilon",parameterised);
+        WriteTerm(Mue[2],value,"Mue",parameterised);
+        WriteTerm(Kappa[2],value,"Kappa",parameterised);
+        WriteTerm(Sigma[2],value,"Sigma",parameterised);
+        prop.InsertEndChild(value);
+
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -340,20 +455,42 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 {
 	if (CSProperties::ReadFromXML(root)==false) return false;
 	TiXmlElement* prop=root.ToElement();
+
+        int attr=1;
+        prop->QueryIntAttribute("Isotropy",&attr);
+        bIsotropy = attr>0;
 	if (prop==NULL) return false;
 	TiXmlElement* matProp=prop->FirstChildElement("Property");
 	if (matProp==NULL) return false;
-	if (ReadTerm(Epsilon,*matProp,"Epsilon")==false) return false;
-	if (ReadTerm(Mue,*matProp,"Mue")==false) return false;
-	if (ReadTerm(Kappa,*matProp,"Kappa")==false) return false;
+        if (ReadTerm(Epsilon[0],*matProp,"Epsilon")==false) return false;
+        if (ReadTerm(Mue[0],*matProp,"Mue")==false) return false;
+        if (ReadTerm(Kappa[0],*matProp,"Kappa")==false) return false;
+        ReadTerm(Sigma[0],*matProp,"Sigma"); //always accept do to legacy support
+
+        matProp=prop->FirstChildElement("PropertyY");
+        if (matProp!=NULL) //always accept do to legacy support
+        {
+            if (ReadTerm(Epsilon[1],*matProp,"Epsilon")==false) return false;
+            if (ReadTerm(Mue[1],*matProp,"Mue")==false) return false;
+            if (ReadTerm(Kappa[1],*matProp,"Kappa")==false) return false;
+            if (ReadTerm(Sigma[1],*matProp,"Sigma")==false) return false;
+        }
+        matProp=prop->FirstChildElement("PropertyZ");
+        if (matProp!=NULL) //always accept do to legacy support
+        {
+            if (ReadTerm(Epsilon[2],*matProp,"Epsilon")==false) return false;
+            if (ReadTerm(Mue[2],*matProp,"Mue")==false) return false;
+            if (ReadTerm(Kappa[2],*matProp,"Kappa")==false) return false;
+            if (ReadTerm(Sigma[2],*matProp,"Sigma")==false) return false;
+        }
 
 	return true;
 }
 
 /*********************CSPropMetal********************************************************************/
-CSPropMetal::CSPropMetal(ParameterSet* paraSet) : CSProperties(paraSet) {Type=METAL;}
-CSPropMetal::CSPropMetal(CSProperties* prop) : CSProperties(prop) {Type=METAL;}
-CSPropMetal::CSPropMetal(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=METAL;}
+CSPropMetal::CSPropMetal(ParameterSet* paraSet) : CSProperties(paraSet) {Type=METAL;bMaterial=true;}
+CSPropMetal::CSPropMetal(CSProperties* prop) : CSProperties(prop) {Type=METAL;bMaterial=true;}
+CSPropMetal::CSPropMetal(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=METAL;bMaterial=true;}
 CSPropMetal::~CSPropMetal() {}
 
 bool CSPropMetal::Write2XML(TiXmlNode& root, bool parameterised)
@@ -409,6 +546,20 @@ const string CSPropElectrode::GetExcitationString(int Comp)
 void CSPropElectrode::SetWeightFct(const string fct, int ny) {if ((ny>=0) && (ny<3)) sWeightFct[ny]=string(fct);}
 const string CSPropElectrode::GetWeightFct(int ny) {if ((ny>=0) && (ny<3)) {return sWeightFct[ny];} else return string();}
 
+double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
+{
+	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
+	return GetExcitation(ny);
+}
+
+void CSPropElectrode::SetDelay(double val)	{Delay.SetValue(val);}
+
+void CSPropElectrode::SetDelay(const string val) {Delay.SetValue(val);}
+
+double CSPropElectrode::GetDelay(){return Delay.GetValue();}
+
+const string CSPropElectrode::GetDelayString(){return Delay.GetString();}
+
 void CSPropElectrode::Init()
 {
 	uiNumber=0;
@@ -417,6 +568,8 @@ void CSPropElectrode::Init()
 	{
 		Excitation[i].SetValue(0.0);
 		Excitation[i].SetParameterSet(clParaSet);
+		Delay.SetValue(0.0);
+		Delay.SetParameterSet(clParaSet);
 	}
 }
 
@@ -437,6 +590,16 @@ bool CSPropElectrode::Update(string *ErrStr)
 			//cout << EC << endl;
 		}
 	}
+	EC=Delay.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in Electrode-Property Delay-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+		//cout << EC << endl;
+	}
 	return bOK;
 }
 
@@ -446,6 +609,7 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("Number",(int)uiNumber);
+	WriteTerm(Delay,prop,"Delay",parameterised);
 
 	TiXmlElement Excit("Excitation");
 	Excit.SetAttribute("Type",iExcitType);
@@ -480,6 +644,8 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	int iHelp;
 	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) return false;
 	else uiNumber=(unsigned int)iHelp;
+
+	ReadTerm(Delay,*prop,"Delay");
 
 	TiXmlElement *excit = prop->FirstChildElement("Excitation");
 	if (excit==NULL) return false;
