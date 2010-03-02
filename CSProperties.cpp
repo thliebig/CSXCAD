@@ -543,6 +543,18 @@ const string CSPropElectrode::GetExcitationString(int Comp)
 	return Excitation[Comp].GetString();
 }
 
+void CSPropElectrode::SetActiveDir(bool active, int Component)
+{
+	if ((Component<0) || (Component>=3)) return;
+	ActiveDir[Component]=active;
+}
+
+bool CSPropElectrode::GetActiveDir(int Component)
+{
+	if ((Component<0) || (Component>=3)) return false;
+	return ActiveDir[Component];
+}
+
 void CSPropElectrode::SetWeightFct(const string fct, int ny) {if ((ny>=0) && (ny<3)) sWeightFct[ny]=string(fct);}
 const string CSPropElectrode::GetWeightFct(int ny) {if ((ny>=0) && (ny<3)) {return sWeightFct[ny];} else return string();}
 
@@ -566,6 +578,7 @@ void CSPropElectrode::Init()
 	iExcitType=1;
 	for (unsigned int i=0;i<3;++i)
 	{
+		ActiveDir[i]=true;
 		Excitation[i].SetValue(0.0);
 		Excitation[i].SetParameterSet(clParaSet);
 		Delay.SetValue(0.0);

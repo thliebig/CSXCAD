@@ -229,6 +229,11 @@ public:
 	void SetExcitType(int val);
 	int GetExcitType();
 
+	//! Set the active direction for the source, only necessary with hard sources (by default all active)
+	void SetActiveDir(bool active, int Component=0);
+	//! Get the active direction for the source, only necessary with hard sources (by default all active)
+	bool GetActiveDir(int Component=0);
+
 	void SetExcitation(double val, int Component=0);
 	void SetExcitation(const string val, int Component=0);
 	double GetExcitation(int Component=0);
@@ -258,6 +263,7 @@ protected:
 //	string sWeightVars[3];
 	unsigned int uiNumber;
 	int iExcitType;
+	bool ActiveDir[3];
 	ParameterScalar Excitation[3];
 	ParameterScalar Delay;//only for transient solver
 };
