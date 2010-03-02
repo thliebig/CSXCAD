@@ -180,7 +180,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(double* coord, CSP
 	int locPrio=0;
 	for (size_t i=0;i<vProperties.size();++i)
 	{
-		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType()==type))
+		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
 		{
 			if (vProperties.at(i)->CheckCoordInPrimitive(coord,locPrio,dDrawingTol))
 			{
