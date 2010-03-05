@@ -47,7 +47,7 @@ public:
 	//! Enumeration of all possible sub-types of this base-class
 	enum PropertyType
 	{
-		ANY,UNKNOWN,MATERIAL,METAL,ELECTRODE,CHARGEBOX,RESBOX,DUMPBOX
+		ANY = 0xff,UNKNOWN = 0x01,MATERIAL = 0x02,METAL = 0x04,ELECTRODE = 0x08,CHARGEBOX = 0x10,RESBOX = 0x20,DUMPBOX = 0x40
 	};
 	
 	//! Get PropertyType \sa PropertyType and GetTypeString
