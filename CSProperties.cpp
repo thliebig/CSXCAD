@@ -18,6 +18,7 @@ CSProperties::CSProperties(CSProperties* prop)
 	{
 		vPrimitives.push_back(prop->vPrimitives.at(i));
 	}
+	InitCoordParameter();
 }
 
 CSProperties::CSProperties(ParameterSet* paraSet)
@@ -34,6 +35,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 	FillColor.a=EdgeColor.a=255;
 	bVisisble=true;
 	Type=ANY;
+	InitCoordParameter();
 }
 CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
@@ -49,6 +51,7 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 	FillColor.a=EdgeColor.a=255;
 	bVisisble=true;
 	Type=ANY;
+	InitCoordParameter();
 }
 
 
@@ -58,6 +61,24 @@ CSProperties::~CSProperties()
 	{
 		vPrimitives.at(i)->SetProperty(NULL);
 	}
+	delete coordParaSet;
+	coordParaSet=NULL;
+}
+
+void CSProperties::InitCoordParameter()
+{
+	coordParaSet = new ParameterSet();
+
+	coordPara[0]=new Parameter("x",0);
+	coordPara[1]=new Parameter("y",0);
+	coordPara[2]=new Parameter("z",0);
+	coordPara[3]=new Parameter("rho",0);
+	coordPara[4]=new Parameter("r",0);
+	coordPara[5]=new Parameter("a",0);
+	coordPara[6]=new Parameter("t",0);
+
+	for (int i=0;i<7;++i)
+		coordParaSet->LinkParameter(coordPara[i]); //the Paraset will take care of deletion...
 }
 
 int CSProperties::GetType() {return Type;}
@@ -289,6 +310,29 @@ const string CSPropMaterial::GetEpsilonTerm(int direction)
     return Epsilon[direction].GetString();
 }
 
+double CSPropMaterial::GetWeight(ParameterScalar &ps, double* coords)
+{
+//	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
+	coordPara[0]->SetValue(coords[0]);
+	coordPara[1]->SetValue(coords[1]);
+	coordPara[2]->SetValue(coords[2]);
+	double rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
+	coordPara[3]->SetValue(rho); //rho
+	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
+	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
+	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
+	ps.Evaluate();
+	return ps.GetValue();
+}
+
+int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightEpsilon[ny].SetValue(fct);}
+const string CSPropMaterial::GetEpsilonWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightEpsilon[ny].GetString();} else return string();}
+double CSPropMaterial::GetEpsilonWeighted(int ny, double* coords)
+{
+	if ((ny<0) || (ny>=3)) return 0;
+	return GetWeight(WeightEpsilon[ny],coords)*GetEpsilon(ny);
+}
+
 void CSPropMaterial::SetMue(double val, int direction)
 {
     if ((direction>2) || (direction<0)) return;
@@ -311,6 +355,15 @@ const string CSPropMaterial::GetMueTerm(int direction)
     if ((direction>2) || (direction<0)) direction=0;
     return Mue[direction].GetString();
 }
+
+int CSPropMaterial::SetMueWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightMue[ny].SetValue(fct);}
+const string CSPropMaterial::GetMueWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightMue[ny].GetString();} else return string();}
+double CSPropMaterial::GetMueWeighted(int ny, double* coords)
+{
+	if ((ny<0) || (ny>=3)) return 0;
+	return GetWeight(WeightMue[ny],coords)*GetMue(ny);
+}
+
 
 void CSPropMaterial::SetKappa(double val, int direction)
 {
@@ -335,6 +388,14 @@ const string CSPropMaterial::GetKappaTerm(int direction)
     return Kappa[direction].GetString();
 }
 
+int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightKappa[ny].SetValue(fct);}
+const string CSPropMaterial::GetKappaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightKappa[ny].GetString();} else return string();}
+double CSPropMaterial::GetKappaWeighted(int ny, double* coords)
+{
+	if ((ny<0) || (ny>=3)) return 0;
+	return GetWeight(WeightKappa[ny],coords)*GetKappa(ny);
+}
+
 void CSPropMaterial::SetSigma(double val, int direction)
 {
     if ((direction>2) || (direction<0)) return;
@@ -357,6 +418,14 @@ const string CSPropMaterial::GetSigmaTerm(int direction)
     return Sigma[direction].GetString();
 }
 
+int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightSigma[ny].SetValue(fct);}
+const string CSPropMaterial::GetSigmaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightSigma[ny].GetString();} else return string();}
+double CSPropMaterial::GetSigmaWeighted(int ny, double* coords)
+{
+	if ((ny<0) || (ny>=3)) return 0;
+	return GetWeight(WeightSigma[ny],coords)*GetSigma(ny);
+}
+
 void CSPropMaterial::Init()
 {
     bIsotropy = true;
@@ -371,7 +440,15 @@ void CSPropMaterial::Init()
         Kappa[n].SetParameterSet(clParaSet);
         Sigma[n].SetValue(0.0);
         Sigma[n].SetParameterSet(clParaSet);
-    }
+		WeightEpsilon[n].SetValue(1);
+		WeightEpsilon[n].SetParameterSet(coordParaSet);
+		WeightMue[n].SetValue(1);
+		WeightMue[n].SetParameterSet(coordParaSet);
+		WeightKappa[n].SetValue(1.0);
+		WeightKappa[n].SetParameterSet(coordParaSet);
+		WeightSigma[n].SetValue(1.0);
+		WeightSigma[n].SetParameterSet(coordParaSet);
+	}
 }
 
 bool CSPropMaterial::Update(string *ErrStr)
@@ -555,13 +632,23 @@ bool CSPropElectrode::GetActiveDir(int Component)
 	return ActiveDir[Component];
 }
 
-void CSPropElectrode::SetWeightFct(const string fct, int ny) {if ((ny>=0) && (ny<3)) sWeightFct[ny]=string(fct);}
-const string CSPropElectrode::GetWeightFct(int ny) {if ((ny>=0) && (ny<3)) {return sWeightFct[ny];} else return string();}
+int CSPropElectrode::SetWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightFct[ny].SetValue(fct);}
+const string CSPropElectrode::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
 
 double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
 {
-	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
-	return GetExcitation(ny);
+	if ((ny<0) || (ny>=3)) return 0;
+//	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
+	coordPara[0]->SetValue(coords[0]);
+	coordPara[1]->SetValue(coords[1]);
+	coordPara[2]->SetValue(coords[2]);
+	double rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
+	coordPara[3]->SetValue(rho); //rho
+	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
+	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
+	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
+	WeightFct[ny].Evaluate();
+	return WeightFct[ny].GetValue()*GetExcitation(ny);
 }
 
 void CSPropElectrode::SetDelay(double val)	{Delay.SetValue(val);}
@@ -581,6 +668,8 @@ void CSPropElectrode::Init()
 		ActiveDir[i]=true;
 		Excitation[i].SetValue(0.0);
 		Excitation[i].SetParameterSet(clParaSet);
+		WeightFct[i].SetValue(1.0);
+		WeightFct[i].SetParameterSet(coordParaSet);
 		Delay.SetValue(0.0);
 		Delay.SetParameterSet(clParaSet);
 	}
@@ -631,17 +720,11 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(Excitation[2],Excit,"Excit_Z",parameterised);
 	prop.InsertEndChild(Excit);
 
-	if ((sWeightFct[0].empty()==false) ||(sWeightFct[1].empty()==false) ||(sWeightFct[2].empty()==false))
-	{
-		TiXmlElement Weight("Weight");
-		Weight.SetAttribute("Function_X",sWeightFct[0].c_str());
-//		Weight.SetAttribute("Vars_X",sWeightVars[0].c_str());
-		Weight.SetAttribute("Function_Y",sWeightFct[1].c_str());
-//		Weight.SetAttribute("Vars_Y",sWeightVars[1].c_str());
-		Weight.SetAttribute("Function_Z",sWeightFct[2].c_str());
-//		Weight.SetAttribute("Vars_Z",sWeightVars[2].c_str());
-		prop.InsertEndChild(Weight);
-	}
+	TiXmlElement Weight("Weight");
+	WriteTerm(WeightFct[0],Weight,"Function_X",parameterised);
+	WriteTerm(WeightFct[1],Weight,"Function_Y",parameterised);
+	WriteTerm(WeightFct[2],Weight,"Function_Z",parameterised);
+	prop.InsertEndChild(Weight);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -668,29 +751,11 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(Excitation[2],*excit,"Excit_Z")==false) return false;
 
 	TiXmlElement *weight = prop->FirstChildElement("Weight");
-	const char* cHelp=NULL;
 	if (weight!=NULL)
 	{
-		cHelp=weight->Attribute("Function_X");
-		if (cHelp!=NULL) sWeightFct[0]=string(cHelp);
-		else sWeightFct[0].clear();
-//		cHelp=weight->Attribute("Vars_X");
-//		if (cHelp!=NULL) sWeightVars[0]=string(cHelp);
-//		else sWeightVars[0].clear();
-
-		cHelp=weight->Attribute("Function_Y");
-		if (cHelp!=NULL) sWeightFct[1]=string(cHelp);
-		else sWeightFct[1].clear();
-//		cHelp=weight->Attribute("Vars_Y");
-//		if (cHelp!=NULL) sWeightVars[1]=string(cHelp);
-//		else sWeightVars[1].clear();
-
-		cHelp=weight->Attribute("Function_Z");
-		if (cHelp!=NULL) sWeightFct[2]=string(cHelp);
-		else sWeightFct[2].clear();
-//		cHelp=weight->Attribute("Vars_Z");
-//		if (cHelp!=NULL) sWeightVars[2]=string(cHelp);
-//		else sWeightVars[2].clear();
+		ReadTerm(WeightFct[0],*weight,"Excit_X");
+		ReadTerm(WeightFct[1],*weight,"Excit_Y");
+		ReadTerm(WeightFct[2],*weight,"Excit_Z");
 	}
 
 	return true;

@@ -2,7 +2,6 @@
 #include <sstream>
 #include <iostream>
 #include "tinyxml.h"
-#include "fparser.hh"
 
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr)
 {
@@ -455,7 +454,7 @@ ParameterScalar::ParameterScalar()
 
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
 {
-	clParaSet=ParaSet;
+	SetParameterSet(ParaSet);
 	bModified=true;
 	ParameterMode=true;
 	sValue=value;
@@ -464,7 +463,7 @@ ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
 
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
 {
-	clParaSet=ParaSet;
+	SetParameterSet(ParaSet);
 	bModified=true;
 	ParameterMode=false;
 	sValue.clear();
@@ -473,7 +472,7 @@ ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
 
 ParameterScalar::ParameterScalar(ParameterScalar* ps)
 {
-	clParaSet=ps->clParaSet;
+	SetParameterSet(ps->clParaSet);
 	bModified=ps->bModified;
 	ParameterMode=ps->ParameterMode;
 	sValue=string(ps->sValue);
@@ -483,6 +482,14 @@ ParameterScalar::ParameterScalar(ParameterScalar* ps)
 
 ParameterScalar::~ParameterScalar()
 {
+}
+
+int ParameterScalar::SetParameterSet(ParameterSet *paraSet)
+{
+	clParaSet=paraSet;
+	fParse.AddConstant("pi", 3.1415926535897932);
+	fParse.Parse(sValue,clParaSet->GetParameterString());
+	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;
 }
 
 int ParameterScalar::SetValue(const string value, bool Eval)
@@ -515,17 +522,21 @@ int ParameterScalar::Evaluate()
 	if (clParaSet==NULL) return -1;
 	if ((bModified==false) && (clParaSet->GetModified()==false)) return 0;
 
-
-	bModified=false;
-	dValue=0;
-	FunctionParser fParse;
-	fParse.AddConstant("pi", 3.1415926535897932);
-	fParse.Parse(sValue,clParaSet->GetParameterString());
-	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;
+//	if (bModified || clParaSet->GetParaSetModified())
+	{
+//		cerr << "parse..." << endl;
+		dValue=0;
+		fParse.AddConstant("pi", 3.1415926535897932);
+//		cerr << sValue << " -- " << clParaSet->GetParameterString() << endl;
+		fParse.Parse(sValue,clParaSet->GetParameterString());
+		if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;
+		bModified=false;
+	}
 
 	double *vars = new double[clParaSet->GetQtyParameter()];
 	vars=clParaSet->GetValueArray(vars);
 	dValue=fParse.Eval(vars);
+//	cerr << "eval..." << dValue << endl;
 	delete[] vars;vars=NULL;
 	return fParse.EvalError();
 }

@@ -13,6 +13,7 @@
 #include <vector>
 #include <math.h>
 #include "CSXCAD_Global.h"
+#include "fparser.hh"
 
 using namespace std;
 
@@ -137,6 +138,9 @@ public:
 	bool GetModified();
 	virtual void SetModified(bool mod=true);
 
+	bool GetParaSetModified() {return bModified;};
+	bool SetParaSetModified(bool val) {bModified=val;};
+
 	const string GetParameterString(const string spacer=",");
 	const string GetParameterValueString(const string spacer=",", bool ValuesOnly=false);
 
@@ -164,6 +168,8 @@ protected:
 
 void PSErrorCode2Msg(int code, string* msg);
 
+class FunctionParser;
+
 class CSXCAD_EXPORT ParameterScalar
 {
 public:
@@ -177,7 +183,7 @@ public:
 	ParameterScalar(ParameterScalar* ps);
 	~ParameterScalar();
 
-	void SetParameterSet(ParameterSet *paraSet) {clParaSet=paraSet;}
+	int SetParameterSet(ParameterSet *paraSet);
 
 	int SetValue(const string value, bool Eval=true); ///returns eval-error-code
 	void SetValue(double value);
@@ -192,6 +198,7 @@ public:
 
 protected:
 	ParameterSet* clParaSet;
+	FunctionParser fParse;
 	bool bModified;
 	bool ParameterMode;
 	string sValue;

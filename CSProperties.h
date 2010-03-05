@@ -129,6 +129,10 @@ protected:
 	CSProperties(ParameterSet* paraSet);
 	CSProperties(unsigned int ID, ParameterSet* paraSet);
 	ParameterSet* clParaSet;
+	ParameterSet* coordParaSet;
+	//! x,y,z,rho,r,a,t one for all coord-systems (rho distance to z-axis (cylinder-coords), r for distance to origin)
+	void InitCoordParameter();
+	Parameter* coordPara[7];
 	PropertyType Type;
 	bool bMaterial;
 	unsigned int uiID;
@@ -174,21 +178,37 @@ public:
         double GetEpsilon(int direction=0);
         const string GetEpsilonTerm(int direction=0);
 
+	int SetEpsilonWeightFunction(const string fct, int ny);
+	const string GetEpsilonWeightFunction(int ny);
+	double GetEpsilonWeighted(int ny, double* coords);
+
         void SetMue(double val, int direction=0);
         void SetMue(const string val, int direction=0);
         double GetMue(int direction=0);
         const string GetMueTerm(int direction=0);
+
+	int SetMueWeightFunction(const string fct, int ny);
+	const string GetMueWeightFunction(int ny);
+	double GetMueWeighted(int ny, double* coords);
 
         void SetKappa(double val, int direction=0);
         void SetKappa(const string val, int direction=0);
         double GetKappa(int direction=0);
         const string GetKappaTerm(int direction=0);
 
+	int SetKappaWeightFunction(const string fct, int ny);
+	const string GetKappaWeightFunction(int ny);
+	double GetKappaWeighted(int ny, double* coords);
+		
         void SetSigma(double val, int direction=0);
         void SetSigma(const string val, int direction=0);
         double GetSigma(int direction=0);
         const string GetSigmaTerm(int direction=0);
 
+	int SetSigmaWeightFunction(const string fct, int ny);
+	const string GetSigmaWeightFunction(int ny);
+	double GetSigmaWeighted(int ny, double* coords);
+		
         void SetIsotropy(bool val) {bIsotropy=val;};
         bool GetIsotropy() {return bIsotropy;};
 
@@ -200,6 +220,8 @@ public:
 
 protected:
         ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
+		ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];
+		double GetWeight(ParameterScalar &ps, double* coords);
         bool bIsotropy;
 };
 
@@ -239,8 +261,11 @@ public:
 	double GetExcitation(int Component=0);
 	const string GetExcitationString(int Comp=0);
 
-	void SetWeightFct(const string fct, int ny);
-	const string GetWeightFct(int ny);
+	//! This will override the weight-function
+	void SetWeight(double val, int ny);
+	//! Define a weight function
+	int SetWeightFunction(const string fct, int ny);
+	const string GetWeightFunction(int ny);
 
 	double GetWeightedExcitation(int ny, double* coords);
 
@@ -259,12 +284,11 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	string sWeightFct[3];
-//	string sWeightVars[3];
 	unsigned int uiNumber;
 	int iExcitType;
 	bool ActiveDir[3];
 	ParameterScalar Excitation[3];
+	ParameterScalar WeightFct[3];
 	ParameterScalar Delay;//only for transient solver
 };
 
