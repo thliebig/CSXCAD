@@ -103,6 +103,9 @@ public:
 	//! Get the quantity of properties of a certain type included in this structure.
 	size_t GetQtyPropertyType(CSProperties::PropertyType type);
 
+	//! Get a properties array of a certian type
+	vector<CSProperties*>  GetPropertyByType(CSProperties::PropertyType type);
+
 	//! Get the edges of all includes primitives and add to the desired grid direction. \param nu Direction of grid (x=0,y=1,z=2).
 	bool InsertEdges2Grid(int nu);
 

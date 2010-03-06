@@ -132,8 +132,17 @@ int ContinuousStructure::GetIndex(CSProperties* prop)
 size_t ContinuousStructure::GetQtyPropertyType(CSProperties::PropertyType type)
 {
 	size_t count=0;
-	for (size_t i=0;i<vProperties.size();++i) if (vProperties.at(i)->GetType()==type) ++count;
+	for (size_t i=0;i<vProperties.size();++i) if (vProperties.at(i)->GetType() & type) ++count;
 	return count;
+}
+
+vector<CSProperties*>  ContinuousStructure::GetPropertyByType(CSProperties::PropertyType type)
+{
+	vector<CSProperties*> found;
+	for (size_t i=0;i<vProperties.size();++i)
+		if (vProperties.at(i)->GetType() & type)
+			found.push_back(vProperties.at(i));
+	return found;
 }
 
 bool ContinuousStructure::InsertEdges2Grid(int nu)
