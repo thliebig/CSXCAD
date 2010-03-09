@@ -9,7 +9,8 @@
 CSProperties::CSProperties(CSProperties* prop)
 {
 	uiID=prop->uiID;
-	bMaterial=false;
+	bMaterial=prop->bMaterial;
+	coordInputType=prop->coordInputType;
 	clParaSet=prop->clParaSet;
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
@@ -25,6 +26,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 {
 	uiID=0;
 	bMaterial=false;
+	coordInputType=0;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -41,6 +43,7 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
 	bMaterial=false;
+	coordInputType=0;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -638,15 +641,31 @@ const string CSPropElectrode::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) 
 double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
-//	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
+	double r,rho,alpha,theta;
+	if (coordInputType==1)
+	{
+		double orig[3] = {coords[0],coords[1],coords[2]};
+		coords[0] = orig[0]*cos(orig[1]);
+		coords[1] = orig[0]*sin(orig[1]);
+		rho = orig[0];
+		alpha=orig[1];
+		r = sqrt(pow(orig[0],2)+pow(orig[2],2));
+		theta=asin(1)-atan(coords[2]/rho);
+	}
+	else
+	{
+		alpha=atan2(coords[1],coords[0]);
+		rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
+		r = sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2));
+		theta=asin(1)-atan(coords[2]/rho);
+	}
 	coordPara[0]->SetValue(coords[0]);
 	coordPara[1]->SetValue(coords[1]);
 	coordPara[2]->SetValue(coords[2]);
-	double rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
 	coordPara[3]->SetValue(rho); //rho
-	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
-	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
-	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
+	coordPara[4]->SetValue(r); //r
+	coordPara[5]->SetValue(alpha);
+	coordPara[6]->SetValue(theta); //theta
 	WeightFct[ny].Evaluate();
 	return WeightFct[ny].GetValue()*GetExcitation(ny);
 }

@@ -125,6 +125,9 @@ public:
 	//! Read property from xml-node. \return Successful read-operation. 
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
+	void SetCoordInputType(int type) {coordInputType=type;}
+
 protected:
 	CSProperties(ParameterSet* paraSet);
 	CSProperties(unsigned int ID, ParameterSet* paraSet);
@@ -133,6 +136,7 @@ protected:
 	//! x,y,z,rho,r,a,t one for all coord-systems (rho distance to z-axis (cylinder-coords), r for distance to origin)
 	void InitCoordParameter();
 	Parameter* coordPara[7];
+	int coordInputType;
 	PropertyType Type;
 	bool bMaterial;
 	unsigned int uiID;
