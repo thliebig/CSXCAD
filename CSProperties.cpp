@@ -781,9 +781,9 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 }
 
 /*********************CSPropProbeBox********************************************************************/
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;}
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;}
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;ProbeType=0;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;}
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
@@ -795,6 +795,7 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised)
 	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("Number",(int)uiNumber);
+	prop.SetAttribute("Type",ProbeType);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -810,6 +811,8 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	int iHelp;
 	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) return false;
 	else uiNumber=(unsigned int)iHelp;
+
+	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
 
 	return true;
 }

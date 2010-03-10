@@ -325,15 +325,21 @@ public:
 	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropProbeBox();
 
-	//! Define a number for this probe property
+	//! Define a number for this probe property \sa GetNumber
 	void SetNumber(unsigned int val);
-	//! Get the number designated to this probe property
+	//! Get the number designated to this probe property \sa SetNumber
 	unsigned int GetNumber();
+
+	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
+	void SetProbeType(int type) {ProbeType=type;}
+	//! Get the probe type \sa SetProbeType
+	int GetProbeType() {return ProbeType;}
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 protected:
 	unsigned int uiNumber;
+	int ProbeType;
 };
 
 //! Continuous Structure Resolution Property
