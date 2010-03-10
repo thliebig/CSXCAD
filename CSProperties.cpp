@@ -527,6 +527,27 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
         WriteTerm(Sigma[2],value,"Sigma",parameterised);
         prop.InsertEndChild(value);
 
+	TiXmlElement WeightX("WeightX");
+	WriteTerm(WeightEpsilon[0],WeightX,"Epsilon",parameterised);
+	WriteTerm(WeightMue[0],WeightX,"Mue",parameterised);
+	WriteTerm(WeightKappa[0],WeightX,"Kappa",parameterised);
+	WriteTerm(WeightSigma[0],WeightX,"Sigma",parameterised);
+	prop.InsertEndChild(WeightX);
+
+	TiXmlElement WeightY("WeightY");
+	WriteTerm(WeightEpsilon[1],WeightY,"Epsilon",parameterised);
+	WriteTerm(WeightMue[1],WeightY,"Mue",parameterised);
+	WriteTerm(WeightKappa[1],WeightY,"Kappa",parameterised);
+	WriteTerm(WeightSigma[1],WeightY,"Sigma",parameterised);
+	prop.InsertEndChild(WeightY);
+
+	TiXmlElement WeightZ("WeightZ");
+	WriteTerm(WeightEpsilon[2],WeightZ,"Epsilon",parameterised);
+	WriteTerm(WeightMue[2],WeightZ,"Mue",parameterised);
+	WriteTerm(WeightKappa[2],WeightZ,"Kappa",parameterised);
+	WriteTerm(WeightSigma[2],WeightZ,"Sigma",parameterised);
+	prop.InsertEndChild(WeightZ);
+
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -563,6 +584,31 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
             if (ReadTerm(Kappa[2],*matProp,"Kappa")==false) return false;
             if (ReadTerm(Sigma[2],*matProp,"Sigma")==false) return false;
         }
+
+	TiXmlElement *weight = prop->FirstChildElement("WeightX");
+	if (weight!=NULL)
+	{
+		ReadTerm(WeightEpsilon[0],*weight,"Epsilon");
+		ReadTerm(WeightMue[0],*weight,"Mue");
+		ReadTerm(WeightKappa[0],*weight,"Kappa");
+		ReadTerm(WeightSigma[0],*weight,"Sigma");
+	}
+	weight = prop->FirstChildElement("WeightY");
+	if (weight!=NULL)
+	{
+		ReadTerm(WeightEpsilon[1],*weight,"Epsilon");
+		ReadTerm(WeightMue[1],*weight,"Mue");
+		ReadTerm(WeightKappa[1],*weight,"Kappa");
+		ReadTerm(WeightSigma[1],*weight,"Sigma");
+	}
+	weight = prop->FirstChildElement("WeightZ");
+	if (weight!=NULL)
+	{
+		ReadTerm(WeightEpsilon[2],*weight,"Epsilon");
+		ReadTerm(WeightMue[2],*weight,"Mue");
+		ReadTerm(WeightKappa[2],*weight,"Kappa");
+		ReadTerm(WeightSigma[2],*weight,"Sigma");
+	}
 
 	return true;
 }

@@ -23,7 +23,7 @@ bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr)
 	return true;
 }
 
-void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode)
+void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode, bool scientific)
 {
 	if (PS.GetMode() && mode)
 	{
@@ -32,10 +32,14 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 	}
 	else
 	{
-		//char doubleVal[50];
-		//sprintf(doubleVal,"%e",PS.GetValue());
-		//elem.SetAttribute(attr,doubleVal);
-		elem.SetDoubleAttribute(attr,PS.GetValue());
+		if (scientific)
+		{
+			char doubleVal[50];
+			sprintf(doubleVal,"%e",PS.GetValue());
+			elem.SetAttribute(attr,doubleVal);
+		}
+		else
+			elem.SetDoubleAttribute(attr,PS.GetValue());
 	}
 }
 
