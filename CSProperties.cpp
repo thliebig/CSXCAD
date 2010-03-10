@@ -894,6 +894,7 @@ void CSPropDumpBox::Init()
 	SGDump=SimpleDump=false;
 	SGLevel=-1;
 	DumpType = 0;
+	DumpMode = 0;
 }
 
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised)
@@ -903,6 +904,7 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised)
 
 	prop.SetAttribute("GlobalSetting",(int)GlobalSetting);
 	prop.SetAttribute("DumpType",DumpType);
+	prop.SetAttribute("DumpMode",DumpMode);
 
 	TiXmlElement ScalDump("ScalarDump");
 	ScalDump.SetAttribute("DumpPhi",(int)PhiDump);
@@ -942,6 +944,7 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	else GlobalSetting=(bool)iHelp;
 
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
+	if (prop->QueryIntAttribute("DumpMode",&DumpMode)!=TIXML_SUCCESS) DumpMode=0;
 
 	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
 	if (ScalDump!=NULL)

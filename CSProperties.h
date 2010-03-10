@@ -381,6 +381,11 @@ public:
 	//! Get the arbitrary dump-type \sa SetDumpType
 	int GetDumpType() {return DumpType;}
 
+	//! Define an arbitrary dump-mode \sa GetDumpMode
+	void SetDumpMode(int mode) {DumpMode=mode;}
+	//! Get the arbitrary dump-mode \sa SetDumpMode
+	int GetDumpMode() {return DumpMode;}
+
 	bool GetGlobalSetting();
 	bool GetPhiDump();
 	bool GetDivEDump();
@@ -422,5 +427,6 @@ protected:
 	int SGLevel;
 
 	int DumpType;
+	int DumpMode;
 };
 
