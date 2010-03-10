@@ -376,6 +376,11 @@ public:
 	CSPropDumpBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropDumpBox();
 
+	//! Define an arbitrary dump-type \sa GetDumpType
+	void SetDumpType(int type) {DumpType=type;}
+	//! Get the arbitrary dump-type \sa SetDumpType
+	int GetDumpType() {return DumpType;}
+
 	bool GetGlobalSetting();
 	bool GetPhiDump();
 	bool GetDivEDump();
@@ -415,5 +420,7 @@ protected:
 	bool EField,DField,PField;
 	bool SGDump,SimpleDump;
 	int SGLevel;
+
+	int DumpType;
 };
 
