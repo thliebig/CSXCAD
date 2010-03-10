@@ -151,6 +151,10 @@ protected:
 	vector<CSPrimitives*> vPrimitives;
 };
 
+//! Continuous Structure Unknown Property
+/*!
+  This is a property that is getting designated for new properties which are unknown so far (e.g. written by a newer version of CSXCAD)
+*/
 class CSXCAD_EXPORT CSPropUnknown : public CSProperties
 {
 public:
@@ -169,6 +173,11 @@ protected:
 	string sUnknownProperty;
 };
 
+//! Continuous Structure Material Property
+/*!
+  This Property can hold information about the properties of materials, such as epsilon, mue, kappa or sigma (aka. magnetic losses in FDTD).
+  The material can be location dependent an unisotropic.
+  */
 class CSXCAD_EXPORT CSPropMaterial : public CSProperties
 {
 public:
@@ -229,6 +238,10 @@ protected:
         bool bIsotropy;
 };
 
+//! Continuous Structure Metal Property
+/*!
+  This Property defines a metal property (aka. PEC).
+  */
 class CSXCAD_EXPORT CSPropMetal : public CSProperties
 {
 public:
@@ -241,6 +254,10 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 };
 
+//! Continuous Structure Electrode Property for excitations
+/*!
+  This Property defines an excitation which can be location and direction depedent.
+  */
 class CSXCAD_EXPORT CSPropElectrode : public CSProperties
 {
 public:
@@ -296,6 +313,10 @@ protected:
 	ParameterScalar Delay;//only for transient solver
 };
 
+//! Continuous Structure Probe Property for calculating integral properties
+/*!
+ CSProbProbeBox is a class for calculating integral properties such as (static) charges, voltages or currents.
+*/
 class CSXCAD_EXPORT CSPropProbeBox : public CSProperties
 {
 public:
@@ -315,6 +336,10 @@ protected:
 	unsigned int uiNumber;
 };
 
+//! Continuous Structure Resolution Property
+/*!
+  This Property defines a refined mesh area.
+  */
 class CSXCAD_EXPORT CSPropResBox : public CSProperties
 {
 public:
@@ -333,6 +358,10 @@ protected:
 	unsigned int uiFactor;
 };
 
+//! Continuous Structure Dump Property
+/*!
+  This Property defines an area (box) designated for field dumps.
+  */
 class CSXCAD_EXPORT CSPropDumpBox : public CSProperties
 {
 public:

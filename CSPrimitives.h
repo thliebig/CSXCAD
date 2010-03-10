@@ -115,6 +115,10 @@ protected:
 	string PrimTypeName;
 };
 
+//! Box Primitive (Cube)
+/*!
+ This is a cube primitive defined by its start-, end-coordinates.
+ */
 class CSXCAD_EXPORT CSPrimBox : public CSPrimitives
 {
 public:
@@ -142,6 +146,10 @@ protected:
 	ParameterScalar psCoords[6];
 };
 
+//! Multi-Box Primitive (Multi-Cube)
+/*!
+ This is a primitive defined by multiple cubes. Mostly used for already discretized objects.
+ */
 class CSXCAD_EXPORT CSPrimMultiBox : public CSPrimitives
 {
 public:
@@ -181,6 +189,10 @@ protected:
 	vector<ParameterScalar> vCoords;
 };
 
+//! Sphere Primitive
+/*!
+ This is a spherical primitive defined by its center coordinates and a radius.
+ */
 class CSXCAD_EXPORT CSPrimSphere : public CSPrimitives
 {
 public:
@@ -215,6 +227,10 @@ protected:
 	ParameterScalar psRadius;
 };
 
+//! Cylinder Primitive
+/*!
+ This is a cylindrical primitive defined by its axis start-, end-coordinates and a radius.
+ */
 class CSXCAD_EXPORT CSPrimCylinder : public CSPrimitives
 {
 public:
@@ -249,6 +265,10 @@ protected:
 	ParameterScalar psRadius;
 };
 
+//! 2D Polygon Primitive
+/*!
+ This is an area polygon primitive defined by a number of points in space.
+ */
 class CSXCAD_EXPORT CSPrimPolygon : public CSPrimitives
 {
 public:
@@ -302,6 +322,10 @@ protected:
 	ParameterScalar Elevation;
 };
 
+//! Linear extruded polygon Primitive
+/*!
+ This is a linear extruded area polygon primitive defined by a number of points in space and an extrude vector.
+ */
 class CSXCAD_EXPORT CSPrimLinPoly : public CSPrimPolygon
 {
 public:
@@ -329,6 +353,10 @@ protected:
 	ParameterScalar extrudeLength;
 };
 
+//! Rotational extruded polygon Primitive
+/*!
+ This is a rotation extruded area polygon primitive defined by a number of points in space, an extrude axis and start-, stop-angle.
+ */
 class CSXCAD_EXPORT CSPrimRotPoly : public CSPrimPolygon
 {
 public:
@@ -365,6 +393,10 @@ protected:
 	ParameterScalar RotAxis[3];
 };
 
+//! User defined Primitive given by an analytic formula
+/*!
+ This primitive is defined by a boolean result analytic formula. If a given coordinate results in a true result the primitive is assumed existing at these coordinate.
+ */
 class CSXCAD_EXPORT CSPrimUserDefined: public CSPrimitives
 {
 public:
