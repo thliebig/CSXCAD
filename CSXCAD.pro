@@ -8,7 +8,7 @@ OBJECTS_DIR = obj
 CONFIG += release
 
 unix{
-VERSION = 0.1.2
+VERSION = 0.1.3
 INCLUDEPATH += ../tinyxml 
 INCLUDEPATH += ../fparser 
 LIBS += -L../fparser\

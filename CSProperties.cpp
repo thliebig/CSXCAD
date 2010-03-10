@@ -112,7 +112,7 @@ CSPropUnknown* CSProperties::ToUnknown() { return ( this && Type == UNKNOWN ) ? 
 CSPropMaterial* CSProperties::ToMaterial() { return ( this && Type == MATERIAL ) ? (CSPropMaterial*) this : 0; }
 CSPropMetal* CSProperties::ToMetal() { return ( this && Type == METAL ) ? (CSPropMetal*) this : 0; }
 CSPropElectrode* CSProperties::ToElectrode() { return ( this && Type == ELECTRODE ) ? (CSPropElectrode*) this : 0; }
-CSPropChargeBox* CSProperties::ToChargeBox() { return ( this && Type == CHARGEBOX ) ? (CSPropChargeBox*) this : 0; }
+CSPropProbeBox* CSProperties::ToProbeBox() { return ( this && Type == PROBEBOX ) ? (CSPropProbeBox*) this : 0; }
 CSPropResBox* CSProperties::ToResBox() { return ( this && Type == RESBOX ) ? (CSPropResBox*) this : 0; }
 CSPropDumpBox* CSProperties::ToDumpBox() { return ( this && Type == DUMPBOX ) ? (CSPropDumpBox*) this : 0; }
 
@@ -134,7 +134,7 @@ const string CSProperties::GetTypeString()
 		case CSProperties::ELECTRODE:
 			sType=string("Electrode");
 			break;
-		case CSProperties::CHARGEBOX:
+		case CSProperties::PROBEBOX:
 			sType=string("Probe-Box");
 			break;
 		case CSProperties::RESBOX:
@@ -780,16 +780,16 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-/*********************CSPropChargeBox********************************************************************/
-CSPropChargeBox::CSPropChargeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=CHARGEBOX;uiNumber=0;}
-CSPropChargeBox::CSPropChargeBox(CSProperties* prop) : CSProperties(prop) {Type=CHARGEBOX;uiNumber=0;}
-CSPropChargeBox::CSPropChargeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=CHARGEBOX;uiNumber=0;}
-CSPropChargeBox::~CSPropChargeBox() {}
+/*********************CSPropProbeBox********************************************************************/
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;}
+CSPropProbeBox::~CSPropProbeBox() {}
 
-void CSPropChargeBox::SetNumber(unsigned int val) {uiNumber=val;}
-unsigned int CSPropChargeBox::GetNumber() {return uiNumber;}
+void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
+unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
-bool CSPropChargeBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("ProbeBox");
 	CSProperties::Write2XML(prop,parameterised);
@@ -800,7 +800,7 @@ bool CSPropChargeBox::Write2XML(TiXmlNode& root, bool parameterised)
 	return true;
 }
 
-bool CSPropChargeBox::ReadFromXML(TiXmlNode &root)
+bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 {
 	if (CSProperties::ReadFromXML(root)==false) return false;
 

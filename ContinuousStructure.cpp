@@ -348,8 +348,8 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"Material")==0) newProp = new CSPropMaterial(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
 		else if (strcmp(cProp,"Electrode")==0) newProp = new CSPropElectrode(clParaSet);
-		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropChargeBox(clParaSet);
-		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropChargeBox(clParaSet); //old version support
+		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropProbeBox(clParaSet);
+		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropProbeBox(clParaSet); //old version support
 		else if (strcmp(cProp,"ResBox")==0) newProp = new CSPropResBox(clParaSet);
 		else if (strcmp(cProp,"DumpBox")==0) newProp = new CSPropDumpBox(clParaSet);
 		else break;

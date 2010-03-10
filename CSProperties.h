@@ -21,7 +21,7 @@ class CSPropUnknown;
 class CSPropMaterial;
 class CSPropMetal;
 class CSPropElectrode;
-class CSPropChargeBox;
+class CSPropProbeBox;
 class CSPropResBox;
 class CSPropDumpBox;
 
@@ -47,7 +47,7 @@ public:
 	//! Enumeration of all possible sub-types of this base-class
 	enum PropertyType
 	{
-		ANY = 0xff,UNKNOWN = 0x01,MATERIAL = 0x02,METAL = 0x04,ELECTRODE = 0x08,CHARGEBOX = 0x10,RESBOX = 0x20,DUMPBOX = 0x40
+		ANY = 0xff,UNKNOWN = 0x01,MATERIAL = 0x02,METAL = 0x04,ELECTRODE = 0x08,PROBEBOX = 0x10,RESBOX = 0x20,DUMPBOX = 0x40
 	};
 	
 	//! Get PropertyType \sa PropertyType and GetTypeString
@@ -110,8 +110,8 @@ public:
 	CSPropMetal* ToMetal();
 	//! Convert to Electrode Property, returns NULL if type is different! \return Returns a ToElectrode* or NULL if type is different!
 	CSPropElectrode* ToElectrode();
-	//! Convert to ChargeBox Property, returns NULL if type is different! \return Returns a ToChargeBox* or NULL if type is different!
-	CSPropChargeBox* ToChargeBox();
+	//! Convert to ProbeBox Property, returns NULL if type is different! \return Returns a ToProbeBox* or NULL if type is different!
+	CSPropProbeBox* ToProbeBox();
 	//! Convert to ResBox Property, returns NULL if type is different! \return Returns a ToResBox* or NULL if type is different!
 	CSPropResBox* ToResBox();
 	//! Convert to DumpBox Property, returns NULL if type is different! \return Returns a ToDumpBox* or NULL if type is different!
@@ -296,16 +296,17 @@ protected:
 	ParameterScalar Delay;//only for transient solver
 };
 
-
-class CSXCAD_EXPORT CSPropChargeBox : public CSProperties
+class CSXCAD_EXPORT CSPropProbeBox : public CSProperties
 {
 public:
-	CSPropChargeBox(ParameterSet* paraSet);
-	CSPropChargeBox(CSProperties* prop);
-	CSPropChargeBox(unsigned int ID, ParameterSet* paraSet);
-	virtual ~CSPropChargeBox();
+	CSPropProbeBox(ParameterSet* paraSet);
+	CSPropProbeBox(CSProperties* prop);
+	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropProbeBox();
 
+	//! Define a number for this probe property
 	void SetNumber(unsigned int val);
+	//! Get the number designated to this probe property
 	unsigned int GetNumber();
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
