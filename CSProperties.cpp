@@ -728,6 +728,7 @@ void CSPropElectrode::Init()
 {
 	uiNumber=0;
 	iExcitType=1;
+	coordInputType=0;
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=true;
@@ -786,9 +787,9 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 	prop.InsertEndChild(Excit);
 
 	TiXmlElement Weight("Weight");
-	WriteTerm(WeightFct[0],Weight,"Function_X",parameterised);
-	WriteTerm(WeightFct[1],Weight,"Function_Y",parameterised);
-	WriteTerm(WeightFct[2],Weight,"Function_Z",parameterised);
+	WriteTerm(WeightFct[0],Weight,"X",parameterised);
+	WriteTerm(WeightFct[1],Weight,"Y",parameterised);
+	WriteTerm(WeightFct[2],Weight,"Z",parameterised);
 	prop.InsertEndChild(Weight);
 
 	root.InsertEndChild(prop);
@@ -818,9 +819,9 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	TiXmlElement *weight = prop->FirstChildElement("Weight");
 	if (weight!=NULL)
 	{
-		ReadTerm(WeightFct[0],*weight,"Excit_X");
-		ReadTerm(WeightFct[1],*weight,"Excit_Y");
-		ReadTerm(WeightFct[2],*weight,"Excit_Z");
+		ReadTerm(WeightFct[0],*weight,"X");
+		ReadTerm(WeightFct[1],*weight,"Y");
+		ReadTerm(WeightFct[2],*weight,"Z");
 	}
 
 	return true;

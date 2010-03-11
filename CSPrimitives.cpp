@@ -106,9 +106,11 @@ CSPrimBox::~CSPrimBox()
 {
 }
 
-double* CSPrimBox::GetBoundBox(bool &accurate)
+double* CSPrimBox::GetBoundBox(bool &accurate, bool PreserveOrientation)
 {
+	accurate=true;
 	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+	if (PreserveOrientation==true) return dBoundBox;
 	for (int i=0;i<3;++i)
 		if (dBoundBox[2*i]>dBoundBox[2*i+1])
 		{
@@ -116,7 +118,6 @@ double* CSPrimBox::GetBoundBox(bool &accurate)
 			dBoundBox[2*i]=dBoundBox[2*i+1];
 			dBoundBox[2*i+1]=help;
 		}
-	accurate=true;
 	return dBoundBox;
 }
 

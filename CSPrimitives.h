@@ -62,7 +62,7 @@ public:
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
 	//! Get the bounding box for this special primitive.
-	virtual double* GetBoundBox(bool &accurate) {return dBoundBox;accurate=false;};
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {return dBoundBox;accurate=false;};
 
 	//! Check if given Coordinate is inside the Primitive.
 	virtual bool IsInside(double* Coord, double tol=0) {return false;};
@@ -135,7 +135,7 @@ public:
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return psCoords[index].GetValue(); else return 0;};
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return &psCoords[index]; else return NULL;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
