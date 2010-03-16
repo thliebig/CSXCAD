@@ -231,11 +231,7 @@ ParameterSet::ParameterSet(void)
 
 ParameterSet::~ParameterSet(void)
 {
-	for (size_t i=0; i<vParameter.size();++i)
-	{
-		delete vParameter.at(i);
-	}
-	vParameter.clear();
+	clear();
 }
 
 size_t ParameterSet::LinkParameter(Parameter* newPara)
@@ -271,8 +267,13 @@ size_t ParameterSet::DeleteParameter(Parameter* para)
 
 void ParameterSet::clear()
 {
+	for (size_t i=0; i<vParameter.size();++i)
+	{
+		delete vParameter.at(i);
+	}
 	vParameter.clear();
 	ParameterString.clear();
+	ParameterValueString.clear();
 }
 
 bool ParameterSet::GetModified()
