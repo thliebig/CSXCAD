@@ -143,36 +143,60 @@ protected:
 class CSXCAD_EXPORT ParameterSet
 {
 public:
+	//! Create an empty Parameter-Set
 	ParameterSet(void);
+	//! Delete the Parameter-Set, including all parameter
 	virtual ~ParameterSet(void);
 
+	//! This will create a clone of the parameter and insert it into the ParameterSet, caller keeps ownership of original parameter \sa LinkParameter \return number of current parameter
 	virtual size_t InsertParameter(Parameter* newPara) {return LinkParameter(newPara->Clone());};
+	//! This will add/link the given parameter into the ParameterSet and take ownership \return number of current parameter
 	virtual size_t LinkParameter(Parameter* newPara);
+	//! Same as LinkParameter \sa LinkParameter \return number of current parameter
+	virtual size_t AddParameter(Parameter* newPara) {return LinkParameter(newPara);}
+	//! Delete a Parameter at given index \return number of current parameter
 	virtual size_t DeleteParameter(size_t index);
+	//! Delete a given Parameter \return number of current parameter
 	virtual size_t DeleteParameter(Parameter* para);
+	//! Get the Parameter at the given index
 	Parameter* GetParameter(size_t index) {if (index<vParameter.size()) return vParameter.at(index); else return NULL;}
 
+	//! Check whether the ParameterSet or any Parameter has been modified
 	bool GetModified();
+	//! Set this ParameterSet's modfication status, including all Parameter
 	virtual void SetModified(bool mod=true);
 
+	//! Check whether the ParameterSet has been modified (will not check the Parameter) \sa GetModified
 	bool GetParaSetModified() {return bModified;};
+	//! Set the ParameterSet's modfication status \sa SetModified
 	bool SetParaSetModified(bool val) {bModified=val;};
 
+	//! Get the string of all parameter separated by the given spacer
 	const string GetParameterString(const string spacer=",");
+	//! Get a string of all parameter and values or only the values separated by the given spacer
 	const string GetParameterValueString(const string spacer=",", bool ValuesOnly=false);
 
+	//! Get the number of parameters in this Parameter-Set
 	size_t GetQtyParameter() {return vParameter.size();};
+	//! Fill a given array with the parameter values
 	double* GetValueArray(double *array);
 
-	int CountSweepSteps(int SweepMode);  ///Modes: 1 sweep all; 2 sweep independently;
+	//! Get the number of necessary sweep steps for the given mode (1: full sweep, 2: sweep independently)
+	int CountSweepSteps(int SweepMode);
+	//! Init a sweep, will set all sweep-enabled Parameter to there initial value
 	void InitSweep();
+	//! This will restore all Parameter values as prior to InitSweep \sa InitSweep
 	void EndSweep();
+	//! Move sweep to the next step \sa InitSweep \sa CountSweepSteps
 	bool NextSweepPos(int SweepMode);
 
+	//! Clear this ParameterSet, this will delete all Parameter
 	virtual void clear();
 
 	void PrintSelf(FILE* out=stdout);
+	//! Write this ParameterSet into a xml-node
 	bool Write2XML(TiXmlNode& root);
+	//! Read the ParameterSet from a xml-node
 	bool ReadFromXML(TiXmlNode &root);
 
 protected:
