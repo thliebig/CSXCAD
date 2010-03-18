@@ -30,7 +30,6 @@
 #include <vector>
 #include <math.h>
 #include "CSXCAD_Global.h"
-#include "fparser.hh"
 
 using namespace std;
 
@@ -239,7 +238,7 @@ public:
 
 protected:
 	ParameterSet* clParaSet;
-	FunctionParser fParse;
+	FunctionParser* fParse;
 	bool bModified;
 	bool ParameterMode;
 	string sValue;
