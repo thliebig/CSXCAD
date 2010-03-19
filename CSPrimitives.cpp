@@ -1310,6 +1310,161 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
+/*********************CSPrimBox********************************************************************/
+CSPrimCurve::CSPrimCurve(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
+{
+	Type=CURVE;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Curve");
+}
+
+CSPrimCurve::CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop) : CSPrimitives(primCurve,prop)
+{
+	Type=CURVE;
+//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	PrimTypeName = string("Curve");
+}
+
+CSPrimCurve::CSPrimCurve(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
+{
+	Type=CURVE;
+//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	PrimTypeName = string("Curve");
+}
+
+
+CSPrimCurve::~CSPrimCurve()
+{
+	points[0].clear();
+	points[1].clear();
+	points[2].clear();
+}
+
+size_t CSPrimCurve::AddPoint(double coords[])
+{
+	points[0].push_back(ParameterScalar(clParaSet,coords[0]));
+	points[1].push_back(ParameterScalar(clParaSet,coords[1]));
+	points[2].push_back(ParameterScalar(clParaSet,coords[2]));
+	return points[0].size()-1;
+}
+
+void CSPrimCurve::SetCoord(size_t point_index, int nu, double val)
+{
+	if (point_index>=GetNumberOfPoints()) return;
+	if ((nu<0) || (nu>2)) return;
+	points[nu].at(point_index).SetValue(val);
+}
+
+void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
+{
+	if (point_index>=GetNumberOfPoints()) return;
+	if ((nu<0) || (nu>2)) return;
+	points[nu].at(point_index).SetValue(val);
+}
+
+bool CSPrimCurve::GetPoint(size_t point_index, double* point)
+{
+	if (point_index>=GetNumberOfPoints()) return false;
+	point[0] = points[0].at(point_index).GetValue();
+	point[1] = points[1].at(point_index).GetValue();
+	point[2] = points[2].at(point_index).GetValue();
+	return true;
+}
+
+double* CSPrimCurve::GetBoundBox(bool &accurate, bool PreserveOrientation)
+{
+	accurate=false;
+//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+//	if (PreserveOrientation==true) return dBoundBox;
+//	for (int i=0;i<3;++i)
+//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
+//		{
+//			double help=dBoundBox[2*i];
+//			dBoundBox[2*i]=dBoundBox[2*i+1];
+//			dBoundBox[2*i+1]=help;
+//		}
+	return dBoundBox;
+}
+
+bool CSPrimCurve::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+
+//	bool accBnd=false;
+//	double* box=this->GetBoundBox(accBnd);
+//
+//	for (unsigned int n=0;n<3;++n)
+//	{
+//		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+//	}
+	return false;
+}
+
+
+bool CSPrimCurve::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+	for (size_t i=0;i<GetNumberOfPoints();++i)
+	{
+		for (int n=0;n<3;++n)
+		{
+			EC=points[n][i].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+			{
+				bOK=false;
+				stringstream stream;
+				stream << endl << "Error in Curve (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
+		}
+	}
+	return bOK;
+}
+
+bool CSPrimCurve::Write2XML(TiXmlNode& root, bool parameterised)
+{
+	TiXmlElement elem("Curve");
+
+	CSPrimitives::Write2XML(elem,parameterised);
+
+	for (size_t i=0;i<points[0].size();++i)
+	{
+		TiXmlElement VT("Vertex");
+		WriteTerm(points[0].at(i),VT,"X",parameterised);
+		WriteTerm(points[1].at(i),VT,"Y",parameterised);
+		WriteTerm(points[2].at(i),VT,"Z",parameterised);
+		elem.InsertEndChild(VT);
+	}
+
+	root.InsertEndChild(elem);
+	return true;
+}
+
+bool CSPrimCurve::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimitives::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *VT=root.FirstChildElement("Vertex");
+	if (points[0].size()!=0) return false;
+	int i=0;
+	double emptyP[] = {0.0,0.0,0.0};
+	size_t current=0;
+	while (VT)
+	{
+		current = this->AddPoint(emptyP);
+
+		if (ReadTerm(points[0].at(current),*VT,"X")==false) return false;
+		if (ReadTerm(points[1].at(current),*VT,"Y")==false) return false;
+		if (ReadTerm(points[2].at(current),*VT,"Z")==false) return false;
+		VT=VT->NextSiblingElement("Vertex");
+	};
+	
+	return true;
+}
+
 /*********************CSPrimUserDefined********************************************************************/
 CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {

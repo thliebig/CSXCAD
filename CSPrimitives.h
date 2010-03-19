@@ -37,6 +37,7 @@ class CSPrimCylinder;
 class CSPrimPolygon;
 	class CSPrimLinPoly;
 	class CSPrimRotPoly;
+class CSPrimCurve;
 class CSPrimUserDefined;
 
 class CSProperties; //include VisualProperties
@@ -57,7 +58,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		BOX,MULTIBOX,SPHERE,CYLINDER,POLYGON,LINPOLY,ROTPOLY,USERDEFINED
+		BOX,MULTIBOX,SPHERE,CYLINDER,POLYGON,LINPOLY,ROTPOLY,CURVE,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -110,6 +111,8 @@ public:
 	CSPrimLinPoly* ToLinPoly() { return ( this && Type == LINPOLY ) ? (CSPrimLinPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
 	CSPrimRotPoly* ToRotPoly() { return ( this && Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Curve-Primitive or NULL in case of different type.
+	CSPrimCurve* ToCurve() { return ( this && Type == CURVE ) ? (CSPrimCurve*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing UserDefined-Primitive or NULL in case of different type.
 	CSPrimUserDefined* ToUserDefined() { return ( this && Type == USERDEFINED ) ? (CSPrimUserDefined*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 
@@ -408,6 +411,38 @@ protected:
 	ParameterScalar StartStopAngle[2];
 	//rot axis
 	ParameterScalar RotAxis[3];
+};
+
+//! Curve Primitive (Polygonal chain)
+/*!
+ This is a curve primitive defined by a number of 3D points
+ */
+class CSXCAD_EXPORT CSPrimCurve : public CSPrimitives
+{
+public:
+	CSPrimCurve(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop=NULL);
+	CSPrimCurve(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimCurve();
+
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCurve(this,prop);};
+
+	virtual size_t AddPoint(double coords[]);
+	virtual void SetCoord(size_t point_index, int nu, double val);
+	virtual void SetCoord(size_t point_index, int nu, string val);
+
+	virtual size_t GetNumberOfPoints() {return points[0].size();}
+	virtual bool GetPoint(size_t point_index, double* point);
+
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	vector<ParameterScalar> points[3];
 };
 
 //! User defined Primitive given by an analytic formula
