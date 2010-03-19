@@ -40,12 +40,15 @@ class CSPrimPolygon;
 	class CSPrimLinPoly;
 	class CSPrimRotPoly;
 class CSPrimCurve;
+	class CSPrimWire;
 class CSPrimUserDefined;
 
 class CSProperties; //include VisualProperties
 
 class TiXmlNode;
 class FunctionParser;
+
+void Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist);
 
 //! Abstract base class for different geometrical primitives.
 /*!
@@ -60,7 +63,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,USERDEFINED
+		BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,WIRE,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -513,6 +516,38 @@ public:
 
 protected:
 	vector<ParameterScalar> points[3];
+};
+
+//! Wire Primitive (Polygonal chain with finite radius)
+/*!
+ This is a wire primitive derived from a curve with an additional wire radius
+ \sa CSPrimCurve
+ */
+class CSXCAD_EXPORT CSPrimWire : public CSPrimCurve
+{
+public:
+	CSPrimWire(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimWire(CSPrimWire* primCurve, CSProperties *prop=NULL);
+	CSPrimWire(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimWire();
+
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimWire(this,prop);};
+
+	void SetWireRadius(double val) {wireRadius.SetValue(val);};
+	void SetWireRadius(const char* val) {wireRadius.SetValue(val);};
+
+	double GetWireRadius() {return wireRadius.GetValue();};
+	ParameterScalar* GetWireRadiusPS() {return &wireRadius;};
+
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	ParameterScalar wireRadius;
 };
 
 //! User defined Primitive given by an analytic formula

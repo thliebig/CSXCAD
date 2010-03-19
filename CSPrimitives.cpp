@@ -23,6 +23,20 @@
 #include "tinyxml.h"
 #include "fparser.hh"
 
+
+void Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist)
+{
+	double dir[] = {stop[0]-start[0],stop[1]-start[1],stop[2]-start[2]};
+
+	double LL = pow(dir[0],2)+pow(dir[1],2)+pow(dir[2],2); //Line length^2
+	foot = (P[0]-start[0])*dir[0] +  (P[1]-start[1])*dir[1] + (P[2]-start[2])*dir[2];
+	foot /= LL;
+
+	double footP[] = {start[0] + foot*dir[0], start[1] + foot*dir[1], start[2] + foot*dir[2]};
+
+	dist = sqrt(pow(P[0]-footP[0],2)+pow(P[1]-footP[1],2)+pow(P[2]-footP[2],2));
+}
+
 /*********************CSPrimitives********************************************************************/
 CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 {
@@ -717,6 +731,7 @@ double* CSPrimCylinder::GetBoundBox(bool &accurate)
 bool CSPrimCylinder::IsInside(double* Coord, double tol)
 {
 	//Lot-Fuss-Punkt
+	//use Point_Line_Distance(...) in the future!!!
 	if (Coord==NULL) return false;
 	double* p=Coord; //punkt
 	double r0[3]={psCoords[0].GetValue(),psCoords[2].GetValue(),psCoords[4].GetValue()}; //aufpunkt
@@ -1498,25 +1513,28 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-/*********************CSPrimBox********************************************************************/
+/*********************CSPrimCurve********************************************************************/
 CSPrimCurve::CSPrimCurve(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=CURVE;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
 	PrimTypeName = string("Curve");
 }
 
 CSPrimCurve::CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop) : CSPrimitives(primCurve,prop)
 {
 	Type=CURVE;
-//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	for (size_t i=0;i<primCurve->points[0].size();++i)
+	{
+		points[0].push_back(ParameterScalar(primCurve->points[0].at(i)));
+		points[1].push_back(ParameterScalar(primCurve->points[1].at(i)));
+		points[2].push_back(ParameterScalar(primCurve->points[2].at(i)));
+	}
 	PrimTypeName = string("Curve");
 }
 
 CSPrimCurve::CSPrimCurve(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=CURVE;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
 	PrimTypeName = string("Curve");
 }
 
@@ -1562,29 +1580,22 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point)
 double* CSPrimCurve::GetBoundBox(bool &accurate, bool PreserveOrientation)
 {
 	accurate=false;
-//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
-//	if (PreserveOrientation==true) return dBoundBox;
-//	for (int i=0;i<3;++i)
-//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
-//		{
-//			double help=dBoundBox[2*i];
-//			dBoundBox[2*i]=dBoundBox[2*i+1];
-//			dBoundBox[2*i+1]=help;
-//		}
+	for (size_t i=0;i<points[0].size();++i)
+	{
+		for (int n=0;n<3;++n)
+		{
+			if (points[n].at(i).GetValue()<dBoundBox[n])
+				dBoundBox[2*n]=points[n].at(i).GetValue();
+			else if (points[n].at(i).GetValue()>dBoundBox[2*n+1])
+				dBoundBox[2*n+1]=points[n].at(i).GetValue();
+		}
+	}
 	return dBoundBox;
 }
 
 bool CSPrimCurve::IsInside(double* Coord, double tol)
 {
-	if (Coord==NULL) return false;
-
-//	bool accBnd=false;
-//	double* box=this->GetBoundBox(accBnd);
-//
-//	for (unsigned int n=0;n<3;++n)
-//	{
-//		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
-//	}
+	//this is a 1D-object, you can never be inside...
 	return false;
 }
 
@@ -1603,7 +1614,7 @@ bool CSPrimCurve::Update(string *ErrStr)
 			{
 				bOK=false;
 				stringstream stream;
-				stream << endl << "Error in Curve (ID: " << uiID << "): ";
+				stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
 				ErrStr->append(stream.str());
 				PSErrorCode2Msg(EC,ErrStr);
 			}
@@ -1646,6 +1657,111 @@ bool CSPrimCurve::ReadFromXML(TiXmlNode &root)
 		VT=VT->NextSiblingElement("Vertex");
 	};
 	
+	return true;
+}
+
+/*********************CSPrimWire********************************************************************/
+CSPrimWire::CSPrimWire(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimCurve(ID,paraSet,prop)
+{
+	Type=WIRE;
+	PrimTypeName = string("Wire");
+	wireRadius.SetParameterSet(paraSet);
+}
+
+CSPrimWire::CSPrimWire(CSPrimWire* primCurve, CSProperties *prop) : CSPrimCurve(primCurve,prop)
+{
+	Type=WIRE;
+	PrimTypeName = string("Wire");
+	wireRadius = ParameterScalar(primCurve->wireRadius);
+}
+
+CSPrimWire::CSPrimWire(ParameterSet* paraSet, CSProperties* prop) : CSPrimCurve(paraSet,prop)
+{
+	Type=WIRE;
+	PrimTypeName = string("Wire");
+	wireRadius.SetParameterSet(paraSet);
+}
+
+
+CSPrimWire::~CSPrimWire()
+{
+}
+
+
+double* CSPrimWire::GetBoundBox(bool &accurate, bool PreserveOrientation)
+{
+	CSPrimCurve::GetBoundBox(accurate,PreserveOrientation);
+	return dBoundBox;
+}
+
+bool CSPrimWire::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+	double rad = wireRadius.GetValue();
+	double p0[3];
+	double p1[3];
+	double foot,dist,distPP;
+	for (size_t i=0;i<GetNumberOfPoints();++i)
+	{
+		p0[0]=points[0].at(i).GetValue();
+		p0[1]=points[1].at(i).GetValue();
+		p0[2]=points[2].at(i).GetValue();
+		dist = sqrt(pow(Coord[0]-p0[0],2)+pow(Coord[1]-p0[1],2)+pow(Coord[2]-p0[2],2));
+		if (dist<rad) return true;
+
+		if (i<GetNumberOfPoints()-1)
+		{
+			p1[0]=points[0].at(i+1).GetValue();
+			p1[1]=points[1].at(i+1).GetValue();
+			p1[2]=points[2].at(i+1).GetValue();
+			distPP = sqrt(pow(p1[0]-p0[0],2)+pow(p1[1]-p0[1],2)+pow(p1[2]-p0[2],2))+rad;
+			if (dist<distPP)
+			{
+				Point_Line_Distance(Coord ,p0 ,p1 ,foot ,dist);
+				if ((foot>0) && (foot<1) && (dist<rad))
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool CSPrimWire::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+	CSPrimCurve::Update(ErrStr);
+
+	EC=wireRadius.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
+	return bOK;
+}
+
+bool CSPrimWire::Write2XML(TiXmlElement &elem, bool parameterised)
+{
+	CSPrimCurve::Write2XML(elem,parameterised);
+
+	WriteTerm(wireRadius,elem,"WireRadius",parameterised);
+	return true;
+}
+
+bool CSPrimWire::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimCurve::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+	if (ReadTerm(wireRadius,*elem,"WireRadius")==false) return false;
 	return true;
 }
 

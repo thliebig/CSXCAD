@@ -431,6 +431,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 			else if (strcmp(cPrim,"LinPoly")==0) newPrim = new CSPrimLinPoly(clParaSet,prop);
 			else if (strcmp(cPrim,"RotPoly")==0) newPrim = new CSPrimRotPoly(clParaSet,prop);
 			else if (strcmp(cPrim,"Curve")==0) newPrim = new CSPrimCurve(clParaSet,prop);
+			else if (strcmp(cPrim,"Wire")==0) newPrim = new CSPrimWire(clParaSet,prop);
 			else if (strcmp(cPrim,"UserDefined")==0) newPrim = new CSPrimUserDefined(clParaSet,prop);
 			else
 			{
