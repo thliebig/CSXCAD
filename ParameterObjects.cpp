@@ -473,7 +473,6 @@ ParameterScalar::ParameterScalar()
 	ParameterMode=false;
 	sValue.clear();
 	dValue=0;
-	fParse = new FunctionParser();
 }
 
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
@@ -483,7 +482,6 @@ ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
 	ParameterMode=true;
 	sValue=value;
 	dValue=0;
-	fParse = new FunctionParser();
 }
 
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
@@ -493,7 +491,6 @@ ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
 	ParameterMode=false;
 	sValue.clear();
 	dValue=value;
-	fParse = new FunctionParser();
 }
 
 ParameterScalar::ParameterScalar(ParameterScalar* ps)
@@ -503,22 +500,16 @@ ParameterScalar::ParameterScalar(ParameterScalar* ps)
 	ParameterMode=ps->ParameterMode;
 	sValue=string(ps->sValue);
 	dValue=ps->dValue;
-	fParse = new FunctionParser(*ps->fParse);
 }
 
 
 ParameterScalar::~ParameterScalar()
 {
-	delete fParse;
-	fParse=NULL;
 }
 
 int ParameterScalar::SetParameterSet(ParameterSet *paraSet)
 {
 	clParaSet=paraSet;
-	fParse->AddConstant("pi", 3.1415926535897932);
-	fParse->Parse(sValue,clParaSet->GetParameterString());
-	if (fParse->GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse->GetParseErrorType()+100;
 }
 
 int ParameterScalar::SetValue(const string value, bool Eval)
@@ -551,23 +542,20 @@ int ParameterScalar::Evaluate()
 	if (clParaSet==NULL) return -1;
 	if ((bModified==false) && (clParaSet->GetModified()==false)) return 0;
 
-//	if (bModified || clParaSet->GetParaSetModified())
-	{
-//		cerr << "parse..." << endl;
-		dValue=0;
-		fParse->AddConstant("pi", 3.1415926535897932);
-//		cerr << sValue << " -- " << clParaSet->GetParameterString() << endl;
-		fParse->Parse(sValue,clParaSet->GetParameterString());
-		if (fParse->GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse->GetParseErrorType()+100;
-		bModified=false;
-	}
+	FunctionParser fParse;
+	dValue=0;
+	fParse.AddConstant("pi", 3.1415926535897932);
+//	cerr << sValue << " -- " << clParaSet->GetParameterString() << endl;
+	fParse.Parse(sValue,clParaSet->GetParameterString());
+	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;
+	bModified=false;
 
 	double *vars = new double[clParaSet->GetQtyParameter()];
 	vars=clParaSet->GetValueArray(vars);
-	dValue=fParse->Eval(vars);
+	dValue=fParse.Eval(vars);
 //	cerr << "eval..." << dValue << endl;
 	delete[] vars;vars=NULL;
-	return fParse->EvalError();
+	return fParse.EvalError();
 }
 
 void PSErrorCode2Msg(int code, string *msg)

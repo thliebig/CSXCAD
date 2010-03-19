@@ -238,7 +238,6 @@ public:
 
 protected:
 	ParameterSet* clParaSet;
-	FunctionParser* fParse;
 	bool bModified;
 	bool ParameterMode;
 	string sValue;
