@@ -71,14 +71,12 @@ CSPrimitives::~CSPrimitives()
 	if (clProperty!=NULL) clProperty->RemovePrimitive(this);
 }
 
-bool CSPrimitives::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimitives::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement *elem = root.ToElement();
-
-	elem->SetAttribute("ID",uiID);
-	if (clProperty!=NULL) elem->SetAttribute("PropertyID",clProperty->GetID());
-	else elem->SetAttribute("PropertyID",-1);
-	elem->SetAttribute("Priority",iPriority);
+	elem.SetAttribute("ID",uiID);
+	if (clProperty!=NULL) elem.SetAttribute("PropertyID",clProperty->GetID());
+	else elem.SetAttribute("PropertyID",-1);
+	elem.SetAttribute("Priority",iPriority);
 
 	return true;
 }
@@ -88,9 +86,9 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	int help;
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;
-    if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS) return false;
+	if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS) return false;
 	uiID=(unsigned int)help;
-    if (elem->QueryIntAttribute("Priority",&iPriority)!=TIXML_SUCCESS) return false;
+	if (elem->QueryIntAttribute("Priority",&iPriority)!=TIXML_SUCCESS) return false;
 
 	return true;
 }
@@ -173,10 +171,8 @@ bool CSPrimBox::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimBox::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("Box");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	TiXmlElement P1("P1");
@@ -190,8 +186,6 @@ bool CSPrimBox::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(psCoords[3],P2,"Y",parameterised);
 	WriteTerm(psCoords[5],P2,"Z",parameterised);
 	elem.InsertEndChild(P2);
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -396,9 +390,8 @@ bool CSPrimMultiBox::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimMultiBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimMultiBox::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("MultiBox");
 	CSPrimitives::Write2XML(elem,parameterised);
 	elem.SetAttribute("QtyBox",(int)vCoords.size()/6);
 
@@ -416,8 +409,6 @@ bool CSPrimMultiBox::Write2XML(TiXmlNode& root, bool parameterised)
 		WriteTerm(vCoords.at(i*6+5),EP,"Z",parameterised);
 		elem.InsertEndChild(EP);
 	}
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -512,7 +503,7 @@ bool CSPrimSphere::Update(string *ErrStr)
 		{
 			bOK=false;
 			stringstream stream;
-			stream << endl << "Error in Sphere Center Point (ID: " << uiID << "): ";
+			stream << endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
@@ -524,7 +515,7 @@ bool CSPrimSphere::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Sphere Radius (ID: " << uiID << "): ";
+		stream << endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -532,10 +523,8 @@ bool CSPrimSphere::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimSphere::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimSphere::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("Sphere");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	WriteTerm(psRadius,elem,"Radius",parameterised);
@@ -545,8 +534,6 @@ bool CSPrimSphere::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(psCenter[1],Center,"Y",parameterised);
 	WriteTerm(psCenter[2],Center,"Z",parameterised);
 	elem.InsertEndChild(Center);
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -563,6 +550,90 @@ bool CSPrimSphere::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(psCenter[0],*Center,"X")==false) return false;
 	if (ReadTerm(psCenter[1],*Center,"Y")==false) return false;
 	if (ReadTerm(psCenter[2],*Center,"Z")==false) return false;
+
+	return true;
+}
+
+/*********************CSPrimSphericalShell********************************************************************/
+CSPrimSphericalShell::CSPrimSphericalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(ID,paraSet,prop)
+{
+	Type=SPHERICALSHELL;
+	PrimTypeName = string("SphericalShell");
+	psShellWidth.SetParameterSet(paraSet);
+}
+
+CSPrimSphericalShell::CSPrimSphericalShell(CSPrimSphericalShell* sphere, CSProperties *prop) : CSPrimSphere(sphere,prop)
+{
+	Type=SPHERICALSHELL;
+	PrimTypeName = string("SphericalShell");
+	psShellWidth=ParameterScalar(sphere->psShellWidth);
+}
+
+CSPrimSphericalShell::CSPrimSphericalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(paraSet,prop)
+{
+	Type=SPHERICALSHELL;
+	PrimTypeName = string("SphericalShell");
+	psShellWidth.SetParameterSet(paraSet);
+}
+
+
+CSPrimSphericalShell::~CSPrimSphericalShell()
+{
+}
+
+double* CSPrimSphericalShell::GetBoundBox(bool &accurate)
+{
+	for (unsigned int i=0;i<3;++i)
+	{
+		dBoundBox[2*i]=psCenter[i].GetValue()-psRadius.GetValue()-psShellWidth.GetValue()/2.0;
+		dBoundBox[2*i+1]=psCenter[i].GetValue()+psRadius.GetValue()+psShellWidth.GetValue()/2.0;
+	}
+	accurate=true;
+	return dBoundBox;
+}
+
+bool CSPrimSphericalShell::IsInside(double* Coord, double tol)
+{
+	if (Coord==NULL) return false;
+	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
+	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0) return true;
+	return false;
+}
+
+bool CSPrimSphericalShell::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=CSPrimSphere::Update(ErrStr);
+
+	EC=psShellWidth.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
+	return bOK;
+}
+
+bool CSPrimSphericalShell::Write2XML(TiXmlElement &elem, bool parameterised)
+{
+	CSPrimSphere::Write2XML(elem,parameterised);
+
+	WriteTerm(psShellWidth,elem,"ShellWidth",parameterised);
+	return true;
+}
+
+bool CSPrimSphericalShell::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimSphere::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+	if (ReadTerm(psShellWidth,*elem,"ShellWidth")==false) return false;
 
 	return true;
 }
@@ -680,7 +751,7 @@ bool CSPrimCylinder::Update(string *ErrStr)
 		{
 			bOK=false;
 			stringstream stream;
-			stream << endl << "Error in Cylinder Coord (ID: " << uiID << "): ";
+			stream << endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
@@ -692,7 +763,7 @@ bool CSPrimCylinder::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Cylinder Radius (ID: " << uiID << "): ";
+		stream << endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -700,10 +771,8 @@ bool CSPrimCylinder::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimCylinder::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimCylinder::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("Cylinder");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	WriteTerm(psRadius,elem,"Radius",parameterised);
@@ -719,8 +788,6 @@ bool CSPrimCylinder::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(psCoords[3],Stop,"Y",parameterised);
 	WriteTerm(psCoords[5],Stop,"Z",parameterised);
 	elem.InsertEndChild(Stop);
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -744,6 +811,140 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(psCoords[3],*Point,"Y")==false) return false;
 	if (ReadTerm(psCoords[5],*Point,"Z")==false) return false;
 
+	return true;
+}
+
+/*********************CSPrimCylindricalShell********************************************************************/
+CSPrimCylindricalShell::CSPrimCylindricalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(ID,paraSet,prop)
+{
+	Type=CYLINDRICALSHELL;
+	PrimTypeName = string("CylindricalShell");
+	psShellWidth.SetParameterSet(paraSet);
+}
+
+CSPrimCylindricalShell::CSPrimCylindricalShell(CSPrimCylindricalShell* cylinder, CSProperties *prop) : CSPrimCylinder(cylinder,prop)
+{
+	Type=CYLINDRICALSHELL;
+	PrimTypeName = string("CylindricalShell");
+	psShellWidth=ParameterScalar(cylinder->psShellWidth);
+}
+
+CSPrimCylindricalShell::CSPrimCylindricalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(paraSet,prop)
+{
+	Type=CYLINDRICALSHELL;
+	PrimTypeName = string("CylindricalShell");
+	psShellWidth.SetParameterSet(paraSet);
+}
+
+CSPrimCylindricalShell::~CSPrimCylindricalShell()
+{
+}
+
+double* CSPrimCylindricalShell::GetBoundBox(bool &accurate)
+{
+	accurate=false;
+	int Direction=0;
+	double dCoords[6];
+	for (unsigned int i=0;i<6;++i)
+		dCoords[i]=psCoords[i].GetValue();
+	double rad=psRadius.GetValue()+psShellWidth.GetValue()/2.0;
+	for (unsigned int i=0;i<3;++i)
+	{
+		//vorerst ganz einfach... muss ueberarbeitet werden!!! //todo
+		double min=dCoords[2*i];
+		double max=dCoords[2*i+1];
+		if (min<max)
+		{
+			dBoundBox[2*i]=min-rad;
+			dBoundBox[2*i+1]=max+rad;
+		}
+		else
+		{
+			dBoundBox[2*i+1]=min+rad;
+			dBoundBox[2*i]=max-rad;
+		}
+		if (min==max) Direction+=pow(2,i);
+	}
+	switch (Direction)
+	{
+	case 3: //orientaion in z-direction
+		dBoundBox[4]=dBoundBox[4]+rad;
+		dBoundBox[5]=dBoundBox[5]-rad;
+		accurate=true;
+		break;
+	case 5: //orientaion in y-direction
+		dBoundBox[2]=dBoundBox[2]+rad;
+		dBoundBox[3]=dBoundBox[3]-rad;
+		accurate=true;
+		break;
+	case 6: //orientaion in x-direction
+		dBoundBox[1]=dBoundBox[1]+rad;
+		dBoundBox[2]=dBoundBox[2]-rad;
+		accurate=true;
+		break;
+	}
+	return dBoundBox;
+}
+
+bool CSPrimCylindricalShell::IsInside(double* Coord, double tol)
+{
+	//Lot-Fuss-Punkt
+	if (Coord==NULL) return false;
+	double* p=Coord; //punkt
+	double r0[3]={psCoords[0].GetValue(),psCoords[2].GetValue(),psCoords[4].GetValue()}; //aufpunkt
+	double r1[3]={psCoords[1].GetValue(),psCoords[3].GetValue(),psCoords[5].GetValue()}; //aufpunkt
+	double a[3]={r1[0]-r0[0],r1[1]-r0[1],r1[2]-r0[2]}; //richtungsvektor
+	double a2=(a[0]*a[0])+(a[1]*a[1])+(a[2]*a[2]);
+	double FP[3];
+	double e=0;
+	double t=(p[0]-r0[0])*a[0]+(p[1]-r0[1])*a[1]+(p[2]-r0[2])*a[2];
+	t/=a2;
+	for (int i=0;i<3;++i)
+	{
+		FP[i]=r0[i]+t*a[i];
+		if ((FP[i]<r0[i] || FP[i]>r1[i]) && (a[i]>0)) return false;
+		if ((FP[i]>r0[i] || FP[i]<r1[i]) && (a[i]<0)) return false;
+		e+=(FP[i]-p[i])*(FP[i]-p[i]);
+	}
+	double r=psRadius.GetValue();
+	if (fabs(sqrt(e)-r)<psShellWidth.GetValue()/2.0) return true;
+	return false;
+}
+
+bool CSPrimCylindricalShell::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=CSPrimCylinder::Update(ErrStr);
+
+	EC=psShellWidth.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		bOK=false;
+		stringstream stream;
+		stream << endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
+	return bOK;
+}
+
+bool CSPrimCylindricalShell::Write2XML(TiXmlElement &elem, bool parameterised)
+{
+	CSPrimCylinder::Write2XML(elem,parameterised);
+
+	WriteTerm(psShellWidth,elem,"ShellWidth",parameterised);
+	return true;
+}
+
+bool CSPrimCylindricalShell::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPrimCylinder::ReadFromXML(root)==false) return false;
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+	if (ReadTerm(psShellWidth,*elem,"ShellWidth")==false) return false;
 	return true;
 }
 
@@ -985,10 +1186,8 @@ bool CSPrimPolygon::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimPolygon::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimPolygon::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("Polygon");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 	
 	WriteTerm(Elevation,elem,"Elevation",parameterised);
@@ -1007,8 +1206,6 @@ bool CSPrimPolygon::Write2XML(TiXmlNode& root, bool parameterised)
 		WriteTerm(vCoords.at(i*2+1),VT,"X2",parameterised);
 		elem.InsertEndChild(VT);
 	}
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -1146,16 +1343,11 @@ bool CSPrimLinPoly::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimLinPoly::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimLinPoly::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("LinPoly");
-
 	CSPrimPolygon::Write2XML(elem,parameterised);
 
 	WriteTerm(extrudeLength,elem,"Length",parameterised);
-
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -1271,10 +1463,8 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimRotPoly::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimRotPoly::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("RotPoly");
-
 	CSPrimPolygon::Write2XML(elem,parameterised);
 
 	TiXmlElement RT("RotAxis");
@@ -1287,8 +1477,6 @@ bool CSPrimRotPoly::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(StartStopAngle[0],Ang,"Start",parameterised);	
 	WriteTerm(StartStopAngle[1],Ang,"Stop",parameterised);	
 	elem.InsertEndChild(Ang);
-	
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -1424,10 +1612,8 @@ bool CSPrimCurve::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimCurve::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimCurve::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("Curve");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	for (size_t i=0;i<points[0].size();++i)
@@ -1438,8 +1624,6 @@ bool CSPrimCurve::Write2XML(TiXmlNode& root, bool parameterised)
 		WriteTerm(points[2].at(i),VT,"Z",parameterised);
 		elem.InsertEndChild(VT);
 	}
-
-	root.InsertEndChild(elem);
 	return true;
 }
 
@@ -1635,10 +1819,8 @@ bool CSPrimUserDefined::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPrimUserDefined::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPrimUserDefined::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	TiXmlElement elem("UserDefined");
-
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	elem.SetAttribute("CoordSystem",CoordSystem);
@@ -1654,8 +1836,6 @@ bool CSPrimUserDefined::Write2XML(TiXmlNode& root, bool parameterised)
 	FuncElem.InsertEndChild(FuncText);
 
 	elem.InsertEndChild(FuncElem);
-
-	root.InsertEndChild(elem);
 	return true;
 }
 

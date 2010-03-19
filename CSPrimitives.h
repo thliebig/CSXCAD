@@ -33,7 +33,9 @@
 class CSPrimBox;
 class CSPrimMultiBox;
 class CSPrimSphere;
+	class CSPrimSphericalShell;
 class CSPrimCylinder;
+	class CSPrimCylindricalShell;
 class CSPrimPolygon;
 	class CSPrimLinPoly;
 	class CSPrimRotPoly;
@@ -58,7 +60,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		BOX,MULTIBOX,SPHERE,CYLINDER,POLYGON,LINPOLY,ROTPOLY,CURVE,USERDEFINED
+		BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -93,8 +95,8 @@ public:
 	//! Update this primitive with respect to the parameters set.
 	virtual bool Update(string *ErrStr=NULL) {return true;};
 	//! Write this primitive to a XML-node.
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
-	//! Read this primitive to a XML-node.
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	//! Read this primitive from a XML-node.
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	//! Get the corresponing Box-Primitive or NULL in case of different type.
@@ -103,8 +105,12 @@ public:
 	CSPrimMultiBox* ToMultiBox() { return ( this && Type == MULTIBOX ) ? (CSPrimMultiBox*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Sphere-Primitive or NULL in case of different type.
 	CSPrimSphere* ToSphere() { return ( this && Type == SPHERE ) ? (CSPrimSphere*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing SphereicalShell-Primitive or NULL in case of different type.
+	CSPrimSphericalShell* ToSphericalShell() { return ( this && Type == SPHERICALSHELL ) ? (CSPrimSphericalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
 	CSPrimCylinder* ToCylinder() { return ( this && Type == CYLINDER ) ? (CSPrimCylinder*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing CylindricalShell-Primitive or NULL in case of different type.
+	CSPrimCylindricalShell* ToCylindricalShell() { return ( this && Type == CYLINDRICALSHELL ) ? (CSPrimCylindricalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Polygon-Primitive or NULL in case of different type.
 	CSPrimPolygon* ToPolygon() { return ( this && Type == POLYGON ) ? (CSPrimPolygon*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing LinPoly-Primitive or NULL in case of different type.
@@ -159,7 +165,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -202,7 +208,7 @@ public:
 	unsigned int GetQtyBoxes() {return (unsigned int) vCoords.size()/6;};
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -239,12 +245,44 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
 	ParameterScalar psCenter[3];
 	ParameterScalar psRadius;
+};
+
+//! SphericalShell Primitive
+/*!
+ This is a spherical shell primitive derived from the sphere primitive, adding a shell width which is centered around the sphere radius.
+ \sa CSPrimSphere
+ */
+class CSXCAD_EXPORT CSPrimSphericalShell : public CSPrimSphere
+{
+public:
+	CSPrimSphericalShell(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimSphericalShell(CSPrimSphericalShell* sphereshell, CSProperties *prop=NULL);
+	CSPrimSphericalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimSphericalShell();
+
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimSphericalShell(this,prop);};
+
+	void SetShellWidth(double val) {psShellWidth.SetValue(val);};
+	void SetShellWidth(const char* val) {psShellWidth.SetValue(val);};
+
+	double GetShellWidth() {return psShellWidth.GetValue();};
+	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
+
+	virtual double* GetBoundBox(bool &accurate);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	ParameterScalar psShellWidth;
 };
 
 //! Cylinder Primitive
@@ -277,12 +315,44 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
 	ParameterScalar psCoords[6];
 	ParameterScalar psRadius;
+};
+
+//! CylindicalShell Primitive
+/*!
+ This is a cylindrical shell primitive derived from the cylinder primitive, adding a shell width which is centered around the cylinder radius.
+ \sa CSPrimCylinder
+ */
+class CSXCAD_EXPORT CSPrimCylindricalShell : public CSPrimCylinder
+{
+public:
+	CSPrimCylindricalShell(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimCylindricalShell(CSPrimCylindricalShell* cylinder, CSProperties *prop=NULL);
+	CSPrimCylindricalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimCylindricalShell();
+
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCylindricalShell(this,prop);};
+
+	void SetShellWidth(double val) {psShellWidth.SetValue(val);};
+	void SetShellWidth(const char* val) {psShellWidth.SetValue(val);};
+
+	double GetShellWidth() {return psShellWidth.GetValue();};
+	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
+
+	virtual double* GetBoundBox(bool &accurate);
+	virtual bool IsInside(double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	ParameterScalar psShellWidth;
 };
 
 //! 2D Polygon Primitive
@@ -330,7 +400,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -366,7 +436,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -403,7 +473,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -438,7 +508,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -479,7 +549,7 @@ public:
 	virtual bool IsInside(double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
-	virtual bool Write2XML(TiXmlNode &root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:

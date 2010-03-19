@@ -48,6 +48,7 @@ void ContinuousStructure::AddPrimitive(CSPrimitives* prim)
 {
 	if (prim==NULL) return;
 	vPrimitives.push_back(prim);
+	prim->Update(&ErrString);
 	if (prim->GetID()<=maxID) prim->SetID(maxID++);
 	else maxID=prim->GetID()+1;
 }
@@ -55,6 +56,7 @@ void ContinuousStructure::AddPrimitive(CSPrimitives* prim)
 void ContinuousStructure::AddProperty(CSProperties* prop)
 {
 	if (prop==NULL) return;
+	prop->Update(&ErrString);
 	//unsigned int ID=prop->GetID();
 	//for (size_t i=0;i<vProperties.size();++i) if (vProperties.at(i)->GetID()==ID) return false;
 	vProperties.push_back(prop);
@@ -319,7 +321,9 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised)
 	TiXmlElement Primitives("Primitives");
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
-		vPrimitives.at(i)->Write2XML(Primitives,parameterised);
+		TiXmlElement PrimElem(vPrimitives.at(i)->GetTypeName().c_str());
+		vPrimitives.at(i)->Write2XML(PrimElem,parameterised);
+		Primitives.InsertEndChild(PrimElem);
 	}
 	Struct.InsertEndChild(Primitives);
 
@@ -369,23 +373,29 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropProbeBox(clParaSet); //old version support
 		else if (strcmp(cProp,"ResBox")==0) newProp = new CSPropResBox(clParaSet);
 		else if (strcmp(cProp,"DumpBox")==0) newProp = new CSPropDumpBox(clParaSet);
-		else break;
-
-		if (newProp->ReadFromXML(*PropNode)) AddProperty(newProp);
 		else
 		{
-			delete newProp;
-			newProp = new CSPropUnknown(clParaSet);
-			if (newProp->ReadFromXML(*PropNode))
-			{
-				AddProperty(newProp);
-				ErrString.append("Warning: Unknown Property found!!!\n");
-			}
+			cerr << "ContinuousStructure::ReadFromXML: Property with type: " << cProp << " is unknown... " << endl;
+			newProp=NULL;
+		}
+		if (newProp)
+		{
+			if (newProp->ReadFromXML(*PropNode)) AddProperty(newProp);
 			else
 			{
-				ErrString.append("Warning: invalid Property found!!!\n");
 				delete newProp;
-				newProp=NULL;
+				newProp = new CSPropUnknown(clParaSet);
+				if (newProp->ReadFromXML(*PropNode))
+				{
+					AddProperty(newProp);
+					ErrString.append("Warning: Unknown Property found!!!\n");
+				}
+				else
+				{
+					ErrString.append("Warning: invalid Property found!!!\n");
+					delete newProp;
+					newProp=NULL;
+				}
 			}
 		}
         PropNode=PropNode->NextSiblingElement();
@@ -414,22 +424,30 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 			if (strcmp(cPrim,"Box")==0) newPrim = new CSPrimBox(clParaSet,prop);
 			else if (strcmp(cPrim,"MultiBox")==0) newPrim = new CSPrimMultiBox(clParaSet,prop);
 			else if (strcmp(cPrim,"Sphere")==0) newPrim = new CSPrimSphere(clParaSet,prop);
+			else if (strcmp(cPrim,"SphericalShell")==0) newPrim = new CSPrimSphericalShell(clParaSet,prop);
 			else if (strcmp(cPrim,"Cylinder")==0) newPrim = new CSPrimCylinder(clParaSet,prop);
+			else if (strcmp(cPrim,"CylindricalShell")==0) newPrim = new CSPrimCylindricalShell(clParaSet,prop);
 			else if (strcmp(cPrim,"Polygon")==0) newPrim = new CSPrimPolygon(clParaSet,prop);
 			else if (strcmp(cPrim,"LinPoly")==0) newPrim = new CSPrimLinPoly(clParaSet,prop);
 			else if (strcmp(cPrim,"RotPoly")==0) newPrim = new CSPrimRotPoly(clParaSet,prop);
 			else if (strcmp(cPrim,"Curve")==0) newPrim = new CSPrimCurve(clParaSet,prop);
 			else if (strcmp(cPrim,"UserDefined")==0) newPrim = new CSPrimUserDefined(clParaSet,prop);
-			else break;
-
-			if (newPrim->ReadFromXML(*PrimNode)) AddPrimitive(newPrim);
-			else {delete newPrim; ErrString.append("Warning: invalid Primitive found!!!\n"); }
+			else
+			{
+				cerr << "ContinuousStructure::ReadFromXML: Primitive with type: " << cPrim << " is unknown... " << endl;
+				newPrim=NULL;
+			}
+			if (newPrim)
+			{
+				if (newPrim->ReadFromXML(*PrimNode)) AddPrimitive(newPrim);
+				else {delete newPrim; ErrString.append("Warning: invalid Primitive found!!!\n");}
+			}
 		}
 		PrimNode=PrimNode->NextSiblingElement();
 	}
-	ErrString.append(Update());
 	return ErrString.c_str();
 }
+
 const char* ContinuousStructure::ReadFromXML(const char* file)
 {
 	ErrString.clear();
