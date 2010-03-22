@@ -187,6 +187,16 @@ bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised)
 	EC.SetAttribute("B",EdgeColor.B);
 	EC.SetAttribute("a",EdgeColor.a);
 	prop->InsertEndChild(EC);
+
+	TiXmlElement Primitives("Primitives");
+	for (size_t i=0;i<vPrimitives.size();++i)
+	{
+		TiXmlElement PrimElem(vPrimitives.at(i)->GetTypeName().c_str());
+		vPrimitives.at(i)->Write2XML(PrimElem,parameterised);
+		Primitives.InsertEndChild(PrimElem);
+	}
+	prop->InsertEndChild(Primitives);
+
 	return true;
 }
 
@@ -283,9 +293,9 @@ const string CSPropUnknown::GetProperty() {return sUnknownProperty;}
 bool CSPropUnknown::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("Unknown");
-	CSProperties::Write2XML(prop,parameterised);
 	prop.SetAttribute("Property",sUnknownProperty.c_str());
 
+	CSProperties::Write2XML(prop,parameterised);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -520,7 +530,6 @@ bool CSPropMaterial::Update(string *ErrStr)
 bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("Material");
-	CSProperties::Write2XML(prop,parameterised);
         prop.SetAttribute("Isotropy",bIsotropy);
 
         TiXmlElement value("Property");
@@ -564,6 +573,8 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(WeightKappa[2],WeightZ,"Kappa",parameterised);
 	WriteTerm(WeightSigma[2],WeightZ,"Sigma",parameterised);
 	prop.InsertEndChild(WeightZ);
+
+	CSProperties::Write2XML(prop,parameterised);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -791,7 +802,6 @@ bool CSPropElectrode::Update(string *ErrStr)
 bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("Electrode");
-	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("Number",(int)uiNumber);
 	WriteTerm(Delay,prop,"Delay",parameterised);
@@ -808,6 +818,8 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(WeightFct[1],Weight,"Y",parameterised);
 	WriteTerm(WeightFct[2],Weight,"Z",parameterised);
 	prop.InsertEndChild(Weight);
+
+	CSProperties::Write2XML(prop,parameterised);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -856,11 +868,11 @@ unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("ProbeBox");
-	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("Number",(int)uiNumber);
 	prop.SetAttribute("Type",ProbeType);
 
+	CSProperties::Write2XML(prop,parameterised);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -893,10 +905,10 @@ unsigned int CSPropResBox::GetResFactor()  {return uiFactor;}
 bool CSPropResBox::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("ResBox");
-	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("Factor",(int)uiFactor);
 
+	CSProperties::Write2XML(prop,parameterised);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -964,7 +976,6 @@ void CSPropDumpBox::Init()
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised)
 {
 	TiXmlElement prop("DumpBox");
-	CSProperties::Write2XML(prop,parameterised);
 
 	prop.SetAttribute("GlobalSetting",(int)GlobalSetting);
 	prop.SetAttribute("DumpType",DumpType);
@@ -990,6 +1001,8 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised)
 	SubGDump.SetAttribute("SimpleDump",(int)SimpleDump);
 	SubGDump.SetAttribute("SubGridLevel",SGLevel);
 	prop.InsertEndChild(SubGDump);
+
+	CSProperties::Write2XML(prop,parameterised);
 
 	root.InsertEndChild(prop);
 

@@ -88,8 +88,8 @@ CSPrimitives::~CSPrimitives()
 bool CSPrimitives::Write2XML(TiXmlElement &elem, bool parameterised)
 {
 	elem.SetAttribute("ID",uiID);
-	if (clProperty!=NULL) elem.SetAttribute("PropertyID",clProperty->GetID());
-	else elem.SetAttribute("PropertyID",-1);
+//	if (clProperty!=NULL) elem.SetAttribute("PropertyID",clProperty->GetID());
+//	else elem.SetAttribute("PropertyID",-1);
 	elem.SetAttribute("Priority",iPriority);
 
 	return true;

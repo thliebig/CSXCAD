@@ -171,6 +171,7 @@ protected:
 	CSRectGrid clGrid;
 	vector<CSPrimitives*> vPrimitives;
 	vector<CSProperties*> vProperties;
+	bool ReadPropertyPrimitives(TiXmlElement* PropNode, CSProperties* prop);
 
 	void UpdateIDs();
 
