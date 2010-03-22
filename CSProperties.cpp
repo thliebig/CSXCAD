@@ -170,23 +170,27 @@ const string CSProperties::GetTypeString()
 	return sType;
 }
 
-bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement* prop=root.ToElement();
 	prop->SetAttribute("ID",uiID);
 	prop->SetAttribute("Name",sName.c_str());
-	TiXmlElement FC("FillColor");
-	FC.SetAttribute("R",FillColor.R);
-	FC.SetAttribute("G",FillColor.G);
-	FC.SetAttribute("B",FillColor.B);
-	FC.SetAttribute("a",FillColor.a);
-	prop->InsertEndChild(FC);
-	TiXmlElement EC("EdgeColor");
-	EC.SetAttribute("R",EdgeColor.R);
-	EC.SetAttribute("G",EdgeColor.G);
-	EC.SetAttribute("B",EdgeColor.B);
-	EC.SetAttribute("a",EdgeColor.a);
-	prop->InsertEndChild(EC);
+
+	if (!sparse)
+	{
+		TiXmlElement FC("FillColor");
+		FC.SetAttribute("R",FillColor.R);
+		FC.SetAttribute("G",FillColor.G);
+		FC.SetAttribute("B",FillColor.B);
+		FC.SetAttribute("a",FillColor.a);
+		prop->InsertEndChild(FC);
+		TiXmlElement EC("EdgeColor");
+		EC.SetAttribute("R",EdgeColor.R);
+		EC.SetAttribute("G",EdgeColor.G);
+		EC.SetAttribute("B",EdgeColor.B);
+		EC.SetAttribute("a",EdgeColor.a);
+		prop->InsertEndChild(EC);
+	}
 
 	TiXmlElement Primitives("Primitives");
 	for (size_t i=0;i<vPrimitives.size();++i)
@@ -252,29 +256,32 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 	else sName.clear();
 
 	TiXmlElement* FC = root.FirstChildElement("FillColor");
-	if (FC==NULL) return false;
-
-	if (FC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
-		FillColor.R=(unsigned char) help;
-	if (FC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
-		FillColor.G=(unsigned char) help;
-	if (FC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
-		FillColor.B=(unsigned char) help;
-	if (FC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
-		FillColor.a=(unsigned char) help;
+	if (FC!=NULL)
+	{
+		if (FC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
+			FillColor.R=(unsigned char) help;
+		if (FC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
+			FillColor.G=(unsigned char) help;
+		if (FC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
+			FillColor.B=(unsigned char) help;
+		if (FC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
+			FillColor.a=(unsigned char) help;
+	}
 
 	FillColor.a=255; //for the time being lock 2 this! take out later!
 
 	TiXmlElement* EC = root.FirstChildElement("EdgeColor");
-	if (EC==NULL) return false;
-	if (EC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
-		EdgeColor.R=(unsigned char) help;
-	if (EC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
-		EdgeColor.G=(unsigned char) help;
-	if (EC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
-		EdgeColor.B=(unsigned char) help;
-	if (EC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
-		EdgeColor.a=(unsigned char) help;
+	if (EC!=NULL)
+	{
+		if (EC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
+			EdgeColor.R=(unsigned char) help;
+		if (EC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
+			EdgeColor.G=(unsigned char) help;
+		if (EC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
+			EdgeColor.B=(unsigned char) help;
+		if (EC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
+			EdgeColor.a=(unsigned char) help;
+	}
 
 	return true;
 }
@@ -290,12 +297,12 @@ void CSPropUnknown::SetProperty(const string val) {sUnknownProperty=string(val);
 const string CSPropUnknown::GetProperty() {return sUnknownProperty;}
 
 
-bool CSPropUnknown::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropUnknown::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("Unknown");
 	prop.SetAttribute("Property",sUnknownProperty.c_str());
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -527,7 +534,7 @@ bool CSPropMaterial::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("Material");
         prop.SetAttribute("Isotropy",bIsotropy);
@@ -574,7 +581,7 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(WeightSigma[2],WeightZ,"Sigma",parameterised);
 	prop.InsertEndChild(WeightZ);
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -650,10 +657,10 @@ CSPropMetal::CSPropMetal(CSProperties* prop) : CSProperties(prop) {Type=METAL;bM
 CSPropMetal::CSPropMetal(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=METAL;bMaterial=true;}
 CSPropMetal::~CSPropMetal() {}
 
-bool CSPropMetal::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropMetal::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("Metal");
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -802,7 +809,7 @@ bool CSPropElectrode::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("Electrode");
 
@@ -822,7 +829,7 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised)
 	WriteTerm(WeightFct[2],Weight,"Z",parameterised);
 	prop.InsertEndChild(Weight);
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 
 	root.InsertEndChild(prop);
 	return true;
@@ -868,14 +875,14 @@ CSPropProbeBox::~CSPropProbeBox() {}
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
-bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("ProbeBox");
 
 	prop.SetAttribute("Number",(int)uiNumber);
 	prop.SetAttribute("Type",ProbeType);
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -905,13 +912,13 @@ CSPropResBox::~CSPropResBox() {};
 void CSPropResBox::SetResFactor(unsigned int val)  {uiFactor=val;}
 unsigned int CSPropResBox::GetResFactor()  {return uiFactor;}
 
-bool CSPropResBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropResBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("ResBox");
 
 	prop.SetAttribute("Factor",(int)uiFactor);
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 	root.InsertEndChild(prop);
 	return true;
 }
@@ -976,36 +983,39 @@ void CSPropDumpBox::Init()
 	DumpMode = 0;
 }
 
-bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised)
+bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("DumpBox");
 
-	prop.SetAttribute("GlobalSetting",(int)GlobalSetting);
 	prop.SetAttribute("DumpType",DumpType);
 	prop.SetAttribute("DumpMode",DumpMode);
 
-	TiXmlElement ScalDump("ScalarDump");
-	ScalDump.SetAttribute("DumpPhi",(int)PhiDump);
-	ScalDump.SetAttribute("DumpDivE",(int)divE);
-	ScalDump.SetAttribute("DumpDivD",(int)divD);
-	ScalDump.SetAttribute("DumpDivP",(int)divP);
-	ScalDump.SetAttribute("DumpFieldW",(int)FieldW);
-	ScalDump.SetAttribute("DumpChargeW",(int)ChargeW);
-	prop.InsertEndChild(ScalDump);
+	if (!sparse)
+	{
+		prop.SetAttribute("GlobalSetting",(int)GlobalSetting);
+		TiXmlElement ScalDump("ScalarDump");
+		ScalDump.SetAttribute("DumpPhi",(int)PhiDump);
+		ScalDump.SetAttribute("DumpDivE",(int)divE);
+		ScalDump.SetAttribute("DumpDivD",(int)divD);
+		ScalDump.SetAttribute("DumpDivP",(int)divP);
+		ScalDump.SetAttribute("DumpFieldW",(int)FieldW);
+		ScalDump.SetAttribute("DumpChargeW",(int)ChargeW);
+		prop.InsertEndChild(ScalDump);
 
-	TiXmlElement VecDump("VectorDump");
-	VecDump.SetAttribute("DumpEField",(int)EField);
-	VecDump.SetAttribute("DumpDField",(int)DField);
-	VecDump.SetAttribute("DumpPField",(int)PField);
-	prop.InsertEndChild(VecDump);
+		TiXmlElement VecDump("VectorDump");
+		VecDump.SetAttribute("DumpEField",(int)EField);
+		VecDump.SetAttribute("DumpDField",(int)DField);
+		VecDump.SetAttribute("DumpPField",(int)PField);
+		prop.InsertEndChild(VecDump);
 
-	TiXmlElement SubGDump("SubGridDump");
-	SubGDump.SetAttribute("SubGridDump",(int)SGDump);
-	SubGDump.SetAttribute("SimpleDump",(int)SimpleDump);
-	SubGDump.SetAttribute("SubGridLevel",SGLevel);
-	prop.InsertEndChild(SubGDump);
+		TiXmlElement SubGDump("SubGridDump");
+		SubGDump.SetAttribute("SubGridDump",(int)SGDump);
+		SubGDump.SetAttribute("SimpleDump",(int)SimpleDump);
+		SubGDump.SetAttribute("SubGridLevel",SGLevel);
+		prop.InsertEndChild(SubGDump);
+	}
 
-	CSProperties::Write2XML(prop,parameterised);
+	CSProperties::Write2XML(prop,parameterised,sparse);
 
 	root.InsertEndChild(prop);
 

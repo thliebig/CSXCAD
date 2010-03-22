@@ -302,7 +302,7 @@ void ContinuousStructure::clear()
 	clGrid.clear();
 }
 
-bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised)
+bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised, bool sparse)
 {
 	if (rootNode==NULL) return false;
 
@@ -315,7 +315,7 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised)
 	TiXmlElement Properties("Properties");
 	for (size_t i=0;i<vProperties.size();++i)
 	{
-		vProperties.at(i)->Write2XML(Properties,parameterised);
+		vProperties.at(i)->Write2XML(Properties,parameterised,sparse);
 	}
 	Struct.InsertEndChild(Properties);
 
@@ -324,12 +324,12 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised)
 	return true;
 }
 
-bool ContinuousStructure::Write2XML(const char* file, bool parameterised)
+bool ContinuousStructure::Write2XML(const char* file, bool parameterised, bool sparse)
 {
 	TiXmlDocument doc(file);
 	doc.InsertEndChild(TiXmlDeclaration("1.0","ISO-8859-1","yes"));
 
-	if (Write2XML(&doc,parameterised)==false) return false;
+	if (Write2XML(&doc,parameterised,sparse)==false) return false;
 
 	doc.SaveFile();
 	return doc.SaveFile();

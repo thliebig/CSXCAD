@@ -138,7 +138,7 @@ public:
 	virtual bool Update(string *ErrStr=NULL);
 
 	//! Write this property to a xml-node. \param parameterised Use false if parameters should be written as values. Parameters are lost!
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	//! Read property from xml-node. \return Successful read-operation. 
 	virtual bool ReadFromXML(TiXmlNode &root);
 
@@ -183,7 +183,7 @@ public:
 	void SetProperty(const string val);
 	const string GetProperty();
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -245,7 +245,7 @@ public:
         virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -267,7 +267,7 @@ public:
 	CSPropMetal(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMetal();
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 };
 
@@ -318,7 +318,7 @@ public:
 	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -352,7 +352,7 @@ public:
 	//! Get the probe type \sa SetProbeType
 	int GetProbeType() {return ProbeType;}
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 protected:
 	unsigned int uiNumber;
@@ -374,7 +374,7 @@ public:
 	void SetResFactor(unsigned int val);
 	unsigned int GetResFactor();
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
@@ -431,7 +431,7 @@ public:
 	void SetSimpleDump(bool val);
 	void SetSGLevel(int val);
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	virtual void Init();
