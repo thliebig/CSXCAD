@@ -40,7 +40,7 @@ class ParameterScalar;
 class TiXmlNode;
 class TiXmlElement;
 
-bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr);
+bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val=0.0);
 void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode, bool scientific=true);
 
 class CSXCAD_EXPORT Parameter

@@ -21,7 +21,7 @@
 #include "tinyxml.h"
 #include "fparser.hh"
 
-bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr)
+bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val)
 {
 	double dHelp;
 	const char* chHelp;
@@ -35,7 +35,11 @@ bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr)
 		if (chHelp==NULL) return false;
 		sHelp=string(chHelp);
 		tHelp=sHelp.find("term:",0);
-		if (tHelp!=0) return false;
+		if (tHelp!=0) //set default value and return false
+		{
+			PS.SetValue(val);
+			return false;
+		}
 		PS.SetValue(sHelp.erase(0,5).c_str());
 	}
 	return true;

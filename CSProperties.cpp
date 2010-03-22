@@ -244,8 +244,8 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	int help;
-	if (prop->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS) return false;
-	uiID=help;
+	if (prop->QueryIntAttribute("ID",&help)==TIXML_SUCCESS)
+		uiID=help;
 
 	const char* cHelp=prop->Attribute("Name");
 	if (cHelp!=NULL) sName=string(cHelp);
@@ -254,27 +254,27 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 	TiXmlElement* FC = root.FirstChildElement("FillColor");
 	if (FC==NULL) return false;
 
-	if (FC->QueryIntAttribute("R",&help)!=TIXML_SUCCESS) return false;
-	FillColor.R=(unsigned char) help;
-	if (FC->QueryIntAttribute("G",&help)!=TIXML_SUCCESS) return false;
-	FillColor.G=(unsigned char) help;
-	if (FC->QueryIntAttribute("B",&help)!=TIXML_SUCCESS) return false;
-	FillColor.B=(unsigned char) help;
-	if (FC->QueryIntAttribute("a",&help)!=TIXML_SUCCESS) return false;
-	FillColor.a=(unsigned char) help;
+	if (FC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
+		FillColor.R=(unsigned char) help;
+	if (FC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
+		FillColor.G=(unsigned char) help;
+	if (FC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
+		FillColor.B=(unsigned char) help;
+	if (FC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
+		FillColor.a=(unsigned char) help;
 
 	FillColor.a=255; //for the time being lock 2 this! take out later!
 
 	TiXmlElement* EC = root.FirstChildElement("EdgeColor");
 	if (EC==NULL) return false;
-	if (EC->QueryIntAttribute("R",&help)!=TIXML_SUCCESS) return false;
-	EdgeColor.R=(unsigned char) help;
-	if (EC->QueryIntAttribute("G",&help)!=TIXML_SUCCESS) return false;
-	EdgeColor.G=(unsigned char) help;
-	if (EC->QueryIntAttribute("B",&help)!=TIXML_SUCCESS) return false;
-	EdgeColor.B=(unsigned char) help;
-	if (EC->QueryIntAttribute("a",&help)!=TIXML_SUCCESS) return false;
-	EdgeColor.a=(unsigned char) help;
+	if (EC->QueryIntAttribute("R",&help)==TIXML_SUCCESS)
+		EdgeColor.R=(unsigned char) help;
+	if (EC->QueryIntAttribute("G",&help)==TIXML_SUCCESS)
+		EdgeColor.G=(unsigned char) help;
+	if (EC->QueryIntAttribute("B",&help)==TIXML_SUCCESS)
+		EdgeColor.B=(unsigned char) help;
+	if (EC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
+		EdgeColor.a=(unsigned char) help;
 
 	return true;
 }
@@ -585,57 +585,60 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	if (CSProperties::ReadFromXML(root)==false) return false;
 	TiXmlElement* prop=root.ToElement();
 
-        int attr=1;
-        prop->QueryIntAttribute("Isotropy",&attr);
-        bIsotropy = attr>0;
+	int attr=1;
+	prop->QueryIntAttribute("Isotropy",&attr);
+	bIsotropy = attr>0;
 	if (prop==NULL) return false;
-	TiXmlElement* matProp=prop->FirstChildElement("Property");
-	if (matProp==NULL) return false;
-        if (ReadTerm(Epsilon[0],*matProp,"Epsilon")==false) return false;
-        if (ReadTerm(Mue[0],*matProp,"Mue")==false) return false;
-        if (ReadTerm(Kappa[0],*matProp,"Kappa")==false) return false;
-        ReadTerm(Sigma[0],*matProp,"Sigma"); //always accept do to legacy support
 
-        matProp=prop->FirstChildElement("PropertyY");
-        if (matProp!=NULL) //always accept do to legacy support
-        {
-            if (ReadTerm(Epsilon[1],*matProp,"Epsilon")==false) return false;
-            if (ReadTerm(Mue[1],*matProp,"Mue")==false) return false;
-            if (ReadTerm(Kappa[1],*matProp,"Kappa")==false) return false;
-            if (ReadTerm(Sigma[1],*matProp,"Sigma")==false) return false;
-        }
-        matProp=prop->FirstChildElement("PropertyZ");
-        if (matProp!=NULL) //always accept do to legacy support
-        {
-            if (ReadTerm(Epsilon[2],*matProp,"Epsilon")==false) return false;
-            if (ReadTerm(Mue[2],*matProp,"Mue")==false) return false;
-            if (ReadTerm(Kappa[2],*matProp,"Kappa")==false) return false;
-            if (ReadTerm(Sigma[2],*matProp,"Sigma")==false) return false;
-        }
+	TiXmlElement* matProp=prop->FirstChildElement("Property");
+	if (matProp!=NULL)
+	{
+		ReadTerm(Epsilon[0],*matProp,"Epsilon",1.0);
+		ReadTerm(Mue[0],*matProp,"Mue",1.0);
+		ReadTerm(Kappa[0],*matProp,"Kappa");
+		ReadTerm(Sigma[0],*matProp,"Sigma");
+	}
+
+	matProp=prop->FirstChildElement("PropertyY");
+	if (matProp!=NULL) //always accept do to legacy support
+	{
+		ReadTerm(Epsilon[1],*matProp,"Epsilon",1.0);
+		ReadTerm(Mue[1],*matProp,"Mue",1.0);
+		ReadTerm(Kappa[1],*matProp,"Kappa");
+		ReadTerm(Sigma[1],*matProp,"Sigma");
+	}
+	matProp=prop->FirstChildElement("PropertyZ");
+	if (matProp!=NULL) //always accept do to legacy support
+	{
+		ReadTerm(Epsilon[2],*matProp,"Epsilon",1.0);
+		ReadTerm(Mue[2],*matProp,"Mue",1.0);
+		ReadTerm(Kappa[2],*matProp,"Kappa");
+		ReadTerm(Sigma[2],*matProp,"Sigma");
+	}
 
 	TiXmlElement *weight = prop->FirstChildElement("WeightX");
 	if (weight!=NULL)
 	{
-		ReadTerm(WeightEpsilon[0],*weight,"Epsilon");
-		ReadTerm(WeightMue[0],*weight,"Mue");
-		ReadTerm(WeightKappa[0],*weight,"Kappa");
-		ReadTerm(WeightSigma[0],*weight,"Sigma");
+		ReadTerm(WeightEpsilon[0],*weight,"Epsilon",1.0);
+		ReadTerm(WeightMue[0],*weight,"Mue",1.0);
+		ReadTerm(WeightKappa[0],*weight,"Kappa",1.0);
+		ReadTerm(WeightSigma[0],*weight,"Sigma",1.0);
 	}
 	weight = prop->FirstChildElement("WeightY");
 	if (weight!=NULL)
 	{
-		ReadTerm(WeightEpsilon[1],*weight,"Epsilon");
-		ReadTerm(WeightMue[1],*weight,"Mue");
-		ReadTerm(WeightKappa[1],*weight,"Kappa");
-		ReadTerm(WeightSigma[1],*weight,"Sigma");
+		ReadTerm(WeightEpsilon[1],*weight,"Epsilon",1.0);
+		ReadTerm(WeightMue[1],*weight,"Mue",1.0);
+		ReadTerm(WeightKappa[1],*weight,"Kappa",1.0);
+		ReadTerm(WeightSigma[1],*weight,"Sigma",1.0);
 	}
 	weight = prop->FirstChildElement("WeightZ");
 	if (weight!=NULL)
 	{
-		ReadTerm(WeightEpsilon[2],*weight,"Epsilon");
-		ReadTerm(WeightMue[2],*weight,"Mue");
-		ReadTerm(WeightKappa[2],*weight,"Kappa");
-		ReadTerm(WeightSigma[2],*weight,"Sigma");
+		ReadTerm(WeightEpsilon[2],*weight,"Epsilon",1.0);
+		ReadTerm(WeightMue[2],*weight,"Mue",1.0);
+		ReadTerm(WeightKappa[2],*weight,"Kappa",1.0);
+		ReadTerm(WeightSigma[2],*weight,"Sigma",1.0);
 	}
 
 	return true;
@@ -833,7 +836,7 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	int iHelp;
-	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) return false;
+	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) uiNumber=0;
 	else uiNumber=(unsigned int)iHelp;
 
 	ReadTerm(Delay,*prop,"Delay");
@@ -885,7 +888,7 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	int iHelp;
-	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) return false;
+	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) uiNumber=0;
 	else uiNumber=(unsigned int)iHelp;
 
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
@@ -921,7 +924,7 @@ bool CSPropResBox::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	int iHelp;
-	if (prop->QueryIntAttribute("Factor",&iHelp)!=TIXML_SUCCESS) return false;
+	if (prop->QueryIntAttribute("Factor",&iHelp)!=TIXML_SUCCESS) uiFactor=1;
 	else uiFactor=(unsigned int)iHelp;
 
 	return true;
@@ -1017,7 +1020,7 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	int iHelp;
-	if (prop->QueryIntAttribute("GlobalSetting",&iHelp)!=TIXML_SUCCESS) return false;
+	if (prop->QueryIntAttribute("GlobalSetting",&iHelp)!=TIXML_SUCCESS) GlobalSetting=0;
 	else GlobalSetting=(bool)iHelp;
 
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
@@ -1026,40 +1029,40 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
 	if (ScalDump!=NULL)
 	{
-		if (ScalDump->QueryIntAttribute("DumpPhi",&iHelp)!=TIXML_SUCCESS) return false;
-		else PhiDump=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivE",&iHelp)!=TIXML_SUCCESS) return false;
-		else divE=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivD",&iHelp)!=TIXML_SUCCESS) return false;
-		else divD=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivP",&iHelp)!=TIXML_SUCCESS) return false;
-		else divP=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpFieldW",&iHelp)!=TIXML_SUCCESS) return false;
-		else FieldW=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpChargeW",&iHelp)!=TIXML_SUCCESS) return false;
-		else ChargeW=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpPhi",&iHelp)==TIXML_SUCCESS)
+			PhiDump=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpDivE",&iHelp)==TIXML_SUCCESS)
+			divE=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpDivD",&iHelp)==TIXML_SUCCESS)
+			divD=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpDivP",&iHelp)==TIXML_SUCCESS)
+			divP=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpFieldW",&iHelp)==TIXML_SUCCESS)
+			FieldW=(bool)iHelp;
+		if (ScalDump->QueryIntAttribute("DumpChargeW",&iHelp)==TIXML_SUCCESS)
+			ChargeW=(bool)iHelp;
 	}
 	TiXmlElement *VecDump = prop->FirstChildElement("VectorDump");
 	if (VecDump!=NULL)
 	{
 
-		if (VecDump->QueryIntAttribute("DumpEField",&iHelp)!=TIXML_SUCCESS) return false;
-		else EField=(bool)iHelp;
-		if (VecDump->QueryIntAttribute("DumpDField",&iHelp)!=TIXML_SUCCESS) return false;
-		else DField=(bool)iHelp;
-		if (VecDump->QueryIntAttribute("DumpPField",&iHelp)!=TIXML_SUCCESS) return false;
-		else PField=(bool)iHelp;
+		if (VecDump->QueryIntAttribute("DumpEField",&iHelp)==TIXML_SUCCESS)
+			EField=(bool)iHelp;
+		if (VecDump->QueryIntAttribute("DumpDField",&iHelp)==TIXML_SUCCESS)
+			DField=(bool)iHelp;
+		if (VecDump->QueryIntAttribute("DumpPField",&iHelp)==TIXML_SUCCESS)
+			PField=(bool)iHelp;
 	}
 	TiXmlElement *SubGDump = prop->FirstChildElement("SubGridDump");
 	if (SubGDump!=NULL)
 	{
 
-		if (SubGDump->QueryIntAttribute("SubGridDump",&iHelp)!=TIXML_SUCCESS) return false;
-		else SGDump=(bool)iHelp;
-		if (SubGDump->QueryIntAttribute("SimpleDump",&iHelp)!=TIXML_SUCCESS) return false;
-		else SimpleDump=(bool)iHelp;
-		if (SubGDump->QueryIntAttribute("SubGridLevel",&iHelp)!=TIXML_SUCCESS) return false;
-		else SGLevel=iHelp;
+		if (SubGDump->QueryIntAttribute("SubGridDump",&iHelp)==TIXML_SUCCESS)
+			SGDump=(bool)iHelp;
+		if (SubGDump->QueryIntAttribute("SimpleDump",&iHelp)==TIXML_SUCCESS)
+			SimpleDump=(bool)iHelp;
+		if (SubGDump->QueryIntAttribute("SubGridLevel",&iHelp)==TIXML_SUCCESS)
+			SGLevel=iHelp;
 	}
 	return true;
 }
