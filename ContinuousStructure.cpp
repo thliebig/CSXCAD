@@ -350,7 +350,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 
 	/***Properties***/
 	TiXmlNode* probs = root->FirstChild("Properties");
-	if (probs==NULL) { ErrString.append("Warning: Properties not found!!!\n");}
+	if (probs==NULL) { ErrString.append("Warning: Properties not found!!!\n"); return ErrString.c_str();}
 
 	TiXmlElement* PropNode = probs->FirstChildElement();
 	CSProperties* newProp=NULL;
@@ -450,7 +450,7 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 {
 	/***Primitives***/
 	TiXmlNode* prims = PropNode->FirstChild("Primitives");
-	if (prims==NULL) { ErrString.append("Warning: Primitives not found!!!\n");}
+	if (prims==NULL) { ErrString.append("Warning: Primitives not found!!!\n"); return false;}
 
 	TiXmlElement* PrimNode = prims->FirstChildElement();
 	CSPrimitives* newPrim=NULL;
