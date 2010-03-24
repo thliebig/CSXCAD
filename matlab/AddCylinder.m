@@ -1,4 +1,9 @@
 function CSX = AddCylinder(CSX, propName, prio, start, stop, rad)
+% function CSX = AddCylinder(CSX, propName, prio, start, stop, rad)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 cylinder.ATTRIBUTE.Priority = prio;
 cylinder.ATTRIBUTE.Radius = rad; 

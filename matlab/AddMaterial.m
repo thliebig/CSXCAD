@@ -1,4 +1,9 @@
 function CSX = AddMaterial(CSX, name)
+% function CSX = AddMaterial(CSX, name)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~ischar(name)
     error('CSXCAD::AddMaterial: name must be a string');

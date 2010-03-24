@@ -1,4 +1,9 @@
 function CSX = AddExcitation(CSX, name, type, excite, varargin)
+% function CSX = AddExcitation(CSX, name, type, excite, varargin)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~ischar(name)
     error('CSXCAD::AddExcitation: name must be a string');

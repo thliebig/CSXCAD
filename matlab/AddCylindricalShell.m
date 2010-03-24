@@ -1,4 +1,9 @@
 function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_width)
+%function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_width)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 cylinder.ATTRIBUTE.Priority = prio;
 cylinder.ATTRIBUTE.Radius = rad; 

@@ -1,4 +1,9 @@
 function CSX = AddDump(CSX, name, type, mode)
+% function CSX = AddDump(CSX, name, type, mode)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~ischar(name)
     error('CSXCAD::AddDump: name must be a string');

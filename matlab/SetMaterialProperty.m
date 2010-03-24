@@ -1,4 +1,9 @@
 function CSX = SetMaterialProperty(CSX, name, varargin)
+% function CSX = SetMaterialProperty(CSX, name, varargin)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~isfield(CSX,'Properties')
     return

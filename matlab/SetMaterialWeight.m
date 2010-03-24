@@ -1,4 +1,9 @@
 function CSX = SetMaterialWeight(CSX, name, varargin)
+% function CSX = SetMaterialWeight(CSX, name, varargin)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~isfield(CSX,'Properties')
     return

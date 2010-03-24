@@ -1,4 +1,9 @@
 function CSX = AddBox(CSX, propName, prio, start, stop)
+% function CSX = AddBox(CSX, propName, prio, start, stop)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 box.ATTRIBUTE.Priority = prio;
 

@@ -1,4 +1,8 @@
 function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 CSX.RectilinearGrid.ATTRIBUTE.DeltaUnit = deltaUnit;
 CSX.RectilinearGrid.XLines = mesh.x;

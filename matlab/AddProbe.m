@@ -1,4 +1,9 @@
 function CSX = AddProbe(CSX, name, type)
+% function CSX = AddProbe(CSX, name, type)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');

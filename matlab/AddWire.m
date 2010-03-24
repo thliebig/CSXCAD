@@ -1,4 +1,9 @@
 function CSX = AddWire(CSX, propName, prio, points, wire_rad)
+% function CSX = AddWire(CSX, propName, prio, points, wire_rad)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 wire.ATTRIBUTE.Priority = prio;
 wire.ATTRIBUTE.WireRadius = wire_rad; 

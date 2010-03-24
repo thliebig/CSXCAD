@@ -1,4 +1,11 @@
 function CSX = Add2Property(CSX, propName, newPrim, primName)
+% function CSX = Add2Property(CSX, propName, newPrim, primName)
+%
+% meant for internal use!!
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 names = fieldnames(CSX.Properties);
 

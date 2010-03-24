@@ -1,5 +1,5 @@
-function CSX = AddSphere(CSX, propName, prio, center, rad)
-% function CSX = AddSphere(CSX, propName, prio, center, rad)
+function CSX = AddSphericalShell(CSX, propName, prio, center, rad, shell_width)
+% function CSX = AddSphericalShell(CSX, propName, prio, center, rad, shell_width)
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -7,6 +7,7 @@ function CSX = AddSphere(CSX, propName, prio, center, rad)
 
 sphere.ATTRIBUTE.Priority = prio;
 sphere.ATTRIBUTE.Radius = rad;
+sphere.ATTRIBUTE.ShellWidth = shell_width; 
 
 sphere.Center.ATTRIBUTE.X=center(1);
 sphere.Center.ATTRIBUTE.Y=center(2);

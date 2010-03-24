@@ -1,4 +1,9 @@
 function CSX = SetExcitationWeight(CSX, name, weight)
+% function CSX = SetExcitationWeight(CSX, name, weight)
+%
+% CSXCAD matlab interface
+% -----------------------
+% author: Thorsten Liebig
 
 if ~isfield(CSX,'Properties')
     return
