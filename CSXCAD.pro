@@ -5,7 +5,6 @@
 TEMPLATE = lib
 INCLUDEPATH += .
 OBJECTS_DIR = obj
-CONFIG += release
 
 unix{
 VERSION = 0.2.0
