@@ -481,6 +481,8 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 		}
 		PrimNode=PrimNode->NextSiblingElement();
 	}
+
+	return true;
 }
 
 const char* ContinuousStructure::ReadFromXML(const char* file)
