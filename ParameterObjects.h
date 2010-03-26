@@ -223,7 +223,7 @@ public:
 	ParameterScalar(ParameterScalar* ps);
 	~ParameterScalar();
 
-	int SetParameterSet(ParameterSet *paraSet);
+	void SetParameterSet(ParameterSet *paraSet);
 
 	int SetValue(const string value, bool Eval=true); ///returns eval-error-code
 	void SetValue(double value);

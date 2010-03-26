@@ -511,7 +511,7 @@ ParameterScalar::~ParameterScalar()
 {
 }
 
-int ParameterScalar::SetParameterSet(ParameterSet *paraSet)
+void ParameterScalar::SetParameterSet(ParameterSet *paraSet)
 {
 	clParaSet=paraSet;
 }

@@ -362,7 +362,13 @@ double CSPropMaterial::GetWeight(ParameterScalar &ps, double* coords)
 	return ps.GetValue();
 }
 
-int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightEpsilon[ny].SetValue(fct);}
+int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny)
+{
+	if ((ny>=0) && (ny<3))
+		return WeightEpsilon[ny].SetValue(fct);
+	return 0;
+}
+
 const string CSPropMaterial::GetEpsilonWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightEpsilon[ny].GetString();} else return string();}
 double CSPropMaterial::GetEpsilonWeighted(int ny, double* coords)
 {
@@ -393,7 +399,13 @@ const string CSPropMaterial::GetMueTerm(int direction)
     return Mue[direction].GetString();
 }
 
-int CSPropMaterial::SetMueWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightMue[ny].SetValue(fct);}
+int CSPropMaterial::SetMueWeightFunction(const string fct, int ny)
+{
+	if ((ny>=0) && (ny<3))
+		return WeightMue[ny].SetValue(fct);
+	return 0;
+}
+
 const string CSPropMaterial::GetMueWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightMue[ny].GetString();} else return string();}
 double CSPropMaterial::GetMueWeighted(int ny, double* coords)
 {
@@ -425,7 +437,13 @@ const string CSPropMaterial::GetKappaTerm(int direction)
     return Kappa[direction].GetString();
 }
 
-int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightKappa[ny].SetValue(fct);}
+int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny)
+{
+	if ((ny>=0) && (ny<3))
+		return WeightKappa[ny].SetValue(fct);
+	return 0;
+}
+
 const string CSPropMaterial::GetKappaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightKappa[ny].GetString();} else return string();}
 double CSPropMaterial::GetKappaWeighted(int ny, double* coords)
 {
@@ -455,7 +473,13 @@ const string CSPropMaterial::GetSigmaTerm(int direction)
     return Sigma[direction].GetString();
 }
 
-int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightSigma[ny].SetValue(fct);}
+int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny)
+{
+	if ((ny>=0) && (ny<3))
+		return WeightSigma[ny].SetValue(fct);
+	return 0;
+}
+
 const string CSPropMaterial::GetSigmaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightSigma[ny].GetString();} else return string();}
 double CSPropMaterial::GetSigmaWeighted(int ny, double* coords)
 {
@@ -719,7 +743,13 @@ bool CSPropElectrode::GetActiveDir(int Component)
 	return ActiveDir[Component];
 }
 
-int CSPropElectrode::SetWeightFunction(const string fct, int ny) {if ((ny>=0) && (ny<3)) return WeightFct[ny].SetValue(fct);}
+int CSPropElectrode::SetWeightFunction(const string fct, int ny)
+{
+	if ((ny>=0) && (ny<3))
+		return WeightFct[ny].SetValue(fct);
+	return 0;
+}
+
 const string CSPropElectrode::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
 
 double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
