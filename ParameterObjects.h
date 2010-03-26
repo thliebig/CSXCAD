@@ -168,7 +168,7 @@ public:
 	//! Check whether the ParameterSet has been modified (will not check the Parameter) \sa GetModified
 	bool GetParaSetModified() {return bModified;};
 	//! Set the ParameterSet's modfication status \sa SetModified
-	bool SetParaSetModified(bool val) {bModified=val;};
+	void SetParaSetModified(bool val) {bModified=val;};
 
 	//! Get the string of all parameter separated by the given spacer
 	const string GetParameterString(const string spacer=",");
