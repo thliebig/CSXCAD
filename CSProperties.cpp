@@ -1011,6 +1011,7 @@ void CSPropDumpBox::Init()
 	SGLevel=-1;
 	DumpType = 0;
 	DumpMode = 0;
+	FileType = 0;
 }
 
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
@@ -1019,6 +1020,7 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	prop.SetAttribute("DumpType",DumpType);
 	prop.SetAttribute("DumpMode",DumpMode);
+	prop.SetAttribute("FileType",FileType);
 
 	if (!sparse)
 	{
@@ -1065,6 +1067,7 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
 	if (prop->QueryIntAttribute("DumpMode",&DumpMode)!=TIXML_SUCCESS) DumpMode=0;
+	if (prop->QueryIntAttribute("FileType",&FileType)!=TIXML_SUCCESS) FileType=0;
 
 	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
 	if (ScalDump!=NULL)

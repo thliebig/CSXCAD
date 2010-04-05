@@ -403,6 +403,11 @@ public:
 	//! Get the arbitrary dump-mode \sa SetDumpMode
 	int GetDumpMode() {return DumpMode;}
 
+	//! Define an arbitrary file-type \sa GetFileType
+	void SetFileType(int ftype) {FileType=ftype;}
+	//! Get the arbitrary file-type \sa SetFileType
+	int GetFileType() {return FileType;}
+
 	bool GetGlobalSetting();
 	bool GetPhiDump();
 	bool GetDivEDump();
@@ -445,5 +450,6 @@ protected:
 
 	int DumpType;
 	int DumpMode;
+	int FileType;
 };
 

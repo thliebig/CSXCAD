@@ -1,5 +1,12 @@
-function CSX = AddDump(CSX, name, type, mode)
-% function CSX = AddDump(CSX, name, type, mode)
+function CSX = AddDump(CSX, name, type, mode, fileType)
+% function CSX = AddDump(CSX, name, type, mode, fileType)
+%
+% type      (field type)    is optional
+% mode      (dump mode)     is optional
+% fileType  (file type)     is optional
+%
+% e.g. AddDump(CSX,'Et',0,2,1);
+% or   AddDump(CSX,'Ht',1);
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -15,5 +22,12 @@ else
     CSX.Properties.DumpBox{1}.ATTRIBUTE.Name=name;
 end
 
-CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpType=type;
-CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpMode=mode;
+if (nargin>2)
+    CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpType=type;
+end
+if (nargin>3)
+    CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpMode=mode;
+end
+if (nargin>4)
+    CSX.Properties.DumpBox{end}.ATTRIBUTE.FileType=fileType;
+end
