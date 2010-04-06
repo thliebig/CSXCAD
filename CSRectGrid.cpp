@@ -17,7 +17,7 @@
 
 #include "CSRectGrid.h"
 #include "tinyxml.h"
-#include "fparser.hh"
+#include "CSFunctionParser.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -49,8 +49,8 @@ string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, string D
 	if ((direct<0)||(direct>=3)) return string("Unknown grid direction!");
 	if (DistFunction.empty()==false)
 	{
-		FunctionParser fParse;
-		fParse.AddConstant("pi", 3.1415926535897932);
+		CSFunctionParser fParse;
+//		fParse.AddConstant("pi", 3.1415926535897932);
 		string dirVar;
 		switch (direct)
 		{

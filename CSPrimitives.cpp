@@ -21,7 +21,7 @@
 #include <iostream>
 #include <limits>
 #include "tinyxml.h"
-#include "fparser.hh"
+#include "CSFunctionParser.h"
 
 
 void Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist)
@@ -1769,8 +1769,8 @@ bool CSPrimWire::ReadFromXML(TiXmlNode &root)
 CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=USERDEFINED;
-	fParse = new FunctionParser();
-	fParse->AddConstant("pi", 3.1415926535897932);
+	fParse = new CSFunctionParser();
+//	fParse->AddConstant("pi", 3.1415926535897932);
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
@@ -1780,7 +1780,7 @@ CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSP
 CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *prop) : CSPrimitives(primUDef,prop)
 {
 	Type=USERDEFINED;
-	fParse = new FunctionParser(*primUDef->fParse);
+	fParse = new CSFunctionParser(*primUDef->fParse);
 //	fParse = primUDef->fParse;
 	stFunction = string(primUDef->stFunction);
 	CoordSystem = primUDef->CoordSystem;
@@ -1791,8 +1791,8 @@ CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *
 CSPrimUserDefined::CSPrimUserDefined(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=USERDEFINED;
-	fParse = new FunctionParser();
-	fParse->AddConstant("pi", 3.1415926535897932);
+	fParse = new CSFunctionParser();
+//	fParse->AddConstant("pi", 3.1415926535897932);
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}

@@ -19,7 +19,7 @@
 #include <sstream>
 #include <iostream>
 #include "tinyxml.h"
-#include "fparser.hh"
+#include "CSFunctionParser.h"
 
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val)
 {
@@ -546,9 +546,9 @@ int ParameterScalar::Evaluate()
 	if (clParaSet==NULL) return -1;
 	if ((bModified==false) && (clParaSet->GetModified()==false)) return 0;
 
-	FunctionParser fParse;
+	CSFunctionParser fParse;
 	dValue=0;
-	fParse.AddConstant("pi", 3.1415926535897932);
+//	fParse.AddConstant("pi", 3.1415926535897932);
 //	cerr << sValue << " -- " << clParaSet->GetParameterString() << endl;
 	fParse.Parse(sValue,clParaSet->GetParameterString());
 	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;

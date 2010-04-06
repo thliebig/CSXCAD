@@ -46,7 +46,7 @@ class CSPrimUserDefined;
 class CSProperties; //include VisualProperties
 
 class TiXmlNode;
-class FunctionParser;
+class CSFunctionParser;
 
 void Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist);
 
@@ -590,7 +590,7 @@ public:
 protected:
 	string stFunction;
 	UserDefinedCoordSystem CoordSystem;
-	FunctionParser* fParse;
+	CSFunctionParser* fParse;
 	string fParameter;
 	int iQtyParameter;
 	ParameterScalar dPosShift[3];

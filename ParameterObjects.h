@@ -208,8 +208,6 @@ protected:
 
 void PSErrorCode2Msg(int code, string* msg);
 
-class FunctionParser;
-
 class CSXCAD_EXPORT ParameterScalar
 {
 public:
