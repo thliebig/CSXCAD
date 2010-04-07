@@ -562,6 +562,13 @@ int ParameterScalar::Evaluate()
 	return fParse.EvalError();
 }
 
+string PSErrorCode2Msg(int code)
+{
+	string msg;
+	PSErrorCode2Msg(code,&msg);
+	return msg;
+}
+
 void PSErrorCode2Msg(int code, string *msg)
 {
 	switch (code)

@@ -358,7 +358,11 @@ double CSPropMaterial::GetWeight(ParameterScalar &ps, double* coords)
 	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
 	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
 	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
-	ps.Evaluate();
+	int EC = ps.Evaluate();
+	if (EC)
+	{
+		cerr << "CSPropMaterial::GetWeight: Error evaluating the weighting function (ID: " << this->GetID() << "): " << PSErrorCode2Msg(EC) << endl;
+	}
 	return ps.GetValue();
 }
 
@@ -780,7 +784,12 @@ double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
 	coordPara[4]->SetValue(r); //r
 	coordPara[5]->SetValue(alpha);
 	coordPara[6]->SetValue(theta); //theta
-	WeightFct[ny].Evaluate();
+	int EC = WeightFct[ny].Evaluate();
+	if (EC)
+	{
+		cerr << "CSPropElectrode::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << endl;
+	}
+
 	return WeightFct[ny].GetValue()*GetExcitation(ny);
 }
 

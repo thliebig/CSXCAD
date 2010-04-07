@@ -207,6 +207,7 @@ protected:
 };
 
 void PSErrorCode2Msg(int code, string* msg);
+string PSErrorCode2Msg(int code);
 
 class CSXCAD_EXPORT ParameterScalar
 {
