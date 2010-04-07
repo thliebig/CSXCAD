@@ -1,6 +1,19 @@
 function CSX = AddDump(CSX, name, varargin)
 % function CSX = AddDump(CSX, name, varargin)
 %
+% possible arguments for useage with openEMS:
+%   DumpType:   0 for E-field time-domain dump
+%               1 for H-field time-domain dump
+%
+%   DumpMode:   0 no-interpolation
+%               1 node-interpolation
+%               2 cell-interpolation
+%
+%   FileType:   0 vtk-file dump
+%               1 hdf5-file dump
+%
+%   SubSampling: field domain sub-sampling, e.g. '2,2,4'
+%
 % e.g. AddDump(CSX,'Et');
 % or   AddDump(CSX,'Ht','SubSampling','2,2,4','DumpType',1);
 %
