@@ -17,6 +17,7 @@
 
 #include "CSProperties.h"
 #include "CSPrimitives.h"
+#include "CSUseful.h"
 #include "ParameterObjects.h"
 #include <iostream>
 #include <sstream>
@@ -1021,6 +1022,36 @@ void CSPropDumpBox::Init()
 	DumpType = 0;
 	DumpMode = 0;
 	FileType = 0;
+	SubSampling[0]=1;
+	SubSampling[1]=1;
+	SubSampling[2]=1;
+}
+
+void CSPropDumpBox::SetSubSampling(int ny, unsigned int val)
+{
+	if ((ny<0) || (ny>2)) return;
+	if (val<1) return;
+	SubSampling[ny] = val;
+}
+
+void CSPropDumpBox::SetSubSampling(unsigned int val[])
+{
+	for (int ny=0;ny<3;++ny)
+		SetSubSampling(ny,val[ny]);
+}
+
+void CSPropDumpBox::SetSubSampling(const char* vals)
+{
+	if (vals==NULL) return;
+	vector<int> values = SplitString2Int(string(vals),',');
+	for (int ny=0;ny<3 && ny<(int)values.size();++ny)
+		SetSubSampling(ny,values.at(ny));
+}
+
+unsigned int CSPropDumpBox::GetSubSampling(int ny)
+{
+	if ((ny<0) || (ny>2)) return 1;
+	return SubSampling[ny];
 }
 
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
@@ -1030,6 +1061,10 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop.SetAttribute("DumpType",DumpType);
 	prop.SetAttribute("DumpMode",DumpMode);
 	prop.SetAttribute("FileType",FileType);
+
+	stringstream ss;
+	ss << GetSubSampling(0) << "," << GetSubSampling(1) << "," << GetSubSampling(2) ;
+	prop.SetAttribute("SubSampling",ss.str().c_str());
 
 	if (!sparse)
 	{
@@ -1077,6 +1112,8 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
 	if (prop->QueryIntAttribute("DumpMode",&DumpMode)!=TIXML_SUCCESS) DumpMode=0;
 	if (prop->QueryIntAttribute("FileType",&FileType)!=TIXML_SUCCESS) FileType=0;
+
+	SetSubSampling(prop->Attribute("SubSampling"));
 
 	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
 	if (ScalDump!=NULL)

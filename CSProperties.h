@@ -408,6 +408,11 @@ public:
 	//! Get the arbitrary file-type \sa SetFileType
 	int GetFileType() {return FileType;}
 
+	void SetSubSampling(int ny, unsigned int val);
+	void SetSubSampling(unsigned int val[]);
+	void SetSubSampling(const char* vals);
+	unsigned int GetSubSampling(int ny);
+
 	bool GetGlobalSetting();
 	bool GetPhiDump();
 	bool GetDivEDump();
@@ -451,5 +456,6 @@ protected:
 	int DumpType;
 	int DumpMode;
 	int FileType;
+	unsigned int SubSampling[3];
 };
 

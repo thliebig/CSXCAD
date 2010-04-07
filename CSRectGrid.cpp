@@ -16,6 +16,7 @@
 */
 
 #include "CSRectGrid.h"
+#include "CSUseful.h"
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
 #include <stdio.h>
@@ -264,7 +265,6 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 	TiXmlNode* FN=NULL;
 	TiXmlText* Text=NULL;
 	string LineStr[3];
-	size_t pos=0;
 
 	Lines = root.FirstChildElement("XLines");
 	if (Lines==NULL) return false;
@@ -292,25 +292,27 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 		Text = FN->ToText();
 		if (Text!=NULL)	LineStr[2]=string(Text->Value());
 	}
-	string sub;
 
+//	string sub;
+//	size_t pos=0;
 	for (int i=0;i<3;++i)
 	{
-		pos=0;
-		do
-		{
-			pos=LineStr[i].find_first_of(',');
-			if (pos==string::npos) pos=LineStr[i].size();
-			else ++pos;
-			sub=LineStr[i].substr(0,pos);
-			//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
-			if (sub.empty()==false) AddDiscLine(i,atof(sub.c_str()));
-			LineStr[i].erase(0,pos);
-		} while (LineStr[i].size()>0);
+//		pos=0;
+//		do
+//		{
+//			pos=LineStr[i].find_first_of(',');
+//			if (pos==string::npos) pos=LineStr[i].size();
+//			else ++pos;
+//			sub=LineStr[i].substr(0,pos);
+//			//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
+//			if (sub.empty()==false) AddDiscLine(i,atof(sub.c_str()));
+//			LineStr[i].erase(0,pos);
+//		} while (LineStr[i].size()>0);
+		vector<double> lines = SplitString2Double(LineStr[i],',');
+		for (size_t n=0;n<lines.size();++n)
+			AddDiscLine(i,lines.at(n));
 		Sort(i);
 	}
 
-
 	return true;
 }
-

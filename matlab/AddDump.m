@@ -1,12 +1,8 @@
-function CSX = AddDump(CSX, name, type, mode, fileType)
-% function CSX = AddDump(CSX, name, type, mode, fileType)
+function CSX = AddDump(CSX, name, varargin)
+% function CSX = AddDump(CSX, name, varargin)
 %
-% type      (field type)    is optional
-% mode      (dump mode)     is optional
-% fileType  (file type)     is optional
-%
-% e.g. AddDump(CSX,'Et',0,2,1);
-% or   AddDump(CSX,'Ht',1);
+% e.g. AddDump(CSX,'Et');
+% or   AddDump(CSX,'Ht','SubSampling','2,2,4','DumpType',1);
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -22,12 +18,9 @@ else
     CSX.Properties.DumpBox{1}.ATTRIBUTE.Name=name;
 end
 
-if (nargin>2)
-    CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpType=type;
-end
-if (nargin>3)
-    CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpMode=mode;
-end
-if (nargin>4)
-    CSX.Properties.DumpBox{end}.ATTRIBUTE.FileType=fileType;
+for n=1:(nargin-2)/2
+    if ~ischar(varargin{2*n-1})
+        error(['CSXCAD::AddDump: not an attribute: ' varargin{2*n-1}]);
+    end
+    CSX.Properties.DumpBox{end}.ATTRIBUTE = setfield(CSX.Properties.DumpBox{end}.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
 end

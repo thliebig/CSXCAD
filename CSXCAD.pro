@@ -5,7 +5,7 @@ TEMPLATE = lib
 INCLUDEPATH += .
 OBJECTS_DIR = obj
 unix { 
-	VERSION = 0.2.1
+    VERSION = 0.2.1
     INCLUDEPATH += ../tinyxml
     INCLUDEPATH += ../fparser
     LIBS += -L../fparser \
@@ -28,10 +28,12 @@ HEADERS += ContinuousStructure.h \
     CSRectGrid.h \
     CSXCAD_Global.h \
     ParameterObjects.h \
-    CSFunctionParser.h
+    CSFunctionParser.h \
+    CSUseful.h
 SOURCES += ContinuousStructure.cpp \
     CSPrimitives.cpp \
     CSProperties.cpp \
     CSRectGrid.cpp \
     ParameterObjects.cpp \
-    CSFunctionParser.cpp
+    CSFunctionParser.cpp \
+    CSUseful.cpp

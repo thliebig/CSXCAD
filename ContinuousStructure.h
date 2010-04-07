@@ -33,8 +33,7 @@
 #include "CSPrimitives.h"
 #include "CSRectGrid.h"
 #include "ParameterObjects.h"
-
-using namespace std;
+#include "CSUseful.h"
 
 class TiXmlNode;
 

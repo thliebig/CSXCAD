@@ -34,7 +34,6 @@
 
 class TiXmlNode;
 
-
 //! CSRectGrid is managing a rectilinear graded mesh.
 class CSXCAD_EXPORT CSRectGrid
 {
