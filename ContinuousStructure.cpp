@@ -231,6 +231,13 @@ CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* /*coor
 	return NULL;
 }
 
+void ContinuousStructure::SetCoordInputType(int type)
+{
+	for (size_t i=0;i<vProperties.size();++i)
+	{
+		vProperties.at(i)->SetCoordInputType(type);
+	}
+}
 
 bool ContinuousStructure::isGeometryValid()
 {

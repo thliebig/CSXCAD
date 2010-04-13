@@ -86,6 +86,9 @@ public:
 	//! Get a property by its internal index number. \sa GetQtyProperties
 	CSProperties* GetProperty(size_t index);
 
+	//! Define the input type for the CSProperties weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
+	void SetCoordInputType(int type);
+
 	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
 	void SetDrawingTolerance(double val) {dDrawingTol=val;}
 
