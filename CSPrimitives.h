@@ -85,7 +85,7 @@ public:
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
 	//! Get the bounding box for this special primitive.
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {return dBoundBox;accurate=false;};
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {accurate=false;return dBoundBox;};
 
 	//! Check if given Coordinate is inside the Primitive.
 	virtual bool IsInside(double* Coord, double tol=0) {return false;};
