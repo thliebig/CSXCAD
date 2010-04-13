@@ -89,7 +89,7 @@ Parameter::~Parameter()
 }
 
 
-void Parameter::PrintSelf(FILE* out)
+void Parameter::PrintSelf(FILE* /*out*/)
 {
 	fprintf(stderr," Parameter: %s  Value: %f  Type %d\n\n",sName.c_str(),dValue,Type);
 }
@@ -132,7 +132,7 @@ bool Parameter::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-Parameter* Parameter::GetParameterFromXML(TiXmlNode &root)
+Parameter* Parameter::GetParameterFromXML(TiXmlNode &/*root*/)
 {
 	return NULL;
 }
@@ -192,7 +192,7 @@ bool LinearParameter::IncreaseStep()
 	return true;
 }
 
-void LinearParameter::PrintSelf(FILE* out)
+void LinearParameter::PrintSelf(FILE* /*out*/)
 {
 	fprintf(stderr," Parameter: %s  Value: %f\n from %f to %f; Stepsize: %f\n",sName.c_str(),dValue,dMin,dMax,dStep);
 }

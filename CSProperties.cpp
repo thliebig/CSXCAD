@@ -134,7 +134,7 @@ CSPropProbeBox* CSProperties::ToProbeBox() { return ( this && Type == PROBEBOX )
 CSPropResBox* CSProperties::ToResBox() { return ( this && Type == RESBOX ) ? (CSPropResBox*) this : 0; }
 CSPropDumpBox* CSProperties::ToDumpBox() { return ( this && Type == DUMPBOX ) ? (CSPropDumpBox*) this : 0; }
 
-bool CSProperties::Update(string *ErrStr) {return true;}
+bool CSProperties::Update(string */*ErrStr*/) {return true;}
 
 const string CSProperties::GetTypeString()
 {

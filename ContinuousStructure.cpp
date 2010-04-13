@@ -225,7 +225,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(double* coord, CSP
 }
 
 
-CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* coords, CSProperties::PropertyType type)
+CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* /*coords*/, CSProperties::PropertyType /*type*/)
 {
 	cerr << "ContinuousStructure::GetPropertiesByCoordsPriority --> This methode has not been implemented yet!!! return NULL" << endl;
 	return NULL;

@@ -39,4 +39,7 @@
 #define CSXCAD_EXPORT
 #endif
 
+// declare a parameter as unused
+#define UNUSED(x) (void)(x);
+
 #endif /*CSXCAD_GLOBAL_H_*/

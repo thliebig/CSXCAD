@@ -85,7 +85,7 @@ CSPrimitives::~CSPrimitives()
 	if (clProperty!=NULL) clProperty->RemovePrimitive(this);
 }
 
-bool CSPrimitives::Write2XML(TiXmlElement &elem, bool parameterised)
+bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 {
 	elem.SetAttribute("ID",uiID);
 //	if (clProperty!=NULL) elem.SetAttribute("PropertyID",clProperty->GetID());
@@ -150,7 +150,7 @@ double* CSPrimBox::GetBoundBox(bool &accurate, bool PreserveOrientation)
 	return dBoundBox;
 }
 
-bool CSPrimBox::IsInside(double* Coord, double tol)
+bool CSPrimBox::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 
@@ -354,7 +354,7 @@ double* CSPrimMultiBox::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimMultiBox::IsInside(double* Coord, double tol)
+bool CSPrimMultiBox::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	bool in=false;
@@ -497,7 +497,7 @@ double* CSPrimSphere::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimSphere::IsInside(double* Coord, double tol)
+bool CSPrimSphere::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
@@ -606,7 +606,7 @@ double* CSPrimSphericalShell::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimSphericalShell::IsInside(double* Coord, double tol)
+bool CSPrimSphericalShell::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
@@ -728,7 +728,7 @@ double* CSPrimCylinder::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimCylinder::IsInside(double* Coord, double tol)
+bool CSPrimCylinder::IsInside(double* Coord, double /*tol*/)
 {
 	//Lot-Fuss-Punkt
 	//use Point_Line_Distance(...) in the future!!!
@@ -901,7 +901,7 @@ double* CSPrimCylindricalShell::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimCylindricalShell::IsInside(double* Coord, double tol)
+bool CSPrimCylindricalShell::IsInside(double* Coord, double /*tol*/)
 {
 	//Lot-Fuss-Punkt
 	if (Coord==NULL) return false;
@@ -1019,7 +1019,7 @@ void CSPrimPolygon::AddCoord(const string val)
 	vCoords.push_back(ParameterScalar(clParaSet,val));
 }
 
-void CSPrimPolygon::RemoveCoords(int index)
+void CSPrimPolygon::RemoveCoords(int /*index*/)
 {
 	//not yet implemented
 }
@@ -1093,7 +1093,7 @@ double* CSPrimPolygon::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimPolygon::IsInside(double* Coord, double tol)
+bool CSPrimPolygon::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	if (vCoords.size()<2) return false;
@@ -1418,7 +1418,7 @@ double* CSPrimRotPoly::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimRotPoly::IsInside(double* Coord, double tol)
+bool CSPrimRotPoly::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 
@@ -1577,7 +1577,7 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point)
 	return true;
 }
 
-double* CSPrimCurve::GetBoundBox(bool &accurate, bool PreserveOrientation)
+double* CSPrimCurve::GetBoundBox(bool &accurate, bool /*PreserveOrientation*/)
 {
 	accurate=false;
 	for (size_t i=0;i<points[0].size();++i)
@@ -1593,7 +1593,7 @@ double* CSPrimCurve::GetBoundBox(bool &accurate, bool PreserveOrientation)
 	return dBoundBox;
 }
 
-bool CSPrimCurve::IsInside(double* Coord, double tol)
+bool CSPrimCurve::IsInside(double* /*Coord*/, double /*tol*/)
 {
 	//this is a 1D-object, you can never be inside...
 	return false;
@@ -1644,7 +1644,6 @@ bool CSPrimCurve::ReadFromXML(TiXmlNode &root)
 
 	TiXmlElement *VT=root.FirstChildElement("Vertex");
 	if (points[0].size()!=0) return false;
-	int i=0;
 	double emptyP[] = {0.0,0.0,0.0};
 	size_t current=0;
 	while (VT)
@@ -1694,7 +1693,7 @@ double* CSPrimWire::GetBoundBox(bool &accurate, bool PreserveOrientation)
 	return dBoundBox;
 }
 
-bool CSPrimWire::IsInside(double* Coord, double tol)
+bool CSPrimWire::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double rad = wireRadius.GetValue();
@@ -1826,7 +1825,7 @@ double* CSPrimUserDefined::GetBoundBox(bool &accurate)
 	return dBoundBox;
 }
 
-bool CSPrimUserDefined::IsInside(double* Coord, double tol)
+bool CSPrimUserDefined::IsInside(double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 

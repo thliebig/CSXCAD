@@ -85,10 +85,10 @@ public:
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
 	//! Get the bounding box for this special primitive.
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {accurate=false;return dBoundBox;};
+	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {UNUSED(PreserveOrientation);accurate=false;return dBoundBox;};
 
 	//! Check if given Coordinate is inside the Primitive.
-	virtual bool IsInside(double* Coord, double tol=0) {return false;};
+	virtual bool IsInside(double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
 
 	//! Set or change the priotity for this primitive.
 	void SetPriority(int val) {iPriority=val;};
@@ -96,7 +96,7 @@ public:
 	int GetPriority() {return iPriority;};
 
 	//! Update this primitive with respect to the parameters set.
-	virtual bool Update(string *ErrStr=NULL) {return true;};
+	virtual bool Update(string *ErrStr=NULL) {UNUSED(ErrStr);return true;};
 	//! Write this primitive to a XML-node.
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	//! Read this primitive from a XML-node.
