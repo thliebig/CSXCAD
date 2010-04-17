@@ -12,6 +12,7 @@ end
 if isfield(CSX.Properties,'Electrode')
     CSX.Properties.Electrode{end+1}.ATTRIBUTE.Name=name;    
 else
+	CSX.Properties.Electrode = {}; % create cell array
     CSX.Properties.Electrode{1}.ATTRIBUTE.Name=name;
 end
 

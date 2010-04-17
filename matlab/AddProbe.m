@@ -12,6 +12,7 @@ end
 if isfield(CSX.Properties,'ProbeBox')
     CSX.Properties.ProbeBox{end+1}.ATTRIBUTE.Name=name;    
 else
+	CSX.Properties.ProbeBox = {}; % create cell array
     CSX.Properties.ProbeBox{1}.ATTRIBUTE.Name=name;
 end
 

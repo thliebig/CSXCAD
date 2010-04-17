@@ -12,6 +12,7 @@ end
 if isfield(CSX.Properties,'Material')
     CSX.Properties.Material{end+1}.ATTRIBUTE.Name=name;    
 else
+	CSX.Properties.Material = {}; % create cell array
     CSX.Properties.Material{1}.ATTRIBUTE.Name=name;
 end
 

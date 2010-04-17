@@ -28,6 +28,7 @@ end
 if isfield(CSX.Properties,'DumpBox')
     CSX.Properties.DumpBox{end+1}.ATTRIBUTE.Name=name;    
 else
+	CSX.Properties.DumpBox = {}; % create cell array
     CSX.Properties.DumpBox{1}.ATTRIBUTE.Name=name;
 end
 
