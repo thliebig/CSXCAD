@@ -4,6 +4,9 @@
 TEMPLATE = lib
 INCLUDEPATH += .
 OBJECTS_DIR = obj
+
+CONFIG-=qt
+
 unix { 
     VERSION = 0.2.1
     INCLUDEPATH += ../tinyxml
