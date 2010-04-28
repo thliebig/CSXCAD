@@ -20,8 +20,8 @@ win32 {
     DEFINES = BUILD_CSXCAD_LIB
     INCLUDEPATH += ../tinyxml
     INCLUDEPATH += ../fparser
-    LIBS += ..\fparser\release\libfparser.a \
-        ..\tinyxml\release\libtinyxml.a
+	LIBS += ..\fparser\release\libfparser4.a \
+		..\tinyxml\release\libtinyxml2.a
 }
 
 # Input

@@ -48,7 +48,7 @@ class CSProperties; //include VisualProperties
 class TiXmlNode;
 class CSFunctionParser;
 
-void Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist);
+void CSXCAD_EXPORT Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist);
 
 //! Abstract base class for different geometrical primitives.
 /*!
