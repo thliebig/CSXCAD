@@ -1,4 +1,5 @@
 function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
+% function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
 %
 % CSXCAD matlab interface
 % -----------------------
