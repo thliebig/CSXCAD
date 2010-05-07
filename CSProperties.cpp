@@ -621,10 +621,11 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	if (CSProperties::ReadFromXML(root)==false) return false;
 	TiXmlElement* prop=root.ToElement();
 
+	if (prop==NULL) return false;
+
 	int attr=1;
 	prop->QueryIntAttribute("Isotropy",&attr);
 	bIsotropy = attr>0;
-	if (prop==NULL) return false;
 
 	TiXmlElement* matProp=prop->FirstChildElement("Property");
 	if (matProp!=NULL)
