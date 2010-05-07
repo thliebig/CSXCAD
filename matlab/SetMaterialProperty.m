@@ -25,5 +25,12 @@ if (pos==0)
 end
 
 for n=1:(nargin-2)/2
-    CSX.Properties.Material{pos}.Property.ATTRIBUTE = setfield(CSX.Properties.Material{pos}.Property.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
+    if ( (ischar(varargin{2*n})) || isnumeric(varargin{2*n}))
+        CSX.Properties.Material{pos}.Property.ATTRIBUTE = setfield(CSX.Properties.Material{pos}.Property.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
+    else 
+        value = varargin{2*n};
+        CSX.Properties.Material{pos}.Property.ATTRIBUTE.(varargin{2*n-1}) = value{1};
+        CSX.Properties.Material{pos}.PropertyY.ATTRIBUTE.(varargin{2*n-1}) = value{2};
+        CSX.Properties.Material{pos}.PropertyZ.ATTRIBUTE.(varargin{2*n-1}) = value{3};
+    end
 end

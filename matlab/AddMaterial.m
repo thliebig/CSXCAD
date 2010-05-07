@@ -1,5 +1,7 @@
-function CSX = AddMaterial(CSX, name)
-% function CSX = AddMaterial(CSX, name)
+function CSX = AddMaterial(CSX, name, varargin)
+% function CSX = AddMaterial(CSX, name, varargin)
+%
+% e.g. CSX = AddMaterial(CSX, 'mat_name')
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -17,3 +19,7 @@ else
 end
 
 CSX.Properties.Material{end}.Property.ATTRIBUTE = [];
+
+for n=1:(nargin-2)/2
+    CSX.Properties.Material{end}.ATTRIBUTE.(varargin{2*n-1})=varargin{2*n};
+end
