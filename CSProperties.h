@@ -96,7 +96,7 @@ public:
 	CSPrimitives* TakePrimitive(size_t index);
 
 	//! Check whether the given coord is inside of a primitive assigned to this property and return found priority.
-	bool CheckCoordInPrimitive(double *coord, int &priority, double tol=0);
+	bool CheckCoordInPrimitive(const double *coord, int &priority, double tol=0);
 
 	//! Get the quentity of primitives assigned to this property! \return Number of primitives in this property
 	size_t GetQtyPrimitives();
@@ -210,7 +210,7 @@ public:
 
 	int SetEpsilonWeightFunction(const string fct, int ny);
 	const string GetEpsilonWeightFunction(int ny);
-	double GetEpsilonWeighted(int ny, double* coords);
+	double GetEpsilonWeighted(int ny, const double* coords);
 
         void SetMue(double val, int direction=0);
         void SetMue(const string val, int direction=0);
@@ -219,7 +219,7 @@ public:
 
 	int SetMueWeightFunction(const string fct, int ny);
 	const string GetMueWeightFunction(int ny);
-	double GetMueWeighted(int ny, double* coords);
+	double GetMueWeighted(int ny, const double* coords);
 
         void SetKappa(double val, int direction=0);
         void SetKappa(const string val, int direction=0);
@@ -228,7 +228,7 @@ public:
 
 	int SetKappaWeightFunction(const string fct, int ny);
 	const string GetKappaWeightFunction(int ny);
-	double GetKappaWeighted(int ny, double* coords);
+	double GetKappaWeighted(int ny, const double* coords);
 		
         void SetSigma(double val, int direction=0);
         void SetSigma(const string val, int direction=0);
@@ -237,7 +237,7 @@ public:
 
 	int SetSigmaWeightFunction(const string fct, int ny);
 	const string GetSigmaWeightFunction(int ny);
-	double GetSigmaWeighted(int ny, double* coords);
+	double GetSigmaWeighted(int ny, const double* coords);
 		
         void SetIsotropy(bool val) {bIsotropy=val;};
         bool GetIsotropy() {return bIsotropy;};
@@ -251,7 +251,7 @@ public:
 protected:
         ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
 		ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];
-		double GetWeight(ParameterScalar &ps, double* coords);
+		double GetWeight(ParameterScalar &ps, const double* coords);
         bool bIsotropy;
 };
 
@@ -305,7 +305,7 @@ public:
 	int SetWeightFunction(const string fct, int ny);
 	const string GetWeightFunction(int ny);
 
-	double GetWeightedExcitation(int ny, double* coords);
+	double GetWeightedExcitation(int ny, const double* coords);
 
 	void SetDelay(double val);
 	void SetDelay(const string val);

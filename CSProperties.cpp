@@ -227,7 +227,7 @@ CSPrimitives* CSProperties::TakePrimitive(size_t index)
 	return prim;
 }
 
-bool CSProperties::CheckCoordInPrimitive(double *coord, int &priority, double tol)
+bool CSProperties::CheckCoordInPrimitive(const double *coord, int &priority, double tol)
 {
 	priority=0;
 	bool found=false;
@@ -348,7 +348,7 @@ const string CSPropMaterial::GetEpsilonTerm(int direction)
     return Epsilon[direction].GetString();
 }
 
-double CSPropMaterial::GetWeight(ParameterScalar &ps, double* coords)
+double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 {
 //	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
 	coordPara[0]->SetValue(coords[0]);
@@ -375,7 +375,7 @@ int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny)
 }
 
 const string CSPropMaterial::GetEpsilonWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightEpsilon[ny].GetString();} else return string();}
-double CSPropMaterial::GetEpsilonWeighted(int ny, double* coords)
+double CSPropMaterial::GetEpsilonWeighted(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	return GetWeight(WeightEpsilon[ny],coords)*GetEpsilon(ny);
@@ -412,7 +412,7 @@ int CSPropMaterial::SetMueWeightFunction(const string fct, int ny)
 }
 
 const string CSPropMaterial::GetMueWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightMue[ny].GetString();} else return string();}
-double CSPropMaterial::GetMueWeighted(int ny, double* coords)
+double CSPropMaterial::GetMueWeighted(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	return GetWeight(WeightMue[ny],coords)*GetMue(ny);
@@ -450,7 +450,7 @@ int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny)
 }
 
 const string CSPropMaterial::GetKappaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightKappa[ny].GetString();} else return string();}
-double CSPropMaterial::GetKappaWeighted(int ny, double* coords)
+double CSPropMaterial::GetKappaWeighted(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	return GetWeight(WeightKappa[ny],coords)*GetKappa(ny);
@@ -486,7 +486,7 @@ int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny)
 }
 
 const string CSPropMaterial::GetSigmaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightSigma[ny].GetString();} else return string();}
-double CSPropMaterial::GetSigmaWeighted(int ny, double* coords)
+double CSPropMaterial::GetSigmaWeighted(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	return GetWeight(WeightSigma[ny],coords)*GetSigma(ny);
@@ -758,18 +758,18 @@ int CSPropElectrode::SetWeightFunction(const string fct, int ny)
 
 const string CSPropElectrode::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
 
-double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
+double CSPropElectrode::GetWeightedExcitation(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
+	double loc_coords[3] = {coords[0],coords[1],coords[2]};
 	double r,rho,alpha,theta;
 	if (coordInputType==1)
 	{
-		double orig[3] = {coords[0],coords[1],coords[2]};
-		coords[0] = orig[0]*cos(orig[1]);
-		coords[1] = orig[0]*sin(orig[1]);
-		rho = orig[0];
-		alpha=orig[1];
-		r = sqrt(pow(orig[0],2)+pow(orig[2],2));
+		loc_coords[0] = coords[0]*cos(coords[1]);
+		loc_coords[1] = coords[0]*sin(coords[1]);
+		rho = coords[0];
+		alpha=coords[1];
+		r = sqrt(pow(coords[0],2)+pow(coords[2],2));
 		theta=asin(1)-atan(coords[2]/rho);
 	}
 	else
@@ -779,9 +779,9 @@ double CSPropElectrode::GetWeightedExcitation(int ny, double* coords)
 		r = sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2));
 		theta=asin(1)-atan(coords[2]/rho);
 	}
-	coordPara[0]->SetValue(coords[0]);
-	coordPara[1]->SetValue(coords[1]);
-	coordPara[2]->SetValue(coords[2]);
+	coordPara[0]->SetValue(loc_coords[0]);
+	coordPara[1]->SetValue(loc_coords[1]);
+	coordPara[2]->SetValue(loc_coords[2]);
 	coordPara[3]->SetValue(rho); //rho
 	coordPara[4]->SetValue(r); //r
 	coordPara[5]->SetValue(alpha);

@@ -48,7 +48,7 @@ class CSProperties; //include VisualProperties
 class TiXmlNode;
 class CSFunctionParser;
 
-void CSXCAD_EXPORT Point_Line_Distance(double P[], double start[], double stop[], double &foot, double &dist);
+void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist);
 
 //! Abstract base class for different geometrical primitives.
 /*!
@@ -88,7 +88,7 @@ public:
 	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {UNUSED(PreserveOrientation);accurate=false;return dBoundBox;};
 
 	//! Check if given Coordinate is inside the Primitive.
-	virtual bool IsInside(double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
+	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
 
 	//! Set or change the priotity for this primitive.
 	void SetPriority(int val) {iPriority=val;};
@@ -165,7 +165,7 @@ public:
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return &psCoords[index]; else return NULL;};
 
 	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -206,7 +206,7 @@ public:
 	void ClearOverlap();
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	unsigned int GetQtyBoxes() {return (unsigned int) vCoords.size()/6;};
 
@@ -245,7 +245,7 @@ public:
 	ParameterScalar* GetRadiusPS() {return &psRadius;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -278,7 +278,7 @@ public:
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -315,7 +315,7 @@ public:
 	ParameterScalar* GetRadiusPS() {return &psRadius;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -348,7 +348,7 @@ public:
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -400,7 +400,7 @@ public:
 	ParameterScalar* GetElevationPS() {return &Elevation;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -436,7 +436,7 @@ public:
 	ParameterScalar* GetLengthPS() {return &extrudeLength;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -473,7 +473,7 @@ public:
 	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -508,7 +508,7 @@ public:
 	virtual bool GetPoint(size_t point_index, double* point);
 
 	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -540,7 +540,7 @@ public:
 	ParameterScalar* GetWireRadiusPS() {return &wireRadius;};
 
 	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
@@ -581,7 +581,7 @@ public:
 	const char* GetFunction() {return stFunction.c_str();};
 
 	virtual double* GetBoundBox(bool &accurate);
-	virtual bool IsInside(double* Coord, double tol=0);
+	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
