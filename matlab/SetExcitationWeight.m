@@ -34,7 +34,7 @@ if ischar(weight{2})
 else
     CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Y = weight{2};
 end
-if ischar(weight{2})
+if ischar(weight{3})
     CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Z = ['term:' weight{3}];
 else
     CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Z = weight{3};
