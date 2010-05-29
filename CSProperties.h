@@ -145,6 +145,9 @@ public:
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	void SetCoordInputType(int type) {coordInputType=type;}
 
+	//! Check and warn for unused primitives
+	void WarnUnusedPrimitves(ostream& stream);
+
 protected:
 	CSProperties(ParameterSet* paraSet);
 	CSProperties(unsigned int ID, ParameterSet* paraSet);

@@ -243,6 +243,17 @@ bool CSProperties::CheckCoordInPrimitive(const double *coord, int &priority, dou
 	return found;
 }
 
+void CSProperties::WarnUnusedPrimitves(ostream& stream)
+{
+	for (size_t i=0; i<vPrimitives.size();++i)
+	{
+		if (vPrimitives.at(i)->GetPrimitiveUsed()==false)
+		{
+			stream << "Warning: Unused primitive (type: " << vPrimitives.at(i)->GetTypeName() << ") detected in property: " << GetName() << "!" << endl;
+		}
+	}
+}
+
 bool CSProperties::ReadFromXML(TiXmlNode &root)
 {
 	TiXmlElement* prop = root.ToElement();

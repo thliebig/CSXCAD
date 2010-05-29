@@ -109,6 +109,10 @@ public:
 	 */
 	CSProperties** GetPropertiesByCoordsPriority(double* coords, CSProperties::PropertyType type=CSProperties::ANY);
 
+	//! Check and warn for unused primitives in properties of given type
+	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
+
+
 	//! Get the internal index of the primitive.
 	int GetIndex(CSPrimitives* prim);
 	//! Get the internal index of the property.

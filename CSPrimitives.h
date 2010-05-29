@@ -90,6 +90,11 @@ public:
 	//! Check if given Coordinate is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
 
+	//! Check whether this primitive was used. (--> IsInside() return true) \sa SetPrimitiveUsed
+	bool GetPrimitiveUsed() {return m_Primtive_Used;}
+	//! Set the primitve uses flag. \sa GetPrimitiveUsed
+	void SetPrimitiveUsed(bool val) {m_Primtive_Used=val;}
+
 	//! Set or change the priotity for this primitive.
 	void SetPriority(int val) {iPriority=val;};
 	//! Get the priotity for this primitive.
@@ -142,6 +147,7 @@ protected:
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
 	string PrimTypeName;
+	bool m_Primtive_Used;
 };
 
 //! Box Primitive (Cube)

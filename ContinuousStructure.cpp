@@ -231,6 +231,17 @@ CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* /*coor
 	return NULL;
 }
 
+void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type)
+{
+	for (size_t i=0;i<vProperties.size();++i)
+	{
+		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
+		{
+			vProperties.at(i)->WarnUnusedPrimitves(stream);
+		}
+	}
+}
+
 void ContinuousStructure::SetCoordInputType(int type)
 {
 	for (size_t i=0;i<vProperties.size();++i)

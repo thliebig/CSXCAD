@@ -47,6 +47,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	clParaSet=paraSet;
 	iPriority=0;
 	PrimTypeName = string("Base Type");
+	m_Primtive_Used = false;
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
@@ -59,6 +60,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	clParaSet=prim->clParaSet;
 	iPriority=prim->iPriority;
 	PrimTypeName = string("Base Type");
+	m_Primtive_Used = false;
 }
 
 
@@ -71,6 +73,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	uiID=0;
 	iPriority=0;
 	PrimTypeName = string("Base Type");
+	m_Primtive_Used = false;
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)
@@ -161,6 +164,7 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	{
 		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
 	}
+	m_Primtive_Used = true;
 	return true;
 }
 
@@ -381,6 +385,7 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 		}
 		if (in==true) {	return true;}
 	}
+	m_Primtive_Used = true;		
 	return false;
 }
 
@@ -501,7 +506,11 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
-	if (dist<psRadius.GetValue()) return true;
+	if (dist>psRadius.GetValue())
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
 	return false;
 }
 
@@ -610,7 +619,11 @@ bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
-	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0) return true;
+	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0)
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
 	return false;
 }
 
@@ -750,7 +763,11 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 		e+=(FP[i]-p[i])*(FP[i]-p[i]);
 	}
 	double r=psRadius.GetValue();
-	if (e<r*r) return true;
+	if (e<r*r)
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
 	return false;
 }
 
@@ -922,7 +939,11 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 		e+=(FP[i]-p[i])*(FP[i]-p[i]);
 	}
 	double r=psRadius.GetValue();
-	if (fabs(sqrt(e)-r)<psShellWidth.GetValue()/2.0) return true;
+	if (fabs(sqrt(e)-r)<psShellWidth.GetValue()/2.0)
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
 	return false;
 }
 
@@ -1152,7 +1173,12 @@ bool CSPrimPolygon::IsInside(const double* Coord, double /*tol*/)
 		y1 = y2;
 		x1 = x2;
 	}
-	return wn != 0;
+	if (wn != 0)
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
+	return false;
 }
 
 
@@ -1429,7 +1455,9 @@ bool CSPrimRotPoly::IsInside(const double* Coord, double /*tol*/)
 	{
 		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
 	}
-	//more checking needed!!
+
+	cerr << "CSPrimRotPoly::IsInside: Warning: More checking needed!!" << endl;
+	m_Primtive_Used = true;
 	return true;
 }
 
@@ -1706,7 +1734,11 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 		p0[1]=points[1].at(i).GetValue();
 		p0[2]=points[2].at(i).GetValue();
 		dist = sqrt(pow(Coord[0]-p0[0],2)+pow(Coord[1]-p0[1],2)+pow(Coord[2]-p0[2],2));
-		if (dist<rad) return true;
+		if (dist<rad)
+		{
+			m_Primtive_Used = true;
+			return true;
+		}
 
 		if (i<GetNumberOfPoints()-1)
 		{
@@ -1718,7 +1750,10 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 			{
 				Point_Line_Distance(Coord ,p0 ,p1 ,foot ,dist);
 				if ((foot>0) && (foot<1) && (dist<rad))
+				{
+					m_Primtive_Used = true;
 					return true;
+				}
 			}
 		}
 	}
@@ -1871,7 +1906,12 @@ bool CSPrimUserDefined::IsInside(const double* Coord, double /*tol*/)
 	else dValue=0;
 	delete[] vars;vars=NULL;
 
-	return dValue==1;
+	if (dValue==1)
+	{
+		m_Primtive_Used = true;
+		return true;
+	}
+	return false;
 }
 
 
