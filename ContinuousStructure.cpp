@@ -457,7 +457,13 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 {
 	/***Primitives***/
 	TiXmlNode* prims = PropNode->FirstChild("Primitives");
-	if (prims==NULL) { ErrString.append("Warning: Primitives not found!!!\n"); return false;}
+	if (prims==NULL)
+	{
+		ErrString.append("Warning: No primitives found in property: ");
+		ErrString.append(prop->GetName());
+		ErrString.append("!\n");
+		return false;
+	}
 
 	TiXmlElement* PrimNode = prims->FirstChildElement();
 	CSPrimitives* newPrim=NULL;
@@ -484,7 +490,13 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 		if (newPrim)
 		{
 			if (newPrim->ReadFromXML(*PrimNode)) AddPrimitive(newPrim);
-			else {delete newPrim; ErrString.append("Warning: invalid Primitive found!!!\n");}
+			else
+			{
+				delete newPrim;
+				ErrString.append("Warning: Invalid primitive found in property: ");
+				ErrString.append(prop->GetName());
+				ErrString.append("!\n");
+			}
 		}
 		PrimNode=PrimNode->NextSiblingElement();
 	}
