@@ -200,8 +200,6 @@ public:
 
 protected:
 	vector<Parameter* > vParameter;
-	string ParameterString;
-	string ParameterValueString;
 	bool bModified;
 	int SweepPara;
 };
@@ -234,6 +232,8 @@ public:
 
 	//returns error-code
 	int Evaluate();
+
+	double GetEvaluated(double* ParaValues, int &EC);
 
 protected:
 	ParameterSet* clParaSet;

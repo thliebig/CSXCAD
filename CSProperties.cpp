@@ -362,20 +362,38 @@ const string CSPropMaterial::GetEpsilonTerm(int direction)
 double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 {
 //	cerr << "CSPropElectrode::GetWeightedExcitation: methode not yet supported!! Falling back to CSPropElectrode::GetExcitation" << endl;
-	coordPara[0]->SetValue(coords[0]);
-	coordPara[1]->SetValue(coords[1]);
-	coordPara[2]->SetValue(coords[2]);
+//	coordPara[0]->SetValue(coords[0]);
+//	coordPara[1]->SetValue(coords[1]);
+//	coordPara[2]->SetValue(coords[2]);
 	double rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
-	coordPara[3]->SetValue(rho); //rho
-	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
-	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
-	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
-	int EC = ps.Evaluate();
+//	coordPara[3]->SetValue(rho); //rho
+//	coordPara[4]->SetValue(sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2))); //r
+//	coordPara[5]->SetValue(atan2(coords[1],coords[0]));  //alpha
+//	coordPara[6]->SetValue(asin(1)-atan(coords[2]/rho)); //theta
+//	int EC = ps.Evaluate();
+//	if (EC)
+//	{
+//		cerr << "CSPropMaterial::GetWeight: Error evaluating the weighting function (ID: " << this->GetID() << "): " << PSErrorCode2Msg(EC) << endl;
+//	}
+//	return ps.GetValue();
+
+	//rewrite making it reentrant (hopefully)
+	double paraVal[7];
+	paraVal[0] = coords[0]; //x
+	paraVal[1] = coords[1]; //y
+	paraVal[2] = coords[2]; //z
+	paraVal[3] = rho;		//rho
+	paraVal[4] = sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2)); // r
+	paraVal[5] = atan2(coords[1],coords[0]); //alpha
+	paraVal[6] = asin(1)-atan(coords[2]/rho); //theta
+
+	int EC=0;
+	double value = ps.GetEvaluated(paraVal,EC);
 	if (EC)
 	{
 		cerr << "CSPropMaterial::GetWeight: Error evaluating the weighting function (ID: " << this->GetID() << "): " << PSErrorCode2Msg(EC) << endl;
 	}
-	return ps.GetValue();
+	return value;
 }
 
 int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny)

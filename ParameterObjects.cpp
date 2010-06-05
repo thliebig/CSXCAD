@@ -277,8 +277,8 @@ void ParameterSet::clear()
 		delete vParameter.at(i);
 	}
 	vParameter.clear();
-	ParameterString.clear();
-	ParameterValueString.clear();
+//	ParameterString.clear();
+//	ParameterValueString.clear();
 }
 
 bool ParameterSet::GetModified()
@@ -395,8 +395,7 @@ bool ParameterSet::NextSweepPos(int SweepMode)
 
 const string ParameterSet::GetParameterString(const string spacer)
 {
-//	if (spacer.empty()) spacer=",";
-	ParameterString.clear();
+	string ParameterString;
 	for (size_t i=0; i<vParameter.size();++i)
 	{
 		if (i>0) ParameterString+=spacer;
@@ -407,8 +406,7 @@ const string ParameterSet::GetParameterString(const string spacer)
 
 const string ParameterSet::GetParameterValueString(const string spacer, bool ValuesOnly)
 {
-//	if (spacer.empty()) spacer=string(",");
-	ParameterValueString.clear();
+	string ParameterValueString;
 	for (size_t i=0; i<vParameter.size();++i)
 	{
 		if (i>0) ParameterValueString+=spacer;
@@ -560,6 +558,21 @@ int ParameterScalar::Evaluate()
 //	cerr << "eval..." << dValue << endl;
 	delete[] vars;vars=NULL;
 	return fParse.EvalError();
+}
+
+double ParameterScalar::GetEvaluated(double* ParaValues, int &EC)
+{
+	if (ParameterMode==false) return dValue;
+	CSFunctionParser fParse;
+	fParse.Parse(sValue,clParaSet->GetParameterString());
+	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR)
+	{
+		EC = fParse.GetParseErrorType()+100;
+		return 0;
+	}
+	double dvalue = fParse.Eval(ParaValues);
+	EC = fParse.EvalError();
+	return dvalue;
 }
 
 string PSErrorCode2Msg(int code)
