@@ -85,7 +85,7 @@ public:
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
 	//! Get the bounding box for this special primitive.
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false) {UNUSED(PreserveOrientation);accurate=false;return dBoundBox;};
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;};
 
 	//! Check if given Coordinate is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
@@ -142,7 +142,6 @@ protected:
 
 	unsigned int uiID;
 	int iPriority;
-	double dBoundBox[6];
 	PrimitiveType Type;
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
@@ -170,7 +169,7 @@ public:
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return psCoords[index].GetValue(); else return 0;};
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return &psCoords[index]; else return NULL;};
 
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -211,7 +210,7 @@ public:
 
 	void ClearOverlap();
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	unsigned int GetQtyBoxes() {return (unsigned int) vCoords.size()/6;};
@@ -250,7 +249,7 @@ public:
 	double GetRadius() {return psRadius.GetValue();};
 	ParameterScalar* GetRadiusPS() {return &psRadius;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -283,7 +282,7 @@ public:
 	double GetShellWidth() {return psShellWidth.GetValue();};
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -320,7 +319,7 @@ public:
 	double GetRadius() {return psRadius.GetValue();};
 	ParameterScalar* GetRadiusPS() {return &psRadius;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -353,7 +352,7 @@ public:
 	double GetShellWidth() {return psShellWidth.GetValue();};
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -405,7 +404,7 @@ public:
 	double GetElevation() {return Elevation.GetValue();};
 	ParameterScalar* GetElevationPS() {return &Elevation;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -441,7 +440,7 @@ public:
 	double GetLength() {return extrudeLength.GetValue();};
 	ParameterScalar* GetLengthPS() {return &extrudeLength;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -478,7 +477,7 @@ public:
 	double GetAngle(int index) {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;};
 	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -513,7 +512,7 @@ public:
 	virtual size_t GetNumberOfPoints() {return points[0].size();}
 	virtual bool GetPoint(size_t point_index, double* point);
 
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -545,7 +544,7 @@ public:
 	double GetWireRadius() {return wireRadius.GetValue();};
 	ParameterScalar* GetWireRadiusPS() {return &wireRadius;};
 
-	virtual double* GetBoundBox(bool &accurate, bool PreserveOrientation=false);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);
@@ -586,7 +585,7 @@ public:
 	void SetFunction(const char* func);
 	const char* GetFunction() {return stFunction.c_str();};
 
-	virtual double* GetBoundBox(bool &accurate);
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);

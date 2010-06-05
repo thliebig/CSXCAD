@@ -168,11 +168,11 @@ bool ContinuousStructure::InsertEdges2Grid(int nu)
 {
 	if (nu<0) return false;
 	if (nu>2) return false;
-	double *box=NULL;
+	double box[6] = {0,0,0,0,0,0};
 	bool accBound=false;
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
-		box=vPrimitives.at(i)->GetBoundBox(accBound);
+		accBound = vPrimitives.at(i)->GetBoundBox(box);
 		if (accBound)
 		{
 			clGrid.AddDiscLine(nu,box[2*nu]);
@@ -279,11 +279,12 @@ bool ContinuousStructure::isGeometryValid()
 double* ContinuousStructure::GetObjectArea()
 {
 	CSPrimitives* prim=NULL;
-	bool AccBound=false;
+	bool AccBound;
 	for (size_t i=0;i<GetQtyPrimitives();++i)
 	{
 		prim=GetPrimitive(i);
-		double* box=prim->GetBoundBox(AccBound);
+		double box[6] = {0,0,0,0,0,0};
+		AccBound = prim->GetBoundBox(box);
 		if (box!=NULL && AccBound)
 		{
 			if (i==0) for (int i=0;i<6;++i) ObjArea[i]=box[i];

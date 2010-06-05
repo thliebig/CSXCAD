@@ -40,7 +40,6 @@ void Point_Line_Distance(const double P[], const double start[], const double st
 /*********************CSPrimitives********************************************************************/
 CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 {
-	for (int i=0;i<6;++i) dBoundBox[i]=0;
 	clProperty=NULL;
 	SetProperty(prop);
 	uiID=ID;
@@ -52,7 +51,6 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 {
-	for (int i=0;i<6;++i) dBoundBox[i]=prim->dBoundBox[i];
 	clProperty=NULL;
 	if (prop==NULL) SetProperty(prim->clProperty);
 	else SetProperty(prop);
@@ -66,7 +64,6 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 
 CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 {
-	for (int i=0;i<6;++i) dBoundBox[i]=0;
 	clProperty=NULL;
 	SetProperty(prop);
 	clParaSet=paraSet;
@@ -138,11 +135,10 @@ CSPrimBox::~CSPrimBox()
 {
 }
 
-double* CSPrimBox::GetBoundBox(bool &accurate, bool PreserveOrientation)
+bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	accurate=true;
 	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
-	if (PreserveOrientation==true) return dBoundBox;
+	if (PreserveOrientation==true) return true;
 	for (int i=0;i<3;++i)
 		if (dBoundBox[2*i]>dBoundBox[2*i+1])
 		{
@@ -150,15 +146,16 @@ double* CSPrimBox::GetBoundBox(bool &accurate, bool PreserveOrientation)
 			dBoundBox[2*i]=dBoundBox[2*i+1];
 			dBoundBox[2*i+1]=help;
 		}
-	return dBoundBox;
+	return true;
 }
 
 bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 
-	bool accBnd=false;
-	double* box=this->GetBoundBox(accBnd);
+	double box[6] = {0,0,0,0,0,0};
+	bool accBnd = GetBoundBox(box);
+	UNUSED(accBnd); //maybe used later?
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -318,8 +315,10 @@ void CSPrimMultiBox::ClearOverlap()
 	vCoords.resize(vCoords.size()-vCoords.size()%6);
 }
 
-double* CSPrimMultiBox::GetBoundBox(bool &accurate)
+bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	for (int n=0;n<6;++n) dBoundBox[n] = 0;
 	//Update();
 	for (unsigned int i=0;i<vCoords.size()/6;++i)
 	{
@@ -354,8 +353,7 @@ double* CSPrimMultiBox::GetBoundBox(bool &accurate)
 			}
 		}
 	}
-	accurate=false;
-	return dBoundBox;
+	return false;
 }
 
 bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
@@ -491,15 +489,15 @@ CSPrimSphere::~CSPrimSphere()
 {
 }
 
-double* CSPrimSphere::GetBoundBox(bool &accurate)
+bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	for (unsigned int i=0;i<3;++i)
 	{
 		dBoundBox[2*i]=psCenter[i].GetValue()-psRadius.GetValue();
 		dBoundBox[2*i+1]=psCenter[i].GetValue()+psRadius.GetValue();
 	}
-	accurate=true;
-	return dBoundBox;
+	return true;
 }
 
 bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
@@ -604,15 +602,15 @@ CSPrimSphericalShell::~CSPrimSphericalShell()
 {
 }
 
-double* CSPrimSphericalShell::GetBoundBox(bool &accurate)
+bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	for (unsigned int i=0;i<3;++i)
 	{
 		dBoundBox[2*i]=psCenter[i].GetValue()-psRadius.GetValue()-psShellWidth.GetValue()/2.0;
 		dBoundBox[2*i+1]=psCenter[i].GetValue()+psRadius.GetValue()+psShellWidth.GetValue()/2.0;
 	}
-	accurate=true;
-	return dBoundBox;
+	return true;
 }
 
 bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
@@ -695,9 +693,10 @@ CSPrimCylinder::~CSPrimCylinder()
 {
 }
 
-double* CSPrimCylinder::GetBoundBox(bool &accurate)
+bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	accurate=false;
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	bool accurate=false;
 	int Direction=0;
 	double dCoords[6];
 	for (unsigned int i=0;i<6;++i)
@@ -738,7 +737,7 @@ double* CSPrimCylinder::GetBoundBox(bool &accurate)
 		accurate=true;
 		break;
 	}
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
@@ -872,9 +871,10 @@ CSPrimCylindricalShell::~CSPrimCylindricalShell()
 {
 }
 
-double* CSPrimCylindricalShell::GetBoundBox(bool &accurate)
+bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	accurate=false;
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	bool accurate=false;
 	int Direction=0;
 	double dCoords[6];
 	for (unsigned int i=0;i<6;++i)
@@ -915,7 +915,7 @@ double* CSPrimCylindricalShell::GetBoundBox(bool &accurate)
 		accurate=true;
 		break;
 	}
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
@@ -1067,9 +1067,10 @@ double* CSPrimPolygon::GetAllCoords(size_t &Qty, double* array)
 }
 
 
-double* CSPrimPolygon::GetBoundBox(bool &accurate)
+bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	accurate=false;
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	bool accurate=false;
 	if (vCoords.size()<2) 
 	{
 		for (int i=0;i<6;++i) dBoundBox[i]=0;
@@ -1111,7 +1112,7 @@ double* CSPrimPolygon::GetBoundBox(bool &accurate)
 		dBoundBox[2] = ymin;
 		dBoundBox[3] = ymax;
 	}
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimPolygon::IsInside(const double* Coord, double /*tol*/)
@@ -1119,8 +1120,9 @@ bool CSPrimPolygon::IsInside(const double* Coord, double /*tol*/)
 	if (Coord==NULL) return false;
 	if (vCoords.size()<2) return false;
 		
-	bool accBnd=false;
-	double* box=this->GetBoundBox(accBnd);
+	double box[6]={0,0,0,0,0,0};
+	bool accBnd=GetBoundBox(box);
+	UNUSED(accBnd); //maybe used later?
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1308,9 +1310,11 @@ CSPrimLinPoly::~CSPrimLinPoly()
 {
 }
 
-double* CSPrimLinPoly::GetBoundBox(bool &accurate)
+bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	CSPrimPolygon::GetBoundBox(accurate);
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	bool accurate;
+	accurate = CSPrimPolygon::GetBoundBox(dBoundBox);
 	
 	double len = extrudeLength.GetValue();
 	
@@ -1354,7 +1358,7 @@ double* CSPrimLinPoly::GetBoundBox(bool &accurate)
 		}
 	}
 	
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimLinPoly::IsInside(const double* Coord, double tol)
@@ -1430,9 +1434,12 @@ CSPrimRotPoly::~CSPrimRotPoly()
 {
 }
 
-double* CSPrimRotPoly::GetBoundBox(bool &accurate)
+bool CSPrimRotPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	accurate = false;
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	bool accurate = false;
+	for (int n=0;n<6;++n) dBoundBox[n] = 0;
+	UNUSED(dBoundBox);
 //	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
 //	for (int i=0;i<3;++i)
 //		if (dBoundBox[2*i]>dBoundBox[2*i+1])
@@ -1441,15 +1448,16 @@ double* CSPrimRotPoly::GetBoundBox(bool &accurate)
 //			dBoundBox[2*i]=dBoundBox[2*i+1];
 //			dBoundBox[2*i+1]=help;
 //		}
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimRotPoly::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 
-	bool accBnd=false;
-	double* box=this->GetBoundBox(accBnd);
+	double box[6]={0,0,0,0,0,0};
+	bool accBnd = GetBoundBox(box);
+	UNUSED(accBnd); //maybe used later?
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1605,11 +1613,20 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point)
 	return true;
 }
 
-double* CSPrimCurve::GetBoundBox(bool &accurate, bool /*PreserveOrientation*/)
+bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 {
-	accurate=false;
+	bool accurate=false;
+	for (int n=0;n<6;++n) dBoundBox[n] = 0;
 	for (size_t i=0;i<points[0].size();++i)
 	{
+		if (i==0)
+		{
+			for (int n=0;n<3;++n)
+			{
+				dBoundBox[2*n]=points[n].at(0).GetValue();
+				dBoundBox[2*n+1]=dBoundBox[2*n];
+			}
+		}
 		for (int n=0;n<3;++n)
 		{
 			if (points[n].at(i).GetValue()<dBoundBox[n])
@@ -1618,7 +1635,7 @@ double* CSPrimCurve::GetBoundBox(bool &accurate, bool /*PreserveOrientation*/)
 				dBoundBox[2*n+1]=points[n].at(i).GetValue();
 		}
 	}
-	return dBoundBox;
+	return accurate;
 }
 
 bool CSPrimCurve::IsInside(const double* /*Coord*/, double /*tol*/)
@@ -1715,10 +1732,11 @@ CSPrimWire::~CSPrimWire()
 }
 
 
-double* CSPrimWire::GetBoundBox(bool &accurate, bool PreserveOrientation)
+bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	CSPrimCurve::GetBoundBox(accurate,PreserveOrientation);
-	return dBoundBox;
+	bool accurate;
+	accurate = CSPrimCurve::GetBoundBox(dBoundBox,PreserveOrientation);
+	return accurate;
 }
 
 bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
@@ -1850,14 +1868,15 @@ void CSPrimUserDefined::SetFunction(const char* func)
 	stFunction = string(func);
 }
 
-double* CSPrimUserDefined::GetBoundBox(bool &accurate)
+bool CSPrimUserDefined::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	//this type has no simple bound box
 	double max=std::numeric_limits<double>::max();
 	dBoundBox[0]=dBoundBox[2]=dBoundBox[4]=-max;
 	dBoundBox[1]=dBoundBox[3]=dBoundBox[5]=max;
-	accurate=false;
-	return dBoundBox;
+	bool accurate=false;
+	return accurate;
 }
 
 bool CSPrimUserDefined::IsInside(const double* Coord, double /*tol*/)
