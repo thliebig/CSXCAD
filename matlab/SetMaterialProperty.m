@@ -1,6 +1,18 @@
 function CSX = SetMaterialProperty(CSX, name, varargin)
 % function CSX = SetMaterialProperty(CSX, name, varargin)
 %
+% examples:
+% CSX = AddMaterial( CSX, 'RO3010' );
+% CSX = SetMaterialProperty( CSX, 'RO3010', 'Epsilon', 10.2, 'Mue', 1 );
+% CSX = AddBox( CSX, 'RO3010', 0, [0 0 0], [100 1000 1000] );
+%
+% %unisotropic material
+% CSX = AddMaterial( CSX, 'sheet','Isotropy',0);
+% CSX = SetMaterialProperty(CSX, 'sheet', 'Kappa', [0 0 kappa]);
+% CSX = AddBox( CSX, 'sheet', 0, [0 0 0], [10 1000 1000] );
+%
+% See also AddMaterial, SetMaterialWeight
+% 
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
