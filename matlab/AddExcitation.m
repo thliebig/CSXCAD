@@ -1,6 +1,8 @@
 function CSX = AddExcitation(CSX, name, type, excite, varargin)
 % function CSX = AddExcitation(CSX, name, type, excite, varargin)
 %
+% type: 0=soft excitation  1=hard excitation
+%
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
