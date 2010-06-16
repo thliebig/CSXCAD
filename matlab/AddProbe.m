@@ -1,10 +1,13 @@
-function CSX = AddProbe(CSX, name, type)
-% function CSX = AddProbe(CSX, name, type)
+function CSX = AddProbe(CSX, name, type, weight)
+% function CSX = AddProbe(CSX, name, type, weight)
 %
 % name:     name of the property and probe file 
 %
 % type:     0 for voltage probing
 %           1 for current probing
+%
+% weight:   weighting factor for this integral parameter
+%           (default is 1)
 %
 % examples:
 %       CSX = AddProbe(CSX,'ut1',0); %voltate probe
@@ -15,6 +18,10 @@ function CSX = AddProbe(CSX, name, type)
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
+
+if (nargin<4)
+    weight=1;
+end
 
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');
@@ -28,3 +35,4 @@ else
 end
 
 CSX.Properties.ProbeBox{end}.ATTRIBUTE.Type=type;
+CSX.Properties.ProbeBox{end}.ATTRIBUTE.Weight=weight;

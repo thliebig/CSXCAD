@@ -350,6 +350,11 @@ public:
 	//! Get the number designated to this probe property \sa SetNumber
 	unsigned int GetNumber();
 
+	//! Define/Set the probe weighting \sa GetWeighting
+	void SetWeighting(double weight) {m_weight=weight;}
+	//! Get the probe weighting \sa GetWeighting
+	double GetWeighting() {return m_weight;}
+
 	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
 	void SetProbeType(int type) {ProbeType=type;}
 	//! Get the probe type \sa SetProbeType
@@ -359,6 +364,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 protected:
 	unsigned int uiNumber;
+	double m_weight;
 	int ProbeType;
 };
 
