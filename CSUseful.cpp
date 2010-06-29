@@ -1,4 +1,9 @@
 #include "CSUseful.h"
+#include "CSUseful.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sstream>
+#include <iostream>
 
 std::vector<double> SplitString2Double(std::string str, const char delimiter)
 {
@@ -16,6 +21,17 @@ std::vector<double> SplitString2Double(std::string str, const char delimiter)
 		str.erase(0,pos);
 	} while (str.size()>0);
 	return values;
+}
+
+string CombineVector2String(vector<double> values, const char delimiter)
+{
+	stringstream ss;
+	for (size_t i=0;i<values.size();++i)
+	{
+		if (i>0) ss << delimiter;
+		ss<<values.at(i);
+	}
+	return ss.str();
 }
 
 std::vector<int> SplitString2Int(std::string str, const char delimiter)

@@ -1,4 +1,4 @@
-function CSX = AddProbe(CSX, name, type, weight)
+function CSX = AddProbe(CSX, name, type, weight, FD_samples)
 % function CSX = AddProbe(CSX, name, type, weight)
 %
 % name:     name of the property and probe file 
@@ -6,8 +6,12 @@ function CSX = AddProbe(CSX, name, type, weight)
 % type:     0 for voltage probing
 %           1 for current probing
 %
+% all following parameter are optional:
+%
 % weight:   weighting factor for this integral parameter
 %           (default is 1)
+%
+% FD_samples: dump in the frequency domain at the given samples (in Hz)
 %
 % examples:
 %       CSX = AddProbe(CSX,'ut1',0); %voltate probe
@@ -36,3 +40,8 @@ end
 
 CSX.Properties.ProbeBox{end}.ATTRIBUTE.Type=type;
 CSX.Properties.ProbeBox{end}.ATTRIBUTE.Weight=weight;
+
+if (nargin>4)
+    CSX.Properties.ProbeBox{end}.FD_Samples=FD_samples;
+end
+

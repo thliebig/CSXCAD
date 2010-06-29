@@ -945,6 +945,18 @@ CSPropProbeBox::~CSPropProbeBox() {}
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
+void CSPropProbeBox::AddFDSample(vector<double> freqs)
+{
+	for (size_t n=0;n<freqs.size();++n)
+		AddFDSample(freqs.at(n));
+}
+
+void CSPropProbeBox::AddFDSample(string freqs)
+{
+	vector<double> v_freqs = SplitString2Double(freqs, ',');
+	AddFDSample(v_freqs);
+}
+
 bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement prop("ProbeBox");
@@ -952,6 +964,16 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop.SetAttribute("Number",(int)uiNumber);
 	prop.SetAttribute("Type",ProbeType);
 	prop.SetAttribute("Weight",m_weight);
+
+	if (m_FD_Samples.size())
+	{
+		string fdSamples = CombineVector2String(m_FD_Samples,',');
+
+		TiXmlElement FDS_Elem("FD_Samples");
+		TiXmlText FDS_Text(fdSamples.c_str());
+		FDS_Elem.InsertEndChild(FDS_Text);
+		prop.InsertEndChild(FDS_Elem);
+	}
 
 	CSProperties::Write2XML(prop,parameterised,sparse);
 	root.InsertEndChild(prop);
@@ -972,6 +994,18 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
 
 	if (prop->QueryDoubleAttribute("Weight",&m_weight)!=TIXML_SUCCESS) m_weight=1;
+
+	TiXmlElement* FDSamples = prop->FirstChildElement("FD_Samples");
+	if (FDSamples!=NULL)
+	{
+		TiXmlNode* node = FDSamples->FirstChild();
+		if (node)
+		{
+			TiXmlText* text = node->ToText();
+			if (text)
+				this->AddFDSample(text->Value());
+		}
+	}
 
 	return true;
 }
