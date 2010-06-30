@@ -533,7 +533,12 @@ void ContinuousStructure::UpdateIDs()
 
 string ContinuousStructure::GetInfoLine()
 {
-	string InfoLine = string(_CSXCAD_LIB_NAME_) + string("\nAuthor: ") + string(_CSXCAD_AUTHOR_) +string("\nMail: ") +string(_CSXCAD_AUTHOR_MAIL_) + string("\nVersion: ") + string(_CSXCAD_VERSION_) +string("\tBuild: ") + string(__DATE__) + string(" ") + string(__TIME__);
+	string InfoLine = string(_CSXCAD_LIB_NAME_)
+					  +string("\nAuthor: ") + string(_CSXCAD_AUTHOR_)
+					  +string("\nMail: ") +string(_CSXCAD_AUTHOR_MAIL_)
+					  +string("\nVersion: ") + string(_CSXCAD_VERSION_)
+					  +string("\tBuild: ") + string(__DATE__) + string(" ") + string(__TIME__)
+					  +string("\nLicense: ") + string(_CSXCAD_LICENSE_);
 	return InfoLine;
 }
 
