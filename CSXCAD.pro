@@ -11,6 +11,9 @@ OBJECTS_DIR = obj
 
 CONFIG-=qt
 
+# add git revision
+QMAKE_CXXFLAGS += -DGIT_VERSION=\\\"`git describe --tags`\\\"
+
 unix { 
     VERSION = 0.2.1
     LIBS += -L../fparser \

@@ -27,7 +27,7 @@
 #define _CSXCAD_LIB_NAME_ "CSXCAD-Lib: Continuous Structure XML - CAD"
 #define _CSXCAD_AUTHOR_ "Thorsten Liebig (2008-2009)"
 #define _CSXCAD_AUTHOR_MAIL_ "Thorsten.Liebig@gmx.de"
-#define _CSXCAD_VERSION_ "0.1.1 alpha"
+#define _CSXCAD_VERSION_ GIT_VERSION
 
 #if defined(WIN32)
 	#ifdef BUILD_CSXCAD_LIB
