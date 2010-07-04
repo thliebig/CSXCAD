@@ -126,13 +126,14 @@ void CSProperties::SetEdgeColor(RGBa color) {EdgeColor.R=color.R;EdgeColor.G=col
 bool CSProperties::GetVisibility() {return bVisisble;}
 void CSProperties::SetVisibility(bool val) {bVisisble=val;}
 
-CSPropUnknown* CSProperties::ToUnknown() { return ( this && Type == UNKNOWN ) ? (CSPropUnknown*) this : 0; }
-CSPropMaterial* CSProperties::ToMaterial() { return ( this && Type == MATERIAL ) ? (CSPropMaterial*) this : 0; }
-CSPropMetal* CSProperties::ToMetal() { return ( this && Type == METAL ) ? (CSPropMetal*) this : 0; }
-CSPropElectrode* CSProperties::ToElectrode() { return ( this && Type == ELECTRODE ) ? (CSPropElectrode*) this : 0; }
-CSPropProbeBox* CSProperties::ToProbeBox() { return ( this && Type == PROBEBOX ) ? (CSPropProbeBox*) this : 0; }
-CSPropResBox* CSProperties::ToResBox() { return ( this && Type == RESBOX ) ? (CSPropResBox*) this : 0; }
-CSPropDumpBox* CSProperties::ToDumpBox() { return ( this && Type == DUMPBOX ) ? (CSPropDumpBox*) this : 0; }
+CSPropUnknown* CSProperties::ToUnknown() { return dynamic_cast<CSPropUnknown*>(this); }
+CSPropMaterial* CSProperties::ToMaterial() { return dynamic_cast<CSPropMaterial*>(this); }
+CSPropLorentzMaterial* CSProperties::ToLorentzMaterial() { return dynamic_cast<CSPropLorentzMaterial*>(this); }
+CSPropMetal* CSProperties::ToMetal() { return dynamic_cast<CSPropMetal*>(this); }
+CSPropElectrode* CSProperties::ToElectrode() { return dynamic_cast<CSPropElectrode*>(this); }
+CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*>(this); }
+CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }
+CSPropDumpBox* CSProperties::ToDumpBox() { return dynamic_cast<CSPropDumpBox*>(this); }
 
 bool CSProperties::Update(string */*ErrStr*/) {return true;}
 
@@ -637,9 +638,9 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 }
 
 /*********************CSPropDispersiveMaterial********************************************************/
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet) {Type=DISPERSIVEMATERIAL;}
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropMaterial(prop) {Type=DISPERSIVEMATERIAL;}
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {Type=DISPERSIVEMATERIAL;}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropMaterial(prop) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
 CSPropDispersiveMaterial::~CSPropDispersiveMaterial() {}
 
 bool CSPropDispersiveMaterial::Update(string *ErrStr)
@@ -658,9 +659,9 @@ bool CSPropDispersiveMaterial::ReadFromXML(TiXmlNode &root)
 }
 
 /*********************CSPropLorentzMaterial********************************************************/
-CSPropLorentzMaterial::CSPropLorentzMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=LORENTZMATERIAL;}
-CSPropLorentzMaterial::CSPropLorentzMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=LORENTZMATERIAL;}
-CSPropLorentzMaterial::CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=LORENTZMATERIAL;}
+CSPropLorentzMaterial::CSPropLorentzMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);}
+CSPropLorentzMaterial::CSPropLorentzMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);}
+CSPropLorentzMaterial::CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);}
 CSPropLorentzMaterial::~CSPropLorentzMaterial() {}
 
 void CSPropLorentzMaterial::Init()

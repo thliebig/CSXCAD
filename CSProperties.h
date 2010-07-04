@@ -127,17 +127,19 @@ public:
 
 	//! Convert to Unknown Property, returns NULL if type is different! \return Returns a CSPropUnknown* or NULL if type is different!
 	CSPropUnknown* ToUnknown();
-	//! Convert to Material Property, returns NULL if type is different! \return Returns a ToMaterial* or NULL if type is different!
+	//! Convert to Material Property, returns NULL if type is different! \return Returns a CSPropMaterial* or NULL if type is different!
 	CSPropMaterial* ToMaterial();
-	//! Convert to Metal Property, returns NULL if type is different! \return Returns a ToMetal* or NULL if type is different!
+	//! Convert to Lorentzs-Material Property, returns NULL if type is different! \return Returns a CSPropLorentzMaterial* or NULL if type is different!
+	CSPropLorentzMaterial* ToLorentzMaterial();
+	//! Convert to Metal Property, returns NULL if type is different! \return Returns a CSPropMetal* or NULL if type is different!
 	CSPropMetal* ToMetal();
-	//! Convert to Electrode Property, returns NULL if type is different! \return Returns a ToElectrode* or NULL if type is different!
+	//! Convert to Electrode Property, returns NULL if type is different! \return Returns a CSPropElectrode* or NULL if type is different!
 	CSPropElectrode* ToElectrode();
-	//! Convert to ProbeBox Property, returns NULL if type is different! \return Returns a ToProbeBox* or NULL if type is different!
+	//! Convert to ProbeBox Property, returns NULL if type is different! \return Returns a CSPropProbeBox* or NULL if type is different!
 	CSPropProbeBox* ToProbeBox();
-	//! Convert to ResBox Property, returns NULL if type is different! \return Returns a ToResBox* or NULL if type is different!
+	//! Convert to ResBox Property, returns NULL if type is different! \return Returns a CSPropResBox* or NULL if type is different!
 	CSPropResBox* ToResBox();
-	//! Convert to DumpBox Property, returns NULL if type is different! \return Returns a ToDumpBox* or NULL if type is different!
+	//! Convert to DumpBox Property, returns NULL if type is different! \return Returns a CSPropDumpBox* or NULL if type is different!
 	CSPropDumpBox* ToDumpBox();
 
 	//! Update all parameters. Nothing to do in this base class. \param ErrStr Methode writes error messages to this string! \return Update success
