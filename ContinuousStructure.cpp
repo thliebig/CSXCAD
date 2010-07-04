@@ -334,7 +334,9 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised, boo
 	TiXmlElement Properties("Properties");
 	for (size_t i=0;i<vProperties.size();++i)
 	{
-		vProperties.at(i)->Write2XML(Properties,parameterised,sparse);
+		TiXmlElement PropElem(vProperties.at(i)->GetTypeXMLString().c_str());
+		vProperties.at(i)->Write2XML(PropElem,parameterised,sparse);
+		Properties.InsertEndChild(PropElem);
 	}
 	Struct.InsertEndChild(Properties);
 

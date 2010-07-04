@@ -71,6 +71,8 @@ public:
 	int GetType();
 	//! Get PropertyType as a string \sa PropertyType and GetType
 	const string GetTypeString();
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("Any");}
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
 	bool GetMaterial() {return bMaterial;};
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
@@ -183,6 +185,9 @@ public:
 	CSPropUnknown(CSProperties* prop);
 	virtual ~CSPropUnknown();
 
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("Unknown");}
+
 	void SetProperty(const string val);
 	const string GetProperty();
 
@@ -205,6 +210,9 @@ public:
 	CSPropMaterial(CSProperties* prop);
 	CSPropMaterial(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMaterial();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("Material");}
 
         void SetEpsilon(double val, int direction=0);
         void SetEpsilon(const string val, int direction=0);
@@ -270,6 +278,9 @@ public:
 	CSPropMetal(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMetal();
 
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("Metal");}
+
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 };
@@ -285,6 +296,9 @@ public:
 	CSPropElectrode(CSProperties* prop);
 	CSPropElectrode(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropElectrode();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("Electrode");}
 
 	void SetNumber(unsigned int val);
 	unsigned int GetNumber();
@@ -345,6 +359,9 @@ public:
 	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropProbeBox();
 
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("ProbeBox");}
+
 	//! Define a number for this probe property \sa GetNumber
 	void SetNumber(unsigned int val);
 	//! Get the number designated to this probe property \sa SetNumber
@@ -388,6 +405,9 @@ public:
 	CSPropResBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropResBox();
 
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("ResBox");}
+
 	void SetResFactor(unsigned int val);
 	unsigned int GetResFactor();
 
@@ -409,6 +429,9 @@ public:
 	CSPropDumpBox(CSProperties* prop);
 	CSPropDumpBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropDumpBox();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("DumpBox");}
 
 	//! Define an arbitrary dump-type \sa GetDumpType
 	void SetDumpType(int type) {DumpType=type;}
