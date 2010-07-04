@@ -340,27 +340,36 @@ CSPropMaterial::CSPropMaterial(CSProperties* prop) : CSProperties(prop) {Type=MA
 CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=MATERIAL;Init();}
 CSPropMaterial::~CSPropMaterial() {}
 
-void CSPropMaterial::SetEpsilon(double val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Epsilon[ny].SetValue(val);
-}
-void CSPropMaterial::SetEpsilon(const string val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Epsilon[ny].SetValue(val);
-}
-double CSPropMaterial::GetEpsilon(int ny)
+double CSPropMaterial::GetValue(ParameterScalar *ps, int ny)
 {
 	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Epsilon[ny].GetValue();
+	if ((ny>2) || (ny<0)) return 0;
+	return ps[ny].GetValue();
 }
-const string CSPropMaterial::GetEpsilonTerm(int ny)
+
+string CSPropMaterial::GetTerm(ParameterScalar *ps, int ny)
 {
 	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Epsilon[ny].GetString();
+	if ((ny>2) || (ny<0)) return 0;
+	return ps[ny].GetString();
+}
+
+void CSPropMaterial::SetValue(double val, ParameterScalar *ps, int ny)
+{
+	if ((ny>2) || (ny<0)) return;
+	ps[ny].SetValue(val);
+}
+
+int CSPropMaterial::SetValue(string val, ParameterScalar *ps, int ny)
+{
+	if ((ny>2) || (ny<0)) return 0;
+	return ps[ny].SetValue(val);
+}
+
+double CSPropMaterial::GetWeight(ParameterScalar *ps, int ny, const double* coords)
+{
+	if ((ny>2) || (ny<0)) return 0;
+	return GetWeight(ps[ny],coords);
 }
 
 double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
@@ -398,131 +407,6 @@ double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 		cerr << "CSPropMaterial::GetWeight: Error evaluating the weighting function (ID: " << this->GetID() << "): " << PSErrorCode2Msg(EC) << endl;
 	}
 	return value;
-}
-
-int CSPropMaterial::SetEpsilonWeightFunction(const string fct, int ny)
-{
-	if ((ny>=0) && (ny<3))
-		return WeightEpsilon[ny].SetValue(fct);
-	return 0;
-}
-
-const string CSPropMaterial::GetEpsilonWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightEpsilon[ny].GetString();} else return string();}
-double CSPropMaterial::GetEpsilonWeighted(int ny, const double* coords)
-{
-	if ((ny<0) || (ny>=3)) return 0;
-	return GetWeight(WeightEpsilon[ny],coords)*GetEpsilon(ny);
-}
-
-void CSPropMaterial::SetMue(double val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Mue[ny].SetValue(val);
-}
-void CSPropMaterial::SetMue(const string val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Mue[ny].SetValue(val);
-}
-double CSPropMaterial::GetMue(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Mue[ny].GetValue();
-}
-const string CSPropMaterial::GetMueTerm(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Mue[ny].GetString();
-}
-
-int CSPropMaterial::SetMueWeightFunction(const string fct, int ny)
-{
-	if ((ny>=0) && (ny<3))
-		return WeightMue[ny].SetValue(fct);
-	return 0;
-}
-
-const string CSPropMaterial::GetMueWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightMue[ny].GetString();} else return string();}
-double CSPropMaterial::GetMueWeighted(int ny, const double* coords)
-{
-	if ((ny<0) || (ny>=3)) return 0;
-	return GetWeight(WeightMue[ny],coords)*GetMue(ny);
-}
-
-
-void CSPropMaterial::SetKappa(double val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Kappa[ny].SetValue(val);
-}
-void CSPropMaterial::SetKappa(const string val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Kappa[ny].SetValue(val);
-}
-double CSPropMaterial::GetKappa(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Kappa[ny].GetValue();
-}
-const string CSPropMaterial::GetKappaTerm(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Kappa[ny].GetString();
-}
-
-int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny)
-{
-	if ((ny>=0) && (ny<3))
-		return WeightKappa[ny].SetValue(fct);
-	return 0;
-}
-
-const string CSPropMaterial::GetKappaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightKappa[ny].GetString();} else return string();}
-double CSPropMaterial::GetKappaWeighted(int ny, const double* coords)
-{
-	if ((ny<0) || (ny>=3)) return 0;
-	return GetWeight(WeightKappa[ny],coords)*GetKappa(ny);
-}
-
-void CSPropMaterial::SetSigma(double val, int ny)
-{
-	if ((ny>2) || (ny<0)) return;
-	Sigma[ny].SetValue(val);
-}
-void CSPropMaterial::SetSigma(const string val, int ny)
-{
-	if ((ny>2) || (ny<0)) return; Sigma[ny].SetValue(val);
-}
-double CSPropMaterial::GetSigma(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Sigma[ny].GetValue();
-}
-const string CSPropMaterial::GetSigmaTerm(int ny)
-{
-	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) ny=0;
-	return Sigma[ny].GetString();
-}
-
-int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny)
-{
-	if ((ny>=0) && (ny<3))
-		return WeightSigma[ny].SetValue(fct);
-	return 0;
-}
-
-const string CSPropMaterial::GetSigmaWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightSigma[ny].GetString();} else return string();}
-double CSPropMaterial::GetSigmaWeighted(int ny, const double* coords)
-{
-	if ((ny<0) || (ny>=3)) return 0;
-	return GetWeight(WeightSigma[ny],coords)*GetSigma(ny);
 }
 
 void CSPropMaterial::Init()
