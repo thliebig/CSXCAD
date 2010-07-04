@@ -243,27 +243,4 @@ protected:
 	double dValue;
 };
 
-class CSXCAD_EXPORT ParameterVector
-{
-public:
-	ParameterVector(ParameterSet* ParaSet);
-	~ParameterVector();
-
-	void SetX(double val) {XCoord.SetValue(val);};
-	void SetX(const string val) {XCoord.SetValue(val);};
-	void SetY(double val) {YCoord.SetValue(val);};
-	void SetY(const string val) {YCoord.SetValue(val);};
-	void SetZ(double val) {ZCoord.SetValue(val);};
-	void SetZ(const string val) {ZCoord.SetValue(val);};
-	void SetCoords(double x, double y, double z) {XCoord.SetValue(x);YCoord.SetValue(y);ZCoord.SetValue(z);};
-
-	int Evaluate() {return XCoord.Evaluate()+YCoord.Evaluate()+ZCoord.Evaluate();};
-	double GetX() {return XCoord.GetValue();};
-	double GetY() {return YCoord.GetValue();};
-	double GetZ() {return ZCoord.GetValue();};
-
-protected:
-	ParameterScalar XCoord,YCoord,ZCoord;
-};
-
 #endif
