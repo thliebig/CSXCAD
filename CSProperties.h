@@ -36,6 +36,9 @@ class CSPrimitives;
 
 class CSPropUnknown;
 class CSPropMaterial;
+	class CSPropDispersiveMaterial;
+		class CSPropLorentzMaterial;
+		class CSPropDebyeMaterial;
 class CSPropMetal;
 class CSPropElectrode;
 class CSPropProbeBox;
@@ -64,7 +67,8 @@ public:
 	//! Enumeration of all possible sub-types of this base-class
 	enum PropertyType
 	{
-		ANY = 0xff,UNKNOWN = 0x01,MATERIAL = 0x02,METAL = 0x04,ELECTRODE = 0x08,PROBEBOX = 0x10,RESBOX = 0x20,DUMPBOX = 0x40
+		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, ELECTRODE = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
+		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400 /*, unused dispersive material = 0x800 */
 	};
 	
 	//! Get PropertyType \sa PropertyType and GetTypeString
@@ -270,6 +274,92 @@ protected:
 	double GetWeight(ParameterScalar *ps, int ny, const double* coords);
 	bool bIsotropy;
 };
+
+//! Continuous Structure Dispersive Material Property
+/*!
+  This abstarct Property can hold information about the special properties of dispersive materials.
+  */
+class CSXCAD_EXPORT CSPropDispersiveMaterial : public CSPropMaterial
+{
+public:
+	virtual ~CSPropDispersiveMaterial();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("DispersiveMaterial");}
+
+protected:
+	virtual bool Update(string *ErrStr=NULL);
+
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+	CSPropDispersiveMaterial(ParameterSet* paraSet);
+	CSPropDispersiveMaterial(CSProperties* prop);
+	CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet);
+};
+
+//! Continuous Structure Lorentz/ Drude Dispersive Material Property
+/*!
+  This Property can hold information about the special properties of Lorentz or Drude dispersive materials.
+  The Drude material model is a special case of the Lorentz material model.
+  \todo Add all the other parameter needed by this model
+  */
+class CSXCAD_EXPORT CSPropLorentzMaterial : public CSPropDispersiveMaterial
+{
+public:
+	CSPropLorentzMaterial(ParameterSet* paraSet);
+	CSPropLorentzMaterial(CSProperties* prop);
+	CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropLorentzMaterial();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() {return string("LorentzMaterial");}
+
+	//! Set the epsilon plasma frequency
+	void SetEpsPlasmaFreq(double val, int ny=0) {SetValue(val,EpsPlasma,ny);}
+	//! Set the epsilon plasma frequency
+	int  SetEpsPlasmaFreq(const string val, int ny=0)  {return SetValue(val,EpsPlasma,ny);}
+	//! Get the epsilon plasma frequency
+	double GetEpsPlasmaFreq(int ny=0) {return GetValue(EpsPlasma,ny);}
+	//! Get the epsilon plasma frequency as a string
+	const string GetEpsPlasmaFreqTerm(int ny=0) {return GetTerm(EpsPlasma,ny);}
+
+	//! Set the epsilon plasma frequency weighting
+	int SetEpsPlasmaFreqWeightFunction(const string val, int ny) {return SetValue(val,WeightEpsPlasma,ny);}
+	//! Get the epsilon plasma frequency weighting string
+	const string GetEpsPlasmaFreqWeightFunction(int ny) {return GetTerm(EpsPlasma,ny);}
+	//! Get the epsilon plasma frequency weighting
+	double GetEpsPlasmaFreqWeighted(int ny, const double* coords) {return GetWeight(EpsPlasma,ny,coords)*GetEpsPlasmaFreq(ny);}
+
+	//! Set the mue plasma frequency
+	void SetMuePlasmaFreq(double val, int ny=0)  {SetValue(val,MuePlasma,ny);}
+	//! Set the mue plasma frequency
+	int SetMuePlasmaFreq(const string val, int ny=0)  {return SetValue(val,MuePlasma,ny);}
+	//! Get the mue plasma frequency
+	double GetMuePlasmaFreq(int ny=0)  {return GetValue(MuePlasma,ny);}
+	//! Get the mue plasma frequency string
+	const string GetMueTermPlasmaFreq(int ny=0)  {return GetTerm(MuePlasma,ny);}
+
+	//! Set the mue plasma frequency weighting
+	int SetMuePlasmaFreqWeightFunction(const string val, int ny) {return SetValue(val,WeightMuePlasma,ny);}
+	//! Get the mue plasma frequency weighting string
+	const string GetMuePlasmaFreqWeightFunction(int ny) {return GetTerm(WeightMuePlasma,ny);}
+	//! Get the mue plasma frequency weighting
+	double GetMuePlasmaFreqWeighted(int ny, const double* coords)  {return GetWeight(WeightMuePlasma,ny,coords)*GetMuePlasmaFreq(ny);}
+
+	virtual void Init();
+	virtual bool Update(string *ErrStr=NULL);
+
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	//! Epsilon and mue plasma frequncies
+	ParameterScalar EpsPlasma[3],MuePlasma[3];
+	//! Epsilon and mue plasma frequncies weighting functions
+	ParameterScalar WeightEpsPlasma[3],WeightMuePlasma[3];
+};
+
 
 //! Continuous Structure Metal Property
 /*!

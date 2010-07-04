@@ -380,6 +380,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		const char* cProp=PropNode->Value();
 		if (strcmp(cProp,"Unknown")==0) newProp = new CSPropUnknown(clParaSet);
 		else if (strcmp(cProp,"Material")==0) newProp = new CSPropMaterial(clParaSet);
+		else if (strcmp(cProp,"LorentzMaterial")==0) newProp = new CSPropLorentzMaterial(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
 		else if (strcmp(cProp,"Electrode")==0) newProp = new CSPropElectrode(clParaSet);
 		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropProbeBox(clParaSet);

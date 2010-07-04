@@ -636,6 +636,143 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
+/*********************CSPropDispersiveMaterial********************************************************/
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet) {Type=DISPERSIVEMATERIAL;}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropMaterial(prop) {Type=DISPERSIVEMATERIAL;}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {Type=DISPERSIVEMATERIAL;}
+CSPropDispersiveMaterial::~CSPropDispersiveMaterial() {}
+
+bool CSPropDispersiveMaterial::Update(string *ErrStr)
+{
+	return CSPropMaterial::Update(ErrStr);
+}
+
+bool CSPropDispersiveMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+{
+	return CSPropMaterial::Write2XML(root,parameterised,sparse);
+}
+
+bool CSPropDispersiveMaterial::ReadFromXML(TiXmlNode &root)
+{
+	return CSPropMaterial::ReadFromXML(root);
+}
+
+/*********************CSPropLorentzMaterial********************************************************/
+CSPropLorentzMaterial::CSPropLorentzMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=LORENTZMATERIAL;}
+CSPropLorentzMaterial::CSPropLorentzMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=LORENTZMATERIAL;}
+CSPropLorentzMaterial::CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=LORENTZMATERIAL;}
+CSPropLorentzMaterial::~CSPropLorentzMaterial() {}
+
+void CSPropLorentzMaterial::Init()
+{
+	for (int n=0;n<3;++n)
+	{
+		EpsPlasma[n].SetValue(0);
+		EpsPlasma[n].SetParameterSet(clParaSet);
+		MuePlasma[n].SetValue(0);
+		MuePlasma[n].SetParameterSet(clParaSet);
+		WeightEpsPlasma[n].SetValue(1);
+		WeightEpsPlasma[n].SetParameterSet(coordParaSet);
+		WeightMuePlasma[n].SetValue(1);
+		WeightMuePlasma[n].SetParameterSet(coordParaSet);
+	}
+	CSPropDispersiveMaterial::Init();
+}
+
+
+bool CSPropLorentzMaterial::Update(string *ErrStr)
+{
+	bool bOK=true;
+	int EC=0;
+	for (int n=0;n<3;++n)
+	{
+		EC=EpsPlasma[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+		EC=MuePlasma[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Lorentz Material-Property mue plasma frequency value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+
+		EC=WeightEpsPlasma[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency weighting function (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+		EC=WeightMuePlasma[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Lorentz Material-Property mue plasma frequency value weighting function (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
+	return CSPropDispersiveMaterial::Update(ErrStr);
+}
+
+bool CSPropLorentzMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+{
+	if (CSPropDispersiveMaterial::Write2XML(root,parameterised,sparse) == false) return false;
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	string dirName[3] = {"X","Y","Z"};
+
+	for (int n=0;n<3;++n)
+	{
+		string name = "PlasmaFrequency" + dirName[n];
+		TiXmlElement value(name.c_str());
+		WriteTerm(EpsPlasma[n],value,"Epsilon",parameterised);
+		WriteTerm(MuePlasma[n],value,"Mue",parameterised);
+		WriteTerm(WeightEpsPlasma[n],value,"WeightEpsilon",parameterised);
+		WriteTerm(WeightMuePlasma[n],value,"WeighMue",parameterised);
+		prop->InsertEndChild(value);
+	}
+	return true;
+}
+
+bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPropDispersiveMaterial::ReadFromXML(root)==false) return false;
+	TiXmlElement* prop=root.ToElement();
+
+	if (prop==NULL) return false;
+
+	string dirName[3] = {"X","Y","Z"};
+
+	for (int n=0;n<3;++n)
+	{
+		string name = "PlasmaFrequency" + dirName[n];
+		TiXmlElement* matProp=prop->FirstChildElement(name.c_str());
+		if (matProp!=NULL)
+		{
+			ReadTerm(EpsPlasma[n],*matProp,"Epsilon",1.0);
+			ReadTerm(MuePlasma[n],*matProp,"Mue",1.0);
+			ReadTerm(WeightEpsPlasma[n],*matProp,"WeightEpsilon");
+			ReadTerm(WeightMuePlasma[n],*matProp,"WeighMue");
+		}
+	}
+
+	return true;
+}
+
 /*********************CSPropMetal********************************************************************/
 CSPropMetal::CSPropMetal(ParameterSet* paraSet) : CSProperties(paraSet) {Type=METAL;bMaterial=true;}
 CSPropMetal::CSPropMetal(CSProperties* prop) : CSProperties(prop) {Type=METAL;bMaterial=true;}
