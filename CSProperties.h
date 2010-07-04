@@ -214,37 +214,37 @@ public:
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() {return string("Material");}
 
-	void SetEpsilon(double val, int direction=0);
-	void SetEpsilon(const string val, int direction=0);
-	double GetEpsilon(int direction=0);
-	const string GetEpsilonTerm(int direction=0);
+	void SetEpsilon(double val, int ny=0);
+	void SetEpsilon(const string val, int ny=0);
+	double GetEpsilon(int ny=0);
+	const string GetEpsilonTerm(int ny=0);
 
 	int SetEpsilonWeightFunction(const string fct, int ny);
 	const string GetEpsilonWeightFunction(int ny);
 	double GetEpsilonWeighted(int ny, const double* coords);
 
-	void SetMue(double val, int direction=0);
-	void SetMue(const string val, int direction=0);
-	double GetMue(int direction=0);
-	const string GetMueTerm(int direction=0);
+	void SetMue(double val, int ny=0);
+	void SetMue(const string val, int ny=0);
+	double GetMue(int ny=0);
+	const string GetMueTerm(int ny=0);
 
 	int SetMueWeightFunction(const string fct, int ny);
 	const string GetMueWeightFunction(int ny);
 	double GetMueWeighted(int ny, const double* coords);
 
-	void SetKappa(double val, int direction=0);
-	void SetKappa(const string val, int direction=0);
-	double GetKappa(int direction=0);
-	const string GetKappaTerm(int direction=0);
+	void SetKappa(double val, int ny=0);
+	void SetKappa(const string val, int ny=0);
+	double GetKappa(int ny=0);
+	const string GetKappaTerm(int ny=0);
 
 	int SetKappaWeightFunction(const string fct, int ny);
 	const string GetKappaWeightFunction(int ny);
 	double GetKappaWeighted(int ny, const double* coords);
 		
-	void SetSigma(double val, int direction=0);
-	void SetSigma(const string val, int direction=0);
-	double GetSigma(int direction=0);
-	const string GetSigmaTerm(int direction=0);
+	void SetSigma(double val, int ny=0);
+	void SetSigma(const string val, int ny=0);
+	double GetSigma(int ny=0);
+	const string GetSigmaTerm(int ny=0);
 
 	int SetSigmaWeightFunction(const string fct, int ny);
 	const string GetSigmaWeightFunction(int ny);

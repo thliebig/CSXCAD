@@ -340,27 +340,27 @@ CSPropMaterial::CSPropMaterial(CSProperties* prop) : CSProperties(prop) {Type=MA
 CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=MATERIAL;Init();}
 CSPropMaterial::~CSPropMaterial() {}
 
-void CSPropMaterial::SetEpsilon(double val, int direction)
+void CSPropMaterial::SetEpsilon(double val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Epsilon[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Epsilon[ny].SetValue(val);
 }
-void CSPropMaterial::SetEpsilon(const string val, int direction)
+void CSPropMaterial::SetEpsilon(const string val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Epsilon[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Epsilon[ny].SetValue(val);
 }
-double CSPropMaterial::GetEpsilon(int direction)
+double CSPropMaterial::GetEpsilon(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Epsilon[direction].GetValue();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Epsilon[ny].GetValue();
 }
-const string CSPropMaterial::GetEpsilonTerm(int direction)
+const string CSPropMaterial::GetEpsilonTerm(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Epsilon[direction].GetString();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Epsilon[ny].GetString();
 }
 
 double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
@@ -414,27 +414,27 @@ double CSPropMaterial::GetEpsilonWeighted(int ny, const double* coords)
 	return GetWeight(WeightEpsilon[ny],coords)*GetEpsilon(ny);
 }
 
-void CSPropMaterial::SetMue(double val, int direction)
+void CSPropMaterial::SetMue(double val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Mue[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Mue[ny].SetValue(val);
 }
-void CSPropMaterial::SetMue(const string val, int direction)
+void CSPropMaterial::SetMue(const string val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Mue[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Mue[ny].SetValue(val);
 }
-double CSPropMaterial::GetMue(int direction)
+double CSPropMaterial::GetMue(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Mue[direction].GetValue();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Mue[ny].GetValue();
 }
-const string CSPropMaterial::GetMueTerm(int direction)
+const string CSPropMaterial::GetMueTerm(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Mue[direction].GetString();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Mue[ny].GetString();
 }
 
 int CSPropMaterial::SetMueWeightFunction(const string fct, int ny)
@@ -452,27 +452,27 @@ double CSPropMaterial::GetMueWeighted(int ny, const double* coords)
 }
 
 
-void CSPropMaterial::SetKappa(double val, int direction)
+void CSPropMaterial::SetKappa(double val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Kappa[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Kappa[ny].SetValue(val);
 }
-void CSPropMaterial::SetKappa(const string val, int direction)
+void CSPropMaterial::SetKappa(const string val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Kappa[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Kappa[ny].SetValue(val);
 }
-double CSPropMaterial::GetKappa(int direction)
+double CSPropMaterial::GetKappa(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Kappa[direction].GetValue();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Kappa[ny].GetValue();
 }
-const string CSPropMaterial::GetKappaTerm(int direction)
+const string CSPropMaterial::GetKappaTerm(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Kappa[direction].GetString();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Kappa[ny].GetString();
 }
 
 int CSPropMaterial::SetKappaWeightFunction(const string fct, int ny)
@@ -489,26 +489,26 @@ double CSPropMaterial::GetKappaWeighted(int ny, const double* coords)
 	return GetWeight(WeightKappa[ny],coords)*GetKappa(ny);
 }
 
-void CSPropMaterial::SetSigma(double val, int direction)
+void CSPropMaterial::SetSigma(double val, int ny)
 {
-    if ((direction>2) || (direction<0)) return;
-    Sigma[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return;
+	Sigma[ny].SetValue(val);
 }
-void CSPropMaterial::SetSigma(const string val, int direction)
+void CSPropMaterial::SetSigma(const string val, int ny)
 {
-    if ((direction>2) || (direction<0)) return; Sigma[direction].SetValue(val);
+	if ((ny>2) || (ny<0)) return; Sigma[ny].SetValue(val);
 }
-double CSPropMaterial::GetSigma(int direction)
+double CSPropMaterial::GetSigma(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Sigma[direction].GetValue();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Sigma[ny].GetValue();
 }
-const string CSPropMaterial::GetSigmaTerm(int direction)
+const string CSPropMaterial::GetSigmaTerm(int ny)
 {
-    if (bIsotropy) direction=0;
-    if ((direction>2) || (direction<0)) direction=0;
-    return Sigma[direction].GetString();
+	if (bIsotropy) ny=0;
+	if ((ny>2) || (ny<0)) ny=0;
+	return Sigma[ny].GetString();
 }
 
 int CSPropMaterial::SetSigmaWeightFunction(const string fct, int ny)
