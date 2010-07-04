@@ -524,7 +524,7 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	prop->SetAttribute("Isotropy",bIsotropy);
 
-	TiXmlElement value("Property");
+	TiXmlElement value("PropertyX");
 	WriteTerm(Epsilon[0],value,"Epsilon",parameterised);
 	WriteTerm(Mue[0],value,"Mue",parameterised);
 	WriteTerm(Kappa[0],value,"Kappa",parameterised);
@@ -580,7 +580,9 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	prop->QueryIntAttribute("Isotropy",&attr);
 	bIsotropy = attr>0;
 
-	TiXmlElement* matProp=prop->FirstChildElement("Property");
+	TiXmlElement* matProp=prop->FirstChildElement("PropertyX");
+	if (matProp==NULL) //if 0 try also the old style...
+		matProp=prop->FirstChildElement("Property");
 	if (matProp!=NULL)
 	{
 		ReadTerm(Epsilon[0],*matProp,"Epsilon",1.0);
