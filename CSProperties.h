@@ -214,56 +214,56 @@ public:
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() {return string("Material");}
 
-        void SetEpsilon(double val, int direction=0);
-        void SetEpsilon(const string val, int direction=0);
-        double GetEpsilon(int direction=0);
-        const string GetEpsilonTerm(int direction=0);
+	void SetEpsilon(double val, int direction=0);
+	void SetEpsilon(const string val, int direction=0);
+	double GetEpsilon(int direction=0);
+	const string GetEpsilonTerm(int direction=0);
 
 	int SetEpsilonWeightFunction(const string fct, int ny);
 	const string GetEpsilonWeightFunction(int ny);
 	double GetEpsilonWeighted(int ny, const double* coords);
 
-        void SetMue(double val, int direction=0);
-        void SetMue(const string val, int direction=0);
-        double GetMue(int direction=0);
-        const string GetMueTerm(int direction=0);
+	void SetMue(double val, int direction=0);
+	void SetMue(const string val, int direction=0);
+	double GetMue(int direction=0);
+	const string GetMueTerm(int direction=0);
 
 	int SetMueWeightFunction(const string fct, int ny);
 	const string GetMueWeightFunction(int ny);
 	double GetMueWeighted(int ny, const double* coords);
 
-        void SetKappa(double val, int direction=0);
-        void SetKappa(const string val, int direction=0);
-        double GetKappa(int direction=0);
-        const string GetKappaTerm(int direction=0);
+	void SetKappa(double val, int direction=0);
+	void SetKappa(const string val, int direction=0);
+	double GetKappa(int direction=0);
+	const string GetKappaTerm(int direction=0);
 
 	int SetKappaWeightFunction(const string fct, int ny);
 	const string GetKappaWeightFunction(int ny);
 	double GetKappaWeighted(int ny, const double* coords);
 		
-        void SetSigma(double val, int direction=0);
-        void SetSigma(const string val, int direction=0);
-        double GetSigma(int direction=0);
-        const string GetSigmaTerm(int direction=0);
+	void SetSigma(double val, int direction=0);
+	void SetSigma(const string val, int direction=0);
+	double GetSigma(int direction=0);
+	const string GetSigmaTerm(int direction=0);
 
 	int SetSigmaWeightFunction(const string fct, int ny);
 	const string GetSigmaWeightFunction(int ny);
 	double GetSigmaWeighted(int ny, const double* coords);
 		
-        void SetIsotropy(bool val) {bIsotropy=val;};
-        bool GetIsotropy() {return bIsotropy;};
+	void SetIsotropy(bool val) {bIsotropy=val;};
+	bool GetIsotropy() {return bIsotropy;};
 
-        virtual void Init();
+	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-        ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
-		ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];
-		double GetWeight(ParameterScalar &ps, const double* coords);
-        bool bIsotropy;
+	ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
+	ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];
+	double GetWeight(ParameterScalar &ps, const double* coords);
+	bool bIsotropy;
 };
 
 //! Continuous Structure Metal Property

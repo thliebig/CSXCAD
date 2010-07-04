@@ -553,46 +553,46 @@ void CSPropMaterial::Init()
 bool CSPropMaterial::Update(string *ErrStr)
 {
 	bool bOK=true;
-        int EC=0;
-        for (int n=0;n<3;++n)
-        {
-            EC=Epsilon[n].Evaluate();
-            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-            {
-                    stringstream stream;
-                    stream << endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
-                    ErrStr->append(stream.str());
-                    PSErrorCode2Msg(EC,ErrStr);
-            }
-            EC=Mue[n].Evaluate();
-            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-            {
-                    stringstream stream;
-                    stream << endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
-                    ErrStr->append(stream.str());
-                    PSErrorCode2Msg(EC,ErrStr);
-            }
-            EC=Kappa[n].Evaluate();
-            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-            {
-                    stringstream stream;
-                    stream << endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
-                    ErrStr->append(stream.str());
-                    PSErrorCode2Msg(EC,ErrStr);
-            }
-            EC=Sigma[n].Evaluate();
-            if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-            if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-            {
-                    stringstream stream;
-                    stream << endl << "Error in Material-Property Sigma-Value (ID: " << uiID << "): ";
-                    ErrStr->append(stream.str());
-                    PSErrorCode2Msg(EC,ErrStr);
-            }
-        }
+	int EC=0;
+	for (int n=0;n<3;++n)
+	{
+		EC=Epsilon[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+		EC=Mue[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+		EC=Kappa[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+		EC=Sigma[n].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Material-Property Sigma-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
 	return bOK;
 }
 
