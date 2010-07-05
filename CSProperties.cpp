@@ -369,6 +369,7 @@ int CSPropMaterial::SetValue(string val, ParameterScalar *ps, int ny)
 
 double CSPropMaterial::GetWeight(ParameterScalar *ps, int ny, const double* coords)
 {
+	if (bIsotropy) ny=0;
 	if ((ny>2) || (ny<0)) return 0;
 	return GetWeight(ps[ny],coords);
 }
