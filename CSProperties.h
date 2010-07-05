@@ -30,6 +30,12 @@
 #include "ParameterObjects.h"
 #include "CSXCAD_Global.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 using namespace std;
 
 class CSPrimitives;
@@ -331,7 +337,7 @@ public:
 	//! Get the epsilon plasma frequency weighting string
 	const string GetEpsPlasmaFreqWeightFunction(int ny) {return GetTerm(EpsPlasma,ny);}
 	//! Get the epsilon plasma frequency weighting
-	double GetEpsPlasmaFreqWeighted(int ny, const double* coords) {return GetWeight(EpsPlasma,ny,coords)*GetEpsPlasmaFreq(ny);}
+	double GetEpsPlasmaFreqWeighted(int ny, const double* coords) {return GetWeight(WeightEpsPlasma,ny,coords)*GetEpsPlasmaFreq(ny);}
 
 	//! Set the mue plasma frequency
 	void SetMuePlasmaFreq(double val, int ny=0)  {SetValue(val,MuePlasma,ny);}
