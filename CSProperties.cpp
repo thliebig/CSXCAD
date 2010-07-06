@@ -768,7 +768,7 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 			ReadTerm(EpsPlasma[n],*matProp,"Epsilon",1.0);
 			ReadTerm(MuePlasma[n],*matProp,"Mue",1.0);
 			ReadTerm(WeightEpsPlasma[n],*matProp,"WeightEpsilon");
-			ReadTerm(WeightMuePlasma[n],*matProp,"WeighMue");
+			ReadTerm(WeightMuePlasma[n],*matProp,"WeightMue");
 		}
 	}
 	return true;
