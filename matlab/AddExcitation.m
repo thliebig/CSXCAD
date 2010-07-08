@@ -1,11 +1,26 @@
 function CSX = AddExcitation(CSX, name, type, excite, varargin)
 % function CSX = AddExcitation(CSX, name, type, excite, varargin)
 %
-% type: 0=soft excitation  1=hard excitation
+% Creates an E-field or H-field excitation.
+%
+% CSX: CSX-struct created by InitCSX
+% name: property name for the excitation
+% type: 0=E-field soft excitation  1=E-field hard excitation
+%       2=H-field soft excitation  3=H-field hard excitation
+% excite: e.g. [2 0 0] for excitation of 2 V/m in x-direction
+%
+% example:
+%   CSX = AddExcitation( CSX, 'infDipole', 1, [1 0 0] );
+%   start = [-dipole_length/2, 0, 0];
+%   stop  = [+dipole_length/2, 0, 0];
+%   CSX = AddBox( CSX, 'infDipole', 1, start, stop );
+%
 %
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
+%
+% See also SetExcitationWeight AddBox
 
 if ~ischar(name)
     error('CSXCAD::AddExcitation: name must be a string');
