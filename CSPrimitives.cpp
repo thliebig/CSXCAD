@@ -1288,21 +1288,21 @@ CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
-	PrimTypeName = string("Lin-Poly");
+	PrimTypeName = string("LinPoly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
 {
 	Type=LINPOLY;
 	extrudeLength = ParameterScalar(primLinPoly->extrudeLength);
-	PrimTypeName = string("Lin-Poly");
+	PrimTypeName = string("LinPoly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
-	PrimTypeName = string("Lin-Poly");
+	PrimTypeName = string("LinPoly");
 }
 
 
