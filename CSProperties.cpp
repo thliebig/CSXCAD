@@ -248,6 +248,11 @@ bool CSProperties::CheckCoordInPrimitive(const double *coord, int &priority, dou
 
 void CSProperties::WarnUnusedPrimitves(ostream& stream)
 {
+	if (vPrimitives.size()==0)
+	{
+		stream << "Warning: No primitives found in property: " << GetName() << "!" << endl;
+		return;
+	}
 	for (size_t i=0; i<vPrimitives.size();++i)
 	{
 		if (vPrimitives.at(i)->GetPrimitiveUsed()==false)
