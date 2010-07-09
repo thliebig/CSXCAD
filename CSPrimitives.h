@@ -30,6 +30,7 @@
 #include "ParameterObjects.h"
 #include "CSXCAD_Global.h"
 
+class CSPrimPoint;
 class CSPrimBox;
 class CSPrimMultiBox;
 class CSPrimSphere;
@@ -63,7 +64,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,WIRE,USERDEFINED
+		POINT,BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,WIRE,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -131,6 +132,8 @@ public:
 	CSPrimWire* ToWire() { return ( this && Type == WIRE ) ? (CSPrimWire*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing UserDefined-Primitive or NULL in case of different type.
 	CSPrimUserDefined* ToUserDefined() { return ( this && Type == USERDEFINED ) ? (CSPrimUserDefined*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Point-Primitive or 0 in case of different type.
+	CSPrimPoint* ToPoint() { return ( this && Type == POINT ) ? (CSPrimPoint*) this : 0; } //!< Cast Primitive to a more defined type. Will return 0 if not of the requested type.
 
 	bool operator<(CSPrimitives& vgl) { return iPriority<vgl.GetPriority();};
 	bool operator>(CSPrimitives& vgl) { return iPriority>vgl.GetPriority();};
@@ -149,6 +152,40 @@ protected:
 	CSProperties* clProperty;
 	string PrimTypeName;
 	bool m_Primtive_Used;
+};
+
+
+//! Point Primitive
+/*!
+ This is a point primitive (useful for field probes).
+ */
+class CSXCAD_EXPORT CSPrimPoint : public CSPrimitives
+{
+public:
+	CSPrimPoint(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimPoint(CSPrimPoint* primPoint, CSProperties *prop=NULL);
+	CSPrimPoint(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimPoint();
+
+	virtual CSPrimPoint* GetCopy(CSProperties *prop=NULL) {return new CSPrimPoint(this,prop);};
+
+	void SetCoord(int index, double val);
+	void SetCoord(int index, const string val);
+	void SetCoords( double c1, double c2, double c3 );
+
+	double GetCoord(int index);
+	ParameterScalar* GetCoordPS(int index);
+
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
+	virtual bool IsInside(const double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+protected:
+	//! Vector describing the point: x,y,z
+	ParameterScalar m_Coords[3];
 };
 
 //! Box Primitive (Cube)

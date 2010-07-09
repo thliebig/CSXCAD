@@ -108,6 +108,134 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 }
 
 
+
+
+
+
+/*********************CSPrimPoint********************************************************************/
+CSPrimPoint::CSPrimPoint(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
+{
+	Type = POINT;
+	for (int i=0;i<3;i++)
+		m_Coords[i].SetParameterSet(paraSet);
+	PrimTypeName = "Point";
+}
+
+CSPrimPoint::CSPrimPoint(CSPrimPoint* primPoint, CSProperties *prop) : CSPrimitives(primPoint,prop)
+{
+	Type = POINT;
+	for (int i=0;i<3;++i)
+		m_Coords[i] = ParameterScalar(primPoint->m_Coords[i]);
+	PrimTypeName = "Point";
+}
+
+CSPrimPoint::CSPrimPoint(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
+{
+	Type = POINT;
+	for (int i=0;i<3;i++)
+		m_Coords[i].SetParameterSet(paraSet);
+	PrimTypeName = "Point";
+}
+
+CSPrimPoint::~CSPrimPoint()
+{
+}
+
+void CSPrimPoint::SetCoord(int index, double val)
+{
+	if ((index>=0) && (index<3))
+		m_Coords[index].SetValue(val);
+}
+
+void CSPrimPoint::SetCoord(int index, const string val)
+{
+	if ((index>=0) && (index<3))
+		m_Coords[index].SetValue(val);
+}
+
+double CSPrimPoint::GetCoord(int index)
+{
+	if ((index>=0) && (index<3))
+		return m_Coords[index].GetValue();
+	return nan("");
+}
+
+ParameterScalar* CSPrimPoint::GetCoordPS(int index)
+{
+	if ((index>=0) && (index<3))
+		return &m_Coords[index];
+	return 0;
+}
+
+bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
+{
+	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	for (int i=0; i<3; i++)
+	{
+		dBoundBox[i]   = m_Coords[i].GetValue();
+		dBoundBox[i+3] = m_Coords[i].GetValue();
+	}
+	return true;
+}
+
+bool CSPrimPoint::IsInside(const double* /*Coord*/, double /*tol*/)
+{
+	// this is a 1D-object, you can never be inside...
+	return false;
+}
+
+
+bool CSPrimPoint::Update(string *ErrStr)
+{
+	int EC=0;
+	bool bOK=true;
+	for (int i=0; i<3; i++)
+	{
+		EC = m_Coords[i].Evaluate();
+		if (EC != ParameterScalar::NO_ERROR)
+			bOK=false;
+		if ((EC != ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		{
+			bOK=false;
+			stringstream stream;
+			stream << endl << "Error in Point (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
+		}
+	}
+	return bOK;
+}
+
+bool CSPrimPoint::Write2XML(TiXmlElement &elem, bool parameterised)
+{
+	CSPrimitives::Write2XML(elem,parameterised);
+
+	TiXmlElement P1("Point");
+	WriteTerm(m_Coords[0],P1,"X",parameterised);
+	WriteTerm(m_Coords[1],P1,"Y",parameterised);
+	WriteTerm(m_Coords[2],P1,"Z",parameterised);
+	elem.InsertEndChild(P1);
+
+	return true;
+}
+
+bool CSPrimPoint::ReadFromXML(TiXmlNode &root)
+{
+	if (!CSPrimitives::ReadFromXML(root))
+		return false;
+
+	TiXmlElement* P1=root.FirstChildElement("Point");
+	if (!P1)
+		return false;
+	if (ReadTerm(m_Coords[0],*P1,"X")==false) return false;
+	if (ReadTerm(m_Coords[1],*P1,"Y")==false) return false;
+	if (ReadTerm(m_Coords[2],*P1,"Z")==false) return false;
+
+	return true;
+}
+
+
+
 /*********************CSPrimBox********************************************************************/
 CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
