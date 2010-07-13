@@ -12,4 +12,4 @@ function CSX = AddMaterial(CSX, name, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-CSX = AddProperty(CSX, 'Material', name, varargin{:})
+CSX = AddProperty(CSX, 'Material', name, varargin{:});
