@@ -170,10 +170,10 @@ ParameterScalar* CSPrimPoint::GetCoordPS(int index)
 bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	for (int i=0; i<3; i++)
+	for (int i=0; i<5; i=i+2)
 	{
 		dBoundBox[i]   = m_Coords[i].GetValue();
-		dBoundBox[i+3] = m_Coords[i].GetValue();
+		dBoundBox[i+1] = m_Coords[i].GetValue();
 	}
 	return true;
 }
@@ -210,11 +210,11 @@ bool CSPrimPoint::Write2XML(TiXmlElement &elem, bool parameterised)
 {
 	CSPrimitives::Write2XML(elem,parameterised);
 
-	TiXmlElement P1("Point");
-	WriteTerm(m_Coords[0],P1,"X",parameterised);
-	WriteTerm(m_Coords[1],P1,"Y",parameterised);
-	WriteTerm(m_Coords[2],P1,"Z",parameterised);
-	elem.InsertEndChild(P1);
+//	TiXmlElement P1("Point");
+	WriteTerm(m_Coords[0],elem,"X",parameterised);
+	WriteTerm(m_Coords[1],elem,"Y",parameterised);
+	WriteTerm(m_Coords[2],elem,"Z",parameterised);
+//	elem.InsertEndChild(P1);
 
 	return true;
 }
@@ -224,12 +224,12 @@ bool CSPrimPoint::ReadFromXML(TiXmlNode &root)
 	if (!CSPrimitives::ReadFromXML(root))
 		return false;
 
-	TiXmlElement* P1=root.FirstChildElement("Point");
-	if (!P1)
-		return false;
-	if (ReadTerm(m_Coords[0],*P1,"X")==false) return false;
-	if (ReadTerm(m_Coords[1],*P1,"Y")==false) return false;
-	if (ReadTerm(m_Coords[2],*P1,"Z")==false) return false;
+//	TiXmlElement* P1=root.FirstChildElement("Point");
+//	if (!P1)
+//		return false;
+	if (ReadTerm(m_Coords[0],*dynamic_cast<TiXmlElement*>(&root),"X")==false) return false;
+	if (ReadTerm(m_Coords[1],*dynamic_cast<TiXmlElement*>(&root),"Y")==false) return false;
+	if (ReadTerm(m_Coords[2],*dynamic_cast<TiXmlElement*>(&root),"Z")==false) return false;
 
 	return true;
 }

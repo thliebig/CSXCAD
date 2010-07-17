@@ -497,6 +497,7 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 		else if (strcmp(cPrim,"Curve")==0) newPrim = new CSPrimCurve(clParaSet,prop);
 		else if (strcmp(cPrim,"Wire")==0) newPrim = new CSPrimWire(clParaSet,prop);
 		else if (strcmp(cPrim,"UserDefined")==0) newPrim = new CSPrimUserDefined(clParaSet,prop);
+		else if (strcmp(cPrim,"Point")==0) newPrim = new CSPrimPoint(clParaSet,prop);
 		else
 		{
 			cerr << "ContinuousStructure::ReadFromXML: Primitive with type: " << cPrim << " is unknown... " << endl;
