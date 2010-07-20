@@ -170,10 +170,10 @@ ParameterScalar* CSPrimPoint::GetCoordPS(int index)
 bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	for (int i=0; i<5; i=i+2)
+	for (int i=0; i<3; i++)
 	{
-		dBoundBox[i]   = m_Coords[i].GetValue();
-		dBoundBox[i+1] = m_Coords[i].GetValue();
+		dBoundBox[2*i]   = m_Coords[i].GetValue();
+		dBoundBox[2*i+1] = m_Coords[i].GetValue();
 	}
 	return true;
 }

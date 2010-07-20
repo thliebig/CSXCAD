@@ -5,11 +5,12 @@ function CSX = AddProbe(CSX, name, type, weight, FD_samples)
 %
 % type:     0 for voltage probing
 %           1 for current probing
+%           2 for E-field probing
+%           3 for H-field probing
 %
 % all following parameter are optional:
 %
-% weight:   weighting factor for this integral parameter
-%           (default is 1)
+% weight:   weighting factor (default is 1)
 %
 % FD_samples: dump in the frequency domain at the given samples (in Hz)
 %
