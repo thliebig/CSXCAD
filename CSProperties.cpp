@@ -1013,16 +1013,16 @@ CSPropProbeBox::~CSPropProbeBox() {}
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
-void CSPropProbeBox::AddFDSample(vector<double> freqs)
+void CSPropProbeBox::AddFDSample(vector<double> *freqs)
 {
-	for (size_t n=0;n<freqs.size();++n)
-		AddFDSample(freqs.at(n));
+	for (size_t n=0;n<freqs->size();++n)
+		AddFDSample(freqs->at(n));
 }
 
 void CSPropProbeBox::AddFDSample(string freqs)
 {
 	vector<double> v_freqs = SplitString2Double(freqs, ',');
-	AddFDSample(v_freqs);
+	AddFDSample(&v_freqs);
 }
 
 bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)

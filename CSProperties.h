@@ -481,10 +481,10 @@ public:
 	int GetProbeType() {return ProbeType;}
 
 	size_t CountFDSamples() {return m_FD_Samples.size();}
-	vector<double> GetFDSamples() {return m_FD_Samples;}
+	vector<double> *GetFDSamples()	{return &m_FD_Samples;}
 	void ClearFDSamples() {m_FD_Samples.clear();}
 	void AddFDSample(double freq) {m_FD_Samples.push_back(freq);}
-	void AddFDSample(vector<double> freqs);
+	void AddFDSample(vector<double> *freqs);
 	void AddFDSample(string freqs);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
