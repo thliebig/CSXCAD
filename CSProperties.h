@@ -100,6 +100,13 @@ public:
 	//! Get Name for this Property. \sa SetName
 	const string GetName();
 
+	//! Check if given attribute exists
+	bool ExistAttribute(string name);
+	//! Get the value of a given attribute
+	string GetAttributeValue(string name);
+	//! Add a new attribute
+	void AddAttribute(string name, string value);
+
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
 	//! Removes and deletes a primitive of this Property. \sa CSPrimitives, AddPrimitive, TakePrimitive
@@ -183,6 +190,11 @@ protected:
 	bool bVisisble;
 
 	vector<CSPrimitives*> vPrimitives;
+
+	//! List of additional attribute names
+	vector<string> m_Attribute_Name;
+	//! List of additional attribute values
+	vector<string> m_Attribute_Value;
 };
 
 //! Continuous Structure Unknown Property

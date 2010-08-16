@@ -113,6 +113,33 @@ void CSProperties::SetUniqueID(unsigned int uID) {UniqueID=uID;}
 void CSProperties::SetName(const string name) {sName=string(name);}
 const string CSProperties::GetName() {return sName;}
 
+bool CSProperties::ExistAttribute(string name)
+{
+	for (size_t n=0;n<m_Attribute_Name.size();++n)
+	{
+		if (m_Attribute_Name.at(n) == name)
+			return true;
+	}
+	return false;
+}
+
+string CSProperties::GetAttributeValue(string name)
+{
+	for (size_t n=0;n<m_Attribute_Name.size();++n)
+	{
+		if (m_Attribute_Name.at(n) == name)
+			return m_Attribute_Value.at(n);
+	}
+	return string();
+}
+
+void CSProperties::AddAttribute(string name, string value)
+{
+	if (name.empty()) return;
+	m_Attribute_Name.push_back(name);
+	m_Attribute_Value.push_back(value);
+}
+
 void CSProperties::AddPrimitive(CSPrimitives *prim) {vPrimitives.push_back(prim);}
 
 size_t CSProperties::GetQtyPrimitives() {return vPrimitives.size();}
@@ -194,6 +221,16 @@ bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 		EC.SetAttribute("B",EdgeColor.B);
 		EC.SetAttribute("a",EdgeColor.a);
 		prop->InsertEndChild(EC);
+	}
+
+	if (m_Attribute_Name.size())
+	{
+		TiXmlElement Attributes("Attributes");
+		for (size_t n=0;n<m_Attribute_Name.size();++n)
+		{
+			Attributes.SetAttribute(m_Attribute_Name.at(n).c_str(),m_Attribute_Value.at(n).c_str());
+		}
+		prop->InsertEndChild(Attributes);
 	}
 
 	TiXmlElement Primitives("Primitives");
@@ -301,6 +338,17 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 			EdgeColor.B=(unsigned char) help;
 		if (EC->QueryIntAttribute("a",&help)==TIXML_SUCCESS)
 			EdgeColor.a=(unsigned char) help;
+	}
+
+	TiXmlElement* att_root = root.FirstChildElement("Attributes");
+	if (att_root)
+	{
+		TiXmlAttribute* att = att_root->FirstAttribute();
+		while (att)
+		{
+			AddAttribute(att->Name(),att->Value());
+			att = att->Next();
+		}
 	}
 
 	return true;

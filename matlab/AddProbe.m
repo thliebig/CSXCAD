@@ -1,4 +1,4 @@
-function CSX = AddProbe(CSX, name, type, weight, FD_samples)
+function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
 % function CSX = AddProbe(CSX, name, type, weight)
 %
 % name:     name of the property and probe file 
@@ -43,6 +43,19 @@ CSX.Properties.ProbeBox{end}.ATTRIBUTE.Type=type;
 CSX.Properties.ProbeBox{end}.ATTRIBUTE.Weight=weight;
 
 if (nargin>4)
-    CSX.Properties.ProbeBox{end}.FD_Samples=FD_samples;
+    if (numel(FD_samples)>0)
+        CSX.Properties.ProbeBox{end}.FD_Samples=FD_samples;
+    end
+end
+
+for n=1:(nargin-5)/2
+    if ( (ischar(varargin{2*n})) || isnumeric(varargin{2*n}))
+        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
+    else 
+        value = varargin{2*n};
+        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'X']) = value{1};
+        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Y']) = value{2};
+        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Z']) = value{3};
+    end
 end
 
