@@ -164,7 +164,9 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	void SetCoordInputType(int type) {coordInputType=type;}
+	void SetCoordInputType(int type, bool CopyToPrimitives=true);
+	//! Get the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
+	int GetCoordInputType() const {return coordInputType;}
 
 	//! Check and warn for unused primitives
 	void WarnUnusedPrimitves(ostream& stream);

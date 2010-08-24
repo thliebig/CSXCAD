@@ -23,7 +23,6 @@
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
 
-
 void Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist)
 {
 	double dir[] = {stop[0]-start[0],stop[1]-start[1],stop[2]-start[2]};
@@ -47,6 +46,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
+	m_MeshType = 0;
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
@@ -59,6 +59,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	iPriority=prim->iPriority;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
+	m_MeshType = prim->m_MeshType;
 }
 
 
@@ -71,6 +72,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
+	m_MeshType = 0;
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)

@@ -26,6 +26,7 @@ ContinuousStructure::ContinuousStructure(void)
 	clParaSet = new ParameterSet();
 	UniqueIDCounter=0;
 	dDrawingTol=0;
+	m_MeshType = 0; //default is a cartesian mesh
 }
 
 ContinuousStructure::~ContinuousStructure(void)
@@ -244,6 +245,7 @@ void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::Pro
 
 void ContinuousStructure::SetCoordInputType(int type)
 {
+	m_MeshType = type;
 	for (size_t i=0;i<vProperties.size();++i)
 	{
 		vProperties.at(i)->SetCoordInputType(type);
@@ -327,6 +329,8 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised, boo
 
 	TiXmlElement Struct("ContinuousStructure");
 
+	Struct.SetAttribute("CoordSystem",GetCoordInputType());
+
 	clGrid.Write2XML(Struct,false);
 
 	clParaSet->Write2XML(Struct);
@@ -361,6 +365,14 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 	clear();
 	TiXmlNode* root = rootNode->FirstChild("ContinuousStructure");
 	if (root==NULL) { ErrString.append("Error: No ContinuousStructure found!!!\n"); return ErrString.c_str();}
+
+	TiXmlElement* rootElem = root->ToElement();
+	if (rootElem)
+	{
+		int CS_mesh = 0;
+		if (rootElem->QueryIntAttribute("CoordSystem",&CS_mesh) == TIXML_SUCCESS)
+			SetCoordInputType(CS_mesh);
+	}
 
 	TiXmlNode* grid = root->FirstChild("RectilinearGrid");
 	if (grid==NULL) { ErrString.append("Error: No RectilinearGrid found!!!\n"); return ErrString.c_str();}

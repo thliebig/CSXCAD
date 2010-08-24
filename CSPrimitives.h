@@ -140,6 +140,11 @@ public:
 	bool operator==(CSPrimitives& vgl) { return iPriority==vgl.GetPriority();};
 	bool operator!=(CSPrimitives& vgl) { return iPriority!=vgl.GetPriority();};
 
+	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
+	void SetCoordInputType(int type) {m_MeshType=type;}
+	//! Get the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
+	int GetCoordInputType() const {return m_MeshType;}
+
 protected:
 	CSPrimitives(ParameterSet* paraSet, CSProperties* prop);
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
@@ -147,6 +152,7 @@ protected:
 
 	unsigned int uiID;
 	int iPriority;
+	int m_MeshType;
 	PrimitiveType Type;
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;

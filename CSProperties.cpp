@@ -86,6 +86,17 @@ CSProperties::~CSProperties()
 	coordParaSet=NULL;
 }
 
+void CSProperties::SetCoordInputType(int type, bool CopyToPrimitives)
+{
+	coordInputType = type;
+	if (CopyToPrimitives==false)
+		return;
+	for (size_t i=0;i<vPrimitives.size();++i)
+	{
+		vPrimitives.at(i)->SetCoordInputType(type);
+	}
+}
+
 void CSProperties::InitCoordParameter()
 {
 	coordParaSet = new ParameterSet();

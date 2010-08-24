@@ -89,6 +89,8 @@ public:
 	//! Define the input type for the CSProperties weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	void SetCoordInputType(int type);
 
+	int GetCoordInputType() const {return m_MeshType;}
+
 	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
 	void SetDrawingTolerance(double val) {dDrawingTol=val;}
 
@@ -180,6 +182,8 @@ protected:
 	bool ReadPropertyPrimitives(TiXmlElement* PropNode, CSProperties* prop);
 
 	void UpdateIDs();
+
+	int m_MeshType;
 
 	unsigned int maxID;
 
