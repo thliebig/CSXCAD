@@ -547,8 +547,15 @@ void ContinuousStructure::UpdateIDs()
 	for (size_t i=0;i<vProperties.size();++i) vProperties.at(i)->SetID((unsigned int)i);
 }
 
-string ContinuousStructure::GetInfoLine()
+string ContinuousStructure::GetInfoLine(bool shortInfo)
 {
+	if (shortInfo)
+	{
+		string InfoLine = string(_CSXCAD_LIB_NAME_SHORT_)
+						  +string(" -- Version: ") + string(_CSXCAD_VERSION_);
+		return InfoLine;
+	}
+
 	string InfoLine = string(_CSXCAD_LIB_NAME_)
 					  +string("\nAuthor: ") + string(_CSXCAD_AUTHOR_)
 					  +string("\nMail: ") +string(_CSXCAD_AUTHOR_MAIL_)

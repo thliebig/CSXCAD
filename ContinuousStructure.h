@@ -172,7 +172,7 @@ public:
 	const char* ReadFromXML(TiXmlNode* rootNode);
 
 	//! Get a Info-Line containing lib-name, -version etc. 
-	static string GetInfoLine();
+	static string GetInfoLine(bool shortInfo=false);
 
 protected:
 	ParameterSet* clParaSet;
