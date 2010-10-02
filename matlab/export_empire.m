@@ -1,17 +1,19 @@
-function export_empire( CSX, filename, options )
-% export_empire( CSX, filename, options )
+function export_empire( CSX, FDTD, filename, options )
+% export_empire( CSX, FDTD, filename, options )
 %
-% Exports the geometry defined in CSX to filename as a empire file.
+% Exports the geometry defined in CSX to filename as a Empire python file.
 %
 % CSX: CSX-object created by InitCSX()
-% filename: export filename (e.g. '/tmp/export.gym')
+% FDTD: FDTD-object created by InitFDTD()
+% filename: export filename (e.g. '/tmp/export.py')
 % options (optional): struct
 %
-% See also InitCSX 
+% See also InitCSX InitFDTD
 % CSXCAD matlab interface
 % -----------------------
 % author: Sebastian Held <sebastian.held@gmx.de>
 % 17. Jun 2010: initial version
+% 28. Sep 2010: rewritten using Empire python scripting
 
 if nargin < 3
 	options = [];
@@ -20,31 +22,10 @@ end
 fid = fopen( filename, 'w' );
 
 % write header
-fprintf( fid, '%s\n\n', 'GANYMEDE  4' );
-fprintf( fid, '%s\n', 'ORIGINS 0' );
-fprintf( fid, '%s\n', 'list [mat.mat(3,1, 0.0 ,0.0 ,0.0)]' );
-fprintf( fid, '%s\n\n', 'END ORIGINS' );
-export_empire_meshlines(fid,CSX);
-fprintf( fid, '%s\n', 'LAYER 1' );
-fprintf( fid, '%s\n', ' texts     [stack_text(text=''name @@initial'',st=STACK), stack_text(text=''conductor'',st=STACK)]' );
-fprintf( fid, '%s\n', ' color     stack_color(''black'')' );
-fprintf( fid, '%s\n', ' fill      stack_color(''black'')' );
-fprintf( fid, '%s\n', ' pattern   ''No Fill''' );
-fprintf( fid, '%s\n', ' opaque    0.0' );
-fprintf( fid, '%s\n', ' width     1' );
-fprintf( fid, '%s\n', ' acadcolor 61' );
-fprintf( fid, '%s\n', ' vis       1' );
-fprintf( fid, '%s\n', ' autodisc  1' );
-fprintf( fid, '%s\n', ' lock      0' );
-fprintf( fid, '%s\n', ' arrow     stack_arrow([0.0, 0.0, 0.0, 0.0, 0.0, 1000.0])' );
-fprintf( fid, '%s\n\n', 'END LAYER' );
-export_empire_layer(fid,2,'empty','conductor')
-fprintf( fid, '\n' );
-fprintf( fid, '%s\n\n', 'CURRENT_LAYER 2' );
-
-
-global layer_num
-layer_num = 2;
+fprintf( fid, '# Empire python script\n\n# start Empire and select File/"Run Script" and select this file\n\n' );
+fprintf( fid, 'from scripting import *\n\n' );
+export_empire_meshlines( fid, CSX );
+export_empire_settings( fid, CSX, FDTD );
 
 if isfield(CSX.Properties,'Material')
 	% process material
@@ -59,7 +40,6 @@ if isfield(CSX.Properties,'Metal')
 	process_primitives( fid, Metal, options );
 end
 
-
 fclose( fid );
 
 % -----------------------------------------------------------------------------
@@ -71,14 +51,11 @@ for a=2:numel(v), str = [str ', ' num2str(v(a))]; end
 str = [str ']'];
 
 % -----------------------------------------------------------------------------
-function str = primitive_box( fid, CSX_box, layernr )
+function str = primitive_box( fid, CSX_box )
 start = [CSX_box.P1.ATTRIBUTE.X CSX_box.P1.ATTRIBUTE.Y CSX_box.P1.ATTRIBUTE.Z];
 stop  = [CSX_box.P2.ATTRIBUTE.X CSX_box.P2.ATTRIBUTE.Y CSX_box.P2.ATTRIBUTE.Z];
-fprintf( fid, '%s\n', 'BOX 1' );
-fprintf( fid, '%s\n', ' texts	[]' );
-fprintf( fid, '%s\n', [' layer_	' num2str(layernr)] );
-fprintf( fid, '%s\n', [' points	' gym_vect(start,stop)] );
-fprintf( fid, '%s\n\n', 'END BOX' );
+fprintf( fid, 'g.layerextrude("z",%g,%g)\n', start(3), stop(3) );
+fprintf( fid, 'g.box(%g,%g,%g,%g)\n', start(1), start(2), stop(1), stop(2) );
 
 
 % -----------------------------------------------------------------------------
@@ -109,113 +86,139 @@ str = [str ' ' options '}'];
 % -----------------------------------------------------------------------------
 function primitive_polygon( fid, CSX_polygon, layernr )
 Elevation = CSX_polygon.ATTRIBUTE.Elevation;
-NormDir = [CSX_polygon.NormDir.ATTRIBUTE.X CSX_polygon.NormDir.ATTRIBUTE.Y CSX_polygon.NormDir.ATTRIBUTE.Z];
+if (CSX_polygon.NormDir.ATTRIBUTE.X ~= 0)
+    NormDir = 'x';
+elseif (CSX_polygon.NormDir.ATTRIBUTE.Y ~= 0)
+    NormDir = 'y';
+elseif (CSX_polygon.NormDir.ATTRIBUTE.Z ~= 0)
+    NormDir = 'z';
+end
+coords = [];
 for a=1:numel(CSX_polygon.Vertex)
 	% iterate over all vertices
-	if (NormDir(1) == 0) && (NormDir(2) == 0), v = [CSX_polygon.Vertex{a}.ATTRIBUTE.X1 CSX_polygon.Vertex{a}.ATTRIBUTE.X2 Elevation]; end
-	if (NormDir(2) == 0) && (NormDir(3) == 0), v = [Elevation CSX_polygon.Vertex{a}.ATTRIBUTE.X1 CSX_polygon.Vertex{a}.ATTRIBUTE.X2]; end
-	if (NormDir(1) == 0) && (NormDir(3) == 0), v = [CSX_polygon.Vertex{a}.ATTRIBUTE.X1 Elevation CSX_polygon.Vertex{a}.ATTRIBUTE.X2]; end
-	if a == 1
-		str = [num2str(v(1)) ',' num2str(v(2)) ',' num2str(v(3))];
-	else
-		str = [str ', ' num2str(v(1)) ',' num2str(v(2)) ',' num2str(v(3))];
-	end
+	coords = [coords CSX_polygon.Vertex{a}.ATTRIBUTE.X1 CSX_polygon.Vertex{a}.ATTRIBUTE.X2];
 end
-fprintf( fid, '%s\n', 'POLY 1' );
-fprintf( fid, '%s\n', ' texts	[]' );
-fprintf( fid, '%s\n', [' layer_	' num2str(layernr)] );
-fprintf( fid, '%s\n', [' objects	(' str ')'] );
-fprintf( fid, '%s\n', [' arrow	stack_arrow(' gym_vect(NormDir*Elevation,NormDir*Elevation) ')'] );
-fprintf( fid, '%s\n', ' rad  	100.0' );
-fprintf( fid, '%s\n\n', 'END POLY' );
+fprintf( fid, 'g.layerextrude("%s",%g,%g)\n', NormDir, Elevation, Elevation+1 );
+fprintf( fid, 'g.poly(' );
+for n=1:numel(coords)
+    if n > 1
+        fprintf( fid, ', %g', coords(n) );
+    else
+        fprintf( fid, '%g', coords(n) );
+    end
+end
+fprintf( fid, ')\n' );
 
 % -----------------------------------------------------------------------------
 function process_primitives( fid, prop, options )
-global layer_num
 ignore = {};
 if isfield(options,'ignore'), ignore = options.ignore; end
 for num=1:numel(prop)
 	Name = prop{num}.ATTRIBUTE.Name;
-	if any( strcmp(Name,ignore) )
+    if any( strcmp(Name,ignore) )
 		disp( ['omitting   ' Name '...'] );
 		continue
-	end
-	disp( ['processing ' prop{num}.ATTRIBUTE.Name '...'] );
-	layer_num = layer_num + 1;
-	if strcmp(options.Property,'Metal')
+    end
+    
+    disp( ['processing ' prop{num}.ATTRIBUTE.Name '...'] );
+
+    if strcmp(options.Property,'Metal')
 		prio = 200;
-		properties = ['conductor name Conductor sigma infinite sides auto rough 0 prio ' num2str(prio) ' automodel auto'];
+		properties = ['conductor sigma infinite sides auto rough 0 prio ' num2str(prio) ' automodel auto'];
 	else
 		prio = 100;
 		epsr = 1;
-		if isfield(prop{num}.Property.ATTRIBUTE,'Epsilon'), epsr = prop{num}.Property.ATTRIBUTE.Epsilon; end
-		properties = ['dielectric name Dielectric epsr ' num2str(epsr) ' sigma 0 prio ' num2str(prio) ' tand 0 density 0'];
-	end
-	export_empire_layer(fid,layer_num,prop{num}.ATTRIBUTE.Name,properties)
-	if isfield(prop{num}.Primitives,'Box')
-		for a=1:numel(prop{num}.Primitives.Box)
-			% iterate over all boxes
-			Box = prop{num}.Primitives.Box{a};
-			primitive_box( fid, Box, layer_num );
-		end
-	end
-	if isfield(prop{num}.Primitives,'Cylinder')
-		for a=1:numel(prop{num}.Primitives.Cylinder)
-			% iterate over all cylinders
-			Cylinder = prop{num}.Primitives.Cylinder{a};
-			primitive_cylinder( fid, Cylinder, layer_num );
-		end
-	end
-	if isfield(prop{num}.Primitives,'Wire')
-		for a=1:numel(prop{num}.Primitives.Wire)
-			% iterate over all wires
-			Wire = prop{num}.Primitives.Wire{a};
+        sigma = 0;
+		if isfield(prop{num}.PropertyX.ATTRIBUTE,'Epsilon'), epsr = prop{num}.PropertyX.ATTRIBUTE.Epsilon; end
+		if isfield(prop{num}.PropertyX.ATTRIBUTE,'Kappa'), sigma = prop{num}.PropertyX.ATTRIBUTE.Kappa; end
+		properties = ['dielectric epsr ' num2str(epsr) ' sigma ' num2str(sigma) ' prio ' num2str(prio) ' tand 0 density 0'];
+    end
+    
+    export_empire_layer( fid, Name, properties )
+	
+    if isfield(prop{num}.Primitives,'Box')
+        for a=1:numel(prop{num}.Primitives.Box)
+            % iterate over all boxes
+            Box = prop{num}.Primitives.Box{a};
+            primitive_box( fid, Box );
+        end
+    end
+    if isfield(prop{num}.Primitives,'Cylinder')
+        for a=1:numel(prop{num}.Primitives.Cylinder)
+            % iterate over all cylinders
+            Cylinder = prop{num}.Primitives.Cylinder{a};
+            primitive_cylinder( fid, Cylinder );
+        end
+    end
+    if isfield(prop{num}.Primitives,'Wire')
+        for a=1:numel(prop{num}.Primitives.Wire)
+            % iterate over all wires
+            Wire = prop{num}.Primitives.Wire{a};
 %			str = primitive_wire( Wire, obj_modifier );
 %			fprintf( fid, '%s\n', str );
-		end
-	end
-	if isfield(prop{num}.Primitives,'Polygon')
-		for a=1:numel(prop{num}.Primitives.Polygon)
-			% iterate over all polygons
-			Polygon = prop{num}.Primitives.Polygon{a};
-			primitive_polygon( fid, Polygon, layer_num );
-		end
-	end
+        end
+    end
+    if isfield(prop{num}.Primitives,'Polygon')
+        for a=1:numel(prop{num}.Primitives.Polygon)
+            % iterate over all polygons
+            Polygon = prop{num}.Primitives.Polygon{a};
+            primitive_polygon( fid, Polygon );
+        end
+    end
+    
+    fprintf( fid, 'g.load()\n\n' );
 end
 
 
 
 
-function export_empire_layer(fid,nr,name,options)
-fprintf( fid, '%s\n', ['LAYER ' num2str(nr)] );
-fprintf( fid, '%s\n', [' texts     [stack_text(text=''name ' name ''',st=STACK), stack_text(text=''' options ''',st=STACK)]'] );
-fprintf( fid, '%s\n', ' color     stack_color(''#08C'')' );
-fprintf( fid, '%s\n', ' fill      stack_color(''#08C'')' );
-fprintf( fid, '%s\n', ' pattern   ''No Fill''' );
-fprintf( fid, '%s\n', ' opaque    0.0' );
-fprintf( fid, '%s\n', ' width     1' );
-fprintf( fid, '%s\n', ' acadcolor 61' );
-fprintf( fid, '%s\n', ' vis       1' );
-fprintf( fid, '%s\n', ' autodisc  0' );
-fprintf( fid, '%s\n', ' lock      0' );
-fprintf( fid, '%s\n', ' arrow     stack_arrow([0.0, 0.0, 0.0, 0.0, 0.0, 1000.0])' );
-fprintf( fid, '%s\n\n', 'END LAYER' );
+function export_empire_layer( fid, name, layertext )
+fprintf( fid, '# create a new layer\n' );
+fprintf( fid, 'g = gmf()\n' );
+fprintf( fid, 'g.layer("%s")\n', name );
+fprintf( fid, 'g.layerextrude("z",0,0)\n' );
+fprintf( fid, 'g.layertext("%s")\n', layertext );
 
 function export_empire_meshlines(fid,CSX)
-fprintf( fid, '%s\n', 'DISC 0' );
-fprintf( fid, '%s\n', ['   lines ' gym_vector(CSX.RectilinearGrid.XLines)] );
-fprintf( fid, '%s\n', '  fixed []' );
-fprintf( fid, '%s\n', '  auto  []' );
-fprintf( fid, '%s\n', 'END DISC' );
-fprintf( fid, '%s\n', 'DISC 1' );
-fprintf( fid, '%s\n', ['   lines ' gym_vector(CSX.RectilinearGrid.YLines)] );
-fprintf( fid, '%s\n', '  fixed []' );
-fprintf( fid, '%s\n', '  auto  []' );
-fprintf( fid, '%s\n', 'END DISC' );
-fprintf( fid, '%s\n', 'DISC 2' );
-fprintf( fid, '%s\n', ['   lines ' gym_vector(CSX.RectilinearGrid.ZLines)] );
-fprintf( fid, '%s\n', '  fixed []' );
-fprintf( fid, '%s\n', '  auto  []' );
-fprintf( fid, '%s\n\n', 'END DISC' );
+fprintf( fid, '# create the mesh\n' );
+fprintf( fid, 'empty_disc()\n' );
+fprintf( fid, 'g = gmf()\n' );
+fprintf( fid, 'g.raw_write("DISC X %g")\n', CSX.RectilinearGrid.XLines );
+fprintf( fid, 'g.raw_write("DISC Y %g")\n', CSX.RectilinearGrid.YLines );
+fprintf( fid, 'g.raw_write("DISC Z %g")\n', CSX.RectilinearGrid.ZLines );
+fprintf( fid, 'g.load()\n\n' );
 
+function empire_BC = convert_BC( openEMS_BC )
+if ischar(openEMS_BC)
+    if strcmp(openEMS_BC,'PEC')
+        empire_BC = 'electric';
+    elseif strcmp(openEMS_BC,'PMC')
+        empire_BC = 'magnetic';
+    elseif strcmp(openEMS_BC,'MUR') || strcmp(openEMS_BC,'MUR-ABC')
+        empire_BC = 'pml 6';
+    else
+        empire_BC = 'UNKNOWN';
+    end
+else
+    if openEMS_BC == 0
+        empire_BC = 'electric';
+    elseif openEMS_BC == 1
+        empire_BC = 'magnetic';
+    elseif openEMS_BC == 2
+        empire_BC = 'pml 6';
+    else
+        empire_BC = 'UNKNOWN';
+    end    
+end
 
+function export_empire_settings(fid,CSX,FDTD)
+fprintf( fid, '# settings\n' );
+fprintf( fid, 'set_fs_parameter( ''dx'', %g )\n', CSX.RectilinearGrid.ATTRIBUTE.DeltaUnit );
+fprintf( fid, 'set_fs_parameter( ''xmin'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.xmin) );
+fprintf( fid, 'set_fs_parameter( ''xmax'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.xmax) );
+fprintf( fid, 'set_fs_parameter( ''ymin'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.ymin) );
+fprintf( fid, 'set_fs_parameter( ''ymax'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.ymax) );
+fprintf( fid, 'set_fs_parameter( ''zmin'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.zmin) );
+fprintf( fid, 'set_fs_parameter( ''zmax'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.zmax) );
+fprintf( fid, 'set_fs_parameter( ''F_START'', %g )\n', max(0,FDTD.Excitation.ATTRIBUTE.f0 - FDTD.Excitation.ATTRIBUTE.f0) );
+fprintf( fid, 'set_fs_parameter( ''F_STOP'', %g )\n', max(0,FDTD.Excitation.ATTRIBUTE.f0 + FDTD.Excitation.ATTRIBUTE.f0) );
