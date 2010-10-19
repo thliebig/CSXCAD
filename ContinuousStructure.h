@@ -96,20 +96,22 @@ public:
 
 	//! Get a property by its priority at a given coordinate and property type.
 	/*!
-	/param coord Give a 3-element array with a 3D-coordinate set (x,y,z).
-	/param type Specify the type searched for. (Default is ANY-type)
-	/return Returns NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
+	\param coord Give a 3-element array with a 3D-coordinate set (x,y,z).
+	\param type Specify the type searched for. (Default is ANY-type)
+	\param markFoundAsUsed Mark the found primitives as beeing used. \sa WarnUnusedPrimitves
+	\return Returns NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties* GetPropertyByCoordPriority(double* coord, CSProperties::PropertyType type=CSProperties::ANY);
+	CSProperties* GetPropertyByCoordPriority(double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
 	//! Get properties by its priority at given coordinates and property type.
 	/*!
-	/sa GetPropertyByCoordPriority
-	/param coords Give a 3*n-element array with the 3D-coordinate set (e.g. x1,y1,z1,x2,y2,z2,...)
-	/param type Specify the type searched for. (Default is ANY-type)
-	/return Returns an array of n properties. NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
+	\sa GetPropertyByCoordPriority
+	\param coords Give a 3*n-element array with the 3D-coordinate set (e.g. x1,y1,z1,x2,y2,z2,...)
+	\param type Specify the type searched for. (Default is ANY-type)
+	\param markFoundAsUsed Mark the found primitives as beeing used. \sa WarnUnusedPrimitves
+	\return Returns an array of n properties. NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties** GetPropertiesByCoordsPriority(double* coords, CSProperties::PropertyType type=CSProperties::ANY);
+	CSProperties** GetPropertiesByCoordsPriority(double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
 	//! Check and warn for unused primitives in properties of given type
 	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);

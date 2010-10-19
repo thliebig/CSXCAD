@@ -278,20 +278,31 @@ CSPrimitives* CSProperties::TakePrimitive(size_t index)
 	return prim;
 }
 
-bool CSProperties::CheckCoordInPrimitive(const double *coord, int &priority, double tol)
+CSPrimitives* CSProperties::CheckCoordInPrimitive(const double *coord, int &priority, bool markFoundAsUsed, double tol)
 {
 	priority=0;
+	CSPrimitives* found_CSPrim = NULL;
 	bool found=false;
 	for (size_t i=0; i<vPrimitives.size();++i)
 	{
 		if (vPrimitives.at(i)->IsInside(coord,tol)==true)
 		{
-			if (found==false) priority=vPrimitives.at(i)->GetPriority()-1;
+			if (found==false)
+			{
+				priority=vPrimitives.at(i)->GetPriority()-1;
+				found_CSPrim = vPrimitives.at(i);
+			}
 			found=true;
-			if (vPrimitives.at(i)->GetPriority()>priority) priority=vPrimitives.at(i)->GetPriority();
+			if (vPrimitives.at(i)->GetPriority()>priority)
+			{
+				priority=vPrimitives.at(i)->GetPriority();
+				found_CSPrim = vPrimitives.at(i);
+			}
 		}
 	}
-	return found;
+	if ((markFoundAsUsed) && (found_CSPrim))
+		found_CSPrim->SetPrimitiveUsed(true);
+	return found_CSPrim;
 }
 
 void CSProperties::WarnUnusedPrimitves(ostream& stream)

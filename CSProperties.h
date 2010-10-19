@@ -114,8 +114,8 @@ public:
 	//! Take a primitive of this Propertie at index. Releases ownership of this primitive to caller! \sa CSPrimitives, RemovePrimitive, AddPrimitive \return NULL if not found!
 	CSPrimitives* TakePrimitive(size_t index);
 
-	//! Check whether the given coord is inside of a primitive assigned to this property and return found priority.
-	bool CheckCoordInPrimitive(const double *coord, int &priority, double tol=0);
+	//! Check whether the given coord is inside of a primitive assigned to this property and return the found primitive and \a priority.
+	CSPrimitives* CheckCoordInPrimitive(const double *coord, int &priority, bool markFoundAsUsed=false, double tol=0);
 
 	//! Get the quentity of primitives assigned to this property! \return Number of primitives in this property
 	size_t GetQtyPrimitives();

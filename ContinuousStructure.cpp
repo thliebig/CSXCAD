@@ -202,31 +202,42 @@ CSPrimitives* ContinuousStructure::GetPrimitive(size_t index)
 	return NULL;
 }
 
-CSProperties* ContinuousStructure::GetPropertyByCoordPriority(double* coord, CSProperties::PropertyType type)
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(double* coord, CSProperties::PropertyType type, bool markFoundAsUsed)
 {
 	CSProperties* winProp=NULL;
+	CSPrimitives* winPrim=NULL;
+	CSPrimitives* locPrim=NULL;
 	int winPrio=0;
 	int locPrio=0;
 	for (size_t i=0;i<vProperties.size();++i)
 	{
 		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
 		{
-			if (vProperties.at(i)->CheckCoordInPrimitive(coord,locPrio,dDrawingTol))
+			locPrim = vProperties.at(i)->CheckCoordInPrimitive(coord,locPrio,dDrawingTol);
+			if (locPrim)
 			{
-				if (winProp==NULL) winPrio=locPrio-1;//make the first one found always highest
-				if (locPrio>winPrio)
+				if (winProp==NULL)
 				{
 					winPrio=locPrio;
 					winProp=vProperties.at(i);
+					winPrim=locPrim;
+				}
+				else if (locPrio>winPrio)
+				{
+					winPrio=locPrio;
+					winProp=vProperties.at(i);
+					winPrim=locPrim;
 				}
 			}
 		}
 	}
+	if ((markFoundAsUsed) && (winPrim))
+		winPrim->SetPrimitiveUsed(true);
 	return winProp;
 }
 
 
-CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* /*coords*/, CSProperties::PropertyType /*type*/)
+CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(double* /*coords*/, CSProperties::PropertyType /*type*/, bool /*markFoundAsUsed*/)
 {
 	cerr << "ContinuousStructure::GetPropertiesByCoordsPriority --> This methode has not been implemented yet!!! return NULL" << endl;
 	return NULL;
