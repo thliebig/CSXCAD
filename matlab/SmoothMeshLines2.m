@@ -80,7 +80,7 @@ while 1
     old_gap(index).stop_res  = stop_res;
     
     % debug
-    %plot_lines
+%     plot_lines
 end
 
 % merge lines
@@ -189,13 +189,18 @@ if isempty(start_res)
     % possible)
     taper = stop_res*ratio;
     stop_taper = stop;
-    while taper*ratio < max_res
+    while (taper*ratio < max_res) && (stop_taper(1)-taper > start)
         stop_taper = [stop_taper(1)-taper stop_taper];
         taper = taper*ratio;
     end
-    if stop_taper(1) > start
+    if (stop_taper(1) - start) >= max_res
+        % fill with equidistant lines
         n1 = ceil( (stop_taper(1)-start) / max_res ) + 1;
         stop_taper = [linspace(start,stop_taper(1),n1) stop_taper];
+    else
+        % not enough space for entire taper
+        stop_taper(1) = []; % likely too near to start
+        stop_taper = [(start+stop_taper(1))/2 stop_taper]; % create a centered line
     end
     lines = sort(unique(stop_taper(stop_taper>=start)));
     return
@@ -206,13 +211,18 @@ if isempty(stop_res)
     % possible)
     taper = start_res*ratio;
     start_taper = start;
-    while taper*ratio < max_res
+    while (taper*ratio < max_res) && (start_taper(end)+taper < stop)
         start_taper = [start_taper start_taper(end)+taper];
         taper = taper*ratio;
     end
-    if start_taper(end) < stop
+    if (stop - start_taper(end)) >= max_res
+        % fill with equidistant lines
         n1 = ceil( (stop-start_taper(end)) / max_res ) + 1;
         start_taper = [start_taper linspace(start_taper(end),stop,n1)];
+    else
+        % not enough space for entire taper
+        start_taper(end) = []; % likely too near to stop
+        start_taper = [start_taper (stop+start_taper(end))/2]; % create a centered line
     end
     lines = sort(unique(start_taper(start_taper<=stop)));
     return
@@ -220,47 +230,51 @@ end
 
 taper = start_res*ratio;
 start_taper = start;
-while (taper*ratio<max_res)
+while (taper*ratio<max_res) && (start_taper(end)+taper < stop)
     start_taper = [start_taper start_taper(end)+taper];
     taper = taper*ratio;
+end
+if (numel(start_taper) > 1) && (start_taper(end) - start_taper(end-1) > stop - start_taper(end))
+    % not enough space for entire taper
+    start_taper(end) = []; % likely too near to stop
+    start_taper = [start_taper (stop+start_taper(end))/2]; % create a centered line
 end
 
 taper = stop_res*ratio;
 stop_taper = stop;
-while (taper*ratio<max_res)
+while (taper*ratio<max_res) && (stop_taper(1)-taper > start)
     stop_taper = [stop_taper(1)-taper stop_taper];
     taper = taper*ratio;
 end
-if any(stop_taper<=start)
+if (numel(stop_taper) > 1) && (stop_taper(2) - stop_taper(1) > start - stop_taper(1))
     % not enough space for entire taper
-    stop_taper = stop_taper(stop_taper>=start); % remove illegal values
-    if numel(stop_taper) > 1
-        stop_taper(1) = []; % likely to near to start
-        stop_taper = [(start+stop_taper(1))/2 stop_taper]; % create a centered line
-    end
+    stop_taper(1) = []; % likely too near to start
+    stop_taper = [(start+stop_taper(1))/2 stop_taper]; % create a centered line
 end
 
-while ~isempty(stop_taper) && ( (abs(stop_taper(1) - start_taper(end)) < max_res) || (stop_taper(1) < start_taper(end)) )
+while ~isempty(start_taper) && ~isempty(stop_taper) && (stop_taper(1) < start_taper(end))
     
     diff_start = diff(start_taper);
     if isempty(diff_start)
-        diff_start = 0;
+        diff_start = start_res;
     end
     diff_stop = diff(stop_taper);
     if isempty(diff_stop)
-        diff_stop = 0;
+        diff_stop = stop_res;
     end
     
     if (diff_start(end)>diff_stop(1))
-        start_taper = start_taper(1:end-1);
+        start_taper(end) = [];
     else
-        stop_taper = stop_taper(2:end);
+        stop_taper(1) = [];
     end
 end
 
+if isempty(start_taper)
+    start_taper = start;
+end
 if isempty(stop_taper)
-    lines = [];
-    return
+    stop_taper = stop;
 end
 
 % fill remaining space with equidistant lines
