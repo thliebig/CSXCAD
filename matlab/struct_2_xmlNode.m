@@ -3,7 +3,7 @@ function docElem = struct_2_xmlNode(docNode, docElem, mat_struct)
 if (isfield(mat_struct,'ATTRIBUTE'))
     names = fieldnames(mat_struct.ATTRIBUTE);
     for n=1:numel(names)
-        if isnumeric(getfield(mat_struct.ATTRIBUTE,names{n}))
+        if isnumeric(getfield(mat_struct.ATTRIBUTE,names{n})) || islogical(getfield(mat_struct.ATTRIBUTE,names{n}))
             docElem.setAttribute(names{n},num2str(getfield(mat_struct.ATTRIBUTE,names{n}),15));
         else
             docElem.setAttribute(names{n},getfield(mat_struct.ATTRIBUTE,names{n}));
