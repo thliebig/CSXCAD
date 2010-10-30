@@ -1,5 +1,5 @@
-function CSX = AddWire(CSX, propName, prio, points, wire_rad)
-% function CSX = AddWire(CSX, propName, prio, points, wire_rad)
+function CSX = AddWire(CSX, propName, prio, points, wire_rad, varargin)
+% function CSX = AddWire(CSX, propName, prio, points, wire_rad, varargin)
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -14,5 +14,7 @@ for s=1:size(points,2)
     wire.Vertex{end}.ATTRIBUTE.Y = points(2,s);
     wire.Vertex{end}.ATTRIBUTE.Z = points(3,s);
 end
+
+wire = AddPrimitiveArgs(wire,varargin{:});
 
 CSX = Add2Property(CSX,propName, wire, 'Wire');

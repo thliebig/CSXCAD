@@ -1,5 +1,5 @@
-function CSX = AddLinPoly( CSX, materialname, prio, normVector, elevation, points, Length)
-% CSX = AddLinPoly( CSX, materialname, prio, normVector, elevation, points, Length)
+function CSX = AddLinPoly( CSX, materialname, prio, normVector, elevation, points, Length, varargin)
+% CSX = AddLinPoly( CSX, materialname, prio, normVector, elevation, points, Length, varargin)
 %
 % CSX: CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
@@ -33,5 +33,7 @@ for s=1:size(points,2)
     polygon.Vertex{end+1}.ATTRIBUTE.X1 = points(1,s);
     polygon.Vertex{end}.ATTRIBUTE.X2   = points(2,s);
 end
+
+polygon = AddPrimitiveArgs(polygon,varargin{:});
 
 CSX = Add2Property( CSX, materialname, polygon, 'LinPoly');

@@ -1,5 +1,5 @@
-function CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points )
-% CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points )
+function CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points, varargin)
+% CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points, varargin)
 %
 % CSX: CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
@@ -32,5 +32,7 @@ for s=1:size(points,2)
     polygon.Vertex{end+1}.ATTRIBUTE.X1 = points(1,s);
     polygon.Vertex{end}.ATTRIBUTE.X2   = points(2,s);
 end
+
+polygon = AddPrimitiveArgs(polygon,varargin{:});
 
 CSX = Add2Property( CSX, materialname, polygon, 'Polygon');
