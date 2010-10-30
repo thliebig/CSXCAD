@@ -254,7 +254,7 @@ void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::Pro
 	}
 }
 
-void ContinuousStructure::SetCoordInputType(int type)
+void ContinuousStructure::SetCoordInputType(CoordinateSystem type)
 {
 	m_MeshType = type;
 	for (size_t i=0;i<vProperties.size();++i)
@@ -382,7 +382,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 	{
 		int CS_mesh = 0;
 		if (rootElem->QueryIntAttribute("CoordSystem",&CS_mesh) == TIXML_SUCCESS)
-			SetCoordInputType(CS_mesh);
+			SetCoordInputType((CoordinateSystem)CS_mesh);
 	}
 
 	TiXmlNode* grid = root->FirstChild("RectilinearGrid");

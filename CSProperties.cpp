@@ -44,7 +44,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 {
 	uiID=0;
 	bMaterial=false;
-	coordInputType=0;
+	coordInputType=UNDEFINED_CS;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -61,7 +61,7 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
 	bMaterial=false;
-	coordInputType=0;
+	coordInputType=UNDEFINED_CS;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -86,7 +86,7 @@ CSProperties::~CSProperties()
 	coordParaSet=NULL;
 }
 
-void CSProperties::SetCoordInputType(int type, bool CopyToPrimitives)
+void CSProperties::SetCoordInputType(CoordinateSystem type, bool CopyToPrimitives)
 {
 	coordInputType = type;
 	if (CopyToPrimitives==false)
@@ -94,6 +94,7 @@ void CSProperties::SetCoordInputType(int type, bool CopyToPrimitives)
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		vPrimitives.at(i)->SetCoordInputType(type);
+		vPrimitives.at(i)->Update();
 	}
 }
 
@@ -974,7 +975,7 @@ void CSPropElectrode::Init()
 {
 	uiNumber=0;
 	iExcitType=1;
-	coordInputType=0;
+	coordInputType=UNDEFINED_CS;
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=true;

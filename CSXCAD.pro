@@ -37,14 +37,16 @@ HEADERS += ContinuousStructure.h \
     CSXCAD_Global.h \
     ParameterObjects.h \
     CSFunctionParser.h \
-    CSUseful.h
+    CSUseful.h \
+    ParameterCoord.h
 SOURCES += ContinuousStructure.cpp \
     CSPrimitives.cpp \
     CSProperties.cpp \
     CSRectGrid.cpp \
     ParameterObjects.cpp \
     CSFunctionParser.cpp \
-    CSUseful.cpp
+    CSUseful.cpp \
+    ParameterCoord.cpp
 
 ABI2 {
         CONFIG-=debug debug_and_release

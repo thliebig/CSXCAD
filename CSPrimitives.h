@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include "ParameterObjects.h"
+#include "ParameterCoord.h"
 #include "CSXCAD_Global.h"
 
 class CSPrimPoint;
@@ -85,10 +86,10 @@ public:
 	//! Create a copy of ths primitive with different property.
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
-	//! Get the bounding box for this special primitive.
+	//! Get the bounding box (for the given mesh type) for this special primitive. \sa SetCoordInputType
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;};
 
-	//! Check if given Coordinate is inside the Primitive.
+	//! Check if given Coordinate (in the given mesh type) is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
 
 	//! Check whether this primitive was used. (--> IsInside() return true) \sa SetPrimitiveUsed
@@ -141,9 +142,14 @@ public:
 	bool operator!=(CSPrimitives& vgl) { return iPriority!=vgl.GetPriority();};
 
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	void SetCoordInputType(int type) {m_MeshType=type;}
+	void SetCoordInputType(CoordinateSystem type) {m_MeshType=type;}
 	//! Get the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	int GetCoordInputType() const {return m_MeshType;}
+	CoordinateSystem GetCoordInputType() const {return m_MeshType;}
+
+	//! Define the coordinate system this primitive is defined in (may be different to the input mesh type) \sa SetCoordInputType
+	void SetCoordinateSystem(CoordinateSystem cs) {m_PrimCoordSystem=cs;}
+	//! Read the coordinate system for this primitive (may be different to the input mesh type) \sa GetCoordInputType
+	CoordinateSystem GetCoordinateSystem() const {return m_PrimCoordSystem;}
 
 protected:
 	CSPrimitives(ParameterSet* paraSet, CSProperties* prop);
@@ -152,7 +158,8 @@ protected:
 
 	unsigned int uiID;
 	int iPriority;
-	int m_MeshType;
+	CoordinateSystem m_PrimCoordSystem;
+	CoordinateSystem m_MeshType;
 	PrimitiveType Type;
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
@@ -179,8 +186,11 @@ public:
 	void SetCoord(int index, const string val);
 	void SetCoords( double c1, double c2, double c3 );
 
+	//! Get the point coordinates according to the input mesh type
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
+
+	const ParameterCoord* GetCoords() const {return &m_Coords;}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -191,7 +201,7 @@ public:
 
 protected:
 	//! Vector describing the point: x,y,z
-	ParameterScalar m_Coords[3];
+	ParameterCoord m_Coords;
 };
 
 //! Box Primitive (Cube)
@@ -206,13 +216,16 @@ public:
 	CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimBox();
 
-	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimBox(this,prop);};
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimBox(this,prop);}
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) psCoords[index].SetValue(val);};
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) psCoords[index].SetValue(val);};
+	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/3,val);}
+	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/3,val);}
 
-	double GetCoord(int index) {if ((index>=0) && (index<6)) return psCoords[index].GetValue(); else return 0;};
-	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return &psCoords[index]; else return NULL;};
+	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/3,(CoordinateSystem)m_MeshType); else return 0;}
+	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/3); else return NULL;}
+
+	const ParameterCoord* GetStartCoord() const {return &m_Coords[0];}
+	const ParameterCoord* GetStopCoord() const {return &m_Coords[1];}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -222,7 +235,8 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	ParameterScalar psCoords[6];
+	//start and stop coords defining the box
+	ParameterCoord m_Coords[2];
 };
 
 //! Multi-Box Primitive (Multi-Cube)
@@ -280,19 +294,19 @@ public:
 	CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimSphere();
 
-	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimSphere(this,prop);};
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimSphere(this,prop);}
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<3)) psCenter[index].SetValue(val);};
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<3)) psCenter[index].SetValue(val);};
+	void SetCoord(int index, double val) {m_Center.SetValue(index,val);}
+	void SetCoord(int index, const char* val) {m_Center.SetValue(index,val);}
 
-	double GetCoord(int index) {if ((index>=0) && (index<3)) return psCenter[index].GetValue(); else return 0;};
-	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<3)) return &psCenter[index]; else return NULL;};
+	double GetCoord(int index) {return m_Center.GetValue(index);}
+	ParameterScalar* GetCoordPS(int index) {return m_Center.GetCoordPS(index);}
 
-	void SetRadius(double val) {psRadius.SetValue(val);};
-	void SetRadius(const char* val) {psRadius.SetValue(val);};
+	void SetRadius(double val) {psRadius.SetValue(val);}
+	void SetRadius(const char* val) {psRadius.SetValue(val);}
 
-	double GetRadius() {return psRadius.GetValue();};
-	ParameterScalar* GetRadiusPS() {return &psRadius;};
+	double GetRadius() {return psRadius.GetValue();}
+	ParameterScalar* GetRadiusPS() {return &psRadius;}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -302,7 +316,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	ParameterScalar psCenter[3];
+	ParameterCoord m_Center;
 	ParameterScalar psRadius;
 };
 

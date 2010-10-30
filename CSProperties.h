@@ -164,7 +164,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	void SetCoordInputType(int type, bool CopyToPrimitives=true);
+	void SetCoordInputType(CoordinateSystem type, bool CopyToPrimitives=true);
 	//! Get the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	int GetCoordInputType() const {return coordInputType;}
 
@@ -179,7 +179,7 @@ protected:
 	//! x,y,z,rho,r,a,t one for all coord-systems (rho distance to z-axis (cylinder-coords), r for distance to origin)
 	void InitCoordParameter();
 	Parameter* coordPara[7];
-	int coordInputType;
+	CoordinateSystem coordInputType;
 	PropertyType Type;
 	bool bMaterial;
 	unsigned int uiID;

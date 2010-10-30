@@ -87,7 +87,7 @@ public:
 	CSProperties* GetProperty(size_t index);
 
 	//! Define the input type for the CSProperties weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	void SetCoordInputType(int type);
+	void SetCoordInputType(CoordinateSystem type);
 
 	int GetCoordInputType() const {return m_MeshType;}
 

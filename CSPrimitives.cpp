@@ -46,7 +46,8 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
-	m_MeshType = 0;
+	m_MeshType = UNDEFINED_CS;
+	m_PrimCoordSystem = UNDEFINED_CS;
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
@@ -60,6 +61,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
 	m_MeshType = prim->m_MeshType;
+	m_PrimCoordSystem = prim->m_PrimCoordSystem;
 }
 
 
@@ -72,7 +74,8 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
-	m_MeshType = 0;
+	m_MeshType = UNDEFINED_CS;
+	m_PrimCoordSystem = UNDEFINED_CS;
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)
@@ -94,6 +97,9 @@ bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 //	else elem.SetAttribute("PropertyID",-1);
 	elem.SetAttribute("Priority",iPriority);
 
+	if (m_PrimCoordSystem!=UNDEFINED_CS)
+		elem.SetAttribute("CoordSystem",(int)m_PrimCoordSystem);
+
 	return true;
 }
 
@@ -105,6 +111,9 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS) uiID=0;
 	uiID=(unsigned int)help;
 	if (elem->QueryIntAttribute("Priority",&iPriority)!=TIXML_SUCCESS) return false;
+
+	if (elem->QueryIntAttribute("CoordSystem",&help)==TIXML_SUCCESS)
+		m_PrimCoordSystem = (CoordinateSystem)help;
 
 	return true;
 }
@@ -118,8 +127,7 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 CSPrimPoint::CSPrimPoint(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type = POINT;
-	for (int i=0;i<3;i++)
-		m_Coords[i].SetParameterSet(paraSet);
+		m_Coords.SetParameterSet(paraSet);
 	PrimTypeName = "Point";
 }
 
@@ -127,15 +135,14 @@ CSPrimPoint::CSPrimPoint(CSPrimPoint* primPoint, CSProperties *prop) : CSPrimiti
 {
 	Type = POINT;
 	for (int i=0;i<3;++i)
-		m_Coords[i] = ParameterScalar(primPoint->m_Coords[i]);
+		m_Coords = ParameterCoord(primPoint->m_Coords);
 	PrimTypeName = "Point";
 }
 
 CSPrimPoint::CSPrimPoint(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type = POINT;
-	for (int i=0;i<3;i++)
-		m_Coords[i].SetParameterSet(paraSet);
+	m_Coords.SetParameterSet(paraSet);
 	PrimTypeName = "Point";
 }
 
@@ -145,118 +152,90 @@ CSPrimPoint::~CSPrimPoint()
 
 void CSPrimPoint::SetCoord(int index, double val)
 {
-	if ((index>=0) && (index<3))
-		m_Coords[index].SetValue(val);
+	m_Coords.SetValue(index,val);
 }
 
 void CSPrimPoint::SetCoord(int index, const string val)
 {
-	if ((index>=0) && (index<3))
-		m_Coords[index].SetValue(val);
+	m_Coords.SetValue(index,val);
 }
 
 double CSPrimPoint::GetCoord(int index)
 {
-	if ((index>=0) && (index<3))
-		return m_Coords[index].GetValue();
-	return nan("");
+	return m_Coords.GetValue(index,m_MeshType);
 }
 
 ParameterScalar* CSPrimPoint::GetCoordPS(int index)
 {
-	if ((index>=0) && (index<3))
-		return &m_Coords[index];
-	return 0;
+	return m_Coords.GetCoordPS(index);
 }
 
 bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	const double *coord = m_Coords.GetCoords(m_MeshType);
 	for (int i=0; i<3; i++)
 	{
-		dBoundBox[2*i]   = m_Coords[i].GetValue();
-		dBoundBox[2*i+1] = m_Coords[i].GetValue();
+		dBoundBox[2*i]   = coord[i];
+		dBoundBox[2*i+1] = coord[i];
 	}
 	return true;
 }
 
 bool CSPrimPoint::IsInside(const double* /*Coord*/, double /*tol*/)
 {
-	// this is a 1D-object, you can never be inside...
+	// this is a 0D-object, you can never be inside...
 	return false;
 }
 
 
 bool CSPrimPoint::Update(string *ErrStr)
 {
-	int EC=0;
-	bool bOK=true;
-	for (int i=0; i<3; i++)
+	bool bOK=m_Coords.Evaluate(ErrStr);
+	if (bOK==false)
 	{
-		EC = m_Coords[i].Evaluate();
-		if (EC != ParameterScalar::NO_ERROR)
-			bOK=false;
-		if ((EC != ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in Point (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+		stringstream stream;
+		stream << endl << "Error in Point (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 	}
+	m_Coords.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 	return bOK;
 }
 
 bool CSPrimPoint::Write2XML(TiXmlElement &elem, bool parameterised)
 {
 	CSPrimitives::Write2XML(elem,parameterised);
-
-//	TiXmlElement P1("Point");
-	WriteTerm(m_Coords[0],elem,"X",parameterised);
-	WriteTerm(m_Coords[1],elem,"Y",parameterised);
-	WriteTerm(m_Coords[2],elem,"Z",parameterised);
-//	elem.InsertEndChild(P1);
-
-	return true;
+	return m_Coords.Write2XML(&elem,parameterised);
 }
 
 bool CSPrimPoint::ReadFromXML(TiXmlNode &root)
 {
-	if (!CSPrimitives::ReadFromXML(root))
-		return false;
-
-//	TiXmlElement* P1=root.FirstChildElement("Point");
-//	if (!P1)
-//		return false;
-	if (ReadTerm(m_Coords[0],*dynamic_cast<TiXmlElement*>(&root),"X")==false) return false;
-	if (ReadTerm(m_Coords[1],*dynamic_cast<TiXmlElement*>(&root),"Y")==false) return false;
-	if (ReadTerm(m_Coords[2],*dynamic_cast<TiXmlElement*>(&root),"Z")==false) return false;
-
-	return true;
+	if (!CSPrimitives::ReadFromXML(root)) return false;
+	return m_Coords.ReadFromXML(dynamic_cast<TiXmlElement*>(&root));
 }
-
-
 
 /*********************CSPrimBox********************************************************************/
 CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=BOX;
-	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	m_Coords[0].SetParameterSet(paraSet);
+	m_Coords[1].SetParameterSet(paraSet);
 	PrimTypeName = string("Box");
 }
 
 CSPrimBox::CSPrimBox(CSPrimBox* primBox, CSProperties *prop) : CSPrimitives(primBox,prop)
 {
 	Type=BOX;
-	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
+	m_Coords[0]=ParameterCoord(primBox->m_Coords[0]);
+	m_Coords[1]=ParameterCoord(primBox->m_Coords[1]);
 	PrimTypeName = string("Box");
 }
 
 CSPrimBox::CSPrimBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=BOX;
-	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	m_Coords[0].SetParameterSet(paraSet);
+	m_Coords[1].SetParameterSet(paraSet);
 	PrimTypeName = string("Box");
 }
 
@@ -267,7 +246,13 @@ CSPrimBox::~CSPrimBox()
 
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
+	const double* start = m_Coords[0].GetCoords(m_MeshType);
+	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
+	for (int i=0;i<3;++i)
+	{
+		dBoundBox[2*i]  = start[i];
+		dBoundBox[2*i+1]= stop[i];
+	}
 	if (PreserveOrientation==true) return true;
 	for (int i=0;i<3;++i)
 		if (dBoundBox[2*i]>dBoundBox[2*i+1])
@@ -297,21 +282,15 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 
 bool CSPrimBox::Update(string *ErrStr)
 {
-	int EC=0;
-	bool bOK=true;
-	for (int i=0;i<6;++i)
+	bool bOK=m_Coords[0].Evaluate(ErrStr) && m_Coords[1].Evaluate(ErrStr);
+	if (bOK==false)
 	{
-		EC=psCoords[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in Box (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+		stringstream stream;
+		stream << endl << "Error in Box (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 	}
+	m_Coords[0].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+	m_Coords[1].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 	return bOK;
 }
 
@@ -320,15 +299,11 @@ bool CSPrimBox::Write2XML(TiXmlElement &elem, bool parameterised)
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	TiXmlElement P1("P1");
-	WriteTerm(psCoords[0],P1,"X",parameterised);
-	WriteTerm(psCoords[2],P1,"Y",parameterised);
-	WriteTerm(psCoords[4],P1,"Z",parameterised);
+	m_Coords[0].Write2XML(&elem,parameterised);
 	elem.InsertEndChild(P1);
 
 	TiXmlElement P2("P2");
-	WriteTerm(psCoords[1],P2,"X",parameterised);
-	WriteTerm(psCoords[3],P2,"Y",parameterised);
-	WriteTerm(psCoords[5],P2,"Z",parameterised);
+	m_Coords[1].Write2XML(&elem,parameterised);
 	elem.InsertEndChild(P2);
 	return true;
 }
@@ -336,19 +311,8 @@ bool CSPrimBox::Write2XML(TiXmlElement &elem, bool parameterised)
 bool CSPrimBox::ReadFromXML(TiXmlNode &root)
 {
 	if (CSPrimitives::ReadFromXML(root)==false) return false;
-
-	//P1
-	TiXmlElement* P1=root.FirstChildElement("P1");
-	if (P1==NULL) return false;
-	if (ReadTerm(psCoords[0],*P1,"X")==false) return false;
-	if (ReadTerm(psCoords[2],*P1,"Y")==false) return false;
-	if (ReadTerm(psCoords[4],*P1,"Z")==false) return false;
-	TiXmlElement* P2=root.FirstChildElement("P2");
-	if (P1==NULL) return false;
-	if (ReadTerm(psCoords[1],*P2,"X")==false) return false;
-	if (ReadTerm(psCoords[3],*P2,"Y")==false) return false;
-	if (ReadTerm(psCoords[5],*P2,"Z")==false) return false;
-
+	if (m_Coords[0].ReadFromXML(root.FirstChildElement("P1")) == false)	return false;
+	if (m_Coords[1].ReadFromXML(root.FirstChildElement("P2")) == false)	return false;
 	return true;
 }
 
@@ -591,7 +555,7 @@ bool CSPrimMultiBox::ReadFromXML(TiXmlNode &root)
 CSPrimSphere::CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=SPHERE;
-	for (int i=0;i<3;++i) {psCenter[i].SetParameterSet(paraSet);}
+	m_Center.SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
 	PrimTypeName = string("Sphere");
 }
@@ -599,7 +563,7 @@ CSPrimSphere::CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties*
 CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimitives(sphere,prop)
 {
 	Type=SPHERE;
-	for (int i=0;i<3;++i) {psCenter[i]=ParameterScalar(sphere->psCenter[i]);}
+	m_Center=ParameterCoord(sphere->m_Center);
 	psRadius=ParameterScalar(sphere->psRadius);
 	PrimTypeName = string("Sphere");
 }
@@ -607,7 +571,7 @@ CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimiti
 CSPrimSphere::CSPrimSphere(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=SPHERE;
-	for (int i=0;i<3;++i) {psCenter[i].SetParameterSet(paraSet);}
+	m_Center.SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
 	PrimTypeName = string("Sphere");
 }
@@ -622,8 +586,8 @@ bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	for (unsigned int i=0;i<3;++i)
 	{
-		dBoundBox[2*i]=psCenter[i].GetValue()-psRadius.GetValue();
-		dBoundBox[2*i+1]=psCenter[i].GetValue()+psRadius.GetValue();
+		dBoundBox[2*i]=m_Center.GetValue(i)-psRadius.GetValue();
+		dBoundBox[2*i+1]=m_Center.GetValue(i)+psRadius.GetValue();
 	}
 	return true;
 }
@@ -631,8 +595,11 @@ bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
-	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
-	if (dist>psRadius.GetValue())
+	double out[3];
+	const double* center = m_Center.GetCartesianCoords();
+	TransformCoords(Coord,out,m_MeshType,CARTESIAN);
+	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
+	if (dist<psRadius.GetValue())
 		return true;
 	return false;
 }
@@ -640,20 +607,14 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 bool CSPrimSphere::Update(string *ErrStr)
 {
 	int EC=0;
-	bool bOK=true;
-	for (int i=0;i<3;++i)
+	bool bOK=m_Center.Evaluate(ErrStr);
+	if (bOK==false)
 	{
-		EC=psCenter[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+		stringstream stream;
+		stream << endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 	}
+	m_Center.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 
 	EC=psRadius.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
@@ -676,9 +637,7 @@ bool CSPrimSphere::Write2XML(TiXmlElement &elem, bool parameterised)
 	WriteTerm(psRadius,elem,"Radius",parameterised);
 
 	TiXmlElement Center("Center");
-	WriteTerm(psCenter[0],Center,"X",parameterised);
-	WriteTerm(psCenter[1],Center,"Y",parameterised);
-	WriteTerm(psCenter[2],Center,"Z",parameterised);
+	m_Center.Write2XML(&Center,parameterised);
 	elem.InsertEndChild(Center);
 	return true;
 }
@@ -692,10 +651,7 @@ bool CSPrimSphere::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(psRadius,*elem,"Radius")==false) return false;
 
 	TiXmlElement* Center=root.FirstChildElement("Center");
-	if (Center==NULL) return false;
-	if (ReadTerm(psCenter[0],*Center,"X")==false) return false;
-	if (ReadTerm(psCenter[1],*Center,"Y")==false) return false;
-	if (ReadTerm(psCenter[2],*Center,"Z")==false) return false;
+	if (m_Center.ReadFromXML(Center) == false)	return false;
 
 	return true;
 }
@@ -732,8 +688,8 @@ bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrienta
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	for (unsigned int i=0;i<3;++i)
 	{
-		dBoundBox[2*i]=psCenter[i].GetValue()-psRadius.GetValue()-psShellWidth.GetValue()/2.0;
-		dBoundBox[2*i+1]=psCenter[i].GetValue()+psRadius.GetValue()+psShellWidth.GetValue()/2.0;
+		dBoundBox[2*i]=m_Center.GetValue(i)-psRadius.GetValue()-psShellWidth.GetValue()/2.0;
+		dBoundBox[2*i+1]=m_Center.GetValue(i)+psRadius.GetValue()+psShellWidth.GetValue()/2.0;
 	}
 	return true;
 }
@@ -741,7 +697,10 @@ bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrienta
 bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
-	double dist=sqrt(pow(Coord[0]-psCenter[0].GetValue(),2)+pow(Coord[1]-psCenter[1].GetValue(),2)+pow(Coord[2]-psCenter[2].GetValue(),2));
+	double out[3];
+	const double* center = m_Center.GetCartesianCoords();
+	TransformCoords(Coord,out,m_MeshType,CARTESIAN);
+	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
 	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0)
 		return true;
 	return false;
