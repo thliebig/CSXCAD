@@ -748,7 +748,8 @@ bool CSPrimSphericalShell::ReadFromXML(TiXmlNode &root)
 CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=CYLINDER;
-	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	m_AxisCoords[0].SetParameterSet(paraSet);
+	m_AxisCoords[1].SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
 	PrimTypeName = string("Cylinder");
 }
@@ -756,7 +757,8 @@ CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSPropert
 CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : CSPrimitives(cylinder,prop)
 {
 	Type=CYLINDER;
-	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(cylinder->psCoords[i]);}
+	m_AxisCoords[0] = ParameterCoord(cylinder->m_AxisCoords[0]);
+	m_AxisCoords[1] = ParameterCoord(cylinder->m_AxisCoords[1]);
 	psRadius=ParameterScalar(cylinder->psRadius);
 	PrimTypeName = string("Cylinder");
 }
@@ -764,7 +766,8 @@ CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : C
 CSPrimCylinder::CSPrimCylinder(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=CYLINDER;
-	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
+	m_AxisCoords[0].SetParameterSet(paraSet);
+	m_AxisCoords[1].SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
 	PrimTypeName = string("Cylinder");
 }
@@ -776,16 +779,16 @@ CSPrimCylinder::~CSPrimCylinder()
 
 bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
 	double dCoords[6];
 	for (unsigned int i=0;i<6;++i)
-		dCoords[i]=psCoords[i].GetValue();
+		dCoords[i]=GetCoord(i);
 	double rad=psRadius.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
-		//vorerst ganz einfach... muss ueberarbeitet werden!!! //todo
 		double min=dCoords[2*i];
 		double max=dCoords[2*i+1];
 		if (min<max)
@@ -823,48 +826,38 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 
 bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 {
-	//Lot-Fuss-Punkt
-	//use Point_Line_Distance(...) in the future!!!
 	if (Coord==NULL) return false;
-	double p[3]={Coord[0],Coord[1],Coord[2]}; //punkt
-	double r0[3]={psCoords[0].GetValue(),psCoords[2].GetValue(),psCoords[4].GetValue()}; //aufpunkt
-	double r1[3]={psCoords[1].GetValue(),psCoords[3].GetValue(),psCoords[5].GetValue()}; //aufpunkt
-	double a[3]={r1[0]-r0[0],r1[1]-r0[1],r1[2]-r0[2]}; //richtungsvektor
-	double a2=(a[0]*a[0])+(a[1]*a[1])+(a[2]*a[2]);
-	double FP[3];
-	double e=0;
-	double t=(p[0]-r0[0])*a[0]+(p[1]-r0[1])*a[1]+(p[2]-r0[2])*a[2];
-	t/=a2;
-	for (int i=0;i<3;++i)
-	{
-		FP[i]=r0[i]+t*a[i];
-		if ((FP[i]<r0[i] || FP[i]>r1[i]) && (a[i]>0)) return false;
-		if ((FP[i]>r0[i] || FP[i]<r1[i]) && (a[i]<0)) return false;
-		e+=(FP[i]-p[i])*(FP[i]-p[i]);
-	}
-	double r=psRadius.GetValue();
-	if (e<r*r)
-		return true;
-	return false;
+
+	const double* start=m_AxisCoords[0].GetCartesianCoords();
+	const double* stop =m_AxisCoords[1].GetCartesianCoords();
+	double pos[3];
+	//transform incoming coordinates into cartesian coords
+	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+
+	double foot,dist;
+	Point_Line_Distance(pos,start,stop,foot,dist);
+
+	if ((foot<0) || (foot>1)) //the foot point is not on the axis
+		return false;
+	if (dist>psRadius.GetValue())
+		return false;
+
+	return true;
 }
 
 bool CSPrimCylinder::Update(string *ErrStr)
 {
 	int EC=0;
-	bool bOK=true;
-	for (int i=0;i<6;++i)
+	bool bOK=m_AxisCoords[0].Evaluate(ErrStr) && m_AxisCoords[1].Evaluate(ErrStr);
+	if (bOK==false)
 	{
-		EC=psCoords[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+		stringstream stream;
+		stream << endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
 	}
+	m_AxisCoords[0].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+	m_AxisCoords[1].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+
 
 	EC=psRadius.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
@@ -886,17 +879,14 @@ bool CSPrimCylinder::Write2XML(TiXmlElement &elem, bool parameterised)
 
 	WriteTerm(psRadius,elem,"Radius",parameterised);
 
-	TiXmlElement Start("P0");
-	WriteTerm(psCoords[0],Start,"X",parameterised);
-	WriteTerm(psCoords[2],Start,"Y",parameterised);
-	WriteTerm(psCoords[4],Start,"Z",parameterised);
+	TiXmlElement Start("P1");
+	m_AxisCoords[0].Write2XML(&Start,parameterised);
 	elem.InsertEndChild(Start);
 
-	TiXmlElement Stop("P1");
-	WriteTerm(psCoords[1],Stop,"X",parameterised);
-	WriteTerm(psCoords[3],Stop,"Y",parameterised);
-	WriteTerm(psCoords[5],Stop,"Z",parameterised);
+	TiXmlElement Stop("P2");
+	m_AxisCoords[0].Write2XML(&Stop,parameterised);
 	elem.InsertEndChild(Stop);
+
 	return true;
 }
 
@@ -908,17 +898,8 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 	if (elem==NULL) return false;
 	if (ReadTerm(psRadius,*elem,"Radius")==false) return false;
 
-	TiXmlElement* Point=root.FirstChildElement("P0");
-	if (Point==NULL) return false;
-	if (ReadTerm(psCoords[0],*Point,"X")==false) return false;
-	if (ReadTerm(psCoords[2],*Point,"Y")==false) return false;
-	if (ReadTerm(psCoords[4],*Point,"Z")==false) return false;
-
-	Point=root.FirstChildElement("P1");
-	if (Point==NULL) return false;
-	if (ReadTerm(psCoords[1],*Point,"X")==false) return false;
-	if (ReadTerm(psCoords[3],*Point,"Y")==false) return false;
-	if (ReadTerm(psCoords[5],*Point,"Z")==false) return false;
+	if (m_AxisCoords[0].ReadFromXML(root.FirstChildElement("P1")) == false)	return false;
+	if (m_AxisCoords[1].ReadFromXML(root.FirstChildElement("P2")) == false)	return false;
 
 	return true;
 }
@@ -951,16 +932,16 @@ CSPrimCylindricalShell::~CSPrimCylindricalShell()
 
 bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	cerr << "CSPrimCylindricalShell::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
 	double dCoords[6];
 	for (unsigned int i=0;i<6;++i)
-		dCoords[i]=psCoords[i].GetValue();
+		dCoords[i]=GetCoord(i);
 	double rad=psRadius.GetValue()+psShellWidth.GetValue()/2.0;
 	for (unsigned int i=0;i<3;++i)
 	{
-		//vorerst ganz einfach... muss ueberarbeitet werden!!! //todo
 		double min=dCoords[2*i];
 		double max=dCoords[2*i+1];
 		if (min<max)
@@ -998,28 +979,22 @@ bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrien
 
 bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 {
-	//Lot-Fuss-Punkt
 	if (Coord==NULL) return false;
-	double p[3]={Coord[0],Coord[1],Coord[2]}; //punkt
-	double r0[3]={psCoords[0].GetValue(),psCoords[2].GetValue(),psCoords[4].GetValue()}; //aufpunkt
-	double r1[3]={psCoords[1].GetValue(),psCoords[3].GetValue(),psCoords[5].GetValue()}; //aufpunkt
-	double a[3]={r1[0]-r0[0],r1[1]-r0[1],r1[2]-r0[2]}; //richtungsvektor
-	double a2=(a[0]*a[0])+(a[1]*a[1])+(a[2]*a[2]);
-	double FP[3];
-	double e=0;
-	double t=(p[0]-r0[0])*a[0]+(p[1]-r0[1])*a[1]+(p[2]-r0[2])*a[2];
-	t/=a2;
-	for (int i=0;i<3;++i)
-	{
-		FP[i]=r0[i]+t*a[i];
-		if ((FP[i]<r0[i] || FP[i]>r1[i]) && (a[i]>0)) return false;
-		if ((FP[i]>r0[i] || FP[i]<r1[i]) && (a[i]<0)) return false;
-		e+=(FP[i]-p[i])*(FP[i]-p[i]);
-	}
-	double r=psRadius.GetValue();
-	if (fabs(sqrt(e)-r)<psShellWidth.GetValue()/2.0)
-		return true;
-	return false;
+	const double* start=m_AxisCoords[0].GetCartesianCoords();
+	const double* stop =m_AxisCoords[1].GetCartesianCoords();
+	double pos[3];
+	//transform incoming coordinates into cartesian coords
+	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+
+	double foot,dist;
+	Point_Line_Distance(pos,start,stop,foot,dist);
+
+	if ((foot<0) || (foot>1)) //the foot point is not on the axis
+		return false;
+	if (fabs(dist-psRadius.GetValue())<psShellWidth.GetValue()/2.0)
+		return false;
+
+	return true;
 }
 
 bool CSPrimCylindricalShell::Update(string *ErrStr)

@@ -50,6 +50,11 @@ class CSProperties; //include VisualProperties
 class TiXmlNode;
 class CSFunctionParser;
 
+/*!
+	Calculate the distance of a point to a line (defined by start/stop coordinates).
+	Foot will return the normalized foot-point on the line. A value between 0..1 means the foot-point is one the given line.
+	foot == 0 --> foot-point is on start, foot == 1 --> foot-point is on stop
+*/
 void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist);
 
 //! Abstract base class for different geometrical primitives.
@@ -366,11 +371,14 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCylinder(this,prop);};
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) psCoords[index].SetValue(val);};
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) psCoords[index].SetValue(val);};
+	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/3,val);}
+	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/3,val);}
 
-	double GetCoord(int index) {if ((index>=0) && (index<6)) return psCoords[index].GetValue(); else return 0;};
-	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return &psCoords[index]; else return NULL;};
+	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetValue(index/3,m_MeshType); else return 0;}
+	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetCoordPS(index/3); else return NULL;}
+
+	const ParameterCoord* GetAxisStartCoord() const {return &m_AxisCoords[0];}
+	const ParameterCoord* GetAxisStopCoord() const {return &m_AxisCoords[1];}
 
 	void SetRadius(double val) {psRadius.SetValue(val);};
 	void SetRadius(const char* val) {psRadius.SetValue(val);};
@@ -386,7 +394,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	ParameterScalar psCoords[6];
+	ParameterCoord m_AxisCoords[2];
 	ParameterScalar psRadius;
 };
 
