@@ -92,10 +92,7 @@ void CSProperties::SetCoordInputType(CoordinateSystem type, bool CopyToPrimitive
 	if (CopyToPrimitives==false)
 		return;
 	for (size_t i=0;i<vPrimitives.size();++i)
-	{
 		vPrimitives.at(i)->SetCoordInputType(type);
-		vPrimitives.at(i)->Update();
-	}
 }
 
 void CSProperties::InitCoordParameter()

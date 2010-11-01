@@ -147,7 +147,7 @@ public:
 	bool operator!=(CSPrimitives& vgl) { return iPriority!=vgl.GetPriority();};
 
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
-	void SetCoordInputType(CoordinateSystem type) {m_MeshType=type;}
+	void SetCoordInputType(CoordinateSystem type, bool doUpdate=true) {m_MeshType=type; if (doUpdate) Update();}
 	//! Get the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	CoordinateSystem GetCoordInputType() const {return m_MeshType;}
 

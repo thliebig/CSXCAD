@@ -185,7 +185,7 @@ protected:
 
 	void UpdateIDs();
 
-	int m_MeshType;
+	CoordinateSystem m_MeshType;
 
 	unsigned int maxID;
 

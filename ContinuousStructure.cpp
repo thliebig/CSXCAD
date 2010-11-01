@@ -26,7 +26,7 @@ ContinuousStructure::ContinuousStructure(void)
 	clParaSet = new ParameterSet();
 	UniqueIDCounter=0;
 	dDrawingTol=0;
-	m_MeshType = 0; //default is a cartesian mesh
+	m_MeshType = CARTESIAN;
 }
 
 ContinuousStructure::~ContinuousStructure(void)
@@ -49,6 +49,7 @@ void ContinuousStructure::AddPrimitive(CSPrimitives* prim)
 {
 	if (prim==NULL) return;
 	vPrimitives.push_back(prim);
+	prim->SetCoordInputType(m_MeshType, false);
 	prim->Update(&ErrString);
 	if (prim->GetID()<=maxID) prim->SetID(maxID++);
 	else maxID=prim->GetID()+1;
@@ -57,6 +58,7 @@ void ContinuousStructure::AddPrimitive(CSPrimitives* prim)
 void ContinuousStructure::AddProperty(CSProperties* prop)
 {
 	if (prop==NULL) return;
+	prop->SetCoordInputType(m_MeshType);
 	prop->Update(&ErrString);
 	//unsigned int ID=prop->GetID();
 	//for (size_t i=0;i<vProperties.size();++i) if (vProperties.at(i)->GetID()==ID) return false;
