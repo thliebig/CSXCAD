@@ -9,12 +9,15 @@ function CSX = AddLinPoly( CSX, materialname, prio, normVector, elevation, point
 % points: two-dimensional coordinates
 % length: linear extrution in normal direction, starting at elevation
 %
+% Warning: Polygon has to be defined using Cartesian Coords
+%          for use with cylindrical mesh, set 'CoordSystem',0
+%
 % example:
 % p(1,1) = 0;  % x-coord point 1
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
-% CSX = AddLinPoly( CSX, 'PEC', 1, [0 0 1], 254, p , 10)
+% CSX = AddLinPoly( CSX, 'PEC', 1, [0 0 1], 254, p , 10, 'CoordSystem',0)
 %
 % Thorsten Liebig <thorsten.liebig@gmx.de>
 % July 6 2010

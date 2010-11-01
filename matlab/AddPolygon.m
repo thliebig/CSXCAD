@@ -8,12 +8,15 @@ function CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, point
 % elevation: position of the polygon plane
 % points: two-dimensional coordinates
 %
+% Warning: Polygon has to be defined using Cartesian Coords
+%          for use with cylindrical mesh, set 'CoordSystem',0
+%
 % example:
 % p(1,1) = 0;  % x-coord point 1
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
-% CSX = AddPolygon( CSX, 'PEC', 1, [0 0 1], 254, p )
+% CSX = AddPolygon( CSX, 'PEC', 1, [0 0 1], 254, p, 'CoordSystem',0)
 %
 %
 % Sebastian Held <sebastian.held@gmx.de>

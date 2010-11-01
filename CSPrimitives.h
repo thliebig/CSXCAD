@@ -433,6 +433,7 @@ protected:
 //! 2D Polygon Primitive
 /*!
  This is an area polygon primitive defined by a number of points in space.
+ Warning: This primitive currently can only be defined in Cartesian coordinates.
  */
 class CSXCAD_EXPORT CSPrimPolygon : public CSPrimitives
 {
@@ -490,6 +491,7 @@ protected:
 //! Linear extruded polygon Primitive
 /*!
  This is a linear extruded area polygon primitive defined by a number of points in space and an extrude vector.
+ Warning: This primitive currently can only be defined in Cartesian coordinates.
  */
 class CSXCAD_EXPORT CSPrimLinPoly : public CSPrimPolygon
 {
@@ -521,6 +523,7 @@ protected:
 //! Rotational extruded polygon Primitive
 /*!
  This is a rotation extruded area polygon primitive defined by a number of points in space, an extrude axis and start-, stop-angle.
+ Warning: This primitive currently can only be defined in Cartesian coordinates.
  */
 class CSXCAD_EXPORT CSPrimRotPoly : public CSPrimPolygon
 {

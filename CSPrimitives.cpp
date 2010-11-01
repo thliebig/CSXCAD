@@ -1165,14 +1165,18 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return accurate;
 }
 
-bool CSPrimPolygon::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 {
-	if (Coord==NULL) return false;
+	if (inCoord==NULL) return false;
 	if (vCoords.size()<2) return false;
 		
 	double box[6]={0,0,0,0,0,0};
 	bool accBnd=GetBoundBox(box);
 	UNUSED(accBnd); //maybe used later?
+
+	double Coord[3];
+	//transform incoming coordinates into cartesian coords
+	TransformCoords(inCoord,Coord,m_MeshType,CARTESIAN);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1235,6 +1239,11 @@ bool CSPrimPolygon::Update(string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
+	if (! ((m_PrimCoordSystem==CARTESIAN) || (m_PrimCoordSystem==UNDEFINED_CS && m_MeshType==CARTESIAN)))
+	{
+		cerr << "CSPrimPolygon::Update: Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected..." << endl;
+		ErrStr->append("Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected...\n");
+	}
 	for (size_t i=1;i<vCoords.size();++i)
 	{
 		EC=vCoords[i].Evaluate();
@@ -1498,13 +1507,17 @@ bool CSPrimRotPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return accurate;
 }
 
-bool CSPrimRotPoly::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 {
-	if (Coord==NULL) return false;
+	if (inCoord==NULL) return false;
 
 	double box[6]={0,0,0,0,0,0};
 	bool accBnd = GetBoundBox(box);
 	UNUSED(accBnd); //maybe used later?
+
+	double Coord[3];
+	//transform incoming coordinates into cartesian coords
+	TransformCoords(inCoord,Coord,m_MeshType,CARTESIAN);
 
 	for (unsigned int n=0;n<3;++n)
 	{
