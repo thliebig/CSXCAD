@@ -1605,12 +1605,8 @@ CSPrimCurve::CSPrimCurve(unsigned int ID, ParameterSet* paraSet, CSProperties* p
 CSPrimCurve::CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop) : CSPrimitives(primCurve,prop)
 {
 	Type=CURVE;
-	for (size_t i=0;i<primCurve->points[0].size();++i)
-	{
-		points[0].push_back(ParameterScalar(primCurve->points[0].at(i)));
-		points[1].push_back(ParameterScalar(primCurve->points[1].at(i)));
-		points[2].push_back(ParameterScalar(primCurve->points[2].at(i)));
-	}
+	for (size_t i=0;i<primCurve->points.size();++i)
+		points.push_back(new ParameterCoord(primCurve->points.at(i)));
 	PrimTypeName = string("Curve");
 }
 
@@ -1623,62 +1619,59 @@ CSPrimCurve::CSPrimCurve(ParameterSet* paraSet, CSProperties* prop) : CSPrimitiv
 
 CSPrimCurve::~CSPrimCurve()
 {
-	points[0].clear();
-	points[1].clear();
-	points[2].clear();
+	points.clear();
 }
 
 size_t CSPrimCurve::AddPoint(double coords[])
 {
-	points[0].push_back(ParameterScalar(clParaSet,coords[0]));
-	points[1].push_back(ParameterScalar(clParaSet,coords[1]));
-	points[2].push_back(ParameterScalar(clParaSet,coords[2]));
-	return points[0].size()-1;
+	points.push_back(new ParameterCoord(clParaSet,coords));
+	return points.size();
 }
 
 void CSPrimCurve::SetCoord(size_t point_index, int nu, double val)
 {
 	if (point_index>=GetNumberOfPoints()) return;
 	if ((nu<0) || (nu>2)) return;
-	points[nu].at(point_index).SetValue(val);
+	points.at(point_index)->SetValue(nu,val);
 }
 
 void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
 {
 	if (point_index>=GetNumberOfPoints()) return;
 	if ((nu<0) || (nu>2)) return;
-	points[nu].at(point_index).SetValue(val);
+	points.at(point_index)->SetValue(nu,val);
 }
 
 bool CSPrimCurve::GetPoint(size_t point_index, double* point)
 {
 	if (point_index>=GetNumberOfPoints()) return false;
-	point[0] = points[0].at(point_index).GetValue();
-	point[1] = points[1].at(point_index).GetValue();
-	point[2] = points[2].at(point_index).GetValue();
+	point[0] = points.at(point_index)->GetValue(0);
+	point[1] = points.at(point_index)->GetValue(1);
+	point[2] = points.at(point_index)->GetValue(2);
 	return true;
 }
 
 bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 {
+	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	bool accurate=false;
 	for (int n=0;n<6;++n) dBoundBox[n] = 0;
-	for (size_t i=0;i<points[0].size();++i)
+	for (size_t i=0;i<points.size();++i)
 	{
 		if (i==0)
 		{
 			for (int n=0;n<3;++n)
 			{
-				dBoundBox[2*n]=points[n].at(0).GetValue();
+				dBoundBox[2*n]=points.at(0)->GetValue(n);
 				dBoundBox[2*n+1]=dBoundBox[2*n];
 			}
 		}
 		for (int n=0;n<3;++n)
 		{
-			if (points[n].at(i).GetValue()<dBoundBox[n])
-				dBoundBox[2*n]=points[n].at(i).GetValue();
-			else if (points[n].at(i).GetValue()>dBoundBox[2*n+1])
-				dBoundBox[2*n+1]=points[n].at(i).GetValue();
+			if (points.at(i)->GetValue(n)<dBoundBox[n])
+				dBoundBox[2*n]=points.at(i)->GetValue(n);
+			else if (points.at(i)->GetValue(n)>dBoundBox[2*n+1])
+				dBoundBox[2*n+1]=points.at(i)->GetValue(n);
 		}
 	}
 	return accurate;
@@ -1693,23 +1686,18 @@ bool CSPrimCurve::IsInside(const double* /*Coord*/, double /*tol*/)
 
 bool CSPrimCurve::Update(string *ErrStr)
 {
-	int EC=0;
 	bool bOK=true;
 	for (size_t i=0;i<GetNumberOfPoints();++i)
 	{
-		for (int n=0;n<3;++n)
+		bool isOK = points.at(i)->Evaluate(ErrStr);
+		if (isOK==false)
 		{
-			EC=points[n][i].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-			{
-				bOK=false;
-				stringstream stream;
-				stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
-				ErrStr->append(stream.str());
-				PSErrorCode2Msg(EC,ErrStr);
-			}
+			stringstream stream;
+			stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
 		}
+		points.at(i)->SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+		bOK &= isOK;
 	}
 	return bOK;
 }
@@ -1718,12 +1706,10 @@ bool CSPrimCurve::Write2XML(TiXmlElement &elem, bool parameterised)
 {
 	CSPrimitives::Write2XML(elem,parameterised);
 
-	for (size_t i=0;i<points[0].size();++i)
+	for (size_t i=0;i<points.size();++i)
 	{
 		TiXmlElement VT("Vertex");
-		WriteTerm(points[0].at(i),VT,"X",parameterised);
-		WriteTerm(points[1].at(i),VT,"Y",parameterised);
-		WriteTerm(points[2].at(i),VT,"Z",parameterised);
+		points.at(i)->Write2XML(&VT,parameterised);
 		elem.InsertEndChild(VT);
 	}
 	return true;
@@ -1734,19 +1720,16 @@ bool CSPrimCurve::ReadFromXML(TiXmlNode &root)
 	if (CSPrimitives::ReadFromXML(root)==false) return false;
 
 	TiXmlElement *VT=root.FirstChildElement("Vertex");
-	if (points[0].size()!=0) return false;
-	double emptyP[] = {0.0,0.0,0.0};
-	size_t current=0;
+	if (points.size()!=0) return false;
+	ParameterCoord *newPoint;
 	while (VT)
 	{
-		current = this->AddPoint(emptyP);
-
-		if (ReadTerm(points[0].at(current),*VT,"X")==false) return false;
-		if (ReadTerm(points[1].at(current),*VT,"Y")==false) return false;
-		if (ReadTerm(points[2].at(current),*VT,"Z")==false) return false;
+		newPoint = new ParameterCoord(clParaSet);
+		if (newPoint->ReadFromXML(VT))
+			points.push_back(newPoint);
 		VT=VT->NextSiblingElement("Vertex");
 	};
-	
+
 	return true;
 }
 
@@ -1789,23 +1772,24 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 	double rad = wireRadius.GetValue();
-	double p0[3];
-	double p1[3];
+	const double* p0;
+	const double* p1;
+	double pos[3];
+	//transform incoming coordinates into cartesian coords
+	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+
 	double foot,dist,distPP;
 	for (size_t i=0;i<GetNumberOfPoints();++i)
 	{
-		p0[0]=points[0].at(i).GetValue();
-		p0[1]=points[1].at(i).GetValue();
-		p0[2]=points[2].at(i).GetValue();
+		p0 = points.at(i)->GetCartesianCoords();
+
 		dist = sqrt(pow(Coord[0]-p0[0],2)+pow(Coord[1]-p0[1],2)+pow(Coord[2]-p0[2],2));
 		if (dist<rad)
 			return true;
 
 		if (i<GetNumberOfPoints()-1)
 		{
-			p1[0]=points[0].at(i+1).GetValue();
-			p1[1]=points[1].at(i+1).GetValue();
-			p1[2]=points[2].at(i+1).GetValue();
+			p1 = points.at(i+1)->GetCartesianCoords();
 			distPP = sqrt(pow(p1[0]-p0[0],2)+pow(p1[1]-p0[1],2)+pow(p1[2]-p0[2],2))+rad;
 			if (dist<distPP)
 			{

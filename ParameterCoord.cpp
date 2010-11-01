@@ -68,6 +68,14 @@ ParameterCoord::ParameterCoord()
 	Update();
 }
 
+ParameterCoord::ParameterCoord(ParameterSet* ParaSet)
+{
+	m_CoordSystem = UNDEFINED_CS;
+	for (int n=0;n<3;++n)
+		m_Coords[n] = new ParameterScalar(ParaSet,0);
+	Update();
+}
+
 ParameterCoord::ParameterCoord(CoordinateSystem cs)
 {
 	m_CoordSystem = cs;
@@ -76,17 +84,17 @@ ParameterCoord::ParameterCoord(CoordinateSystem cs)
 	Update();
 }
 
-ParameterCoord::ParameterCoord(CoordinateSystem cs, ParameterSet* ParaSet, const double value[3])
+ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const double value[3])
 {
-	m_CoordSystem = cs;
+	m_CoordSystem = UNDEFINED_CS;
 	for (int n=0;n<3;++n)
 		m_Coords[n] = new ParameterScalar(ParaSet, value[n]);
 	Update();
 }
 
-ParameterCoord::ParameterCoord(CoordinateSystem cs, ParameterSet* ParaSet, const string value[3])
+ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const string value[3])
 {
-	m_CoordSystem = cs;
+	m_CoordSystem = UNDEFINED_CS;
 	for (int n=0;n<3;++n)
 		m_Coords[n] = new ParameterScalar(ParaSet, value[n]);
 	Update();

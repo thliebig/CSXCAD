@@ -576,7 +576,7 @@ public:
 	virtual void SetCoord(size_t point_index, int nu, double val);
 	virtual void SetCoord(size_t point_index, int nu, string val);
 
-	virtual size_t GetNumberOfPoints() {return points[0].size();}
+	virtual size_t GetNumberOfPoints() {return points.size();}
 	virtual bool GetPoint(size_t point_index, double* point);
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
@@ -587,7 +587,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	vector<ParameterScalar> points[3];
+	vector<ParameterCoord*> points;
 };
 
 //! Wire Primitive (Polygonal chain with finite radius)

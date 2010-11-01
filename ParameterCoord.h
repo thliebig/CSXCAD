@@ -25,9 +25,10 @@ class ParameterCoord
 {
 public:
 	ParameterCoord();
+	ParameterCoord(ParameterSet* ParaSet);
 	ParameterCoord(CoordinateSystem cs);
-	ParameterCoord(CoordinateSystem cs, ParameterSet* ParaSet, const double value[3]);
-	ParameterCoord(CoordinateSystem cs, ParameterSet* ParaSet, const string value[3]);
+	ParameterCoord(ParameterSet* ParaSet, const double value[3]);
+	ParameterCoord(ParameterSet* ParaSet, const string value[3]);
 	ParameterCoord(ParameterCoord* pc);
 	~ParameterCoord();
 
