@@ -15,7 +15,7 @@ CONFIG-=qt
 QMAKE_CXXFLAGS += -DGIT_VERSION=\\\"`git describe --tags`\\\"
 
 unix { 
-    VERSION = 0.2.1
+	VERSION = 0.2.2
     LIBS += -L../fparser \
         -lfparser
     LIBS += -L../tinyxml \
