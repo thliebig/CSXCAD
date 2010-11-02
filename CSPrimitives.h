@@ -223,11 +223,11 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimBox(this,prop);}
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/3,val);}
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/3,val);}
+	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
+	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
 
-	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/3); else return 0;}
-	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/3); else return NULL;}
+	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/2); else return 0;}
+	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/2); else return NULL;}
 
 	const ParameterCoord* GetStartCoord() const {return &m_Coords[0];}
 	const ParameterCoord* GetStopCoord() const {return &m_Coords[1];}
@@ -371,11 +371,11 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCylinder(this,prop);};
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/3,val);}
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/3,val);}
+	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/2,val);}
+	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/2,val);}
 
-	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetValue(index/3); else return 0;}
-	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetCoordPS(index/3); else return NULL;}
+	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetValue(index/2); else return 0;}
+	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetCoordPS(index/2); else return NULL;}
 
 	const ParameterCoord* GetAxisStartCoord() const {return &m_AxisCoords[0];}
 	const ParameterCoord* GetAxisStopCoord() const {return &m_AxisCoords[1];}
