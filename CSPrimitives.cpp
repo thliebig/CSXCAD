@@ -246,6 +246,9 @@ CSPrimBox::~CSPrimBox()
 
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
+	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
+		cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
 	for (int i=0;i<3;++i)
@@ -268,13 +271,24 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
 
-	double box[6] = {0,0,0,0,0,0};
-	bool accBnd = GetBoundBox(box);
-	UNUSED(accBnd); //maybe used later?
+	const double* start = m_Coords[0].GetCoords(m_PrimCoordSystem);
+	const double* stop  = m_Coords[1].GetCoords(m_PrimCoordSystem);
+	double pos[3];
+	//transform incoming coordinates into the coorindate system of the primitive
+	TransformCoords(Coord,pos,m_MeshType,m_PrimCoordSystem);
 
 	for (unsigned int n=0;n<3;++n)
 	{
-		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+		if (start[n]<=stop[n])
+		{
+			if ((pos[n]<start[n]) || (pos[n]>stop[n]))
+				return false;
+		}
+		else
+		{
+			if ((pos[n]>start[n]) || (pos[n]<stop[n]))
+				return false;
+		}
 	}
 	return true;
 }
