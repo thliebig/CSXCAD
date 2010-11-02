@@ -46,7 +46,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
-	m_MeshType = UNDEFINED_CS;
+	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
 }
 
@@ -74,7 +74,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
-	m_MeshType = UNDEFINED_CS;
+	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
 }
 

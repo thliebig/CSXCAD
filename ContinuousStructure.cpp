@@ -21,12 +21,9 @@
 /*********************ContinuousStructure********************************************************************/
 ContinuousStructure::ContinuousStructure(void)
 {
-	vPrimitives.clear();
-	maxID=0;
 	clParaSet = new ParameterSet();
-	UniqueIDCounter=0;
-	dDrawingTol=0;
-	m_MeshType = CARTESIAN;
+	//init datastructures...
+	clear();
 }
 
 ContinuousStructure::~ContinuousStructure(void)
@@ -327,7 +324,10 @@ const char* ContinuousStructure::Update()
 
 void ContinuousStructure::clear()
 {
+	UniqueIDCounter=0;
+	dDrawingTol=0;
 	maxID=0;
+	SetCoordInputType(CARTESIAN);
 	for (size_t i=0;i<vPrimitives.size();++i) delete vPrimitives.at(i);
 	vPrimitives.clear();
 	for (size_t i=0;i<vProperties.size();++i) delete vProperties.at(i);

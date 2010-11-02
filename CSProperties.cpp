@@ -44,7 +44,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 {
 	uiID=0;
 	bMaterial=false;
-	coordInputType=UNDEFINED_CS;
+	coordInputType=CARTESIAN;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
@@ -61,7 +61,7 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
 	bMaterial=false;
-	coordInputType=UNDEFINED_CS;
+	coordInputType=CARTESIAN;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
