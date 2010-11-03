@@ -270,6 +270,17 @@ while ~isempty(start_taper) && ~isempty(stop_taper) && (stop_taper(1) < start_ta
     end
 end
 
+% it may happen, that the space between start_taper(end) and stop_taper(1)
+% is very small; correct it:
+if numel(start_taper)>=2 && numel(stop_taper)>=2
+    d = diff( [start_taper(end-1) start_taper(end) stop_taper(1) stop_taper(2) ]);
+    if (d(1)/d(2) > ratio) || (d(3)/d(2) > ratio)
+        addLines = linspace( start_taper(end-1), stop_taper(2), 4 );
+        lines = unique( [start_taper(1:end-1) addLines stop_taper(2:end)] );
+        return
+    end
+end
+
 if isempty(start_taper)
     start_taper = start;
 end
