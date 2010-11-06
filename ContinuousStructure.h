@@ -89,7 +89,7 @@ public:
 	//! Define the input type for the CSProperties weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	void SetCoordInputType(CoordinateSystem type);
 
-	int GetCoordInputType() const {return m_MeshType;}
+	CoordinateSystem GetCoordInputType() const {return m_MeshType;}
 
 	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
 	void SetDrawingTolerance(double val) {dDrawingTol=val;}
