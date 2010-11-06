@@ -169,7 +169,7 @@ ParameterScalar* ParameterCoord::GetCoordPS(int ny)
 	return 0;
 }
 
-const double* ParameterCoord::GetNativeCoords()
+const double* ParameterCoord::GetNativeCoords() const
 {
 	switch (m_CoordSystem)
 	{
@@ -182,7 +182,7 @@ const double* ParameterCoord::GetNativeCoords()
 	return NULL; //this should not happen...
 }
 
-const double* ParameterCoord::GetCoords(CoordinateSystem cs)
+const double* ParameterCoord::GetCoords(CoordinateSystem cs) const
 {
 	switch (cs)
 	{

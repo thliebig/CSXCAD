@@ -51,10 +51,10 @@ public:
 	//! Get the internal scalar parameter, use carefully...
 	ParameterScalar* GetCoordPS(int ny);
 
-	const double* GetNativeCoords();
-	const double* GetCartesianCoords() {return m_CartesianCoords;}
-	const double* GetCylindricalCoords() {return m_CylindricalCoords;}
-	const double* GetCoords(CoordinateSystem cs);
+	const double* GetNativeCoords() const;
+	const double* GetCartesianCoords() const {return m_CartesianCoords;}
+	const double* GetCylindricalCoords() const {return m_CylindricalCoords;}
+	const double* GetCoords(CoordinateSystem cs) const;
 
 	//! Evaluate the parametric coordinates and return an error message. This methode should be called before requesting coordinate values to check for valid parametric coordinates.
 	bool Evaluate(string *ErrStr);
