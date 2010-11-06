@@ -145,6 +145,7 @@ void ParameterCoord::SetValue(int ny, double value)
 	if ((ny<0) || (ny>2))
 		return;
 	m_Coords[ny]->SetValue(value);
+	Update();
 }
 
 double ParameterCoord::GetValue(int ny)
