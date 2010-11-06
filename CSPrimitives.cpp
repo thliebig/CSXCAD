@@ -313,11 +313,11 @@ bool CSPrimBox::Write2XML(TiXmlElement &elem, bool parameterised)
 	CSPrimitives::Write2XML(elem,parameterised);
 
 	TiXmlElement P1("P1");
-	m_Coords[0].Write2XML(&elem,parameterised);
+	m_Coords[0].Write2XML(&P1,parameterised);
 	elem.InsertEndChild(P1);
 
 	TiXmlElement P2("P2");
-	m_Coords[1].Write2XML(&elem,parameterised);
+	m_Coords[1].Write2XML(&P2,parameterised);
 	elem.InsertEndChild(P2);
 	return true;
 }
@@ -898,7 +898,7 @@ bool CSPrimCylinder::Write2XML(TiXmlElement &elem, bool parameterised)
 	elem.InsertEndChild(Start);
 
 	TiXmlElement Stop("P2");
-	m_AxisCoords[0].Write2XML(&Stop,parameterised);
+	m_AxisCoords[1].Write2XML(&Stop,parameterised);
 	elem.InsertEndChild(Stop);
 
 	return true;
