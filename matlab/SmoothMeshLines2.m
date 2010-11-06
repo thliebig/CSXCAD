@@ -58,7 +58,7 @@ if numel(lines) == 2
 end
 
 while 1
-    gap = calc_gaps();
+    gap = calc_gaps(lines,old_gap,max_res);
     
     % determine gap to process
     index = find( [old_gap(2:end).start_res] ~= [gap(2:end).start_res], 1, 'first' ) + 1;
@@ -69,8 +69,8 @@ while 1
         break; % done
     end
     
-    start_res = min( max_res, calc_start_res(index) );
-    stop_res  = min( max_res, calc_stop_res(index) );
+    start_res = min( max_res, calc_start_res(index,lines,old_gap) );
+    stop_res  = min( max_res, calc_stop_res(index,lines,old_gap) );
     
     % create new lines
     old_gap(index).lines = SmoothRange( lines(index), lines(index+1), start_res, stop_res, max_res, ratio );
@@ -90,9 +90,10 @@ end
 lines = sort(unique(lines));
 CheckMesh(lines,0,max_res,ratio);
 
+end % SmoothMeshLines2()
 
 %% ------------------------------------------------------------------------
-function gap = calc_gaps()
+function gap = calc_gaps(lines,old_gap,max_res)
     temp_lines = lines;
     for n=1:numel(old_gap)
         temp_lines = [temp_lines old_gap(n).lines];
@@ -137,7 +138,7 @@ end % plot_lines
 
 
 %% ------------------------------------------------------------------------
-function res = calc_start_res( pos )
+function res = calc_start_res(pos,lines,old_gap)
     if (pos < 2) || (pos > numel(lines))
         res = [];
         return
@@ -154,7 +155,7 @@ end % calc_res()
 
 
 %% ------------------------------------------------------------------------
-function res = calc_stop_res( pos )
+function res = calc_stop_res(pos,lines,old_gap)
     if (pos < 1) || (pos >= numel(lines)-1)
         res = [];
         return
@@ -292,5 +293,3 @@ end
 numL = ceil((stop_taper(1) - start_taper(end))/max_res)+1;
 lines = unique([start_taper linspace(start_taper(end),stop_taper(1),numL) stop_taper]);
 end % SmoothRange()
-
-end % main function
