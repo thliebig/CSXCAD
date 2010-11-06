@@ -229,8 +229,8 @@ public:
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/2); else return 0;}
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/2); else return NULL;}
 
-	const ParameterCoord* GetStartCoord() const {return &m_Coords[0];}
-	const ParameterCoord* GetStopCoord() const {return &m_Coords[1];}
+	ParameterCoord* GetStartCoord() {return &m_Coords[0];}
+	ParameterCoord* GetStopCoord() {return &m_Coords[1];}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -306,6 +306,7 @@ public:
 
 	double GetCoord(int index) {return m_Center.GetValue(index);}
 	ParameterScalar* GetCoordPS(int index) {return m_Center.GetCoordPS(index);}
+	ParameterCoord* GetCenter() {return &m_Center;}
 
 	void SetRadius(double val) {psRadius.SetValue(val);}
 	void SetRadius(const char* val) {psRadius.SetValue(val);}
@@ -377,8 +378,8 @@ public:
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetValue(index/2); else return 0;}
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetCoordPS(index/2); else return NULL;}
 
-	const ParameterCoord* GetAxisStartCoord() const {return &m_AxisCoords[0];}
-	const ParameterCoord* GetAxisStopCoord() const {return &m_AxisCoords[1];}
+	ParameterCoord* GetAxisStartCoord() {return &m_AxisCoords[0];}
+	ParameterCoord* GetAxisStopCoord() {return &m_AxisCoords[1];}
 
 	void SetRadius(double val) {psRadius.SetValue(val);};
 	void SetRadius(const char* val) {psRadius.SetValue(val);};
