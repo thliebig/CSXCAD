@@ -21,7 +21,7 @@
 #include "ParameterObjects.h"
 
 //! This class can hold a parameterized coordinate, defined in different coordinate systems.
-class ParameterCoord
+class CSXCAD_EXPORT ParameterCoord
 {
 public:
 	ParameterCoord();

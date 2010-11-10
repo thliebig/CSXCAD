@@ -12,10 +12,10 @@ class CSDebug;
 
 using namespace std;
 
-vector<double> SplitString2Double(string str, const char delimiter);
-string CombineVector2String(vector<double> values, const char delimiter);
+vector<double> CSXCAD_EXPORT SplitString2Double(string str, const char delimiter);
+string CSXCAD_EXPORT CombineVector2String(vector<double> values, const char delimiter);
 
-vector<int> SplitString2Int(string str, const char delimiter);
+vector<int> CSXCAD_EXPORT SplitString2Int(string str, const char delimiter);
 
 class CSXCAD_EXPORT CSDebug
 {
