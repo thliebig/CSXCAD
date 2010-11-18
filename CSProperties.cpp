@@ -23,6 +23,8 @@
 #include <sstream>
 #include "tinyxml.h"
 
+#include <H5Cpp.h>
+
 /*********************CSProperties********************************************************************/
 CSProperties::CSProperties(CSProperties* prop)
 {
@@ -844,6 +846,221 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 	}
 	return true;
 }
+
+
+/*********************CSPropDiscMaterial********************************************************************/
+CSPropDiscMaterial::CSPropDiscMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet)
+{
+	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);
+	Init();
+}
+
+CSPropDiscMaterial::CSPropDiscMaterial(CSProperties* prop) : CSPropMaterial(prop)
+{
+	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);
+	Init();
+}
+
+CSPropDiscMaterial::CSPropDiscMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID, paraSet)
+{
+	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);
+	Init();
+}
+
+CSPropDiscMaterial::~CSPropDiscMaterial()
+{
+	for (int n=0;n<3;++n)
+	{
+		delete[] m_mesh[n];
+		m_mesh[n]=NULL;
+	}
+	delete[] m_Disc_epsR;
+	m_Disc_epsR=NULL;
+	delete[] m_Disc_kappa;
+	m_Disc_kappa=NULL;
+	delete[] m_Disc_mueR;
+	m_Disc_mueR=NULL;
+	delete[] m_Disc_sigma;
+	m_Disc_sigma=NULL;
+}
+
+unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
+{
+	double coords[3];
+	TransformCoords(inCoords, coords, coordInputType, CARTESIAN);
+	for (int n=0;n<3;++n)
+		coords[n]=(coords[n]-m_Shift[n])*m_Scale;
+	unsigned int pos[3];
+	if (!(m_mesh[0] && m_mesh[1] && m_mesh[2]))
+		return -1;
+	if (m_Disc_epsR==NULL)
+		return -1;
+	for (int n=0;n<3;++n)
+	{
+		if (coords[n]<m_mesh[n][0])
+			return -1;
+		if (coords[n]>m_mesh[n][m_Size[n]-1])
+			return -1;
+		pos[n]=0;
+		for (unsigned int i=0;i<m_Size[n];++i)
+		{
+			if (coords[n]<m_mesh[n][i])
+			{
+				pos[n]=i;
+				break;
+			}
+		}
+	}
+	return pos[0] + pos[1]*m_Size[0] + pos[2]*m_Size[0]*m_Size[1];
+}
+
+double CSPropDiscMaterial::GetEpsilonWeighted(int ny, const double* inCoords)
+{
+	if (m_Disc_epsR==NULL)
+		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+	unsigned int pos1 = GetWeightingPos(inCoords);
+	if (pos1==(unsigned int)-1)
+		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+	return m_Disc_epsR[pos1];
+}
+
+double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
+{
+	if (m_Disc_kappa==NULL)
+		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+	unsigned int pos1 = GetWeightingPos(inCoords);
+	if (pos1==(unsigned int)-1)
+		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
+	return m_Disc_kappa[pos1];
+}
+
+double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
+{
+	if (m_Disc_mueR==NULL)
+		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+	unsigned int pos1 = GetWeightingPos(inCoords);
+	if (pos1==(unsigned int)-1)
+		return CSPropMaterial::GetMueWeighted(ny,inCoords);
+	return m_Disc_mueR[pos1];
+}
+
+double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
+{
+	if (m_Disc_sigma==NULL)
+		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+	unsigned int pos1 = GetWeightingPos(inCoords);
+	if (pos1==(unsigned int)-1)
+		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
+	return m_Disc_sigma[pos1];
+}
+
+void CSPropDiscMaterial::Init()
+{
+	m_Filename.clear();
+	m_FileType=-1;
+
+	for (int n=0;n<3;++n)
+		m_mesh[n]=NULL;
+	m_Disc_epsR=NULL;
+	m_Disc_kappa=NULL;
+	m_Disc_mueR=NULL;
+	m_Disc_sigma=NULL;
+
+	CSPropMaterial::Init();
+}
+
+bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+{
+	if (CSPropMaterial::Write2XML(root,parameterised,sparse) == false) return false;
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	TiXmlElement filename("DiscFile");
+	filename.SetAttribute("Type",m_FileType);
+	filename.SetAttribute("File",m_Filename.c_str());
+	prop->InsertEndChild(filename);
+
+	return true;
+}
+
+bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
+{
+	if (CSPropMaterial::ReadFromXML(root)==false) return false;
+	TiXmlElement* prop=root.ToElement();
+
+	if (prop==NULL) return false;
+
+	m_FileType = -1;
+	if (prop->QueryIntAttribute("Type",&m_FileType)!=TIXML_SUCCESS)
+		return true;
+	const char* c_filename = prop->Attribute("File");
+
+	const char* help = prop->Attribute("Shift");
+	if (help)
+	{
+		vector<double> shift= SplitString2Double(help,',');
+		for (unsigned int n=0;n<3 && n<shift.size();++n)
+			m_Shift[n]=shift.at(n);
+	}
+
+	if (prop->QueryFloatAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
+		m_Scale=1;
+
+	if (c_filename==NULL)
+		return true;
+
+	if ((m_FileType==0) && (c_filename!=NULL))
+		return ReadHDF5(c_filename);
+
+	return true;
+}
+
+bool CSPropDiscMaterial::ReadHDF5(string filename)
+{
+	cout << "CSPropDiscMaterial::ReadHDF5: Reading \"" << filename << "\""<< endl;
+
+	H5::FloatType datatype( H5::PredType::NATIVE_FLOAT );
+
+	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
+
+	H5::H5File file( filename, H5F_ACC_RDONLY );
+	for (int n=0;n<3;++n)
+	{
+		H5::DataSet dataset = file.openDataSet( names[n].c_str() );
+		H5::DataSpace dataspace = dataset.getSpace();
+		m_Size[n]= dataspace.getSimpleExtentNpoints();
+		delete[] m_mesh[n];
+		m_mesh[n] = new float[m_Size[n]];
+		dataset.read(m_mesh[n],datatype,dataspace);
+		dataspace.close();
+	}
+
+	H5::DataSet dataset = file.openDataSet( "/epsR");
+	H5::DataSpace dataspace = dataset.getSpace();
+	size_t  size= dataspace.getSimpleExtentNpoints();
+	delete[] m_Disc_epsR;
+	m_Disc_epsR = new float[size];
+	dataset.read(m_Disc_epsR,datatype,dataspace);
+	dataspace.close();
+	if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+	}
+
+	dataset = file.openDataSet( "/kappa");
+	dataspace = dataset.getSpace();
+	size= dataspace.getSimpleExtentNpoints();
+	delete[] m_Disc_kappa;
+	m_Disc_kappa = new float[size];
+	dataset.read(m_Disc_kappa,datatype,dataspace);
+	dataspace.close();
+	if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+	}
+	return true;
+}
+
 
 /*********************CSPropMetal********************************************************************/
 CSPropMetal::CSPropMetal(ParameterSet* paraSet) : CSProperties(paraSet) {Type=METAL;bMaterial=true;}

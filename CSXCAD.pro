@@ -27,6 +27,8 @@ win32 {
     INCLUDEPATH += ../fparser
 	LIBS += ..\fparser\release\libfparser4.a \
 		..\tinyxml\release\libtinyxml2.a
+	INCLUDEPATH += ../hdf5/include ../boost/include/boost-1_42
+	LIBS +=  ../hdf5/lib/libhdf5_cpp.a ../hdf5/lib/libhdf5.a
 }
 
 # Input
@@ -66,6 +68,9 @@ bits64 {
         OBJECTS_DIR = ABI2-64
 	LIBS = ../fparser/ABI2-64/libfparser.so
 	LIBS += ../tinyxml/ABI2-64/libtinyxml.so
+	LIBS += ../hdf5-64/lib/libhdf5.so
+	LIBS += ../hdf5-64/lib/libhdf5_cpp.so
+	INCLUDEPATH += ../hdf5-64/include
 }
 
 bits32 {
@@ -74,6 +79,9 @@ bits32 {
         OBJECTS_DIR = ABI2-32
 	LIBS = ../fparser/ABI2-32/libfparser.so
 	LIBS += ../tinyxml/ABI2-32/libtinyxml.so
+	LIBS += ../hdf5-32/lib/libhdf5.so
+	LIBS += ../hdf5-32/lib/libhdf5_cpp.so
+	INCLUDEPATH += ../hdf5-32/include
 }
 
 ABI2 {

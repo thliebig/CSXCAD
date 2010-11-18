@@ -45,6 +45,7 @@ class CSPropMaterial;
 	class CSPropDispersiveMaterial;
 		class CSPropLorentzMaterial;
 		class CSPropDebyeMaterial;
+	class CSPropDiscMaterial;
 class CSPropMetal;
 class CSPropElectrode;
 class CSPropProbeBox;
@@ -74,7 +75,8 @@ public:
 	enum PropertyType
 	{
 		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, ELECTRODE = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
-		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400 /*, unused dispersive material = 0x800 */
+		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400, /* unused dispersive material = 0x800 */
+		DISCRETE_MATERIAL = 0x1000
 	};
 	
 	//! Get PropertyType \sa PropertyType and GetTypeString
@@ -247,7 +249,7 @@ public:
 
 	int SetEpsilonWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightEpsilon,ny);}
 	const string GetEpsilonWeightFunction(int ny)			{return GetTerm(WeightEpsilon,ny);}
-	double GetEpsilonWeighted(int ny, const double* coords)	{return GetWeight(WeightEpsilon,ny,coords)*GetEpsilon(ny);}
+	virtual double GetEpsilonWeighted(int ny, const double* coords)	{return GetWeight(WeightEpsilon,ny,coords)*GetEpsilon(ny);}
 
 	void SetMue(double val, int ny=0)			{SetValue(val,Mue,ny);}
 	int SetMue(const string val, int ny=0)		{return SetValue(val,Mue,ny);}
@@ -256,7 +258,7 @@ public:
 
 	int SetMueWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightMue,ny);}
 	const string GetMueWeightFunction(int ny)			{return GetTerm(WeightMue,ny);}
-	double GetMueWeighted(int ny, const double* coords)	{return GetWeight(WeightMue,ny,coords)*GetMue(ny);}
+	virtual double GetMueWeighted(int ny, const double* coords)	{return GetWeight(WeightMue,ny,coords)*GetMue(ny);}
 
 	void SetKappa(double val, int ny=0)			{SetValue(val,Kappa,ny);}
 	int SetKappa(const string val, int ny=0)	{return SetValue(val,Kappa,ny);}
@@ -265,7 +267,7 @@ public:
 
 	int SetKappaWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightKappa,ny);}
 	const string GetKappaWeightFunction(int ny)				{return GetTerm(WeightKappa,ny);}
-	double GetKappaWeighted(int ny, const double* coords)	{return GetWeight(WeightKappa,ny,coords)*GetKappa(ny);}
+	virtual double GetKappaWeighted(int ny, const double* coords)	{return GetWeight(WeightKappa,ny,coords)*GetKappa(ny);}
 		
 	void SetSigma(double val, int ny=0)			{SetValue(val,Sigma,ny);}
 	int SetSigma(const string val, int ny=0)	{return SetValue(val,Sigma,ny);}
@@ -274,7 +276,7 @@ public:
 
 	int SetSigmaWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightSigma,ny);}
 	const string GetSigmaWeightFunction(int ny)				{return GetTerm(WeightSigma,ny);}
-	double GetSigmaWeighted(int ny, const double* coords)	{return GetWeight(WeightSigma,ny,coords)*GetSigma(ny);}
+	virtual double GetSigmaWeighted(int ny, const double* coords)	{return GetWeight(WeightSigma,ny,coords)*GetSigma(ny);}
 		
 	void SetIsotropy(bool val) {bIsotropy=val;};
 	bool GetIsotropy() {return bIsotropy;};
@@ -382,6 +384,46 @@ protected:
 	ParameterScalar WeightEpsPlasma[3],WeightMuePlasma[3];
 };
 
+//! Continuous Structure Discrete Material Property
+/*!
+  This Property reads a discrete material distribution from a file. (currently only HDF5)
+  */
+class CSXCAD_EXPORT CSPropDiscMaterial : public CSPropMaterial
+{
+public:
+	CSPropDiscMaterial(ParameterSet* paraSet);
+	CSPropDiscMaterial(CSProperties* prop);
+	CSPropDiscMaterial(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropDiscMaterial();
+
+	virtual const string GetTypeXMLString() {return string("Discrete-Material");}
+
+	virtual double GetEpsilonWeighted(int ny, const double* coords);
+	virtual double GetMueWeighted(int ny, const double* coords);
+	virtual double GetKappaWeighted(int ny, const double* coords);
+	virtual double GetSigmaWeighted(int ny, const double* coords);
+
+	virtual void Init();
+
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+	bool ReadHDF5(string filename);
+
+protected:
+	unsigned int GetWeightingPos(const double* coords);
+
+	int m_FileType;
+	string m_Filename;
+	unsigned int m_Size[3];
+	float *m_mesh[3];
+	float *m_Disc_epsR;
+	float *m_Disc_kappa;
+	float *m_Disc_mueR;
+	float *m_Disc_sigma;
+	float m_Shift[3];
+	float m_Scale;
+};
 
 //! Continuous Structure Metal Property
 /*!
