@@ -20,6 +20,7 @@ unix {
         -lfparser
     LIBS += -L../tinyxml \
         -ltinyxml
+    LIBS += -lhdf5_cpp -lhdf5
 }
 win32 { 
     DEFINES = BUILD_CSXCAD_LIB
