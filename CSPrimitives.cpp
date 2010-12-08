@@ -1005,7 +1005,7 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 
 	if ((foot<0) || (foot>1)) //the foot point is not on the axis
 		return false;
-	if (fabs(dist-psRadius.GetValue())<psShellWidth.GetValue()/2.0)
+	if (fabs(dist-psRadius.GetValue())>psShellWidth.GetValue()/2.0)
 		return false;
 
 	return true;
