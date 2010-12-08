@@ -2,17 +2,29 @@ function CSX = AddDump(CSX, name, varargin)
 % function CSX = AddDump(CSX, name, varargin)
 %
 % possible arguments for useage with openEMS:
-%   DumpType:   0 for E-field time-domain dump
+%   DumpType:   0 for E-field time-domain dump (default)
 %               1 for H-field time-domain dump
 %
-%   DumpMode:   0 no-interpolation
-%               1 node-interpolation
-%               2 cell-interpolation
+%   DumpMode:   0 no-interpolation   (default)
+%               1 node-interpolation (see warning below)
+%               2 cell-interpolation (see warning below)
 %
-%   FileType:   0 vtk-file dump
+%   FileType:   0 vtk-file dump      (default)
 %               1 hdf5-file dump
 %
 %   SubSampling: field domain sub-sampling, e.g. '2,2,4'
+% 
+%   Warning:
+%       FDTD Interpolation abnormalities:
+%           - no-interpolation: fields are located in the mesh by the
+%           Yee-scheme, the mesh only specifies E- or H-Yee-nodes 
+%             --> use node- or cell-interpolation or be aware of the offset
+%           - E-field dump & node-interpolation: normal electric fields on
+%           boundaries will have false amplitude due to forward/backward
+%           interpolation --> use no- or cell-interpolation
+%           - H-field dump & cell-interpolation: normal magnetic fields on
+%           boundaries will have false amplitude due to forward/backward
+%           interpolation --> use no- or node-interpolation
 %
 % e.g. AddDump(CSX,'Et');
 % or   AddDump(CSX,'Ht','SubSampling','2,2,4','DumpType',1);
