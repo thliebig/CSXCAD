@@ -1,6 +1,21 @@
 function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_width, varargin)
 %function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_width, varargin)
 %
+% Add a cylinder shell to CSX and assign to a property with name <propName>.
+%
+%  start:       cylinder axis start coordinates
+%  stop :       cylinder axis box stop  coordinates
+%  rad  :       cylinder radius
+%  shell_width: cylinder shell width
+%  prio :       primitive priority
+%
+%   example:
+%       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
+%       CSX = AddCylinder(CSX,'metal',10,[0 0 0],[0 0 200],50,10);
+%
+% See also AddBox, AddCylinder, AddSphere, AddSphericalShell,
+% AddCurve, AddWire, AddMetal
+%
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig

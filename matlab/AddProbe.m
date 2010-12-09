@@ -1,12 +1,18 @@
 function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
 % function CSX = AddProbe(CSX, name, type, weight)
 %
+% Add a probe property to CSX with the given name.
+% Remember to add a geometrical primitive to any property.
+%
 % name:     name of the property and probe file 
 %
 % type:     0 for voltage probing
 %           1 for current probing
 %           2 for E-field probing
 %           3 for H-field probing
+%
+%           10 for waveguide voltage mode matching
+%           11 for waveguide current mode matching
 %
 % all following parameter are optional:
 %
@@ -18,7 +24,8 @@ function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
 %       CSX = AddProbe(CSX,'ut1',0); %voltate probe
 %       CSX = AddProbe(CSX,'it1',1); %current probe
 %
-% See also ReadUI in the openEMS matlab interface
+% See also ReadUI in the openEMS matlab interface, AddDump,
+% AddExcitation, AddMaterial, AddExcitation, AddProbe, AddBox
 %
 % CSXCAD matlab interface
 % -----------------------

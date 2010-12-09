@@ -1,6 +1,8 @@
 function CSX = AddDump(CSX, name, varargin)
 % function CSX = AddDump(CSX, name, varargin)
 %
+% Add a dump property to CSX with the given name.
+% 
 % possible arguments for useage with openEMS:
 %   DumpType:   0 for E-field time-domain dump (default)
 %               1 for H-field time-domain dump
@@ -27,8 +29,13 @@ function CSX = AddDump(CSX, name, varargin)
 %           interpolation --> use no- or node-interpolation
 %
 % e.g. AddDump(CSX,'Et');
+%      CSX = AddBox(CSX,'Et',10,[0 0 0],[100 100 200]); %assign box
+% 
 % or   AddDump(CSX,'Ht','SubSampling','2,2,4','DumpType',1);
-%
+%      CSX = AddBox(CSX,'Ht',10,[0 0 0],[100 100 200]); %assign box
+% 
+% See also AddMaterial, AddExcitation, AddProbe, AddMetal, AddBox
+% 
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig

@@ -20,7 +20,8 @@ function CSX = AddExcitation(CSX, name, type, excite, varargin)
 % -----------------------
 % author: Thorsten Liebig
 %
-% See also SetExcitationWeight AddBox
+% See also SetExcitationWeight, AddMetal, AddExcitation, AddProbe,
+% AddDump, AddBox
 
 if ~ischar(name)
     error('CSXCAD::AddExcitation: name must be a string');

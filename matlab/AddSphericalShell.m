@@ -1,6 +1,20 @@
 function CSX = AddSphericalShell(CSX, propName, prio, center, rad, shell_width, varargin)
 % function CSX = AddSphericalShell(CSX, propName, prio, center, rad, shell_width, varargin)
 %
+% Add a sphere shell to CSX and assign to a property with name <propName>.
+%
+%  center:      sphere center coordinates
+%  rad  :       sphere radius
+%  shell_width: sphere shell width
+%  prio :       primitive priority
+%
+%   example:
+%       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
+%       CSX = AddSphericalShell(CSX,'metal',10,[0 0 0],50,10);
+%
+% See also AddBox, AddCylindricalShell, AddCylinder, AddSphere,
+% AddCurve, AddWire, AddMetal
+%
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig

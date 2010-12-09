@@ -2,7 +2,21 @@ function [ lines ] = SmoothMeshLines( lines, max_res, ratio )
 %function [ lines ] = SmoothMeshLines( lines, max_res, ratio )
 %
 % create smooth mesh lines
+% 
+%   Warning: This function is still experimental, may not always produce a
+%   desired output.
+% 
+%   lines:      given fixed lines to create a smooth mesh in between
+%   max_res:    desired max. resolution
+%   ratio:      max. neighboring line-delta ratio
+% 
+% example:
+%   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
+%   resolution of 5
+%   mesh.x = SmoothMeshLines([0 50 200],5,1.3);
 %
+% See also InitCSX, DefineRectGrid
+% 
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig

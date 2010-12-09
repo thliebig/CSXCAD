@@ -3,6 +3,8 @@ function CSXGeomPlot(CSX_filename)
 %
 % plot the geometry stored in the CSX file using QCSXCAD & AppCSXCAD
 %
+% See also InitCSX, DefineRectGrid
+% 
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
