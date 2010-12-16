@@ -44,12 +44,15 @@ while ( (abs(stop_taper(1) - start_taper(end)) < max_res) || (stop_taper(1) < st
     else
         stop_taper = stop_taper(2:end);
     end
+    
+    if (numel(stop_taper)==0) || (numel(start_taper)==0)
+        break
+    end
 end
 
-numL = ceil((stop_taper(1) - start_taper(end))/max_res)+1;
-
-lines = unique([start_taper linspace(start_taper(end),stop_taper(1),numL) stop_taper]);
-
-
-%% check the solution... give some warnings...
-[EC pos] = CheckMesh(lines,min(start_res,stop_res),max_res,ratio);
+if (numel(stop_taper)==0) || (numel(start_taper)==0)
+    lines = unique([start_taper stop_taper]);
+else
+    numL = ceil((stop_taper(1) - start_taper(end))/max_res)+1;
+    lines = unique([start_taper linspace(start_taper(end),stop_taper(1),numL) stop_taper]);
+end
