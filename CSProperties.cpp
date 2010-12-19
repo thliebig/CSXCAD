@@ -1397,9 +1397,9 @@ bool CSPropResBox::ReadFromXML(TiXmlNode &root)
 }
 
 /*********************CSPropDumpBox********************************************************************/
-CSPropDumpBox::CSPropDumpBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=DUMPBOX;Init();}
-CSPropDumpBox::CSPropDumpBox(CSProperties* prop) : CSProperties(prop) {Type=DUMPBOX;Init();}
-CSPropDumpBox::CSPropDumpBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=DUMPBOX;Init();}
+CSPropDumpBox::CSPropDumpBox(ParameterSet* paraSet) : CSPropProbeBox(paraSet) {Type=DUMPBOX;Init();}
+CSPropDumpBox::CSPropDumpBox(CSProperties* prop) : CSPropProbeBox(prop) {Type=DUMPBOX;Init();}
+CSPropDumpBox::CSPropDumpBox(unsigned int ID, ParameterSet* paraSet) : CSPropProbeBox(ID,paraSet) {Type=DUMPBOX;Init();}
 CSPropDumpBox::~CSPropDumpBox() {}
 
 bool CSPropDumpBox::GetGlobalSetting() {return GlobalSetting;}
@@ -1475,7 +1475,7 @@ unsigned int CSPropDumpBox::GetSubSampling(int ny)
 
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
-	if (CSProperties::Write2XML(root,parameterised,sparse) == false) return false;
+	if (CSPropProbeBox::Write2XML(root,parameterised,sparse) == false) return false;
 	TiXmlElement* prop=root.ToElement();
 	if (prop==NULL) return false;
 
@@ -1517,7 +1517,7 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 {
-	if (CSProperties::ReadFromXML(root)==false) return false;
+	if (CSPropProbeBox::ReadFromXML(root)==false) return false;
 
 	TiXmlElement *prop = root.ToElement();
 	if (prop==NULL) return false;

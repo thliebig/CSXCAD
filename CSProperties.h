@@ -49,8 +49,8 @@ class CSPropMaterial;
 class CSPropMetal;
 class CSPropElectrode;
 class CSPropProbeBox;
+	class CSPropDumpBox;
 class CSPropResBox;
-class CSPropDumpBox;
 
 class TiXmlNode;
 
@@ -581,7 +581,7 @@ protected:
 /*!
   This Property defines an area (box) designated for field dumps.
   */
-class CSXCAD_EXPORT CSPropDumpBox : public CSProperties
+class CSXCAD_EXPORT CSPropDumpBox : public CSPropProbeBox
 {
 public:
 	CSPropDumpBox(ParameterSet* paraSet);

@@ -55,5 +55,9 @@ for n=1:(nargin-2)/2
     if ~ischar(varargin{2*n-1})
         error(['CSXCAD::AddDump: not an attribute: ' varargin{2*n-1}]);
     end
-    CSX.Properties.DumpBox{end}.ATTRIBUTE = setfield(CSX.Properties.DumpBox{end}.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
+    if strcmp(varargin{2*n-1},'Frequency')
+        CSX.Properties.DumpBox{end}.FD_Samples=varargin{2*n};
+    else
+        CSX.Properties.DumpBox{end}.ATTRIBUTE = setfield(CSX.Properties.DumpBox{end}.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
+    end
 end
