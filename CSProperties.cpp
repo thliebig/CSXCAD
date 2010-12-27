@@ -1441,6 +1441,7 @@ void CSPropDumpBox::Init()
 	DumpType = 0;
 	DumpMode = 0;
 	FileType = 0;
+	m_SubSampling=false;
 	SubSampling[0]=1;
 	SubSampling[1]=1;
 	SubSampling[2]=1;
@@ -1462,6 +1463,7 @@ void CSPropDumpBox::SetSubSampling(unsigned int val[])
 void CSPropDumpBox::SetSubSampling(const char* vals)
 {
 	if (vals==NULL) return;
+	m_SubSampling=true;
 	vector<int> values = SplitString2Int(string(vals),',');
 	for (int ny=0;ny<3 && ny<(int)values.size();++ny)
 		SetSubSampling(ny,values.at(ny));
@@ -1483,9 +1485,12 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop->SetAttribute("DumpMode",DumpMode);
 	prop->SetAttribute("FileType",FileType);
 
-	stringstream ss;
-	ss << GetSubSampling(0) << "," << GetSubSampling(1) << "," << GetSubSampling(2) ;
-	prop->SetAttribute("SubSampling",ss.str().c_str());
+	if (m_SubSampling)
+	{
+		stringstream ss;
+		ss << GetSubSampling(0) << "," << GetSubSampling(1) << "," << GetSubSampling(2) ;
+		prop->SetAttribute("SubSampling",ss.str().c_str());
+	}
 
 	if (!sparse)
 	{

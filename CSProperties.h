@@ -607,6 +607,8 @@ public:
 	//! Get the arbitrary file-type \sa SetFileType
 	int GetFileType() {return FileType;}
 
+	bool GetSubSampling() {return m_SubSampling;}
+	void SetSubSampling(bool val) {m_SubSampling=val;}
 	void SetSubSampling(int ny, unsigned int val);
 	void SetSubSampling(unsigned int val[]);
 	void SetSubSampling(const char* vals);
@@ -655,6 +657,9 @@ protected:
 	int DumpType;
 	int DumpMode;
 	int FileType;
+
+	//sub-sampling
+	bool m_SubSampling;
 	unsigned int SubSampling[3];
 };
 
