@@ -1445,6 +1445,10 @@ void CSPropDumpBox::Init()
 	SubSampling[0]=1;
 	SubSampling[1]=1;
 	SubSampling[2]=1;
+	m_OptResolution=false;
+	OptResolution[0]=1;
+	OptResolution[1]=1;
+	OptResolution[2]=1;
 }
 
 void CSPropDumpBox::SetSubSampling(int ny, unsigned int val)
@@ -1475,6 +1479,40 @@ unsigned int CSPropDumpBox::GetSubSampling(int ny)
 	return SubSampling[ny];
 }
 
+void CSPropDumpBox::SetOptResolution(int ny, double val)
+{
+	if ((ny<0) || (ny>2)) return;
+	if (val<0) return;
+	OptResolution[ny] = val;
+}
+
+void CSPropDumpBox::SetOptResolution(double val[])
+{
+	for (int ny=0;ny<3;++ny)
+		SetOptResolution(ny,val[ny]);
+}
+
+void CSPropDumpBox::SetOptResolution(const char* vals)
+{
+	if (vals==NULL) return;
+	m_OptResolution=true;
+	vector<double> values = SplitString2Double(string(vals),',');
+	if (values.size()==1) //allow one resolution for all directions
+	{
+		for (int ny=0;ny<3;++ny)
+			SetOptResolution(ny,values.at(0));
+		return;
+	}
+	for (int ny=0;ny<3 && ny<(int)values.size();++ny)
+		SetOptResolution(ny,values.at(ny));
+}
+
+double CSPropDumpBox::GetOptResolution(int ny)
+{
+	if ((ny<0) || (ny>2)) return 1;
+	return OptResolution[ny];
+}
+
 bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	if (CSPropProbeBox::Write2XML(root,parameterised,sparse) == false) return false;
@@ -1490,6 +1528,12 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 		stringstream ss;
 		ss << GetSubSampling(0) << "," << GetSubSampling(1) << "," << GetSubSampling(2) ;
 		prop->SetAttribute("SubSampling",ss.str().c_str());
+	}
+	if (m_OptResolution)
+	{
+		stringstream ss;
+		ss << GetOptResolution(0) << "," << GetOptResolution(1) << "," << GetOptResolution(2) ;
+		prop->SetAttribute("OptResolution",ss.str().c_str());
 	}
 
 	if (!sparse)
@@ -1536,6 +1580,7 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("FileType",&FileType)!=TIXML_SUCCESS) FileType=0;
 
 	SetSubSampling(prop->Attribute("SubSampling"));
+	SetOptResolution(prop->Attribute("OptResolution"));
 
 	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
 	if (ScalDump!=NULL)

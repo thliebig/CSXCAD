@@ -614,6 +614,19 @@ public:
 	void SetSubSampling(const char* vals);
 	unsigned int GetSubSampling(int ny);
 
+	//! Get status of opt resolution flag
+	bool GetOptResolution() {return m_OptResolution;}
+	//! Set status of opt resolution flag
+	void SetOptResolution(bool val) {m_OptResolution=val;}
+	//! Set the opt resoultion for a given direction
+	void SetOptResolution(int ny, double val);
+	//! Set the opt resoultion for all directions
+	void SetOptResolution(double val[]);
+	//! Set the opt resoultion for all directions as string
+	void SetOptResolution(const char* vals);
+	//! Get the optimal resolution for a given direction
+	double GetOptResolution(int ny);
+
 	bool GetGlobalSetting();
 	bool GetPhiDump();
 	bool GetDivEDump();
@@ -661,5 +674,9 @@ protected:
 	//sub-sampling
 	bool m_SubSampling;
 	unsigned int SubSampling[3];
+
+	//sub-sampling
+	bool m_OptResolution;
+	double OptResolution[3];
 };
 

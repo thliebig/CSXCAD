@@ -14,7 +14,8 @@ function CSX = AddDump(CSX, name, varargin)
 %   FileType:   0 vtk-file dump      (default)
 %               1 hdf5-file dump
 %
-%   SubSampling: field domain sub-sampling, e.g. '2,2,4'
+%   SubSampling:   field domain sub-sampling, e.g. '2,2,4'
+%   OptResolution: field domain dump resolution, e.g. '10' or '10,20,5'
 % 
 %   Warning:
 %       FDTD Interpolation abnormalities:
