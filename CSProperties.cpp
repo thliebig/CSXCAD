@@ -927,7 +927,7 @@ double CSPropDiscMaterial::GetEpsilonWeighted(int ny, const double* inCoords)
 double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_kappa==NULL)
-		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
 	unsigned int pos1 = GetWeightingPos(inCoords);
 	if (pos1==(unsigned int)-1)
 		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
@@ -937,7 +937,7 @@ double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_mueR==NULL)
-		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+		return CSPropMaterial::GetMueWeighted(ny,inCoords);
 	unsigned int pos1 = GetWeightingPos(inCoords);
 	if (pos1==(unsigned int)-1)
 		return CSPropMaterial::GetMueWeighted(ny,inCoords);
@@ -947,7 +947,7 @@ double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
 double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_sigma==NULL)
-		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
+		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
 	unsigned int pos1 = GetWeightingPos(inCoords);
 	if (pos1==(unsigned int)-1)
 		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
