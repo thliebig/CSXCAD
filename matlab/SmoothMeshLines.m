@@ -1,5 +1,5 @@
-function [ lines ] = SmoothMeshLines( lines, max_res, ratio , recursive)
-%function [ lines ] = SmoothMeshLines( lines, max_res, ratio , recursive)
+function lines = SmoothMeshLines( lines, max_res, ratio, recursive)
+%function lines = SmoothMeshLines( lines, max_res, ratio, recursive)
 %
 % create smooth mesh lines
 % 
@@ -76,13 +76,17 @@ ratio_relax = ratio + (ratio-1) * 1;
 [EC pos E_type] = CheckMesh(lines,0,max_res,ratio_relax,1);
 diff_Lines = diff(lines);
 
-for (n=1:EC)
-    if (pos(n)>1)
+for n=1:EC
+    if pos(n)>1
         start_res = diff_Lines(pos(n)-1);
     else
         start_res = diff_Lines(pos(n));
     end
-    stop_res  = diff_Lines(pos(n)+1);
+    if pos(n) >= numel(diff_Lines)
+        stop_res  = diff_Lines(end);
+    else
+        stop_res  = diff_Lines(pos(n)+1);
+    end
     max_res_R = max([start_res stop_res])/2/ratio;
     addLines = [addLines SmoothRange(lines(pos(n)),lines(pos(n)+1),start_res,stop_res,max_res_R,ratio)];    
 end
@@ -91,8 +95,8 @@ lines = unique(sort([lines addLines]));
 
 for n=1:recursive
     old_numL = numel(lines);
-    [ lines ] = SmoothMeshLines( lines, max_res, ratio, 0);
-    if (numel(lines)==old_numL)
+    lines = SmoothMeshLines( lines, max_res, ratio, 0);
+    if numel(lines) == old_numL
         return
     end
 end
