@@ -201,7 +201,9 @@ if isempty(start_res)
     else
         % not enough space for entire taper
         stop_taper(1) = []; % likely too near to start
-        stop_taper = [(start+stop_taper(1))/2 stop_taper]; % create a centered line
+        if numel(stop_taper) > 0
+            stop_taper = [(start+stop_taper(1))/2 stop_taper]; % create a centered line
+        end
     end
     lines = sort(unique(stop_taper(stop_taper>=start)));
     return
@@ -223,7 +225,9 @@ if isempty(stop_res)
     else
         % not enough space for entire taper
         start_taper(end) = []; % likely too near to stop
-        start_taper = [start_taper (stop+start_taper(end))/2]; % create a centered line
+        if numel(start_taper) > 0 
+            start_taper = [start_taper (stop+start_taper(end))/2]; % create a centered line
+        end
     end
     lines = sort(unique(start_taper(start_taper<=stop)));
     return
