@@ -7,6 +7,9 @@ function CSX = AddDump(CSX, name, varargin)
 %   DumpType:   0 for E-field time-domain dump (default)
 %               1 for H-field time-domain dump
 %
+%              10 for E-field frequency-domain dump
+%              11 for H-field frequency-domain dump
+% 
 %   DumpMode:   0 no-interpolation   (default)
 %               1 node-interpolation (see warning below)
 %               2 cell-interpolation (see warning below)
@@ -31,6 +34,9 @@ function CSX = AddDump(CSX, name, varargin)
 %
 % e.g. AddDump(CSX,'Et');
 %      CSX = AddBox(CSX,'Et',10,[0 0 0],[100 100 200]); %assign box
+% 
+% or   AddDump(CSX,'Ef',DumpType, 10, 'Frequency',[1e9 2e9]);
+%      CSX = AddBox(CSX,'Ef',10,[0 0 0],[100 100 200]); %assign box
 % 
 % or   AddDump(CSX,'Ht','SubSampling','2,2,4','DumpType',1);
 %      CSX = AddBox(CSX,'Ht',10,[0 0 0],[100 100 200]); %assign box
