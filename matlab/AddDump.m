@@ -7,10 +7,12 @@ function CSX = AddDump(CSX, name, varargin)
 %   DumpType:   0 for E-field time-domain dump (default)
 %               1 for H-field time-domain dump
 %               2 for electric current time-domain dump
+%               3 for total current density (rot(H)) time-domain dump
 %
 %              10 for E-field frequency-domain dump
 %              11 for H-field frequency-domain dump
 %              12 for electric current frequency-domain dump
+%              13 for total current density (rot(H)) frequency-domain dump
 % 
 %   DumpMode:   0 no-interpolation   (default)
 %               1 node-interpolation (see warning below)
