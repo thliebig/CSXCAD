@@ -8,6 +8,9 @@ function CSX = AddExcitation(CSX, name, type, excite, varargin)
 % type: 0=E-field soft excitation  1=E-field hard excitation
 %       2=H-field soft excitation  3=H-field hard excitation
 % excite: e.g. [2 0 0] for excitation of 2 V/m in x-direction
+% 
+% additional options for openEMS:
+%   'Delay' : setup an excitation time delay in seconds
 %
 % example:
 %   CSX = AddExcitation( CSX, 'infDipole', 1, [1 0 0] );
