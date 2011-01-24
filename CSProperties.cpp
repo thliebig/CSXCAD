@@ -1023,41 +1023,127 @@ bool CSPropDiscMaterial::ReadHDF5(string filename)
 
 	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
 
-	H5::H5File file( filename, H5F_ACC_RDONLY );
-	for (int n=0;n<3;++n)
+	//save exception print status
+	H5E_auto2_t func;
+	void* client_data;
+	H5::Exception::getAutoPrint(func, &client_data);
+
+	//disable exception print
+	H5::Exception::dontPrint();
+
+	H5::H5File file;
+	try
 	{
-		H5::DataSet dataset = file.openDataSet( names[n].c_str() );
+		file.openFile(filename, H5F_ACC_RDONLY );
+	}
+	catch (H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: Failed to open file " << filename << " skipping..." << endl;
+		//restore exception print status
+		H5::Exception::setAutoPrint(func,client_data);
+		return false;
+	}
+
+	try
+	{
+		for (int n=0;n<3;++n)
+		{
+			H5::DataSet dataset = file.openDataSet( names[n].c_str() );
+			H5::DataSpace dataspace = dataset.getSpace();
+			m_Size[n]= dataspace.getSimpleExtentNpoints();
+			delete[] m_mesh[n];
+			m_mesh[n] = new float[m_Size[n]];
+			dataset.read(m_mesh[n],datatype,dataspace);
+			dataspace.close();
+		}
+	}
+	catch (H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: Failed to read mesh, skipping..." << endl;
+		//restore exception print status
+		H5::Exception::setAutoPrint(func,client_data);
+		return false;
+	}
+
+	try
+	{
+		H5::DataSet dataset = file.openDataSet( "/epsR");
 		H5::DataSpace dataspace = dataset.getSpace();
-		m_Size[n]= dataspace.getSimpleExtentNpoints();
-		delete[] m_mesh[n];
-		m_mesh[n] = new float[m_Size[n]];
-		dataset.read(m_mesh[n],datatype,dataspace);
+		size_t  size= dataspace.getSimpleExtentNpoints();
+		delete[] m_Disc_epsR;
+		m_Disc_epsR = new float[size];
+		dataset.read(m_Disc_epsR,datatype,dataspace);
 		dataspace.close();
+		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+		{
+			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		}
+	}
+	catch( H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: No epsR material information found" << endl;
 	}
 
-	H5::DataSet dataset = file.openDataSet( "/epsR");
-	H5::DataSpace dataspace = dataset.getSpace();
-	size_t  size= dataspace.getSimpleExtentNpoints();
-	delete[] m_Disc_epsR;
-	m_Disc_epsR = new float[size];
-	dataset.read(m_Disc_epsR,datatype,dataspace);
-	dataspace.close();
-	if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+	try
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		H5::DataSet dataset = file.openDataSet( "/kappa");
+		H5::DataSpace dataspace = dataset.getSpace();
+		size_t size= dataspace.getSimpleExtentNpoints();
+		delete[] m_Disc_kappa;
+		m_Disc_kappa = new float[size];
+		dataset.read(m_Disc_kappa,datatype,dataspace);
+		dataspace.close();
+		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+		{
+			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		}
+	}
+	catch( H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: No kappa material information found" << endl;
 	}
 
-	dataset = file.openDataSet( "/kappa");
-	dataspace = dataset.getSpace();
-	size= dataspace.getSimpleExtentNpoints();
-	delete[] m_Disc_kappa;
-	m_Disc_kappa = new float[size];
-	dataset.read(m_Disc_kappa,datatype,dataspace);
-	dataspace.close();
-	if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+	try
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		H5::DataSet dataset = file.openDataSet( "/mueR");
+		H5::DataSpace dataspace = dataset.getSpace();
+		size_t size= dataspace.getSimpleExtentNpoints();
+		delete[] m_Disc_mueR;
+		m_Disc_mueR = new float[size];
+		dataset.read(m_Disc_mueR,datatype,dataspace);
+		dataspace.close();
+		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+		{
+			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		}
 	}
+	catch( H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: No mueR material information found" << endl;
+	}
+
+	try
+	{
+		H5::DataSet dataset = file.openDataSet( "/sigma");
+		H5::DataSpace dataspace = dataset.getSpace();
+		size_t size= dataspace.getSimpleExtentNpoints();
+		delete[] m_Disc_sigma;
+		m_Disc_sigma = new float[size];
+		dataset.read(m_Disc_sigma,datatype,dataspace);
+		dataspace.close();
+		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+		{
+			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		}
+	}
+	catch( H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: No sigma material information found" << endl;
+	}
+
+	//restore exception print status
+	H5::Exception::setAutoPrint(func,client_data);
+
 	return true;
 }
 
