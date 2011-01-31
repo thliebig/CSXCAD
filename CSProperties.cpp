@@ -507,6 +507,8 @@ void CSPropMaterial::Init()
 		WeightSigma[n].SetValue(1.0);
 		WeightSigma[n].SetParameterSet(coordParaSet);
 	}
+	Density.SetValue(0);
+	WeightDensity.SetValue(1.0);
 }
 
 bool CSPropMaterial::Update(string *ErrStr)
@@ -588,6 +590,26 @@ bool CSPropMaterial::Update(string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
+
+	EC=Density.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in Material-Property Density-Value (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+	EC=WeightDensity.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in Material-Property Density weighting function (ID: " << uiID << "): ";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
 	return bOK;
 }
 
@@ -599,6 +621,7 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	prop->SetAttribute("Isotropy",bIsotropy);
 
+	/***************   3D - Properties *****************/
 	TiXmlElement value("PropertyX");
 	WriteTerm(Epsilon[0],value,"Epsilon",parameterised);
 	WriteTerm(Mue[0],value,"Mue",parameterised);
@@ -619,7 +642,13 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	WriteTerm(Kappa[2],value,"Kappa",parameterised);
 	WriteTerm(Sigma[2],value,"Sigma",parameterised);
 	prop->InsertEndChild(value);
+	
+	/***************   1D - Properties *****************/
+	value = TiXmlElement("Property");
+	WriteTerm(Density,value,"Density",parameterised);
+	prop->InsertEndChild(value);
 
+	/**********   3D - Properties  Weight **************/
 	TiXmlElement WeightX("WeightX");
 	WriteTerm(WeightEpsilon[0],WeightX,"Epsilon",parameterised);
 	WriteTerm(WeightMue[0],WeightX,"Mue",parameterised);
@@ -641,6 +670,11 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	WriteTerm(WeightSigma[2],WeightZ,"Sigma",parameterised);
 	prop->InsertEndChild(WeightZ);
 
+	/**********   1D - Properties  Weight **************/
+	TiXmlElement weight("Weight");
+	WriteTerm(WeightDensity,weight,"Density",parameterised);
+	prop->InsertEndChild(weight);
+
 	return true;
 }
 
@@ -655,6 +689,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	prop->QueryIntAttribute("Isotropy",&attr);
 	bIsotropy = attr>0;
 
+	/***************   3D - Properties *****************/
 	TiXmlElement* matProp=prop->FirstChildElement("PropertyX");
 	if (matProp==NULL) //if 0 try also the old style...
 		matProp=prop->FirstChildElement("Property");
@@ -683,6 +718,14 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 		ReadTerm(Sigma[2],*matProp,"Sigma");
 	}
 
+	/***************   1D - Properties *****************/
+	matProp=prop->FirstChildElement("Property");
+	if (matProp!=NULL) //always accept do to legacy support
+	{
+		ReadTerm(Density,*matProp,"Density",0.0);
+	}
+
+	/**********   3D - Properties  Weight **************/
 	TiXmlElement *weight = prop->FirstChildElement("WeightX");
 	if (weight!=NULL)
 	{
@@ -708,6 +751,12 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 		ReadTerm(WeightSigma[2],*weight,"Sigma",1.0);
 	}
 
+	/**********   1D - Properties  Weight **************/
+	weight = prop->FirstChildElement("Weight");
+	if (weight!=NULL)
+	{
+		ReadTerm(WeightDensity,*weight,"Density",1.0);
+	}
 	return true;
 }
 
@@ -893,8 +942,6 @@ unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 	unsigned int pos[3];
 	if (!(m_mesh[0] && m_mesh[1] && m_mesh[2]))
 		return -1;
-	if (m_Disc_epsR==NULL)
-		return -1;
 	for (int n=0;n<3;++n)
 	{
 		if (coords[n]<m_mesh[n][0])
@@ -931,6 +978,8 @@ double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 	unsigned int pos1 = GetWeightingPos(inCoords);
 	if (pos1==(unsigned int)-1)
 		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
+	if (m_Disc_kappa[pos1]>3)
+		cerr << "kappa to large? " << m_Disc_kappa[pos1] << endl;
 	return m_Disc_kappa[pos1];
 }
 
@@ -952,6 +1001,16 @@ double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
 	if (pos1==(unsigned int)-1)
 		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
 	return m_Disc_sigma[pos1];
+}
+
+double CSPropDiscMaterial::GetDensityWeighted(const double* inCoords)
+{
+	if (m_Disc_Density==NULL)
+		return CSPropMaterial::GetDensityWeighted(inCoords);
+	unsigned int pos1 = GetWeightingPos(inCoords);
+	if (pos1==(unsigned int)-1)
+		return CSPropMaterial::GetDensityWeighted(inCoords);
+	return m_Disc_Density[pos1];
 }
 
 void CSPropDiscMaterial::Init()
@@ -1139,6 +1198,25 @@ bool CSPropDiscMaterial::ReadHDF5(string filename)
 	catch( H5::Exception error)
 	{
 		cerr << "CSPropDiscMaterial::ReadHDF5: No sigma material information found" << endl;
+	}
+
+	try
+	{
+		H5::DataSet dataset = file.openDataSet( "/density");
+		H5::DataSpace dataspace = dataset.getSpace();
+		size_t size= dataspace.getSimpleExtentNpoints();
+		delete[] m_Disc_Density;
+		m_Disc_Density = new float[size];
+		dataset.read(m_Disc_Density,datatype,dataspace);
+		dataspace.close();
+		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
+		{
+			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		}
+	}
+	catch( H5::Exception error)
+	{
+		cerr << "CSPropDiscMaterial::ReadHDF5: No material density information found" << endl;
 	}
 
 	//restore exception print status

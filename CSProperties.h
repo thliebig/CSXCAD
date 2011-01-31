@@ -277,7 +277,16 @@ public:
 	int SetSigmaWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightSigma,ny);}
 	const string GetSigmaWeightFunction(int ny)				{return GetTerm(WeightSigma,ny);}
 	virtual double GetSigmaWeighted(int ny, const double* coords)	{return GetWeight(WeightSigma,ny,coords)*GetSigma(ny);}
-		
+
+	void SetDensity(double val)			{Density.SetValue(val);}
+	int SetDensity(const string val)	{return Density.SetValue(val);}
+	double GetDensity()					{return Density.GetValue();}
+	const string GetDensityTerm()		{return Density.GetString();}
+
+	int SetDensityWeightFunction(const string fct) {return WeightDensity.SetValue(fct);}
+	const string GetDensityWeightFunction() {return WeightDensity.GetString();}
+	virtual double GetDensityWeighted(const double* coords)	{return GetWeight(WeightDensity,coords)*GetDensity();}
+
 	void SetIsotropy(bool val) {bIsotropy=val;};
 	bool GetIsotropy() {return bIsotropy;};
 
@@ -292,8 +301,14 @@ protected:
 	string GetTerm(ParameterScalar *ps, int ny);
 	void SetValue(double val, ParameterScalar *ps, int ny);
 	int SetValue(string val, ParameterScalar *ps, int ny);
+
+	//electro-magnetic properties
 	ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
 	ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];
+
+	//other physical properties
+	ParameterScalar Density, WeightDensity;
+
 	double GetWeight(ParameterScalar &ps, const double* coords);
 	double GetWeight(ParameterScalar *ps, int ny, const double* coords);
 	bool bIsotropy;
@@ -403,6 +418,8 @@ public:
 	virtual double GetKappaWeighted(int ny, const double* coords);
 	virtual double GetSigmaWeighted(int ny, const double* coords);
 
+	virtual double GetDensityWeighted(const double* coords);
+
 	virtual void Init();
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
@@ -421,6 +438,7 @@ protected:
 	float *m_Disc_kappa;
 	float *m_Disc_mueR;
 	float *m_Disc_sigma;
+	float *m_Disc_Density;
 	float m_Shift[3];
 	float m_Scale;
 };
