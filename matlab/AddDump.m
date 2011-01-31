@@ -13,6 +13,8 @@ function CSX = AddDump(CSX, name, varargin)
 %              11 for H-field frequency-domain dump
 %              12 for electric current frequency-domain dump
 %              13 for total current density (rot(H)) frequency-domain dump
+%
+%              20 local SAR frequency-domain dump
 % 
 %   DumpMode:   0 no-interpolation   (default)
 %               1 node-interpolation (see warning below)
