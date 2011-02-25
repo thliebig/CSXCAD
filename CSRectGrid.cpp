@@ -32,6 +32,17 @@ CSRectGrid::~CSRectGrid(void)
 {
 }
 
+CSRectGrid* CSRectGrid::Clone(CSRectGrid* original)
+{
+	CSRectGrid* clone = new CSRectGrid();
+	clone->dDeltaUnit = original->dDeltaUnit;
+	for (int i=0;i<3;++i)
+		clone->Lines[i] = original->Lines[i];
+	for (int i=0;i<6;++i)
+		clone->SimBox[i] = original->SimBox[i];
+	return clone;
+}
+
 void CSRectGrid::AddDiscLine(int direct, double val)
 {
 	if ((direct>=0)&&(direct<3)) Lines[direct].push_back(val);
@@ -146,6 +157,26 @@ string CSRectGrid::GetLinesAsString(int direct)
 		}
 	}
 	return xStr.str();
+}
+
+unsigned int CSRectGrid::Snap2LineNumber(int ny, double value, bool &inside) const
+{
+	inside = false;
+		if ((ny<0) || (ny>2))
+		return -1;
+	if (Lines[ny].size()==0)
+		return -1;
+	if (value<Lines[ny].at(0))
+		return 0;
+	if (value>Lines[ny].at(Lines[ny].size()-1))
+		return Lines[ny].size()-1;
+	inside = true;
+	for (size_t n=0;n<Lines[ny].size()-1;++n)
+	{
+		if (value < 0.5*(Lines[ny].at(n)+Lines[ny].at(n+1)) )
+			return n;
+	}
+	return Lines[ny].size()-1;
 }
 
 int CSRectGrid::GetDimension()

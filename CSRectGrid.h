@@ -43,6 +43,8 @@ public:
 	//! Deconstruct the grid.
 	~CSRectGrid(void);
 
+	static CSRectGrid* Clone(CSRectGrid* original);
+
 	//! Add a disc-line in the given direction.
 	void AddDiscLine(int direct, double val);
 	void AddDiscLines(int direct, int numLines, double* vals);
@@ -77,6 +79,9 @@ public:
 	double GetLine(int direct, size_t Index);
 	//! Get disc-lines as a comma-seperated string for given direction
 	string GetLinesAsString(int direct);
+
+	//! Snap a given value to a grid line for the given direction
+	unsigned int Snap2LineNumber(int ny, double value, bool &inside) const;
 
 	//! Write the grid to a given XML-node.
 	bool Write2XML(TiXmlNode &root, bool sorted=false);
