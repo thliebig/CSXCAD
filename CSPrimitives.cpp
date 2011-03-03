@@ -108,8 +108,10 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	int help;
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;
-	if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS) uiID=0;
-	uiID=(unsigned int)help;
+	if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS)
+		uiID=0;
+	else
+		uiID=(unsigned int)help;
 	if (elem->QueryIntAttribute("Priority",&iPriority)!=TIXML_SUCCESS) return false;
 
 	if (elem->QueryIntAttribute("CoordSystem",&help)==TIXML_SUCCESS)
