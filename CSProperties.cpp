@@ -691,7 +691,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 
 	/***************   3D - Properties *****************/
 	TiXmlElement* matProp=prop->FirstChildElement("PropertyX");
-	if (matProp==NULL) //if 0 try also the old style...
+	if (matProp==NULL) //if NULL check for old style "Property"
 		matProp=prop->FirstChildElement("Property");
 	if (matProp!=NULL)
 	{
@@ -702,7 +702,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	}
 
 	matProp=prop->FirstChildElement("PropertyY");
-	if (matProp!=NULL) //always accept do to legacy support
+	if (matProp!=NULL)
 	{
 		ReadTerm(Epsilon[1],*matProp,"Epsilon",1.0);
 		ReadTerm(Mue[1],*matProp,"Mue",1.0);
@@ -710,7 +710,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 		ReadTerm(Sigma[1],*matProp,"Sigma");
 	}
 	matProp=prop->FirstChildElement("PropertyZ");
-	if (matProp!=NULL) //always accept do to legacy support
+	if (matProp!=NULL)
 	{
 		ReadTerm(Epsilon[2],*matProp,"Epsilon",1.0);
 		ReadTerm(Mue[2],*matProp,"Mue",1.0);
@@ -719,8 +719,8 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	}
 
 	/***************   1D - Properties *****************/
-	matProp=prop->FirstChildElement("Property");
-	if (matProp!=NULL) //always accept do to legacy support
+	matProp=prop->FirstChildElement("PropertyX");
+	if (matProp!=NULL)
 	{
 		ReadTerm(Density,*matProp,"Density",0.0);
 	}
@@ -752,7 +752,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	}
 
 	/**********   1D - Properties  Weight **************/
-	weight = prop->FirstChildElement("Weight");
+	weight = prop->FirstChildElement("WeightX");
 	if (weight!=NULL)
 	{
 		ReadTerm(WeightDensity,*weight,"Density",1.0);
