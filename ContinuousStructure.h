@@ -116,6 +116,8 @@ public:
 	//! Check and warn for unused primitives in properties of given type
 	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
+	//! Show status of all properties with given type
+	void ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get the internal index of the primitive.
 	int GetIndex(CSPrimitives* prim);

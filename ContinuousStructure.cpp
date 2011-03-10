@@ -253,6 +253,18 @@ void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::Pro
 	}
 }
 
+void ContinuousStructure::ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type)
+{
+	for (size_t i=0;i<vProperties.size();++i)
+	{
+		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
+		{
+			stream << "-----------------------------------------" << endl;
+			vProperties.at(i)->ShowPropertyStatus(stream);
+		}
+	}
+}
+
 void ContinuousStructure::SetCoordInputType(CoordinateSystem type)
 {
 	m_MeshType = type;

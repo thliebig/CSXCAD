@@ -155,6 +155,13 @@ double ParameterCoord::GetValue(int ny)
 	return m_Coords[ny]->GetValue();
 }
 
+const string ParameterCoord::GetValueString(int ny) const
+{
+	if ((ny<0) || (ny>2))
+		return "nan";
+	return m_Coords[ny]->GetValueString();
+}
+
 double ParameterCoord::GetValue(int ny, CoordinateSystem cs)
 {
 	if ((ny<0) || (ny>2))

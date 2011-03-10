@@ -173,6 +173,9 @@ public:
 	//! Check and warn for unused primitives
 	void WarnUnusedPrimitves(ostream& stream);
 
+	//! Show status of this property, incl. all primitives
+	virtual void ShowPropertyStatus(ostream& stream);
+
 protected:
 	CSProperties(ParameterSet* paraSet);
 	CSProperties(unsigned int ID, ParameterSet* paraSet);
@@ -295,6 +298,8 @@ public:
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPropertyStatus(ostream& stream);
 
 protected:
 	double GetValue(ParameterScalar *ps, int ny);
@@ -515,6 +520,8 @@ public:
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	virtual void ShowPropertyStatus(ostream& stream);
+
 protected:
 	unsigned int uiNumber;
 	int iExcitType;
@@ -677,6 +684,8 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	virtual void Init();
+
+	virtual void ShowPropertyStatus(ostream& stream);
 
 protected:
 	bool GlobalSetting;

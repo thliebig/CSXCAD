@@ -538,6 +538,15 @@ double ParameterScalar::GetValue()
 	return dValue;
 }
 
+const string ParameterScalar::GetValueString() const
+{
+	if (ParameterMode)
+		return sValue;
+	stringstream numString;
+	numString << dValue;
+	return numString.str();
+}
+
 int ParameterScalar::Evaluate()
 {
 	if (ParameterMode==false) return 0;

@@ -230,6 +230,8 @@ public:
 
 	double GetValue();
 
+	const string GetValueString() const;
+
 	//returns error-code
 	int Evaluate();
 

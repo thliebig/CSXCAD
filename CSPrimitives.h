@@ -156,6 +156,9 @@ public:
 	//! Read the coordinate system for this primitive (may be different to the input mesh type) \sa GetCoordInputType
 	CoordinateSystem GetCoordinateSystem() const {return m_PrimCoordSystem;}
 
+	//! Show status of this primitve
+	virtual void ShowPrimitiveStatus(ostream& stream);
+
 protected:
 	CSPrimitives(ParameterSet* paraSet, CSProperties* prop);
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
@@ -204,6 +207,8 @@ public:
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	virtual void ShowPrimitiveStatus(ostream& stream);
+
 protected:
 	//! Vector describing the point: x,y,z
 	ParameterCoord m_Coords;
@@ -239,6 +244,8 @@ public:
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPrimitiveStatus(ostream& stream);
 
 protected:
 	//start and stop coords defining the box
@@ -323,6 +330,8 @@ public:
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	virtual void ShowPrimitiveStatus(ostream& stream);
+
 protected:
 	ParameterCoord m_Center;
 	ParameterScalar psRadius;
@@ -355,6 +364,8 @@ public:
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPrimitiveStatus(ostream& stream);
 
 protected:
 	ParameterScalar psShellWidth;
@@ -397,6 +408,8 @@ public:
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	virtual void ShowPrimitiveStatus(ostream& stream);
+
 protected:
 	ParameterCoord m_AxisCoords[2];
 	ParameterScalar psRadius;
@@ -429,6 +442,8 @@ public:
 	virtual bool Update(string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPrimitiveStatus(ostream& stream);
 
 protected:
 	ParameterScalar psShellWidth;

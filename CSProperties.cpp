@@ -321,6 +321,20 @@ void CSProperties::WarnUnusedPrimitves(ostream& stream)
 	}
 }
 
+void CSProperties::ShowPropertyStatus(ostream& stream)
+{
+	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << endl;
+	stream << " Primitive Count \t: " << vPrimitives.size() << endl;
+
+	stream << "  -- Primitives: --" << endl;
+	for (size_t i=0; i<vPrimitives.size();++i)
+	{
+		vPrimitives.at(i)->ShowPrimitiveStatus(stream);
+		if (i<vPrimitives.size()-1)
+			stream << " ---- " << endl;
+	}
+}
+
 bool CSProperties::ReadFromXML(TiXmlNode &root)
 {
 	TiXmlElement* prop = root.ToElement();
@@ -758,6 +772,19 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 		ReadTerm(WeightDensity,*weight,"Density",1.0);
 	}
 	return true;
+}
+
+void CSPropMaterial::ShowPropertyStatus(ostream& stream)
+{
+	CSProperties::ShowPropertyStatus(stream);
+	stream << " --- Material Properties --- " << endl;
+	stream << "  Isotropy\t: " << bIsotropy << endl;
+	stream << "  Epsilon_R\t: " << Epsilon[0].GetValueString() << ", "  << Epsilon[1].GetValueString() << ", "  << Epsilon[2].GetValueString()  << endl;
+	stream << "  Kappa\t\t: " << Kappa[0].GetValueString() << ", "  << Kappa[1].GetValueString() << ", "  << Kappa[2].GetValueString()  << endl;
+	stream << "  Mue_R\t\t: " << Mue[0].GetValueString() << ", "  << Mue[1].GetValueString() << ", "  << Mue[2].GetValueString()  << endl;
+	stream << "  Sigma\t\t: " << Sigma[0].GetValueString() << ", "  << Sigma[1].GetValueString() << ", "  << Sigma[2].GetValueString()  << endl;
+	stream << "  Density\t: " << Density.GetValueString() << endl;
+
 }
 
 /*********************CSPropDispersiveMaterial********************************************************/
@@ -1452,6 +1479,16 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
+void CSPropElectrode::ShowPropertyStatus(ostream& stream)
+{
+	CSProperties::ShowPropertyStatus(stream);
+	stream << " --- Electrode Properties --- " << endl;
+	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << endl;
+	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << endl;
+	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << endl;
+	stream << "  Delay\t\t: " << Delay.GetValueString() << endl;
+}
+
 /*********************CSPropProbeBox********************************************************************/
 CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;}
 CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;}
@@ -1785,4 +1822,14 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 			SGLevel=iHelp;
 	}
 	return true;
+}
+
+void CSPropDumpBox::ShowPropertyStatus(ostream& stream)
+{
+	//skip output of prarent CSPropProbeBox
+	CSProperties::ShowPropertyStatus(stream);
+	stream << " --- Dump Properties --- " << endl;
+	stream << "  DumpType: " << DumpType << "  DumpMode: " << DumpMode << " FileType: " << FileType << endl;
+	if (m_FD_Samples.size()>0)
+		stream << "  Dump Frequencies: " << CombineVector2String(m_FD_Samples,',') << endl;
 }

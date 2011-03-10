@@ -120,10 +120,10 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-
-
-
-
+void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
+{
+	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
+}
 
 /*********************CSPrimPoint********************************************************************/
 CSPrimPoint::CSPrimPoint(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
@@ -215,6 +215,14 @@ bool CSPrimPoint::ReadFromXML(TiXmlNode &root)
 	if (!CSPrimitives::ReadFromXML(root)) return false;
 	return m_Coords.ReadFromXML(dynamic_cast<TiXmlElement*>(&root));
 }
+
+
+void CSPrimPoint::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimitives::ShowPrimitiveStatus(stream);
+	stream << "  Coordinate: " << m_Coords.GetValueString(0) << "," << m_Coords.GetValueString(1) << "," << m_Coords.GetValueString(2) << endl;
+}
+
 
 /*********************CSPrimBox********************************************************************/
 CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
@@ -330,6 +338,13 @@ bool CSPrimBox::ReadFromXML(TiXmlNode &root)
 	if (m_Coords[0].ReadFromXML(root.FirstChildElement("P1")) == false)	return false;
 	if (m_Coords[1].ReadFromXML(root.FirstChildElement("P2")) == false)	return false;
 	return true;
+}
+
+void CSPrimBox::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimitives::ShowPrimitiveStatus(stream);
+	stream << "  Start: " << m_Coords[0].GetValueString(0) << "," << m_Coords[0].GetValueString(1) << "," << m_Coords[0].GetValueString(2) << endl;
+	stream << "  Stop : " << m_Coords[1].GetValueString(0) << "," << m_Coords[1].GetValueString(1) << "," << m_Coords[1].GetValueString(2) << endl;
 }
 
 /*********************CSPrimMultiBox********************************************************************/
@@ -672,6 +687,13 @@ bool CSPrimSphere::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
+void CSPrimSphere::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimitives::ShowPrimitiveStatus(stream);
+	stream << "  Center: " << m_Center.GetValueString(0) << "," << m_Center.GetValueString(1) << "," << m_Center.GetValueString(2) << endl;
+	stream << "  Radius: " << psRadius.GetValueString() << endl;
+}
+
 /*********************CSPrimSphericalShell********************************************************************/
 CSPrimSphericalShell::CSPrimSphericalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(ID,paraSet,prop)
 {
@@ -758,6 +780,12 @@ bool CSPrimSphericalShell::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(psShellWidth,*elem,"ShellWidth")==false) return false;
 
 	return true;
+}
+
+void CSPrimSphericalShell::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimSphere::ShowPrimitiveStatus(stream);
+	stream << "  Shell width: " << psShellWidth.GetValueString() << endl;
 }
 
 /*********************CSPrimCylinder********************************************************************/
@@ -920,6 +948,15 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
+void CSPrimCylinder::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimitives::ShowPrimitiveStatus(stream);
+	stream << "  Axis-Start: " << m_AxisCoords[0].GetValueString(0) << "," << m_AxisCoords[0].GetValueString(1) << "," << m_AxisCoords[0].GetValueString(2) << endl;
+	stream << "  Axis-Stop : " << m_AxisCoords[1].GetValueString(0) << "," << m_AxisCoords[1].GetValueString(1) << "," << m_AxisCoords[1].GetValueString(2) << endl;
+	stream << "  Radius: " << psRadius.GetValueString() << endl;
+}
+
+
 /*********************CSPrimCylindricalShell********************************************************************/
 CSPrimCylindricalShell::CSPrimCylindricalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(ID,paraSet,prop)
 {
@@ -1048,6 +1085,12 @@ bool CSPrimCylindricalShell::ReadFromXML(TiXmlNode &root)
 	if (elem==NULL) return false;
 	if (ReadTerm(psShellWidth,*elem,"ShellWidth")==false) return false;
 	return true;
+}
+
+void CSPrimCylindricalShell::ShowPrimitiveStatus(ostream& stream)
+{
+	CSPrimCylinder::ShowPrimitiveStatus(stream);
+	stream << "  Shell width: " << psShellWidth.GetValueString() << endl;
 }
 
 /*********************CSPrimPolygon********************************************************************/
