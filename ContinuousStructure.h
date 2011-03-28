@@ -101,7 +101,7 @@ public:
 	\param markFoundAsUsed Mark the found primitives as beeing used. \sa WarnUnusedPrimitves
 	\return Returns NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties* GetPropertyByCoordPriority(double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
+	CSProperties* GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
 	//! Get properties by its priority at given coordinates and property type.
 	/*!
@@ -111,7 +111,7 @@ public:
 	\param markFoundAsUsed Mark the found primitives as beeing used. \sa WarnUnusedPrimitves
 	\return Returns an array of n properties. NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties** GetPropertiesByCoordsPriority(double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
+	CSProperties** GetPropertiesByCoordsPriority(const double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
 	//! Check and warn for unused primitives in properties of given type
 	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
