@@ -126,6 +126,14 @@ void CSRectGrid::ClearLines(int direct)
 	Lines[direct].clear();
 }
 
+bool CSRectGrid::SetLine(int direct, size_t Index, double value)
+{
+	if ((direct<0) || (direct>=3)) return false;
+	if (Lines[direct].size()<=Index) return false;
+	Lines[direct].at(Index) = value;
+	return true;
+}
+
 double CSRectGrid::GetLine(int direct, size_t Index)
 {
 	if ((direct<0) || (direct>=3)) return 0;

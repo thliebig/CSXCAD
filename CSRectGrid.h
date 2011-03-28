@@ -65,6 +65,9 @@ public:
 	//! Get the current drawing unit.
 	double GetDeltaUnit() {return dDeltaUnit;};
 
+	//! Set a disc-line in a certain direction at a given index. Will return true on success.
+	bool SetLine(int direct, size_t Index, double value);
+
 	//! Get an array of discretization lines in a certain direction.
 	/*!
 	\param direct The direction of interest.
