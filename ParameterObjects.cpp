@@ -54,6 +54,8 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 	}
 	else
 	{
+		if (PS.GetValue()==NAN)
+			return;
 		if (scientific)
 		{
 			char doubleVal[50];
@@ -533,7 +535,7 @@ void ParameterScalar::SetValue(double value)
 	sValue.clear();
 }
 
-double ParameterScalar::GetValue()
+double ParameterScalar::GetValue() const
 {
 	return dValue;
 }

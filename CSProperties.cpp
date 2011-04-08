@@ -1252,6 +1252,114 @@ bool CSPropDiscMaterial::ReadHDF5(string filename)
 	return true;
 }
 
+/*********************CSPropLumpedElement********************************************************/
+CSPropLumpedElement::CSPropLumpedElement(ParameterSet* paraSet) : CSProperties(paraSet) {Type=LUMPED_ELEMENT;Init();}
+CSPropLumpedElement::CSPropLumpedElement(CSProperties* prop) : CSProperties(prop) {Type=LUMPED_ELEMENT;Init();}
+CSPropLumpedElement::CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=LUMPED_ELEMENT;Init();}
+CSPropLumpedElement::~CSPropLumpedElement() {}
+
+void CSPropLumpedElement::Init()
+{
+	m_ny=-1;
+	m_Caps=true;
+	m_R.SetValue(NAN);
+	m_C.SetValue(NAN);
+	m_L.SetValue(NAN);
+}
+
+bool CSPropLumpedElement::Update(string *ErrStr)
+{
+	int EC=m_R.Evaluate();
+	bool bOK=true;
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in LumpedElement-Property Resistance-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+		//cout << EC << endl;
+	}
+
+	EC=m_C.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in LumpedElement-Property Capacitor-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+		//cout << EC << endl;
+	}
+
+	EC=m_L.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in LumpedElement-Property Inductance-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+		//cout << EC << endl;
+	}
+
+	return bOK & CSProperties::Update(ErrStr);
+}
+
+void CSPropLumpedElement::SetDirection(int ny)
+{
+	if ((ny<0) || (ny>2)) return;
+	m_ny = ny;
+}
+
+bool CSPropLumpedElement::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+{
+	if (CSProperties::Write2XML(root,parameterised,sparse)==false) return false;
+
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	prop->SetAttribute("Direction",m_ny);
+	prop->SetAttribute("Caps",(int)m_Caps);
+
+	WriteTerm(m_R,*prop,"R",parameterised);
+	WriteTerm(m_C,*prop,"C",parameterised);
+	WriteTerm(m_L,*prop,"L",parameterised);
+
+	return true;
+}
+
+bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
+{
+	if (CSProperties::ReadFromXML(root)==false) return false;
+
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	if (prop->QueryIntAttribute("Direction",&m_ny)!=TIXML_SUCCESS) m_ny=-1;
+	int caps=0;
+	if (prop->QueryIntAttribute("Caps",&caps)!=TIXML_SUCCESS) m_Caps=true;
+	else
+		m_Caps = (bool)caps;
+
+	if (ReadTerm(m_R,*prop,"R")==false)
+		m_R.SetValue(NAN);
+	if (ReadTerm(m_C,*prop,"C")==false)
+		m_C.SetValue(NAN);
+	if (ReadTerm(m_L,*prop,"L")==false)
+		m_L.SetValue(NAN);
+	return true;
+}
+
+void CSPropLumpedElement::ShowPropertyStatus(ostream& stream) 
+{
+	CSProperties::ShowPropertyStatus(stream);
+	stream << " --- Lumped Element Properties --- " << endl;
+	stream << "  Direction: " << m_ny << endl;
+	stream << "  Resistance: " << m_R.GetValueString() << endl;
+	stream << "  Capacity: "   << m_C.GetValueString() << endl;
+	stream << "  Inductance: " << m_L.GetValueString() << endl;
+}
 
 /*********************CSPropMetal********************************************************************/
 CSPropMetal::CSPropMetal(ParameterSet* paraSet) : CSProperties(paraSet) {Type=METAL;bMaterial=true;}

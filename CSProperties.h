@@ -46,6 +46,7 @@ class CSPropMaterial;
 		class CSPropLorentzMaterial;
 		class CSPropDebyeMaterial;
 	class CSPropDiscMaterial;
+class CSPropLumpedElement;
 class CSPropMetal;
 class CSPropElectrode;
 class CSPropProbeBox;
@@ -76,7 +77,7 @@ public:
 	{
 		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, ELECTRODE = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
 		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400, /* unused dispersive material = 0x800 */
-		DISCRETE_MATERIAL = 0x1000
+		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000
 	};
 	
 	//! Get PropertyType \sa PropertyType and GetTypeString
@@ -123,6 +124,9 @@ public:
 	size_t GetQtyPrimitives();
 	//! Get the Primitive at certain index position. \sa GetQtyPrimitives
 	CSPrimitives* GetPrimitive(size_t index);
+
+	//! Get all Primitives \sa GetPrimitive
+	vector<CSPrimitives*> GetAllPrimitives() {return vPrimitives;}
 	
 	//! Set a fill-color for this property. \sa GetFillColor
 	void SetFillColor(RGBa color);
@@ -446,6 +450,56 @@ protected:
 	float *m_Disc_Density;
 	float m_Shift[3];
 	float m_Scale;
+};
+
+//! Continuous Structure Lumped Element Property
+/*!
+  This property represents lumped elements, e.g. smd capacitors etc.
+  */
+class CSXCAD_EXPORT CSPropLumpedElement : public CSProperties
+{
+public:
+	CSPropLumpedElement(ParameterSet* paraSet);
+	CSPropLumpedElement(CSProperties* prop);
+	CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropLumpedElement();
+
+	virtual void Init();
+
+	void SetResistance(double val)			{m_R.SetValue(val);}
+	int SetResistance(const string val)		{return m_R.SetValue(val);}
+	double GetResistance() const			{return m_R.GetValue();}
+	const string GetResistanceTerm() const	{return m_R.GetString();}
+
+	void SetCapacity(double val)			{m_C.SetValue(val);}
+	int SetCapacity(const string val)		{return m_C.SetValue(val);}
+	double GetCapacity() const				{return m_C.GetValue();}
+	const string GetCapacityTerm() const	{return m_C.GetString();}
+
+	void SetInductance(double val)			{m_L.SetValue(val);}
+	int SetInductance(const string val)		{return m_L.SetValue(val);}
+	double GetInductance() const			{return m_L.GetValue();}
+	const string GetInductanceTerm() const	{return m_L.GetString();}
+
+	void SetDirection(int ny);
+	int GetDirection() const {return m_ny;}
+
+	void SetCaps(bool val) {m_Caps=val;}
+	int GetCaps() const {return m_Caps;}
+
+	void ShowPropertyStatus(ostream& stream);
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() const {return string("LumpedElement");}
+
+protected:
+	int m_ny;
+	bool m_Caps;
+	ParameterScalar m_R,m_C,m_L;
+	virtual bool Update(string *ErrStr=NULL);
+
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool ReadFromXML(TiXmlNode &root);
 };
 
 //! Continuous Structure Metal Property

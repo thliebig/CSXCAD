@@ -225,10 +225,10 @@ public:
 	int SetValue(const string value, bool Eval=true); ///returns eval-error-code
 	void SetValue(double value);
 
-	bool GetMode() {return ParameterMode;};
-	const string GetString() {return sValue;}; //if (sValue.empty()) return NULL; else return sValue.c_str();};
+	bool GetMode() const {return ParameterMode;}
+	const string GetString() const {return sValue;}
 
-	double GetValue();
+	double GetValue() const;
 
 	const string GetValueString() const;
 
