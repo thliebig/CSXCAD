@@ -8,12 +8,12 @@ function export_empire( CSX, FDTD, filename, options )
 % filename: export filename (e.g. '/tmp/export.py')
 % options (optional): struct
 %
-% See also InitCSX InitFDTD
 % CSXCAD matlab interface
 % -----------------------
 % author: Sebastian Held <sebastian.held@gmx.de>
 % 17. Jun 2010: initial version
 % 28. Sep 2010: rewritten using Empire python scripting
+% See also InitCSX InitFDTD
 
 if nargin < 3
 	options = [];
@@ -22,7 +22,8 @@ end
 fid = fopen( filename, 'w' );
 
 % write header
-fprintf( fid, '# Empire python script\n\n# start Empire and select File/"Run Script" and select this file\n\n' );
+fprintf( fid, ['# Empire python script\n\n' ...
+               '# start Empire and select File/"Run Script" and select this file\n\n'] );
 fprintf( fid, 'from scripting import *\n\n' );
 export_empire_meshlines( fid, CSX );
 export_empire_settings( fid, CSX, FDTD );
@@ -129,8 +130,10 @@ for num=1:numel(prop)
 		prio = 100;
 		epsr = 1;
         sigma = 0;
-		if isfield(prop{num}.PropertyX.ATTRIBUTE,'Epsilon'), epsr = prop{num}.PropertyX.ATTRIBUTE.Epsilon; end
-		if isfield(prop{num}.PropertyX.ATTRIBUTE,'Kappa'), sigma = prop{num}.PropertyX.ATTRIBUTE.Kappa; end
+        if isfield(prop{num},'PropertyX')
+            if isfield(prop{num}.PropertyX.ATTRIBUTE,'Epsilon'), epsr = prop{num}.PropertyX.ATTRIBUTE.Epsilon; end
+            if isfield(prop{num}.PropertyX.ATTRIBUTE,'Kappa'), sigma = prop{num}.PropertyX.ATTRIBUTE.Kappa; end
+        end
 		properties = ['dielectric epsr ' num2str(epsr) ' sigma ' num2str(sigma) ' prio ' num2str(prio) ' tand 0 density 0'];
     end
     
@@ -194,7 +197,7 @@ if ischar(openEMS_BC)
         empire_BC = 'electric';
     elseif strcmp(openEMS_BC,'PMC')
         empire_BC = 'magnetic';
-    elseif strcmp(openEMS_BC,'MUR') || strcmp(openEMS_BC,'MUR-ABC')
+    elseif strncmp(openEMS_BC,'MUR',3) || strncmp(openEMS_BC,'PML',3)
         empire_BC = 'pml 6';
     else
         empire_BC = 'UNKNOWN';
@@ -204,7 +207,7 @@ else
         empire_BC = 'electric';
     elseif openEMS_BC == 1
         empire_BC = 'magnetic';
-    elseif openEMS_BC == 2
+    elseif openEMS_BC == 2 || openEMS_BC == 3
         empire_BC = 'pml 6';
     else
         empire_BC = 'UNKNOWN';
@@ -220,5 +223,10 @@ fprintf( fid, 'set_fs_parameter( ''ymin'', ''%s'' )\n', convert_BC(FDTD.Boundary
 fprintf( fid, 'set_fs_parameter( ''ymax'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.ymax) );
 fprintf( fid, 'set_fs_parameter( ''zmin'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.zmin) );
 fprintf( fid, 'set_fs_parameter( ''zmax'', ''%s'' )\n', convert_BC(FDTD.BoundaryCond.ATTRIBUTE.zmax) );
-fprintf( fid, 'set_fs_parameter( ''F_START'', %g )\n', max(0,FDTD.Excitation.ATTRIBUTE.f0 - FDTD.Excitation.ATTRIBUTE.f0) );
-fprintf( fid, 'set_fs_parameter( ''F_STOP'', %g )\n', max(0,FDTD.Excitation.ATTRIBUTE.f0 + FDTD.Excitation.ATTRIBUTE.f0) );
+fprintf( fid, 'set_fs_parameter( ''f_0'', %g )\n', FDTD.Excitation.ATTRIBUTE.f0 );
+fprintf( fid, 'set_fs_parameter( ''f_c'', %g )\n', FDTD.Excitation.ATTRIBUTE.fc );
+f_start = max(0,FDTD.Excitation.ATTRIBUTE.f0 - FDTD.Excitation.ATTRIBUTE.fc);
+f_end   = max(0,FDTD.Excitation.ATTRIBUTE.f0 + FDTD.Excitation.ATTRIBUTE.fc);
+fprintf( fid, 'set_fs_parameter( ''F_START'', %g )\n', f_start );
+fprintf( fid, 'set_fs_parameter( ''F_END'', %g )\n', f_end );
+fprintf( fid, 'set_fs_parameter( ''F_MID'', %g )\n', (f_start+f_end)/2 );
