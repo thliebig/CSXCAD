@@ -62,7 +62,6 @@ string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, string D
 	if (DistFunction.empty()==false)
 	{
 		CSFunctionParser fParse;
-//		fParse.AddConstant("pi", 3.1415926535897932);
 		string dirVar;
 		switch (direct)
 		{
@@ -170,7 +169,7 @@ string CSRectGrid::GetLinesAsString(int direct)
 unsigned int CSRectGrid::Snap2LineNumber(int ny, double value, bool &inside) const
 {
 	inside = false;
-		if ((ny<0) || (ny>2))
+	if ((ny<0) || (ny>2))
 		return -1;
 	if (Lines[ny].size()==0)
 		return -1;
@@ -332,21 +331,8 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 		if (Text!=NULL)	LineStr[2]=string(Text->Value());
 	}
 
-//	string sub;
-//	size_t pos=0;
 	for (int i=0;i<3;++i)
 	{
-//		pos=0;
-//		do
-//		{
-//			pos=LineStr[i].find_first_of(',');
-//			if (pos==string::npos) pos=LineStr[i].size();
-//			else ++pos;
-//			sub=LineStr[i].substr(0,pos);
-//			//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
-//			if (sub.empty()==false) AddDiscLine(i,atof(sub.c_str()));
-//			LineStr[i].erase(0,pos);
-//		} while (LineStr[i].size()>0);
 		vector<double> lines = SplitString2Double(LineStr[i],',');
 		for (size_t n=0;n<lines.size();++n)
 			AddDiscLine(i,lines.at(n));
