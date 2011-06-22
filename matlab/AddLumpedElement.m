@@ -15,7 +15,7 @@ function CSX = AddLumpedElement(CSX, name, direction, varargin)
 % examples:
 % lumped element capacitor in y-direction with 1pF
 % CSX = AddLumpedElement( CSX, 'Capacitor', 1, 'Caps', 1, 'C', 1e-12 );
-% CSX = AddBox( CSX, 'RO3010', 0, [0 0 0], [10 10 10] );
+% CSX = AddBox( CSX, 'Capacitor', 0, [0 0 0], [10 10 10] );
 %
 % See also AddMaterial, AddMetal, AddExcitation, AddProbe, AddDump, AddBox
 %
