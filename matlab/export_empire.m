@@ -1,12 +1,13 @@
 function export_empire( CSX, FDTD, filename, options )
 % export_empire( CSX, FDTD, filename, options )
 %
-% Exports the geometry defined in CSX to filename as a Empire python file.
+% Exports the geometry defined in CSX to filename as an Empire python file.
 %
 % CSX: CSX-object created by InitCSX()
 % FDTD: FDTD-object created by InitFDTD()
 % filename: export filename (e.g. '/tmp/export.py')
 % options (optional): struct
+%   options.ignore  : cell array with property names to ignore
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -52,26 +53,52 @@ for a=2:numel(v), str = [str ', ' num2str(v(a))]; end
 str = [str ']'];
 
 % -----------------------------------------------------------------------------
-function str = primitive_box( fid, CSX_box )
+function primitive_box( fid, CSX_box, layertype )
+%primitive_box( fid, CSX_box, layertype )
+% layertype may be: 'dielectric Dielectric' or 'conductor Conductor'
+global current_layer_prio
+properties = '';
+if current_layer_prio ~= CSX_box.ATTRIBUTE.Priority
+    properties = [properties ' prio ' num2str(CSX_box.ATTRIBUTE.Priority)];
+end
+if ~isempty(properties)
+    fprintf( fid, 'g.objecttext("%s")\n', [layertype properties] );
+end
 start = [CSX_box.P1.ATTRIBUTE.X CSX_box.P1.ATTRIBUTE.Y CSX_box.P1.ATTRIBUTE.Z];
 stop  = [CSX_box.P2.ATTRIBUTE.X CSX_box.P2.ATTRIBUTE.Y CSX_box.P2.ATTRIBUTE.Z];
 fprintf( fid, 'g.layerextrude("z",%g,%g)\n', start(3), stop(3) );
 fprintf( fid, 'g.box(%g,%g,%g,%g)\n', start(1), start(2), stop(1), stop(2) );
 
-
 % -----------------------------------------------------------------------------
-function str = primitive_cylinder( fid, CSX_cylinder, layernr )
-start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y CSX_cylinder.P0.ATTRIBUTE.Z];
-stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y CSX_cylinder.P1.ATTRIBUTE.Z];
+function primitive_cylinder( fid, CSX_cylinder, layertype )
+%primitive_cylinder( fid, CSX_cylinder, layertype )
+% layertype may be: 'dielectric Dielectric' or 'conductor Conductor'
+global current_layer_prio
+properties = '';
+if current_layer_prio ~= CSX_cylinder.ATTRIBUTE.Priority
+    properties = [properties ' prio ' num2str(CSX_cylinder.ATTRIBUTE.Priority)];
+end
+if ~isempty(properties)
+    fprintf( fid, 'g.objecttext("%s")\n', [layertype properties] );
+end
+
+start  = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y CSX_cylinder.P1.ATTRIBUTE.Z];
+stop   = [CSX_cylinder.P2.ATTRIBUTE.X CSX_cylinder.P2.ATTRIBUTE.Y CSX_cylinder.P2.ATTRIBUTE.Z];
 
 radius = CSX_cylinder.ATTRIBUTE.Radius;
-fprintf( fid, '%s\n', 'POLY 1' );
-fprintf( fid, '%s\n', ' texts	[]' );
-fprintf( fid, '%s\n', [' layer_	' num2str(layernr)] );
-fprintf( fid, '%s\n', [' objects [stack_point([' num2str(start(1)) ',' num2str(start(2)) ',' num2str(start(3)) '],radius=' num2str(radius) ')]'] );
-fprintf( fid, '%s\n', [' arrow	stack_arrow(' gym_vect(start,stop) ')'] );
-fprintf( fid, '%s\n', ' rad  	1' );
-fprintf( fid, '%s\n', 'END POLY' );
+if start([1 2]) == stop([1 2])
+    fprintf( fid, 'g.layerextrude("z",%g,%g)\n', start(3), stop(3) );
+    fprintf( fid, 'g.circle(%g,%g,%g)\n', start(1), start(2), radius );
+elseif start([1 3]) == stop([1 3])
+    fprintf( fid, 'g.layerextrude("y",%g,%g)\n', start(2), stop(2) );
+    fprintf( fid, 'g.circle(%g,%g,%g)\n', start(3), start(1), radius );
+elseif start([2 3]) == stop([2 3])
+    fprintf( fid, 'g.layerextrude("x",%g,%g)\n', start(1), stop(1) );
+    fprintf( fid, 'g.circle(%g,%g,%g)\n', start(2), start(3), radius );
+else
+    disp( ['cylinder coordinates: (' num2str(start) ') -> (' num2str(stop) ')'] );
+    error 'cylinder orientation not supported'
+end
 
 % -----------------------------------------------------------------------------
 function str = primitive_wire( CSX_wire, options )
@@ -85,7 +112,17 @@ end
 str = [str ' ' options '}'];
 
 % -----------------------------------------------------------------------------
-function primitive_polygon( fid, CSX_polygon, layernr )
+function primitive_polygon( fid, CSX_polygon, layertype )
+%primitive_polygon( fid, CSX_polygon, layertype )
+% layertype may be: 'dielectric Dielectric' or 'conductor Conductor'
+global current_layer_prio
+properties = '';
+if current_layer_prio ~= CSX_polygon.ATTRIBUTE.Priority
+    properties = [properties ' prio ' num2str(CSX_polygon.ATTRIBUTE.Priority)];
+end
+if ~isempty(properties)
+    fprintf( fid, 'g.objecttext("%s")\n', [layertype properties] );
+end
 Elevation = CSX_polygon.ATTRIBUTE.Elevation;
 if (CSX_polygon.NormDir.ATTRIBUTE.X ~= 0)
     NormDir = 'x';
@@ -110,10 +147,45 @@ for n=1:numel(coords)
 end
 fprintf( fid, ')\n' );
 
+
+
+
 % -----------------------------------------------------------------------------
 function process_primitives( fid, prop, options )
+global current_layer_prio
 ignore = {};
 if isfield(options,'ignore'), ignore = options.ignore; end
+
+% iterate over all properties and extract the priority
+prio = [];
+for num=1:numel(prop)
+    if isfield(prop{num}.Primitives,'Box')
+        for a=1:numel(prop{num}.Primitives.Box)
+            % iterate over all boxes
+            prio(end+1) = prop{num}.Primitives.Box{a}.ATTRIBUTE.Priority;
+        end
+    end
+    if isfield(prop{num}.Primitives,'Cylinder')
+        for a=1:numel(prop{num}.Primitives.Cylinder)
+            % iterate over all cylinders
+            prio(end+1) = prop{num}.Primitives.Cylinder{a}.ATTRIBUTE.Priority;
+        end
+    end
+    if isfield(prop{num}.Primitives,'Polygon')
+        for a=1:numel(prop{num}.Primitives.Polygon)
+            % iterate over all polygons
+            prio(end+1) = prop{num}.Primitives.Polygon{a}.ATTRIBUTE.Priority;
+        end
+    end
+end
+% Now prio is a vector full of priorities. Extract the priority, which is
+% most often used.
+u_prios = unique(prio);
+count = histc(prio,u_prios);
+[~,idx] = max(count);
+current_layer_prio = u_prios(idx);
+
+% now export all properties/primitives
 for num=1:numel(prop)
 	Name = prop{num}.ATTRIBUTE.Name;
     if any( strcmp(Name,ignore) )
@@ -124,17 +196,17 @@ for num=1:numel(prop)
     disp( ['processing ' prop{num}.ATTRIBUTE.Name '...'] );
 
     if strcmp(options.Property,'Metal')
-		prio = 200;
-		properties = ['conductor sigma infinite sides auto rough 0 prio ' num2str(prio) ' automodel auto'];
+        layertype = 'conductor';
+		properties = [layertype ' sigma infinite sides auto rough 0 prio ' num2str(current_layer_prio) ' automodel auto'];
 	else
-		prio = 100;
+        layertype = 'dielectric';
 		epsr = 1;
         sigma = 0;
         if isfield(prop{num},'PropertyX')
             if isfield(prop{num}.PropertyX.ATTRIBUTE,'Epsilon'), epsr = prop{num}.PropertyX.ATTRIBUTE.Epsilon; end
             if isfield(prop{num}.PropertyX.ATTRIBUTE,'Kappa'), sigma = prop{num}.PropertyX.ATTRIBUTE.Kappa; end
         end
-		properties = ['dielectric epsr ' num2str(epsr) ' sigma ' num2str(sigma) ' prio ' num2str(prio) ' tand 0 density 0'];
+		properties = [layertype ' epsr ' num2str(epsr) ' sigma ' num2str(sigma) ' prio ' num2str(current_layer_prio) ' tand 0 density 0'];
     end
     
     export_empire_layer( fid, Name, properties )
@@ -143,14 +215,14 @@ for num=1:numel(prop)
         for a=1:numel(prop{num}.Primitives.Box)
             % iterate over all boxes
             Box = prop{num}.Primitives.Box{a};
-            primitive_box( fid, Box );
+            primitive_box( fid, Box, layertype );
         end
     end
     if isfield(prop{num}.Primitives,'Cylinder')
         for a=1:numel(prop{num}.Primitives.Cylinder)
             % iterate over all cylinders
             Cylinder = prop{num}.Primitives.Cylinder{a};
-            primitive_cylinder( fid, Cylinder );
+            primitive_cylinder( fid, Cylinder, layertype );
         end
     end
     if isfield(prop{num}.Primitives,'Wire')
@@ -160,12 +232,13 @@ for num=1:numel(prop)
 %			str = primitive_wire( Wire, obj_modifier );
 %			fprintf( fid, '%s\n', str );
         end
+        warning( 'CSXCAD:export_empire', 'primitive wire currently unsupported' );
     end
     if isfield(prop{num}.Primitives,'Polygon')
         for a=1:numel(prop{num}.Primitives.Polygon)
             % iterate over all polygons
             Polygon = prop{num}.Primitives.Polygon{a};
-            primitive_polygon( fid, Polygon );
+            primitive_polygon( fid, Polygon, layertype );
         end
     end
     
