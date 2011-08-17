@@ -38,6 +38,8 @@ end
 
 global drawingunit
 drawingunit = CSX.RectilinearGrid.ATTRIBUTE.DeltaUnit;
+global CoordSystem
+CoordSystem = CSX.ATTRIBUTE.CoordSystem;
 
 if isfield(CSX.Properties,'Material')
 	% process material
@@ -57,7 +59,18 @@ fclose( fid );
 
 
 % -----------------------------------------------------------------------------
-function str = gerber_coord(v)
+function str = gerber_coord(v, CoordSystem)
+global drawingunit
+
+if (CoordSystem==1)
+    r = v(1);
+    a = v(2);
+    v(1) = r*cos(a) * drawingunit;
+    v(2) = r*sin(a) * drawingunit;
+else
+    v(1) = v(1) * drawingunit;
+    v(2) = v(2) * drawingunit;
+end
 x = sprintf( '%+013i', round(v(1)*1e9) ); % mm
 y = sprintf( '%+013i', round(v(2)*1e9) ); % mm
 if (numel(x) ~= 13) || (numel(y) ~= 13)
@@ -66,51 +79,80 @@ end
 str = ['X' x 'Y' y];
 
 % -----------------------------------------------------------------------------
-function primitive_box( fid, CSX_box )
-global drawingunit
-start = [CSX_box.P1.ATTRIBUTE.X CSX_box.P1.ATTRIBUTE.Y] * drawingunit;
-stop  = [CSX_box.P2.ATTRIBUTE.X CSX_box.P2.ATTRIBUTE.Y] * drawingunit;
-fprintf( fid, '%s\n', 'G36*' );
-fprintf( fid, '%s\n', [gerber_coord(start) 'D02*'] );
-fprintf( fid, '%s\n', [gerber_coord([stop(1) start(2)]) 'D01*'] );
-fprintf( fid, '%s\n', [gerber_coord([stop]) 'D01*'] );
-fprintf( fid, '%s\n', [gerber_coord([start(1) stop(2)]) 'D01*'] );
-fprintf( fid, '%s\n', [gerber_coord(start) 'D01*'] );
-fprintf( fid, '%s\n', 'G37*' );
+function primitive_box( fid, CSX_box, CoordSystem )
+start = [CSX_box.P1.ATTRIBUTE.X CSX_box.P1.ATTRIBUTE.Y];
+stop  = [CSX_box.P2.ATTRIBUTE.X CSX_box.P2.ATTRIBUTE.Y];
+
+if (CoordSystem==0)
+    fprintf( fid, '%s\n', 'G36*' );
+    fprintf( fid, '%s\n', [gerber_coord(start, CoordSystem) 'D02*'] );
+    fprintf( fid, '%s\n', [gerber_coord([stop(1) start(2)], CoordSystem) 'D01*'] );
+    fprintf( fid, '%s\n', [gerber_coord([stop], CoordSystem) 'D01*'] );
+    fprintf( fid, '%s\n', [gerber_coord([start(1) stop(2)], CoordSystem) 'D01*'] );
+    fprintf( fid, '%s\n', [gerber_coord(start, CoordSystem) 'D01*'] );
+    fprintf( fid, '%s\n', 'G37*' );
+elseif (CoordSystem==1)
+    r = sort([start(1) stop(1)]);
+    a = sort([start(2) stop(2)]);
+    max_arc = 0.5*pi/180; 
+    a = linspace(a(1),a(2),ceil((a(2)-a(1))/max_arc));
+    
+    fprintf( fid, '%s\n', 'G36*' );
+    fprintf( fid, '%s\n', [gerber_coord([r(1) a(1)], CoordSystem) 'D02*'] );
+
+    for ang = a(2:end)
+        fprintf( fid, '%s\n', [gerber_coord([r(1) ang], CoordSystem) 'D01*'] );        
+    end
+    
+    for ang = fliplr(a)
+        fprintf( fid, '%s\n', [gerber_coord([r(2) ang], CoordSystem) 'D01*'] );        
+    end
+    
+    fprintf( fid, '%s\n', [gerber_coord([r(1) a(1)], CoordSystem) 'D01*'] );
+    fprintf( fid, '%s\n', 'G37*' );
+else
+    error 'unknown coordinate system'
+end
 
 % -----------------------------------------------------------------------------
-function primitive_cylinder( fid, CSX_cylinder )
+function primitive_cylinder( fid, CSX_cylinder, CoordSystem )
 global drawingunit
-start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y] * drawingunit;
-stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y] * drawingunit;
+start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y];
+stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y];
 radius = CSX_cylinder.ATTRIBUTE.Radius * drawingunit;
 if start(1:2) == stop(1:2)
 	% via => draw circle
 	fprintf( fid, '%%ADD10C,%f*%%\n', radius*2*1e3 ); % aperture definition (mm)
 	fprintf( fid, '%s\n', 'G54D10*' ); % select aperture D10
-	fprintf( fid, '%s\n', [gerber_coord(start) 'D03*'] ); % flash
+	fprintf( fid, '%s\n', [gerber_coord(start, CoordSystem) 'D03*'] ); % flash
 else
 	disp( ['omitting   primitive cylinder, because the projection onto the z-plane is not a circle'] );	
 end
 
 
 % -----------------------------------------------------------------------------
-function primitive_polygon( fid, CSX_polygon )
-global drawingunit
+function primitive_polygon( fid, CSX_polygon, CoordSystem )
 NormDir = [CSX_polygon.NormDir.ATTRIBUTE.X CSX_polygon.NormDir.ATTRIBUTE.Y CSX_polygon.NormDir.ATTRIBUTE.Z];
 if NormDir ~= [0 0 1]
 	disp( ['omitting   primitive polygon, because the normal vector is not [0 0 1]'] );	
 end
 fprintf( fid, '%s\n', 'G36*' );
-v = [CSX_polygon.Vertex{1}.ATTRIBUTE.X1 CSX_polygon.Vertex{1}.ATTRIBUTE.X2] * drawingunit;
-fprintf( fid, '%s\n', [gerber_coord(v) 'D02*'] );
+v = [CSX_polygon.Vertex{1}.ATTRIBUTE.X1 CSX_polygon.Vertex{1}.ATTRIBUTE.X2];
+fprintf( fid, '%s\n', [gerber_coord(v, CoordSystem) 'D02*'] );
 for a=2:numel(CSX_polygon.Vertex)
 	% iterate over all vertices
-	v = [CSX_polygon.Vertex{a}.ATTRIBUTE.X1 CSX_polygon.Vertex{a}.ATTRIBUTE.X2] * drawingunit;
-	fprintf( fid, '%s\n', [gerber_coord(v) 'D01*'] );
+	v = [CSX_polygon.Vertex{a}.ATTRIBUTE.X1 CSX_polygon.Vertex{a}.ATTRIBUTE.X2];
+	fprintf( fid, '%s\n', [gerber_coord(v, CoordSystem) 'D01*'] );
 end
 fprintf( fid, '%s\n', 'G37*' );
 
+% -----------------------------------------------------------------------------
+function primCoordSystem = GetCoordSystem(prim)
+global CoordSystem
+primCoordSystem = CoordSystem;
+if (isfield(prim.ATTRIBUTE,'CoordSystem'))
+    primCoordSystem = prim.ATTRIBUTE.CoordSystem;
+end
 
 % -----------------------------------------------------------------------------
 function process_primitives( fid, prop, options )
@@ -125,29 +167,29 @@ for num=1:numel(prop)
 	if strcmp(options.Property,'Material') && ~isfield(prop{num}.Property.ATTRIBUTE,'Kappa')
 		disp( ['omitting   ' Name ' (no Kappa-value)...'] );
 		continue
-	end
-
+    end
+    
 	disp( ['processing ' prop{num}.ATTRIBUTE.Name '...'] );
 	fprintf( fid, '%s\n', ['%LN' Name '*%'] );
 	if isfield(prop{num}.Primitives,'Box')
 		for a=1:numel(prop{num}.Primitives.Box)
 			% iterate over all boxes
 			Box = prop{num}.Primitives.Box{a};
-			primitive_box( fid, Box );
+			primitive_box( fid, Box, GetCoordSystem(Box) );
 		end
 	end
 	if isfield(prop{num}.Primitives,'Cylinder')
 		for a=1:numel(prop{num}.Primitives.Cylinder)
 			% iterate over all cylinders
 			Cylinder = prop{num}.Primitives.Cylinder{a};
-			primitive_cylinder( fid, Cylinder );
+        	primitive_cylinder( fid, Cylinder, GetCoordSystem(Box) );
 		end
 	end
 	if isfield(prop{num}.Primitives,'Polygon')
 		for a=1:numel(prop{num}.Primitives.Polygon)
 			% iterate over all polygons
 			Polygon = prop{num}.Primitives.Polygon{a};
-			primitive_polygon( fid, Polygon );
+        	primitive_polygon( fid, Polygon, GetCoordSystem(Box) );
 		end
 	end
 end
