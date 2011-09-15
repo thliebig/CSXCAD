@@ -16,6 +16,9 @@ function CSX = InitCSX(varargin)
 
 CSX.Properties = [];
 
+%Cartesian mesh as default coordinate system
+CSX.ATTRIBUTE.CoordSystem = 0;
+
 if (nargin>0)
     for n=1:nargin/2
         CSX.ATTRIBUTE.(varargin{2*n-1}) = (varargin{2*n});
