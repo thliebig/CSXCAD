@@ -958,6 +958,8 @@ CSPropDiscMaterial::~CSPropDiscMaterial()
 	m_Disc_mueR=NULL;
 	delete[] m_Disc_sigma;
 	m_Disc_sigma=NULL;
+	delete[] m_Disc_Density;
+	m_Disc_Density=NULL;
 }
 
 unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
@@ -1051,6 +1053,7 @@ void CSPropDiscMaterial::Init()
 	m_Disc_kappa=NULL;
 	m_Disc_mueR=NULL;
 	m_Disc_sigma=NULL;
+	m_Disc_Density=NULL;
 
 	CSPropMaterial::Init();
 }
