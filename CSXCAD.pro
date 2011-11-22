@@ -33,10 +33,11 @@ win32 {
     INCLUDEPATH += ../fparser
 	LIBS += ..\fparser\release\libfparser4.a \
 		..\tinyxml\release\libtinyxml2.a
-	INCLUDEPATH += ../hdf5/include ../boost/include/boost-1_42
-	LIBS +=  ../hdf5/lib/libhdf5_cpp.a ../hdf5/lib/libhdf5.a
+	INCLUDEPATH += ../hdf5/include ../hdf5/include/cpp ../boost/include/boost-1_42
+	LIBS +=  ../hdf5/lib/hdf5_cpp.lib ../hdf5/lib/hdf5.lib
 ### vtk ###
-	 INCLUDEPATH += ..\vtk\Common
+	 INCLUDEPATH += ..\vtk ..\vtk\Common
+	 LIBS +=..\vtk\bin\libvtkCommon.dll
 }
 
 # Input
