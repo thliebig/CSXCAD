@@ -285,7 +285,7 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	const double* stop  = m_Coords[1].GetCoords(m_PrimCoordSystem);
 	double pos[3];
 	//transform incoming coordinates into the coorindate system of the primitive
-	TransformCoords(Coord,pos,m_MeshType,m_PrimCoordSystem);
+	TransformCoordSystem(Coord,pos,m_MeshType,m_PrimCoordSystem);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -628,7 +628,7 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 	if (Coord==NULL) return false;
 	double out[3];
 	const double* center = m_Center.GetCartesianCoords();
-	TransformCoords(Coord,out,m_MeshType,CARTESIAN);
+	TransformCoordSystem(Coord,out,m_MeshType,CARTESIAN);
 	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
 	if (dist<psRadius.GetValue())
 		return true;
@@ -737,7 +737,7 @@ bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
 	if (Coord==NULL) return false;
 	double out[3];
 	const double* center = m_Center.GetCartesianCoords();
-	TransformCoords(Coord,out,m_MeshType,CARTESIAN);
+	TransformCoordSystem(Coord,out,m_MeshType,CARTESIAN);
 	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
 	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0)
 		return true;
@@ -876,7 +876,7 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 	const double* stop =m_AxisCoords[1].GetCartesianCoords();
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
-	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
@@ -1037,7 +1037,7 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 	const double* stop =m_AxisCoords[1].GetCartesianCoords();
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
-	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
@@ -1235,7 +1235,7 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
-	TransformCoords(inCoord,Coord,m_MeshType,CARTESIAN);
+	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1576,7 +1576,7 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
-	TransformCoords(inCoord,Coord,m_MeshType,CARTESIAN);
+	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1848,7 +1848,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	const double* p1;
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
-	TransformCoords(Coord,pos,m_MeshType,CARTESIAN);
+	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 
 	double foot,dist,distPP;
 	for (size_t i=0;i<GetNumberOfPoints();++i)

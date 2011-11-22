@@ -965,7 +965,7 @@ CSPropDiscMaterial::~CSPropDiscMaterial()
 unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 {
 	double coords[3];
-	TransformCoords(inCoords, coords, coordInputType, CARTESIAN);
+	TransformCoordSystem(inCoords, coords, coordInputType, CARTESIAN);
 	for (int n=0;n<3;++n)
 		coords[n]=(coords[n]-m_Shift[n])*m_Scale;
 	unsigned int pos[3];

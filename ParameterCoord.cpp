@@ -19,7 +19,7 @@
 #include "tinyxml.h"
 #include <sstream>
 
-double* TransformCoords(const double* in, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out)
+double* TransformCoordSystem(const double* in, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out)
 {
 	switch (CS_In)
 	{
@@ -224,8 +224,8 @@ bool ParameterCoord::Evaluate(string *ErrStr)
 void ParameterCoord::Update()
 {
 	double coords[3] = {m_Coords[0]->GetValue(),m_Coords[1]->GetValue(),m_Coords[2]->GetValue()};
-	TransformCoords(coords, m_CartesianCoords, m_CoordSystem, CARTESIAN);
-	TransformCoords(coords, m_CylindricalCoords, m_CoordSystem, CYLINDRICAL);
+	TransformCoordSystem(coords, m_CartesianCoords, m_CoordSystem, CARTESIAN);
+	TransformCoordSystem(coords, m_CylindricalCoords, m_CoordSystem, CYLINDRICAL);
 }
 
 bool ParameterCoord::Write2XML(TiXmlElement *elem, bool parameterised)
