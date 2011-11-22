@@ -565,9 +565,6 @@ public:
 	double GetDelay();
 	const string GetDelayString();
 
-//	void SetWeightVars(const char* vars,int ny) {if ((ny>=0) && (ny<3)) sWeightVars[ny]=string(vars);};
-//	const char* GetWeightVars(int ny) {if ((ny>=0) && (ny<3)) {if (sWeightVars[ny].empty()) return NULL; else return sWeightVars[ny].c_str();} else return NULL;};
-
 	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
 
@@ -706,34 +703,6 @@ public:
 	//! Get the optimal resolution for a given direction
 	double GetOptResolution(int ny);
 
-	bool GetGlobalSetting();
-	bool GetPhiDump();
-	bool GetDivEDump();
-	bool GetDivDDump();
-	bool GetDivPDump();
-	bool GetFieldWDump();
-	bool GetChargeWDump();
-	bool GetEFieldDump();
-	bool GetDFieldDump();
-	bool GetPFieldDump();
-	bool GetSGDump();
-	bool GetSimpleDump();
-	int GetSGLevel();
-
-	void SetGlobalSetting(bool val);
-	void SetPhiDump(bool val);
-	void SetDivEDump(bool val);
-	void SetDivDDump(bool val);
-	void SetDivPDump(bool val);
-	void SetFieldWDump(bool val);
-	void SetChargeWDump(bool val);
-	void SetEFieldDump(bool val);
-	void SetDFieldDump(bool val);
-	void SetPFieldDump(bool val);
-	void SetSGDump(bool val);
-	void SetSimpleDump(bool val);
-	void SetSGLevel(int val);
-
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
@@ -742,12 +711,6 @@ public:
 	virtual void ShowPropertyStatus(ostream& stream);
 
 protected:
-	bool GlobalSetting;
-	bool PhiDump,divE,divD,divP,FieldW,ChargeW;
-	bool EField,DField,PField;
-	bool SGDump,SimpleDump;
-	int SGLevel;
-
 	int DumpType;
 	int DumpMode;
 	int FileType;

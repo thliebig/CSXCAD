@@ -1714,42 +1714,8 @@ CSPropDumpBox::CSPropDumpBox(CSProperties* prop) : CSPropProbeBox(prop) {Type=DU
 CSPropDumpBox::CSPropDumpBox(unsigned int ID, ParameterSet* paraSet) : CSPropProbeBox(ID,paraSet) {Type=DUMPBOX;Init();}
 CSPropDumpBox::~CSPropDumpBox() {}
 
-bool CSPropDumpBox::GetGlobalSetting() {return GlobalSetting;}
-bool CSPropDumpBox::GetPhiDump() {return PhiDump;}
-bool CSPropDumpBox::GetDivEDump() {return divE;}
-bool CSPropDumpBox::GetDivDDump() {return divD;}
-bool CSPropDumpBox::GetDivPDump() {return divP;}
-bool CSPropDumpBox::GetFieldWDump() {return FieldW;}
-bool CSPropDumpBox::GetChargeWDump() {return ChargeW;}
-bool CSPropDumpBox::GetEFieldDump() {return EField;}
-bool CSPropDumpBox::GetDFieldDump() {return DField;}
-bool CSPropDumpBox::GetPFieldDump() {return PField;}
-bool CSPropDumpBox::GetSGDump() {return SGDump;}
-bool CSPropDumpBox::GetSimpleDump() {return SimpleDump;}
-int CSPropDumpBox::GetSGLevel() {return SGLevel;}
-
-void CSPropDumpBox::SetGlobalSetting(bool val) {GlobalSetting=val;}
-void CSPropDumpBox::SetPhiDump(bool val) {PhiDump=val;}
-void CSPropDumpBox::SetDivEDump(bool val) {divE=val;}
-void CSPropDumpBox::SetDivDDump(bool val) {divD=val;}
-void CSPropDumpBox::SetDivPDump(bool val) {divP=val;}
-void CSPropDumpBox::SetFieldWDump(bool val) {FieldW=val;}
-void CSPropDumpBox::SetChargeWDump(bool val) {ChargeW=val;}
-void CSPropDumpBox::SetEFieldDump(bool val) {EField=val;}
-void CSPropDumpBox::SetDFieldDump(bool val) {DField=val;}
-void CSPropDumpBox::SetPFieldDump(bool val) {PField=val;}
-void CSPropDumpBox::SetSGDump(bool val) {SGDump=val;}
-void CSPropDumpBox::SetSimpleDump(bool val) {SimpleDump=val;}
-void CSPropDumpBox::SetSGLevel(int val) {SGLevel=val;}
-
 void CSPropDumpBox::Init()
 {
-	GlobalSetting=true;
-	PhiDump=true;
-	divE=divD=divP=FieldW=ChargeW=false;
-	EField=DField=PField=false;
-	SGDump=SimpleDump=false;
-	SGLevel=-1;
 	DumpType = 0;
 	DumpMode = 0;
 	FileType = 0;
@@ -1848,31 +1814,6 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 		prop->SetAttribute("OptResolution",ss.str().c_str());
 	}
 
-	if (!sparse)
-	{
-		prop->SetAttribute("GlobalSetting",(int)GlobalSetting);
-		TiXmlElement ScalDump("ScalarDump");
-		ScalDump.SetAttribute("DumpPhi",(int)PhiDump);
-		ScalDump.SetAttribute("DumpDivE",(int)divE);
-		ScalDump.SetAttribute("DumpDivD",(int)divD);
-		ScalDump.SetAttribute("DumpDivP",(int)divP);
-		ScalDump.SetAttribute("DumpFieldW",(int)FieldW);
-		ScalDump.SetAttribute("DumpChargeW",(int)ChargeW);
-		prop->InsertEndChild(ScalDump);
-
-		TiXmlElement VecDump("VectorDump");
-		VecDump.SetAttribute("DumpEField",(int)EField);
-		VecDump.SetAttribute("DumpDField",(int)DField);
-		VecDump.SetAttribute("DumpPField",(int)PField);
-		prop->InsertEndChild(VecDump);
-
-		TiXmlElement SubGDump("SubGridDump");
-		SubGDump.SetAttribute("SubGridDump",(int)SGDump);
-		SubGDump.SetAttribute("SimpleDump",(int)SimpleDump);
-		SubGDump.SetAttribute("SubGridLevel",SGLevel);
-		prop->InsertEndChild(SubGDump);
-	}
-
 	return true;
 }
 
@@ -1883,10 +1824,6 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	TiXmlElement *prop = root.ToElement();
 	if (prop==NULL) return false;
 
-	int iHelp;
-	if (prop->QueryIntAttribute("GlobalSetting",&iHelp)!=TIXML_SUCCESS) GlobalSetting=0;
-	else GlobalSetting=(bool)iHelp;
-
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
 	if (prop->QueryIntAttribute("DumpMode",&DumpMode)!=TIXML_SUCCESS) DumpMode=0;
 	if (prop->QueryIntAttribute("FileType",&FileType)!=TIXML_SUCCESS) FileType=0;
@@ -1894,44 +1831,6 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	SetSubSampling(prop->Attribute("SubSampling"));
 	SetOptResolution(prop->Attribute("OptResolution"));
 
-	TiXmlElement *ScalDump = prop->FirstChildElement("ScalarDump");
-	if (ScalDump!=NULL)
-	{
-		if (ScalDump->QueryIntAttribute("DumpPhi",&iHelp)==TIXML_SUCCESS)
-			PhiDump=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivE",&iHelp)==TIXML_SUCCESS)
-			divE=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivD",&iHelp)==TIXML_SUCCESS)
-			divD=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpDivP",&iHelp)==TIXML_SUCCESS)
-			divP=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpFieldW",&iHelp)==TIXML_SUCCESS)
-			FieldW=(bool)iHelp;
-		if (ScalDump->QueryIntAttribute("DumpChargeW",&iHelp)==TIXML_SUCCESS)
-			ChargeW=(bool)iHelp;
-	}
-	TiXmlElement *VecDump = prop->FirstChildElement("VectorDump");
-	if (VecDump!=NULL)
-	{
-
-		if (VecDump->QueryIntAttribute("DumpEField",&iHelp)==TIXML_SUCCESS)
-			EField=(bool)iHelp;
-		if (VecDump->QueryIntAttribute("DumpDField",&iHelp)==TIXML_SUCCESS)
-			DField=(bool)iHelp;
-		if (VecDump->QueryIntAttribute("DumpPField",&iHelp)==TIXML_SUCCESS)
-			PField=(bool)iHelp;
-	}
-	TiXmlElement *SubGDump = prop->FirstChildElement("SubGridDump");
-	if (SubGDump!=NULL)
-	{
-
-		if (SubGDump->QueryIntAttribute("SubGridDump",&iHelp)==TIXML_SUCCESS)
-			SGDump=(bool)iHelp;
-		if (SubGDump->QueryIntAttribute("SimpleDump",&iHelp)==TIXML_SUCCESS)
-			SimpleDump=(bool)iHelp;
-		if (SubGDump->QueryIntAttribute("SubGridLevel",&iHelp)==TIXML_SUCCESS)
-			SGLevel=iHelp;
-	}
 	return true;
 }
 
