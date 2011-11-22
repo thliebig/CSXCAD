@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include "ParameterObjects.h"
+#include "CSTransform.h"
 #include "CSXCAD_Global.h"
 
 #include <stdio.h>
@@ -448,8 +449,9 @@ protected:
 	float *m_Disc_mueR;
 	float *m_Disc_sigma;
 	float *m_Disc_Density;
-	float m_Shift[3];
-	float m_Scale;
+	double m_Scale;
+	bool m_EnableTransform;
+	CSTransform m_Transform;
 };
 
 //! Continuous Structure Lumped Element Property

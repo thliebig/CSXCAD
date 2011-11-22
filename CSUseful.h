@@ -13,7 +13,9 @@ class CSDebug;
 using namespace std;
 
 vector<double> CSXCAD_EXPORT SplitString2Double(string str, const char delimiter);
+vector<string> CSXCAD_EXPORT SplitString2Vector(string str, const char delimiter);
 string CSXCAD_EXPORT CombineVector2String(vector<double> values, const char delimiter);
+string CSXCAD_EXPORT CombineArray2String(double* values, unsigned int numVal, const char delimiter);
 
 vector<int> CSXCAD_EXPORT SplitString2Int(string str, const char delimiter);
 

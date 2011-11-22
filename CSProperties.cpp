@@ -18,6 +18,7 @@
 #include "CSProperties.h"
 #include "CSPrimitives.h"
 #include "CSUseful.h"
+#include "CSTransform.h"
 #include "ParameterObjects.h"
 #include <iostream>
 #include <sstream>
@@ -966,8 +967,10 @@ unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 {
 	double coords[3];
 	TransformCoordSystem(inCoords, coords, coordInputType, CARTESIAN);
+	if (m_EnableTransform)
+		m_Transform.Transform(coords,coords);
 	for (int n=0;n<3;++n)
-		coords[n]=(coords[n]-m_Shift[n])*m_Scale;
+		coords[n]/=m_Scale;
 	unsigned int pos[3];
 	if (!(m_mesh[0] && m_mesh[1] && m_mesh[2]))
 		return -1;
@@ -1055,6 +1058,11 @@ void CSPropDiscMaterial::Init()
 	m_Disc_sigma=NULL;
 	m_Disc_Density=NULL;
 
+	m_Scale=1;
+	m_EnableTransform=false;
+	m_Transform.Reset();
+	m_Transform.SetParameterSet(clParaSet);
+
 	CSPropMaterial::Init();
 }
 
@@ -1067,6 +1075,12 @@ bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool spa
 	TiXmlElement filename("DiscFile");
 	filename.SetAttribute("Type",m_FileType);
 	filename.SetAttribute("File",m_Filename.c_str());
+
+	filename.SetAttribute("Scale",m_Scale);
+
+	if (m_EnableTransform)
+		m_Transform.Write2XML(prop);
+
 	prop->InsertEndChild(filename);
 
 	return true;
@@ -1079,20 +1093,14 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 	if (prop==NULL) return false;
 
-	m_FileType = -1;
-	if (prop->QueryIntAttribute("Type",&m_FileType)!=TIXML_SUCCESS)
-		return true;
+	m_FileType = 0;
+	prop->QueryIntAttribute("Type",&m_FileType);
 	const char* c_filename = prop->Attribute("File");
 
-	const char* help = prop->Attribute("Shift");
-	if (help)
-	{
-		vector<double> shift= SplitString2Double(help,',');
-		for (unsigned int n=0;n<3 && n<shift.size();++n)
-			m_Shift[n]=shift.at(n);
-	}
+	m_EnableTransform = m_Transform.ReadFromXML(prop);
+	m_Transform.Invert();
 
-	if (prop->QueryFloatAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
+	if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
 		m_Scale=1;
 
 	if (c_filename==NULL)
@@ -1100,6 +1108,8 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 	if ((m_FileType==0) && (c_filename!=NULL))
 		return ReadHDF5(c_filename);
+	else
+		cerr << "CSPropDiscMaterial::ReadFromXML: Unknown file type or no filename given." << endl;
 
 	return true;
 }

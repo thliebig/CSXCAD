@@ -23,6 +23,32 @@ std::vector<double> SplitString2Double(std::string str, const char delimiter)
 	return values;
 }
 
+std::vector<string> SplitString2Vector(std::string str, const char delimiter)
+{
+	size_t pos=0;
+	std::string sub;
+	std::vector<string> values;
+	do
+	{
+		pos=str.find_first_of(delimiter);
+		if (pos==std::string::npos)
+		{
+			pos=str.size();
+			sub=str.substr(0,pos);
+		}
+		else
+		{
+			sub=str.substr(0,pos);
+			++pos;
+		}
+		//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
+		if (sub.empty()==false) values.push_back(sub);
+		str.erase(0,pos);
+	} while (str.size()>0);
+	return values;
+}
+
+
 string CombineVector2String(vector<double> values, const char delimiter)
 {
 	stringstream ss;
@@ -33,6 +59,18 @@ string CombineVector2String(vector<double> values, const char delimiter)
 	}
 	return ss.str();
 }
+
+string CombineArray2String(double* values, unsigned int numVal, const char delimiter)
+{
+	stringstream ss;
+	for (unsigned int i=0;i<numVal;++i)
+	{
+		if (i>0) ss << delimiter;
+		ss<<values[i];
+	}
+	return ss.str();
+}
+
 
 std::vector<int> SplitString2Int(std::string str, const char delimiter)
 {

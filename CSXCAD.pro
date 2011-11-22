@@ -21,6 +21,11 @@ unix {
     LIBS += -L../tinyxml \
         -ltinyxml
     LIBS += -lhdf5_cpp -lhdf5
+
+#vtk
+	INCLUDEPATH += /usr/include/vtk-5.2 \
+		/usr/include/vtk-5.4 \
+		/usr/include/vtk-5.6
 }
 win32 { 
     DEFINES = BUILD_CSXCAD_LIB
@@ -30,6 +35,8 @@ win32 {
 		..\tinyxml\release\libtinyxml2.a
 	INCLUDEPATH += ../hdf5/include ../boost/include/boost-1_42
 	LIBS +=  ../hdf5/lib/libhdf5_cpp.a ../hdf5/lib/libhdf5.a
+### vtk ###
+	 INCLUDEPATH += ..\vtk\Common
 }
 
 # Input
@@ -41,7 +48,8 @@ HEADERS += ContinuousStructure.h \
     ParameterObjects.h \
     CSFunctionParser.h \
     CSUseful.h \
-    ParameterCoord.h
+    ParameterCoord.h \
+    CSTransform.h
 SOURCES += ContinuousStructure.cpp \
     CSPrimitives.cpp \
     CSProperties.cpp \
@@ -49,7 +57,8 @@ SOURCES += ContinuousStructure.cpp \
     ParameterObjects.cpp \
     CSFunctionParser.cpp \
     CSUseful.cpp \
-    ParameterCoord.cpp
+    ParameterCoord.cpp \
+    CSTransform.cpp
 
 ABI2 {
         CONFIG-=debug debug_and_release
