@@ -9,7 +9,7 @@ function lines = SmoothMeshLines( lines, max_res, ratio, recursive)
 %   lines:      given fixed lines to create a smooth mesh in between
 %   max_res:    desired max. resolution
 %   ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
-%   recursive:  SmoothMeshLines a couple of times recursivly (optional, default is 20)
+%   recursive:  SmoothMeshLines a couple of times recursivly (optional, default is 0)
 % 
 % example:
 %   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
@@ -31,7 +31,7 @@ if (nargin<3)
 end
 
 if (nargin<4)
-    recursive = 20;
+    recursive = 0;
 end
 
 lines = unique(sort(lines));
