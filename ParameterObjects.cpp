@@ -482,19 +482,14 @@ ParameterScalar::ParameterScalar()
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
 {
 	SetParameterSet(ParaSet);
-	bModified=true;
-	ParameterMode=true;
-	sValue=value;
-	dValue=0;
+	SetValue(value);
 }
 
 ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
 {
 	SetParameterSet(ParaSet);
 	bModified=true;
-	ParameterMode=false;
-	sValue.clear();
-	dValue=value;
+	SetValue(value);
 }
 
 ParameterScalar::ParameterScalar(ParameterScalar* ps)
@@ -519,6 +514,13 @@ void ParameterScalar::SetParameterSet(ParameterSet *paraSet)
 int ParameterScalar::SetValue(const string value, bool Eval)
 {
 	if (value.empty()) return -1;
+
+	//check if string is only a plain double
+	char *pEnd;
+	double val = strtod(value.c_str(),&pEnd);
+	if (*pEnd == 0)
+		SetValue(val);
+
 	ParameterMode=true;
 	bModified=true;
 	sValue=value;
@@ -552,22 +554,31 @@ const string ParameterScalar::GetValueString() const
 int ParameterScalar::Evaluate()
 {
 	if (ParameterMode==false) return 0;
-	if (clParaSet==NULL) return -1;
-	if ((bModified==false) && (clParaSet->GetModified()==false)) return 0;
+	if (clParaSet!=NULL)
+		bModified = bModified || clParaSet->GetModified();
+	if (bModified==false)
+		return 0;
 
 	CSFunctionParser fParse;
 	dValue=0;
-//	fParse.AddConstant("pi", 3.1415926535897932);
-//	cerr << sValue << " -- " << clParaSet->GetParameterString() << endl;
-	fParse.Parse(sValue,clParaSet->GetParameterString());
+
+	if (clParaSet!=NULL)
+		fParse.Parse(sValue,clParaSet->GetParameterString());
+	else
+		fParse.Parse(sValue,"");
+
 	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR) return fParse.GetParseErrorType()+100;
 	bModified=false;
 
-	double *vars = new double[clParaSet->GetQtyParameter()];
-	vars=clParaSet->GetValueArray(vars);
-	dValue=fParse.Eval(vars);
-//	cerr << "eval..." << dValue << endl;
-	delete[] vars;vars=NULL;
+	if (clParaSet!=NULL)
+	{
+		double *vars = new double[clParaSet->GetQtyParameter()];
+		vars=clParaSet->GetValueArray(vars);
+		dValue=fParse.Eval(vars);
+		delete[] vars;vars=NULL;
+	}
+	else
+		dValue=fParse.Eval(NULL);
 	return fParse.EvalError();
 }
 
