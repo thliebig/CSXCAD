@@ -236,10 +236,10 @@ bool CSTransform::RotateOrigin(string XYZ_A, bool concatenate)
 	ParameterScalar ps_rotate[4];
 	double rot_double_vec[4];
 	if (rot_vec.size()>4)
-		cerr << "CSTransform::RotateOrigin: Warning: Number of arguments for operation: \"Translate\" with arguments: \"" << XYZ_A << "\" is larger than expected, skipping unneeded! " << endl;
+		cerr << "CSTransform::RotateOrigin: Warning: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is larger than expected, skipping unneeded! " << endl;
 	else if (rot_vec.size()<4)
 	{
-		cerr << "CSTransform::RotateOrigin: Error: Number of arguments for operation: \"Translate\" with arguments: \"" << XYZ_A << "\" is invalid! Skipping" << endl;
+		cerr << "CSTransform::RotateOrigin: Error: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is invalid! Skipping" << endl;
 		return false;
 	}
 
