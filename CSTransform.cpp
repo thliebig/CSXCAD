@@ -577,3 +577,12 @@ bool CSTransform::ReadFromXML(TiXmlNode* root)
 	}
 	return true;
 }
+
+CSTransform* CSTransform::New(TiXmlNode* root, ParameterSet* paraSet)
+{
+	CSTransform* newCST = new CSTransform(paraSet);
+	if (newCST->ReadFromXML(root))
+		return newCST;
+	delete newCST;
+	return NULL;
+}

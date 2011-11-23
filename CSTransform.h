@@ -104,6 +104,8 @@ public:
 	//! Read transformations from xml-node. \return Successful read-operation.
 	virtual bool ReadFromXML(TiXmlNode* root);
 
+	static CSTransform* New(TiXmlNode* root, ParameterSet* paraSet=NULL);
+
 protected:
 	//transform matrix
 	double m_TMatrix[16];

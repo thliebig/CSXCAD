@@ -961,14 +961,17 @@ CSPropDiscMaterial::~CSPropDiscMaterial()
 	m_Disc_sigma=NULL;
 	delete[] m_Disc_Density;
 	m_Disc_Density=NULL;
+
+	delete m_Transform;
+	m_Transform=NULL;
 }
 
 unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 {
 	double coords[3];
 	TransformCoordSystem(inCoords, coords, coordInputType, CARTESIAN);
-	if (m_EnableTransform)
-		m_Transform.Transform(coords,coords);
+	if (m_Transform)
+		m_Transform->Transform(coords,coords);
 	for (int n=0;n<3;++n)
 		coords[n]/=m_Scale;
 	unsigned int pos[3];
@@ -1059,9 +1062,7 @@ void CSPropDiscMaterial::Init()
 	m_Disc_Density=NULL;
 
 	m_Scale=1;
-	m_EnableTransform=false;
-	m_Transform.Reset();
-	m_Transform.SetParameterSet(clParaSet);
+	m_Transform=NULL;
 
 	CSPropMaterial::Init();
 }
@@ -1078,8 +1079,8 @@ bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool spa
 
 	filename.SetAttribute("Scale",m_Scale);
 
-	if (m_EnableTransform)
-		m_Transform.Write2XML(prop);
+	if (m_Transform)
+		m_Transform->Write2XML(prop);
 
 	prop->InsertEndChild(filename);
 
@@ -1097,8 +1098,10 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	prop->QueryIntAttribute("Type",&m_FileType);
 	const char* c_filename = prop->Attribute("File");
 
-	m_EnableTransform = m_Transform.ReadFromXML(prop);
-	m_Transform.Invert();
+	delete m_Transform;
+	m_Transform = CSTransform::New(prop, clParaSet);
+	if (m_Transform)
+		m_Transform->Invert();
 
 	if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
 		m_Scale=1;

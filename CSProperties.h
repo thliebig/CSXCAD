@@ -450,8 +450,7 @@ protected:
 	float *m_Disc_sigma;
 	float *m_Disc_Density;
 	double m_Scale;
-	bool m_EnableTransform;
-	CSTransform m_Transform;
+	CSTransform* m_Transform;
 };
 
 //! Continuous Structure Lumped Element Property
