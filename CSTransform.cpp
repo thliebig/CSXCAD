@@ -50,12 +50,27 @@ void CSTransform::Reset()
 	m_TransformList.clear();
 	m_TransformArguments.clear();
 	MakeUnitMatrix(m_TMatrix);
+	MakeUnitMatrix(m_Inv_TMatrix);
 }
 
 void CSTransform::Invert()
 {
+	//make sure the inverse matrix is up to date...
+	UpdateInverse();
+	//switch matrices
+	double help;
+	for (int n=0;n<16;++n)
+	{
+			help = m_TMatrix[n];
+			m_TMatrix[n] = m_Inv_TMatrix[n];
+			m_Inv_TMatrix[n]=help;
+	}
+}
+
+void CSTransform::UpdateInverse()
+{
 	// use vtk to do the matrix inversion
-	vtkMatrix4x4::Invert(m_TMatrix, m_TMatrix);
+	vtkMatrix4x4::Invert(m_TMatrix, m_Inv_TMatrix);
 }
 
 void CSTransform::Concatenate(const double matrix[16])
@@ -74,6 +89,7 @@ void CSTransform::Concatenate(const double matrix[16])
 		}
 	for (int n=0;n<16;++n)
 			m_TMatrix[n]=new_matrix[n];
+	UpdateInverse();
 }
 
 void CSTransform::SetMatrix(const double matrix[16])
@@ -82,6 +98,7 @@ void CSTransform::SetMatrix(const double matrix[16])
 	m_TransformArguments.clear();
 	for (int n=0;n<16;++n)
 			m_TMatrix[n]=matrix[n];
+	UpdateInverse();
 }
 
 double* CSTransform::Transform(const double inCoords[3], double outCoords[3]) const
@@ -93,6 +110,20 @@ double* CSTransform::Transform(const double inCoords[3], double outCoords[3]) co
 		for (int n=0;n<4;++n)
 		{
 			outCoords[m] +=  m_TMatrix[4*m+n]*coords[n];
+		}
+	}
+	return outCoords;
+}
+
+double* CSTransform::InvertTransform(const double inCoords[3], double outCoords[3]) const
+{
+	double coords[4] = {inCoords[0],inCoords[1],inCoords[2],1};
+	for (int m=0;m<3;++m)
+	{
+		outCoords[m] = 0;
+		for (int n=0;n<4;++n)
+		{
+			outCoords[m] +=  m_Inv_TMatrix[4*m+n]*coords[n];
 		}
 	}
 	return outCoords;

@@ -971,7 +971,7 @@ unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 	double coords[3];
 	TransformCoordSystem(inCoords, coords, coordInputType, CARTESIAN);
 	if (m_Transform)
-		m_Transform->Transform(coords,coords);
+		m_Transform->InvertTransform(coords,coords);
 	for (int n=0;n<3;++n)
 		coords[n]/=m_Scale;
 	unsigned int pos[3];
@@ -1100,8 +1100,6 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 	delete m_Transform;
 	m_Transform = CSTransform::New(prop, clParaSet);
-	if (m_Transform)
-		m_Transform->Invert();
 
 	if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
 		m_Scale=1;

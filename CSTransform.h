@@ -44,6 +44,7 @@ public:
 	}; //Keep this in sync with GetNameByType and GetTypeByName and TransformByType methods!!!
 
 	double* Transform(const double inCoords[3], double outCoords[3]) const;
+	double* InvertTransform(const double inCoords[3], double outCoords[3]) const;
 
 	void Invert();
 
@@ -109,6 +110,10 @@ public:
 protected:
 	//transform matrix
 	double m_TMatrix[16];
+	//inverse transform matrix
+	double m_Inv_TMatrix[16];
+
+	void UpdateInverse();
 
 	bool m_PostMultiply;
 	bool m_AngleRadian;
