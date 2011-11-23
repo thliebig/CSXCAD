@@ -49,6 +49,7 @@ class CSProperties; //include VisualProperties
 
 class TiXmlNode;
 class CSFunctionParser;
+class CSTransform;
 
 /*!
 	Calculate the distance of a point to a line (defined by start/stop coordinates).
@@ -164,6 +165,8 @@ protected:
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
 	CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 
+	void TransformCoords(double* Coord);
+
 	unsigned int uiID;
 	int iPriority;
 	CoordinateSystem m_PrimCoordSystem;
@@ -171,6 +174,7 @@ protected:
 	PrimitiveType Type;
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
+	CSTransform* m_Transform;
 	string PrimTypeName;
 	bool m_Primtive_Used;
 };

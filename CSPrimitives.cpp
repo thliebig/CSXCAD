@@ -43,6 +43,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	SetProperty(prop);
 	uiID=ID;
 	clParaSet=paraSet;
+	m_Transform=NULL;
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
@@ -57,6 +58,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	else SetProperty(prop);
 	uiID=prim->uiID;
 	clParaSet=prim->clParaSet;
+	m_Transform=CSTransform::New(prim->m_Transform);
 	iPriority=prim->iPriority;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
@@ -70,6 +72,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	clProperty=NULL;
 	SetProperty(prop);
 	clParaSet=paraSet;
+	m_Transform=NULL;
 	uiID=0;
 	iPriority=0;
 	PrimTypeName = string("Base Type");
@@ -88,6 +91,8 @@ void CSPrimitives::SetProperty(CSProperties *prop)
 CSPrimitives::~CSPrimitives()
 {
 	if (clProperty!=NULL) clProperty->RemovePrimitive(this);
+	delete m_Transform;
+	m_Transform=NULL;
 }
 
 bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
@@ -99,6 +104,9 @@ bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 
 	if (m_PrimCoordSystem!=UNDEFINED_CS)
 		elem.SetAttribute("CoordSystem",(int)m_PrimCoordSystem);
+
+	if (m_Transform)
+		m_Transform->Write2XML(&elem);
 
 	return true;
 }
@@ -117,12 +125,26 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	if (elem->QueryIntAttribute("CoordSystem",&help)==TIXML_SUCCESS)
 		m_PrimCoordSystem = (CoordinateSystem)help;
 
+	delete m_Transform;
+	m_Transform = CSTransform::New(elem, clParaSet);
+
 	return true;
 }
 
 void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
 {
 	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
+}
+
+void CSPrimitives::TransformCoords(double* Coord)
+{
+	if (m_Transform==NULL)
+		return;
+	if (m_MeshType!=CARTESIAN) //transform to cartesian if necessary
+		TransformCoordSystem(Coord,Coord,m_MeshType,CARTESIAN);
+	m_Transform->InvertTransform(Coord,Coord);
+	if (m_MeshType!=CARTESIAN) //transform back from cartesian if necessary
+		TransformCoordSystem(Coord,Coord,m_MeshType,m_PrimCoordSystem);
 }
 
 /*********************CSPrimPoint********************************************************************/
@@ -283,9 +305,11 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 
 	const double* start = m_Coords[0].GetCoords(m_PrimCoordSystem);
 	const double* stop  = m_Coords[1].GetCoords(m_PrimCoordSystem);
-	double pos[3];
+	double pos[3] = {Coord[0],Coord[1],Coord[2]};
+
+	TransformCoords(pos);
 	//transform incoming coordinates into the coorindate system of the primitive
-	TransformCoordSystem(Coord,pos,m_MeshType,m_PrimCoordSystem);
+	TransformCoordSystem(pos,pos,m_MeshType,m_PrimCoordSystem);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -485,6 +509,8 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 	if (Coord==NULL) return false;
 	bool in=false;
 	double UpVal,DownVal;
+	double coords[3]={Coord[0],Coord[1],Coord[2]};
+	TransformCoords(coords);
 	//fprintf(stderr,"here\n");
 	for (unsigned int i=0;i<vCoords.size()/6;++i)
 	{
@@ -496,13 +522,13 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 			DownVal=vCoords.at(6*i+2*n).GetValue();
 			if (DownVal<UpVal)
 			{
-				if (DownVal>Coord[n]) {in=false;break;}
-				if (UpVal<Coord[n]) {in=false;break;}
+				if (DownVal>coords[n]) {in=false;break;}
+				if (UpVal<coords[n]) {in=false;break;}
 			}
 			else
 			{
-				if (DownVal<Coord[n]) {in=false;break;}
-				if (UpVal>Coord[n]) {in=false;break;}
+				if (DownVal<coords[n]) {in=false;break;}
+				if (UpVal>coords[n]) {in=false;break;}
 			}
 		}
 		if (in==true) {	return true;}
@@ -615,10 +641,12 @@ CSPrimSphere::~CSPrimSphere()
 bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	double center[3] = {m_Center.GetValue(0),m_Center.GetValue(1),m_Center.GetValue(2)};
+	double radius = psRadius.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
-		dBoundBox[2*i]=m_Center.GetValue(i)-psRadius.GetValue();
-		dBoundBox[2*i+1]=m_Center.GetValue(i)+psRadius.GetValue();
+		dBoundBox[2*i]=center[i]-radius;
+		dBoundBox[2*i+1]=center[i]+radius;
 	}
 	return true;
 }
@@ -629,6 +657,8 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 	double out[3];
 	const double* center = m_Center.GetCartesianCoords();
 	TransformCoordSystem(Coord,out,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(out,out);
 	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
 	if (dist<psRadius.GetValue())
 		return true;
@@ -724,10 +754,13 @@ CSPrimSphericalShell::~CSPrimSphericalShell()
 bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
+	double center[3] = {m_Center.GetValue(0),m_Center.GetValue(1),m_Center.GetValue(2)};
+	double radius = psRadius.GetValue();
+	double shellwidth = psShellWidth.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
-		dBoundBox[2*i]=m_Center.GetValue(i)-psRadius.GetValue()-psShellWidth.GetValue()/2.0;
-		dBoundBox[2*i+1]=m_Center.GetValue(i)+psRadius.GetValue()+psShellWidth.GetValue()/2.0;
+		dBoundBox[2*i]=center[i]-radius-shellwidth/2.0;
+		dBoundBox[2*i+1]=center[i]+radius+shellwidth/2.0;
 	}
 	return true;
 }
@@ -738,6 +771,8 @@ bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
 	double out[3];
 	const double* center = m_Center.GetCartesianCoords();
 	TransformCoordSystem(Coord,out,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(out,out);
 	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
 	if (fabs(dist-psRadius.GetValue())< psShellWidth.GetValue()/2.0)
 		return true;
@@ -877,6 +912,8 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(pos,pos);
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
@@ -1038,6 +1075,8 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(pos,pos);
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
@@ -1236,6 +1275,8 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(Coord,Coord);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1577,6 +1618,8 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(Coord,Coord);
 
 	for (unsigned int n=0;n<3;++n)
 	{
@@ -1720,6 +1763,7 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point)
 	point[0] = points.at(point_index)->GetValue(0);
 	point[1] = points.at(point_index)->GetValue(1);
 	point[2] = points.at(point_index)->GetValue(2);
+	TransformCoords(point);
 	return true;
 }
 
@@ -1849,6 +1893,8 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(pos,pos);
 
 	double foot,dist,distPP;
 	for (size_t i=0;i<GetNumberOfPoints();++i)
@@ -1985,9 +2031,15 @@ bool CSPrimUserDefined::IsInside(const double* Coord, double /*tol*/)
 
 	vars=clParaSet->GetValueArray(vars);
 
-	double x=Coord[0]-dPosShift[0].GetValue();
-	double y=Coord[1]-dPosShift[1].GetValue();
-	double z=Coord[2]-dPosShift[2].GetValue();
+	double inCoord[3] = {Coord[0],Coord[1],Coord[2]};
+	//transform incoming coordinates into cartesian coords
+	TransformCoordSystem(Coord,inCoord,m_MeshType,CARTESIAN);
+	if (m_Transform)
+		m_Transform->InvertTransform(inCoord,inCoord);
+
+	double x=inCoord[0]-dPosShift[0].GetValue();
+	double y=inCoord[1]-dPosShift[1].GetValue();
+	double z=inCoord[2]-dPosShift[2].GetValue();
 	double rxy=sqrt(x*x+y*y);
 	vars[NrPara]=x;
 	vars[NrPara+1]=y;

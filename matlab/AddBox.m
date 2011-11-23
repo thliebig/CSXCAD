@@ -7,9 +7,18 @@ function CSX = AddBox(CSX, propName, prio, start, stop, varargin)
 %  stop :   box stop  coordinates
 %  prio :   primitive priority
 %
+% optional:
+%   Transformation: perform a transformation on a primitive by adding
+%      e.g.: 'Transform', {'Scale','1,1,2','Rotate_X',pi/4,'Translate','0,0,100'}
+%      Note: This will only affect the 3D material/metal discretisation
+%
 %   example:
 %       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
 %       CSX = AddBox(CSX,'metal',10,[0 0 0],[100 100 200]); %assign box
+%
+%   with transformation:
+%       CSX = AddBox(CSX,'metal',10,[0 0 0],[100 100 200], ...
+%                        'Transform', {Rotate_Z, pi/4});
 %
 % See also AddCylinder, AddCylindricalShell, AddSphere, AddSphericalShell,
 % AddCurve, AddWire, AddMetal
