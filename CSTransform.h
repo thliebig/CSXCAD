@@ -40,7 +40,7 @@ public:
 
 	enum TransformType
 	{
-		SCALE, TRANSLATE, ROTATE_ORIGIN, ROTATE_X, ROTATE_Y, ROTATE_Z
+		SCALE, SCALE3, TRANSLATE, ROTATE_ORIGIN, ROTATE_X, ROTATE_Y, ROTATE_Z
 	}; //Keep this in sync with GetNameByType and GetTypeByName and TransformByType methods!!!
 
 	double* Transform(const double inCoords[3], double outCoords[3]) const;
@@ -72,6 +72,7 @@ public:
 	bool RotateXYZ(int dir, string angle, bool concatenate=true);
 
 	void Scale(double scale, bool concatenate=true);
+	void Scale(const double scale[3], bool concatenate=true);
 	bool Scale(string scale, bool concatenate=true);
 
 	bool TransformByString(string operation, string argument, bool concatenate=true);
@@ -124,6 +125,7 @@ protected:
 
 	bool RotateOriginMatrix(double matrix[16], const double XYZ_A[4]);
 	bool ScaleMatrix(double matrix[16], double scale);
+	bool ScaleMatrix(double matrix[16], const double scale[3]);
 	bool TranslateMatrix(double matrix[16], const double translate[3]);
 
 	void AppendList(TransformType type, const double* args, size_t numArgs );

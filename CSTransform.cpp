@@ -338,6 +338,14 @@ bool CSTransform::ScaleMatrix(double matrix[16], double scale)
 	return true;
 }
 
+bool CSTransform::ScaleMatrix(double matrix[16], const double scale[3])
+{
+	MakeUnitMatrix(matrix);
+	for (int n=0;n<3;++n)
+		matrix[4*n+n] = scale[n];
+	return true;
+}
+
 void CSTransform::Scale(double scale, bool concatenate)
 {
 	double matrix[16];
@@ -349,21 +357,70 @@ void CSTransform::Scale(double scale, bool concatenate)
 	AppendList(SCALE,&scale,1);
 }
 
+void CSTransform::Scale(const double scale[3], bool concatenate)
+{
+	double matrix[16];
+
+	if (ScaleMatrix(matrix, scale)==false)
+		return;
+
+	ApplyMatrix(matrix,concatenate);
+	AppendList(SCALE3,scale,3);
+}
+
 bool CSTransform::Scale(string scale, bool concatenate)
 {
 	double matrix[16];
 
-	ParameterScalar ps_scale(m_ParaSet, scale);
-	int EC = ps_scale.Evaluate();
-	if (EC!=0)
-		return false;
+	vector<string> scale_vec = SplitString2Vector(scale, ',');
 
-	if (ScaleMatrix(matrix, ps_scale.GetValue())==false)
+	if ((scale_vec.size()>1) && (scale_vec.size()!=3))
+		cerr << "CSTransform::Scale: Warning: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is larger than expected, skipping unneeded! " << endl;
+	else if (scale_vec.size()<1)
+	{
+		cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << endl;
 		return false;
+	}
 
-	ApplyMatrix(matrix,concatenate);
-	AppendList(SCALE,&ps_scale,1);
-	return true;
+	if (scale_vec.size()>=3)
+	{
+		ParameterScalar ps_scale[3];
+		double scale_double_vec[3];
+		for (int n=0;n<3;++n)
+		{
+			ps_scale[n].SetParameterSet(m_ParaSet);
+			ps_scale[n].SetValue(scale_vec.at(n));
+			int EC = ps_scale[n].Evaluate();
+			if (EC!=0)
+				return false;
+			scale_double_vec[n]=ps_scale[n].GetValue();
+		}
+
+		if (ScaleMatrix(matrix, scale_double_vec)==false)
+			return false;
+
+		ApplyMatrix(matrix,concatenate);
+		AppendList(SCALE3,ps_scale,3);
+		return true;
+	}
+
+	if(scale_vec.size()>=1)
+	{
+		ParameterScalar ps_scale(m_ParaSet, scale);
+		int EC = ps_scale.Evaluate();
+		if (EC!=0)
+			return false;
+
+		if (ScaleMatrix(matrix, ps_scale.GetValue())==false)
+			return false;
+
+		ApplyMatrix(matrix,concatenate);
+		AppendList(SCALE,&ps_scale,1);
+		return true;
+	}
+
+	cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << endl;
+	return false;
 }
 
 void CSTransform::ApplyMatrix(const double matrix[16], bool concatenate)
@@ -403,6 +460,7 @@ bool CSTransform::TransformByType(TransformType type, string args, bool concaten
 	switch (type)
 	{
 	case SCALE:
+	case SCALE3:
 		return Scale(args, concatenate);
 	case TRANSLATE:
 		return Translate(args,concatenate);
@@ -426,6 +484,8 @@ void CSTransform::TransformByType(TransformType type, const double* args, bool c
 	{
 	case SCALE:
 		return Scale(args[0], concatenate);
+	case SCALE3:
+		return Scale(args, concatenate);
 	case TRANSLATE:
 		return Translate(args,concatenate);
 	case ROTATE_ORIGIN:
