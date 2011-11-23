@@ -33,6 +33,7 @@ class CSXCAD_EXPORT CSTransform
 {
 public:
 	CSTransform();
+	CSTransform(CSTransform* transform);
 	CSTransform(ParameterSet* paraSet);
 	~CSTransform();
 
@@ -107,6 +108,7 @@ public:
 	virtual bool ReadFromXML(TiXmlNode* root);
 
 	static CSTransform* New(TiXmlNode* root, ParameterSet* paraSet=NULL);
+	static CSTransform* New(CSTransform* cst, ParameterSet* paraSet=NULL);
 
 protected:
 	//transform matrix

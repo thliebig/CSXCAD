@@ -33,6 +33,20 @@ CSTransform::CSTransform()
 	SetParameterSet(NULL);
 }
 
+CSTransform::CSTransform(CSTransform* transform)
+{
+	m_PostMultiply = transform->m_PostMultiply;
+	m_AngleRadian = transform->m_AngleRadian;
+	m_TransformList = transform->m_TransformList;
+	m_TransformArguments = transform->m_TransformArguments;
+	SetParameterSet(transform->m_ParaSet);
+	for (int n=0;n<16;++n)
+	{
+		m_TMatrix[n] = transform->m_TMatrix[n];
+		m_Inv_TMatrix[n] = transform->m_Inv_TMatrix[n];
+	}
+}
+
 CSTransform::CSTransform(ParameterSet* paraSet)
 {
 	Reset();
@@ -676,4 +690,14 @@ CSTransform* CSTransform::New(TiXmlNode* root, ParameterSet* paraSet)
 		return newCST;
 	delete newCST;
 	return NULL;
+}
+
+CSTransform* CSTransform::New(CSTransform* cst, ParameterSet* paraSet)
+{
+	if (cst==NULL)
+		return NULL;
+	CSTransform* newCST = new CSTransform(cst);
+	if (paraSet)
+		newCST->SetParameterSet(paraSet);
+	return newCST;
 }
