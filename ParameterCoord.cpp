@@ -19,8 +19,9 @@
 #include "tinyxml.h"
 #include <sstream>
 
-double* TransformCoordSystem(const double* in, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out)
+double* TransformCoordSystem(const double* inCoord, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out)
 {
+	double in[3] = {inCoord[0],inCoord[1],inCoord[2]};
 	switch (CS_In)
 	{
 	case CARTESIAN: //input coords are cartesian
