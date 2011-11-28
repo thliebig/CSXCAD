@@ -136,13 +136,16 @@ void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
 	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
 }
 
-void CSPrimitives::TransformCoords(double* Coord)
+void CSPrimitives::TransformCoords(double* Coord, bool invers)
 {
 	if (m_Transform==NULL)
 		return;
 	if (m_MeshType!=CARTESIAN) //transform to cartesian if necessary
 		TransformCoordSystem(Coord,Coord,m_MeshType,CARTESIAN);
-	m_Transform->InvertTransform(Coord,Coord);
+	if (invers)
+		m_Transform->InvertTransform(Coord,Coord);
+	else
+		m_Transform->Transform(Coord,Coord);
 	if (m_MeshType!=CARTESIAN) //transform back from cartesian if necessary
 		TransformCoordSystem(Coord,Coord,m_MeshType,m_PrimCoordSystem);
 }
@@ -307,7 +310,7 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	const double* stop  = m_Coords[1].GetCoords(m_PrimCoordSystem);
 	double pos[3] = {Coord[0],Coord[1],Coord[2]};
 
-	TransformCoords(pos);
+	TransformCoords(pos, true);
 	//transform incoming coordinates into the coorindate system of the primitive
 	TransformCoordSystem(pos,pos,m_MeshType,m_PrimCoordSystem);
 
@@ -510,7 +513,7 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 	bool in=false;
 	double UpVal,DownVal;
 	double coords[3]={Coord[0],Coord[1],Coord[2]};
-	TransformCoords(coords);
+	TransformCoords(coords, true);
 	//fprintf(stderr,"here\n");
 	for (unsigned int i=0;i<vCoords.size()/6;++i)
 	{
@@ -1757,13 +1760,14 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
 	points.at(point_index)->SetValue(nu,val);
 }
 
-bool CSPrimCurve::GetPoint(size_t point_index, double* point)
+bool CSPrimCurve::GetPoint(size_t point_index, double* point, bool transform)
 {
 	if (point_index>=GetNumberOfPoints()) return false;
 	point[0] = points.at(point_index)->GetValue(0);
 	point[1] = points.at(point_index)->GetValue(1);
 	point[2] = points.at(point_index)->GetValue(2);
-	TransformCoords(point);
+	if (transform)
+		TransformCoords(point, false);
 	return true;
 }
 

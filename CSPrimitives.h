@@ -157,6 +157,8 @@ public:
 	//! Read the coordinate system for this primitive (may be different to the input mesh type) \sa GetCoordInputType
 	CoordinateSystem GetCoordinateSystem() const {return m_PrimCoordSystem;}
 
+	CSTransform* GetTransform() const {return m_Transform;}
+
 	//! Show status of this primitve
 	virtual void ShowPrimitiveStatus(ostream& stream);
 
@@ -165,7 +167,7 @@ protected:
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
 	CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 
-	void TransformCoords(double* Coord);
+	void TransformCoords(double* Coord, bool invers);
 
 	unsigned int uiID;
 	int iPriority;
@@ -603,7 +605,7 @@ public:
 	virtual void SetCoord(size_t point_index, int nu, string val);
 
 	virtual size_t GetNumberOfPoints() {return points.size();}
-	virtual bool GetPoint(size_t point_index, double* point);
+	virtual bool GetPoint(size_t point_index, double* point, bool transform=true);
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
