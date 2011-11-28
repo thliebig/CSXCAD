@@ -35,6 +35,7 @@ CSProperties::CSProperties(CSProperties* prop)
 	clParaSet=prop->clParaSet;
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
+	bVisisble=prop->bVisisble;
 	sName=string(prop->sName);
 	for (size_t i=0;i<prop->vPrimitives.size();++i)
 	{
@@ -362,8 +363,6 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 			FillColor.a=(unsigned char) help;
 	}
 
-	FillColor.a=255; //for the time being lock 2 this! take out later!
-
 	TiXmlElement* EC = root.FirstChildElement("EdgeColor");
 	if (EC!=NULL)
 	{
@@ -393,9 +392,9 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 
 
 /*********************CSPropUnknown********************************************************************/
-CSPropUnknown::CSPropUnknown(ParameterSet* paraSet) : CSProperties(paraSet) {Type=UNKNOWN;}
-CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=UNKNOWN;}
-CSPropUnknown::CSPropUnknown(CSProperties* prop) : CSProperties(prop) {Type=UNKNOWN;}
+CSPropUnknown::CSPropUnknown(ParameterSet* paraSet) : CSProperties(paraSet) {Type=UNKNOWN;bVisisble=false;}
+CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=UNKNOWN;bVisisble=false;}
+CSPropUnknown::CSPropUnknown(CSProperties* prop) : CSProperties(prop) {Type=UNKNOWN;bVisisble=false;}
 CSPropUnknown::~CSPropUnknown() {}
 
 void CSPropUnknown::SetProperty(const string val) {sUnknownProperty=string(val);}
@@ -524,6 +523,8 @@ void CSPropMaterial::Init()
 	}
 	Density.SetValue(0);
 	WeightDensity.SetValue(1.0);
+	FillColor.a=EdgeColor.a=123;
+	bVisisble=true;
 }
 
 bool CSPropMaterial::Update(string *ErrStr)
@@ -1612,9 +1613,9 @@ void CSPropElectrode::ShowPropertyStatus(ostream& stream)
 }
 
 /*********************CSPropProbeBox********************************************************************/
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;}
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;}
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
@@ -1686,9 +1687,9 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 }
 
 /*********************CSPropResBox********************************************************************/
-CSPropResBox::CSPropResBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=RESBOX;uiFactor=1;} ;
-CSPropResBox::CSPropResBox(CSProperties* prop) : CSProperties(prop) {Type=RESBOX;uiFactor=1;} ;
-CSPropResBox::CSPropResBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=RESBOX;uiFactor=1;} ;
+CSPropResBox::CSPropResBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
+CSPropResBox::CSPropResBox(CSProperties* prop) : CSProperties(prop) {Type=RESBOX;uiFactor=1;bVisisble=false;}
+CSPropResBox::CSPropResBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
 CSPropResBox::~CSPropResBox() {};
 
 void CSPropResBox::SetResFactor(unsigned int val)  {uiFactor=val;}
