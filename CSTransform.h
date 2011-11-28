@@ -51,6 +51,7 @@ public:
 
 	void Concatenate(const double matrix[16]);
 	void SetMatrix(const double matrix[16]);
+	double* GetMatrix() {return m_TMatrix;}
 
 	//! Create and apply a translation matrix
 	void Translate(const double translate[3], bool concatenate=true);
