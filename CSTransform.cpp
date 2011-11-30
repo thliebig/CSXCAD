@@ -87,34 +87,6 @@ void CSTransform::UpdateInverse()
 	vtkMatrix4x4::Invert(m_TMatrix, m_Inv_TMatrix);
 }
 
-void CSTransform::Concatenate(const double matrix[16])
-{
-	double new_matrix[16];
-	for (int n=0;n<16;++n)
-		new_matrix[n]=0;
-	for (int n=0;n<4;++n)
-		for (int m=0;m<4;++m)
-		{
-			for (int k=0;k<4;++k)
-				if (m_PostMultiply)
-					new_matrix[4*m+n] += matrix[4*m+k]*m_TMatrix[4*k+n];
-				else
-					new_matrix[4*m+n] += m_TMatrix[4*m+k]*matrix[4*k+n];
-		}
-	for (int n=0;n<16;++n)
-			m_TMatrix[n]=new_matrix[n];
-	UpdateInverse();
-}
-
-void CSTransform::SetMatrix(const double matrix[16])
-{
-	m_TransformList.clear();
-	m_TransformArguments.clear();
-	for (int n=0;n<16;++n)
-			m_TMatrix[n]=matrix[n];
-	UpdateInverse();
-}
-
 double* CSTransform::Transform(const double inCoords[3], double outCoords[3]) const
 {
 	double coords[4] = {inCoords[0],inCoords[1],inCoords[2],1};
@@ -141,6 +113,41 @@ double* CSTransform::InvertTransform(const double inCoords[3], double outCoords[
 		}
 	}
 	return outCoords;
+}
+
+void CSTransform::SetMatrix(const double matrix[16], bool concatenate)
+{
+	ApplyMatrix(matrix,concatenate);
+	AppendList(MATRIX,matrix,16);
+}
+
+bool CSTransform::SetMatrix(string matrix, bool concatenate)
+{
+	vector<string> mat_vec = SplitString2Vector(matrix, ',');
+	ParameterScalar ps_matrix[16];
+
+	double d_matrix[16];
+	if (mat_vec.size()>16)
+		cerr << "CSTransform::SetMatrix: Warning: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is larger than expected, skipping unneeded! " << endl;
+	else if (mat_vec.size()<16)
+	{
+		cerr << "CSTransform::SetMatrix: Error: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is invalid! Skipping" << endl;
+		return false;
+	}
+
+	for (int n=0;n<16;++n)
+	{
+		ps_matrix[n].SetParameterSet(m_ParaSet);
+		ps_matrix[n].SetValue(mat_vec.at(n));
+		int EC = ps_matrix[n].Evaluate();
+		if (EC!=0)
+			return false;
+		d_matrix[n]=ps_matrix[n].GetValue();
+	}
+
+	ApplyMatrix(d_matrix,concatenate);
+	AppendList(MATRIX,ps_matrix,16);
+	return true;
 }
 
 bool CSTransform::TranslateMatrix(double matrix[16], const double translate[3])
@@ -440,9 +447,30 @@ bool CSTransform::Scale(string scale, bool concatenate)
 void CSTransform::ApplyMatrix(const double matrix[16], bool concatenate)
 {
 	if (concatenate)
-		Concatenate(matrix);
+	{
+		double new_matrix[16];
+		for (int n=0;n<16;++n)
+			new_matrix[n]=0;
+		for (int n=0;n<4;++n)
+			for (int m=0;m<4;++m)
+			{
+				for (int k=0;k<4;++k)
+					if (m_PostMultiply)
+						new_matrix[4*m+n] += matrix[4*m+k]*m_TMatrix[4*k+n];
+					else
+						new_matrix[4*m+n] += m_TMatrix[4*m+k]*matrix[4*k+n];
+			}
+		for (int n=0;n<16;++n)
+				m_TMatrix[n]=new_matrix[n];
+	}
 	else
-		SetMatrix(matrix);
+	{
+		m_TransformList.clear();
+		m_TransformArguments.clear();
+		for (int n=0;n<16;++n)
+			m_TMatrix[n]=matrix[n];
+	}
+	UpdateInverse();
 }
 
 bool CSTransform::TransformByString(string operation, string argument, bool concatenate)
@@ -486,6 +514,8 @@ bool CSTransform::TransformByType(TransformType type, string args, bool concaten
 		return RotateY(args,concatenate);
 	case ROTATE_Z:
 		return RotateZ(args,concatenate);
+	case MATRIX:
+		return SetMatrix(args,concatenate);
 	default:
 		return false;
 	}
@@ -510,6 +540,8 @@ void CSTransform::TransformByType(TransformType type, const double* args, bool c
 		return RotateY(args[0],concatenate);
 	case ROTATE_Z:
 		return RotateZ(args[0],concatenate);
+	case MATRIX:
+		return SetMatrix(args,concatenate);
 	default:
 		return;
 	}
@@ -544,6 +576,9 @@ string CSTransform::GetNameByType(TransformType type, unsigned int &numArgs) con
 	case ROTATE_Z:
 		numArgs=1;
 		return "Rotate_Z";
+	case MATRIX:
+		numArgs=16;
+		return "Matrix";
 	default:
 		numArgs=0;
 		return "Unknown";
@@ -582,6 +617,11 @@ int CSTransform::GetTypeByName(string name, unsigned int &numArgs) const
 	{
 		numArgs=1;
 		return ROTATE_Z;
+	}
+	if (name.compare("Matrix")==0)
+	{
+		numArgs=16;
+		return MATRIX;
 	}
 	numArgs = 0;
 	return -1;

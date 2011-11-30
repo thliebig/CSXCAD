@@ -41,7 +41,7 @@ public:
 
 	enum TransformType
 	{
-		SCALE, SCALE3, TRANSLATE, ROTATE_ORIGIN, ROTATE_X, ROTATE_Y, ROTATE_Z
+		SCALE, SCALE3, TRANSLATE, ROTATE_ORIGIN, ROTATE_X, ROTATE_Y, ROTATE_Z, MATRIX
 	}; //Keep this in sync with GetNameByType and GetTypeByName and TransformByType methods!!!
 
 	double* Transform(const double inCoords[3], double outCoords[3]) const;
@@ -49,9 +49,11 @@ public:
 
 	void Invert();
 
-	void Concatenate(const double matrix[16]);
-	void SetMatrix(const double matrix[16]);
 	double* GetMatrix() {return m_TMatrix;}
+
+	//! Apply a matrix directly
+	void SetMatrix(const double matrix[16], bool concatenate=true);
+	bool SetMatrix(string matrix, bool concatenate=true);
 
 	//! Create and apply a translation matrix
 	void Translate(const double translate[3], bool concatenate=true);
