@@ -23,6 +23,8 @@
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
 
+#define PI acos(-1)
+
 void Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist)
 {
 	double dir[] = {stop[0]-start[0],stop[1]-start[1],stop[2]-start[2]};
@@ -1139,9 +1141,7 @@ void CSPrimCylindricalShell::ShowPrimitiveStatus(ostream& stream)
 CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=POLYGON;
-	NormDir[0].SetParameterSet(paraSet);
-	NormDir[1].SetParameterSet(paraSet);
-	NormDir[2].SetParameterSet(paraSet);
+	m_NormDir = 0;
 	Elevation.SetParameterSet(paraSet);
 	PrimTypeName = string("Polygon");
 }
@@ -1149,9 +1149,7 @@ CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSPropertie
 CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : CSPrimitives(primPolygon,prop)
 {
 	Type=POLYGON;
-	NormDir[0] = ParameterScalar(primPolygon->NormDir[0]);
-	NormDir[1] = ParameterScalar(primPolygon->NormDir[1]);
-	NormDir[2] = ParameterScalar(primPolygon->NormDir[2]);
+	m_NormDir = primPolygon->m_NormDir;
 	Elevation = ParameterScalar(primPolygon->Elevation);
 	PrimTypeName = string("Polygon");
 }
@@ -1159,13 +1157,10 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=POLYGON;
-	NormDir[0].SetParameterSet(paraSet);
-	NormDir[1].SetParameterSet(paraSet);
-	NormDir[2].SetParameterSet(paraSet);
+	m_NormDir = 0;
 	Elevation.SetParameterSet(paraSet);
 	PrimTypeName = string("Polygon");
 }
-
 
 CSPrimPolygon::~CSPrimPolygon()
 {
@@ -1238,31 +1233,13 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		if (y<ymin) ymin=y;
 		else if (y>ymax) ymax=y;
 	}
-	//only cartesian so far...
-	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
-	{
-		dBoundBox[0] = dBoundBox[1] = Elevation.GetValue();
-		dBoundBox[2] = xmin;
-		dBoundBox[3] = xmax;
-		dBoundBox[4] = ymin;
-		dBoundBox[5] = ymax;
-	}
-	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
-	{
-		dBoundBox[2] = dBoundBox[3] = Elevation.GetValue();
-		dBoundBox[4] = xmin;
-		dBoundBox[5] = xmax;
-		dBoundBox[0] = ymin;
-		dBoundBox[1] = ymax;
-	}
-	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
-	{
-		dBoundBox[4] = dBoundBox[5] = Elevation.GetValue();
-		dBoundBox[0] = xmin;
-		dBoundBox[1] = xmax;
-		dBoundBox[2] = ymin;
-		dBoundBox[3] = ymax;
-	}
+	int nP = (m_NormDir+1)%3;
+	int nPP = (m_NormDir+2)%3;
+	dBoundBox[2*m_NormDir] = dBoundBox[2*m_NormDir+1] = Elevation.GetValue();
+	dBoundBox[2*nP] = xmin;
+	dBoundBox[2*nP+1] = xmax;
+	dBoundBox[2*nPP] = ymin;
+	dBoundBox[2*nPP+1] = ymax;
 	return accurate;
 }
 
@@ -1270,15 +1247,14 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 {
 	if (inCoord==NULL) return false;
 	if (vCoords.size()<2) return false;
-		
+
 	double box[6]={0,0,0,0,0,0};
-	bool accBnd=GetBoundBox(box);
-	UNUSED(accBnd); //maybe used later?
+	GetBoundBox(box);
 
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
-	if (m_Transform)
+	if (m_Transform && Type==POLYGON)
 		m_Transform->InvertTransform(Coord,Coord);
 
 	for (unsigned int n=0;n<3;++n)
@@ -1286,21 +1262,10 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
 	}
 	double x=0,y=0;
-	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
-	{
-		x = Coord[1];
-		y = Coord[2];
-	}
-	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
-	{
-		x = Coord[2];
-		y = Coord[0];
-	}
-	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
-	{
-		x = Coord[0];
-		y = Coord[1];
-	}
+	int nP = (m_NormDir+1)%3;
+	int nPP = (m_NormDir+2)%3;
+	x = Coord[nP];
+	y = Coord[nPP];
 	
 	int wn = 0;
 
@@ -1367,24 +1332,11 @@ bool CSPrimPolygon::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Polygib Elevation (ID: " << uiID << "): ";
+		stream << endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	
-	for (size_t i=1;i<3;++i)
-	{
-		EC=NormDir[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in Polygon Normal Direction (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-	}
 	return bOK;
 }
 
@@ -1394,12 +1346,9 @@ bool CSPrimPolygon::Write2XML(TiXmlElement &elem, bool parameterised)
 	
 	WriteTerm(Elevation,elem,"Elevation",parameterised);
 
+	elem.SetAttribute("NormDir",m_NormDir);
+
 	elem.SetAttribute("QtyVertices",(int)vCoords.size()/2);
-	TiXmlElement NV("NormDir");
-	WriteTerm(NormDir[0],NV,"X",parameterised);	
-	WriteTerm(NormDir[1],NV,"Y",parameterised);	
-	WriteTerm(NormDir[2],NV,"Z",parameterised);	
-	elem.InsertEndChild(NV);
 
 	for (size_t i=0;i<vCoords.size()/2;++i)
 	{
@@ -1417,13 +1366,13 @@ bool CSPrimPolygon::ReadFromXML(TiXmlNode &root)
 
 	TiXmlElement *elem = root.ToElement();
 	if (elem==NULL) return false;
-	if (ReadTerm(Elevation,*elem,"Elevation")==false) return false;
+	if (ReadTerm(Elevation,*elem,"Elevation")==false)
+		Elevation.SetValue(0);
 
-	TiXmlElement* NV=root.FirstChildElement("NormDir");
-	if (NV==NULL) return false;
-	if (ReadTerm(NormDir[0],*NV,"X")==false) return false;
-	if (ReadTerm(NormDir[1],*NV,"Y")==false) return false;
-	if (ReadTerm(NormDir[2],*NV,"Z")==false) return false;
+	int help;
+	if (elem->QueryIntAttribute("NormDir",&help)!=TIXML_SUCCESS)
+		 return false;
+	m_NormDir=help;
 	
 	TiXmlElement *VT=root.FirstChildElement("Vertex");
 	if (vCoords.size()!=0) return false;
@@ -1477,44 +1426,15 @@ bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	
 	double len = extrudeLength.GetValue();
 	
-	if (NormDir[0].GetValue()!=0) //assume norm x, yz-plane
+	if (len>0)
 	{
-		if (len>0)
-		{
-			dBoundBox[0] = Elevation.GetValue();
-			dBoundBox[1] = dBoundBox[0] + len;
-		}
-		else
-		{
-			dBoundBox[1] = Elevation.GetValue();
-			dBoundBox[0] = dBoundBox[1] + len;			
-		}
+		dBoundBox[2*m_NormDir] = Elevation.GetValue();
+		dBoundBox[2*m_NormDir+1] = dBoundBox[2*m_NormDir] + len;
 	}
-	else if (NormDir[1].GetValue()!=0) //assume norm y, zx-plane
+	else
 	{
-		if (len>0)
-		{
-			dBoundBox[2] = Elevation.GetValue();
-			dBoundBox[3] = dBoundBox[2] + len;
-		}
-		else
-		{
-			dBoundBox[3] = Elevation.GetValue();
-			dBoundBox[2] = dBoundBox[3] + len;			
-		}
-	}
-	else if (NormDir[2].GetValue()!=0) //assume norm z, xy-plane
-	{
-		if (len>0)
-		{
-			dBoundBox[4] = Elevation.GetValue();
-			dBoundBox[5] = dBoundBox[4] + len;
-		}
-		else
-		{
-			dBoundBox[5] = Elevation.GetValue();
-			dBoundBox[4] = dBoundBox[5] + len;			
-		}
+		dBoundBox[2*m_NormDir+1] = Elevation.GetValue();
+		dBoundBox[2*m_NormDir] = dBoundBox[2*m_NormDir+1] + len;
 	}
 	
 	return accurate;
@@ -1523,7 +1443,11 @@ bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimLinPoly::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;	
-	return CSPrimPolygon::IsInside(Coord, tol);
+	double coords[3];
+	if (m_Transform && Type==LINPOLY)
+		m_Transform->InvertTransform(Coord,coords);
+
+	return CSPrimPolygon::IsInside(coords, tol);
 }
 
 
@@ -1539,7 +1463,7 @@ bool CSPrimLinPoly::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Polygib Elevation (ID: " << uiID << "): ";
+		stream << endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -1569,25 +1493,24 @@ bool CSPrimLinPoly::ReadFromXML(TiXmlNode &root)
 /*********************CSPrimLinPoly********************************************************************/
 CSPrimRotPoly::CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(ID,paraSet,prop)
 {
-	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
-	PrimTypeName = string("Rot-Poly");
+	Type=ROTPOLY;
+	m_RotAxisDir=0;
+	PrimTypeName = string("RotPoly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(CSPrimRotPoly* primRotPoly, CSProperties *prop) : CSPrimPolygon(primRotPoly,prop)
 {
-	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i]=ParameterScalar(primBox->psCoords[i]);}
-	PrimTypeName = string("Rot-Poly");
+	Type=ROTPOLY;
+	m_RotAxisDir=primRotPoly->m_RotAxisDir;
+	PrimTypeName = string("RotPoly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
-	Type=LINPOLY;
-//	for (int i=0;i<6;++i) {psCoords[i].SetParameterSet(paraSet);}
-	PrimTypeName = string("Rot-Poly");
+	Type=ROTPOLY;
+	m_RotAxisDir=0;
+	PrimTypeName = string("RotPoly");
 }
-
 
 CSPrimRotPoly::~CSPrimRotPoly()
 {
@@ -1596,41 +1519,61 @@ CSPrimRotPoly::~CSPrimRotPoly()
 bool CSPrimRotPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	bool accurate = false;
-	for (int n=0;n<6;++n) dBoundBox[n] = 0;
-	UNUSED(dBoundBox);
-//	for (int i=0;i<6;++i) dBoundBox[i]=psCoords[i].GetValue();
-//	for (int i=0;i<3;++i)
-//		if (dBoundBox[2*i]>dBoundBox[2*i+1])
-//		{
-//			double help=dBoundBox[2*i];
-//			dBoundBox[2*i]=dBoundBox[2*i+1];
-//			dBoundBox[2*i+1]=help;
-//		}
-	return accurate;
+	for (int n=0;n<6;++n)
+		dBoundBox[n] = 0;
+	return false;
 }
 
 bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 {
 	if (inCoord==NULL) return false;
 
-	double box[6]={0,0,0,0,0,0};
-	bool accBnd = GetBoundBox(box);
-	UNUSED(accBnd); //maybe used later?
-
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
-	if (m_Transform)
+	if (m_Transform && Type==ROTPOLY)
 		m_Transform->InvertTransform(Coord,Coord);
 
-	for (unsigned int n=0;n<3;++n)
-	{
-		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
-	}
+	double origin[3]={0,0,0};
+	double dir[3]={0,0,0};
+	dir[m_RotAxisDir] = 1;
+	double foot;
+	double dist;
+	Point_Line_Distance(Coord, origin, dir, foot, dist);
 
-	cerr << "CSPrimRotPoly::IsInside: Warning: More checking needed!!" << endl;
-	return true;
+	int raP = (m_RotAxisDir+1)%3;
+	int raPP = (m_RotAxisDir+2)%3;
+	double alpha = atan2(Coord[raPP],Coord[raP]);
+	if (raP == m_NormDir)
+		alpha=alpha-PI/2;
+	if (alpha<0)
+		alpha+=2*PI;
+
+	origin[0] = dist;origin[1] = dist;origin[2] = dist;
+	origin[m_NormDir] = 0;
+	origin[m_RotAxisDir] = foot;
+
+	if (alpha<m_StartStopAng[0])
+		alpha+=2*PI;
+
+	if ((CSPrimPolygon::IsInside(origin)) && (alpha<m_StartStopAng[1]))
+		return true;
+
+	dist*=-1;
+	alpha=alpha+PI;
+	if (alpha>2*PI)
+		alpha-=2*PI;
+
+	if (alpha<m_StartStopAng[0])
+		alpha+=2*PI;
+
+	if (alpha>m_StartStopAng[1])
+		return false;
+
+	origin[0] = dist;origin[1] = dist;origin[2] = dist;
+	origin[m_NormDir] = 0;
+	origin[m_RotAxisDir] = foot;
+	return CSPrimPolygon::IsInside(origin);
 }
 
 
@@ -1638,20 +1581,6 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 {
 	int EC=0;
 	bool bOK = CSPrimPolygon::Update(ErrStr);
-
-	for (size_t i=1;i<3;++i)
-	{
-		EC=RotAxis[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
-		{
-			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in Rot - Polygon Axis (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-	}
 	
 	EC=StartStopAngle[0].Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
@@ -1659,7 +1588,7 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Polygib Start Angle (ID: " << uiID << "): ";
+		stream << endl << "Error in RotPoly Start Angle (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -1670,11 +1599,27 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 	{
 		bOK=false;
 		stringstream stream;
-		stream << endl << "Error in Polygib Stop Angle (ID: " << uiID << "): ";
+		stream << endl << "Error in RotPoly Stop Angle (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
-	
+
+	// make angle range to 0..2*pi & stop > start!
+	m_StartStopAng[0]=StartStopAngle[0].GetValue();
+	m_StartStopAng[1]=StartStopAngle[1].GetValue();
+	if (m_StartStopAng[0]>m_StartStopAng[1])
+		m_StartStopAng[1]+=2*PI;
+	if (m_StartStopAng[0]>2*PI)
+	{
+		m_StartStopAng[0]-=2*PI;
+		m_StartStopAng[1]-=2*PI;
+	}
+	if (m_StartStopAng[0]<0)
+	{
+		m_StartStopAng[0]+=2*PI;
+		m_StartStopAng[1]+=2*PI;
+	}
+
 	return bOK;
 }
 
@@ -1682,11 +1627,7 @@ bool CSPrimRotPoly::Write2XML(TiXmlElement &elem, bool parameterised)
 {
 	CSPrimPolygon::Write2XML(elem,parameterised);
 
-	TiXmlElement RT("RotAxis");
-	WriteTerm(RotAxis[0],RT,"X",parameterised);	
-	WriteTerm(RotAxis[1],RT,"Y",parameterised);	
-	WriteTerm(RotAxis[2],RT,"Z",parameterised);	
-	elem.InsertEndChild(RT);
+	elem.SetAttribute("RotAxisDir",m_RotAxisDir);
 	
 	TiXmlElement Ang("Angles");
 	WriteTerm(StartStopAngle[0],Ang,"Start",parameterised);	
@@ -1699,13 +1640,17 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 {
 	if (CSPrimPolygon::ReadFromXML(root)==false) return false;
 
-	TiXmlElement* NV=root.FirstChildElement("RotAxis");
-	if (NV==NULL) return false;
-	if (ReadTerm(NormDir[0],*NV,"X")==false) return false;
-	if (ReadTerm(NormDir[1],*NV,"Y")==false) return false;
-	if (ReadTerm(NormDir[2],*NV,"Z")==false) return false;
-	
-	NV=root.FirstChildElement("Angles");
+	Elevation.SetValue(0);
+
+	TiXmlElement *elem = root.ToElement();
+	if (elem==NULL) return false;
+
+	int help;
+	if (elem->QueryIntAttribute("RotAxisDir",&help)!=TIXML_SUCCESS)
+		 return false;
+	m_RotAxisDir=help;
+
+	TiXmlElement *NV=elem->FirstChildElement("Angles");
 	if (NV==NULL) return false;
 	if (ReadTerm(StartStopAngle[0],*NV,"Start")==false) return false;
 	if (ReadTerm(StartStopAngle[1],*NV,"Stop")==false) return false;

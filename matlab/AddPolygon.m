@@ -1,12 +1,12 @@
-function CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points, varargin)
-% CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, points, varargin)
+function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, varargin)
+% CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, varargin)
 %
-% CSX: CSX-object created by InitCSX()
+% CSX:          CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
-% prio: priority
-% normVector: normal vector of the polygon
-% elevation: position of the polygon plane
-% points: two-dimensional coordinates
+% prio:         priority
+% normDir:      normal direction of the polygon (0->x, 1->y, 2->z)
+% elevation:    position of the polygon plane
+% points:       two-dimensional coordinates
 %
 % Warning: Polygon has to be defined using Cartesian Coords
 %          for use with cylindrical mesh, set 'CoordSystem',0
@@ -26,9 +26,7 @@ function CSX = AddPolygon( CSX, materialname, prio, normVector, elevation, point
 
 polygon.ATTRIBUTE.Priority = prio;
 polygon.ATTRIBUTE.Elevation = elevation;
-polygon.NormDir.ATTRIBUTE.X = normVector(1);
-polygon.NormDir.ATTRIBUTE.Y = normVector(2);
-polygon.NormDir.ATTRIBUTE.Z = normVector(3);
+polygon.ATTRIBUTE.NormDir = normDir;
 
 polygon.Vertex = {};
 for s=1:size(points,2)

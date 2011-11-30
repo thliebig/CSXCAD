@@ -1,13 +1,13 @@
-function CSX = AddLinPoly( CSX, materialname, prio, normDir, elevation, points, Length, varargin)
-% CSX = AddLinPoly( CSX, materialname, prio, normDir, elevation, points, Length, varargin)
+function CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points, angle, varargin)
+% CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points, angle, varargin)
 %
 % CSX:          CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
 % prio:         priority
 % normDir:      normal direction of the polygon (0->x, 1->y, 2->z)
-% elevation:    position of the polygon plane
 % points:       two-dimensional coordinates
-% length:       linear extrution in normal direction, starting at elevation
+% RotAxisDir:   direction of the rotational axis (0->x, 1->y, 2->z)
+% angle (optional): rotational start/stop angle, default is [0 2pi]
 %
 % Warning: Polygon has to be defined using Cartesian Coords
 %          for use with cylindrical mesh, set 'CoordSystem',0
@@ -24,10 +24,16 @@ function CSX = AddLinPoly( CSX, materialname, prio, normDir, elevation, points, 
 %
 % See also InitCSX AddMetal AddMaterial AddPolygon
 
+if (nargin<7)
+    angle = [0 2*pi];
+end
+
 polygon.ATTRIBUTE.Priority = prio;
-polygon.ATTRIBUTE.Elevation = elevation;
-polygon.ATTRIBUTE.Length = Length;
 polygon.ATTRIBUTE.NormDir = normDir;
+polygon.ATTRIBUTE.RotAxisDir = RotAxisDir;
+
+polygon.Angles.ATTRIBUTE.Start = angle(1);
+polygon.Angles.ATTRIBUTE.Stop = angle(2);
 
 polygon.Vertex = {};
 for s=1:size(points,2)
@@ -37,4 +43,4 @@ end
 
 polygon = AddPrimitiveArgs(polygon,varargin{:});
 
-CSX = Add2Property( CSX, materialname, polygon, 'LinPoly');
+CSX = Add2Property( CSX, materialname, polygon, 'RotPoly');

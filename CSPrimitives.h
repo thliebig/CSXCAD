@@ -482,20 +482,18 @@ public:
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
 
-	size_t GetQtyCoords() {return vCoords.size()/2;};
+	size_t GetQtyCoords() {return vCoords.size()/2;}
 	double* GetAllCoords(size_t &Qty, double* array);
 	
-	void SetNormDir(int index, double val) {if ((index>=0) && (index<3)) NormDir[index].SetValue(val);};
-	void SetNormDir(int index, const char* val) {if ((index>=0) && (index<3)) NormDir[index].SetValue(val);};
+	void SetNormDir(int dir) {if ((dir>=0) && (dir<3)) m_NormDir=dir;}
 
-	double GetNormDir(int index) {if ((index>=0) && (index<3)) return NormDir[index].GetValue(); else return 0;};
-	ParameterScalar* GetNormDirPS(int index) {if ((index>=0) && (index<3)) return &NormDir[index]; else return NULL;};
+	int GetNormDir() {return m_NormDir;}
 
-	void SetElevation(double val) {Elevation.SetValue(val);};
-	void SetElevation(const char* val) {Elevation.SetValue(val);};
+	void SetElevation(double val) {Elevation.SetValue(val);}
+	void SetElevation(const char* val) {Elevation.SetValue(val);}
 
-	double GetElevation() {return Elevation.GetValue();};
-	ParameterScalar* GetElevationPS() {return &Elevation;};
+	double GetElevation() {return Elevation.GetValue();}
+	ParameterScalar* GetElevationPS() {return &Elevation;}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -507,8 +505,8 @@ public:
 protected:
 	///Vector describing the polygon, x1,y1,x2,y2 ... xn,yn
 	vector<ParameterScalar> vCoords;
-	///The polygon plane normal vector (only cartesian so far)
-	ParameterScalar NormDir[3];
+	///The polygon plane normal direction
+	int m_NormDir;
 	///The polygon plane elevation in direction of the normal vector
 	ParameterScalar Elevation;
 };
@@ -526,13 +524,13 @@ public:
 	CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimLinPoly();
 
-	virtual CSPrimLinPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimLinPoly(this,prop);};
+	virtual CSPrimLinPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimLinPoly(this,prop);}
 
-	void SetLength(double val) {extrudeLength.SetValue(val);};
-	void SetLength(const string val) {extrudeLength.SetValue(val);};
+	void SetLength(double val) {extrudeLength.SetValue(val);}
+	void SetLength(const string val) {extrudeLength.SetValue(val);}
 
-	double GetLength() {return extrudeLength.GetValue();};
-	ParameterScalar* GetLengthPS() {return &extrudeLength;};
+	double GetLength() {return extrudeLength.GetValue();}
+	ParameterScalar* GetLengthPS() {return &extrudeLength;}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -558,19 +556,17 @@ public:
 	CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimRotPoly();
 
-	virtual CSPrimRotPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimRotPoly(this,prop);};
+	virtual CSPrimRotPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimRotPoly(this,prop);}
 
-	void SetRotAxis(int index, double val) {if ((index>=0) && (index<3)) RotAxis[index].SetValue(val);};
-	void SetRotAxis(int index, const string val) {if ((index>=0) && (index<3)) RotAxis[index].SetValue(val);};
+	void SetRotAxisDir(int dir) {if ((dir>=0) && (dir<3)) m_RotAxisDir=dir;}
 
-	double GetRotAxis(int index) {if ((index>=0) && (index<3)) return RotAxis[index].GetValue(); else return 0;};
-	ParameterScalar* GetRotAxisPS(int index) {if ((index>=0) && (index<3)) return &RotAxis[index]; else return NULL;};
+	int GetRotAxisDir() const {return m_RotAxisDir;}
 
-	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);};
-	void SetAngle(int index, const string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);};
+	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
+	void SetAngle(int index, const string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
 
-	double GetAngle(int index) {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;};
-	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;};
+	double GetAngle(int index) const {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;}
+	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;}
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
@@ -582,8 +578,10 @@ public:
 protected:
 	//start-stop angle
 	ParameterScalar StartStopAngle[2];
-	//rot axis
-	ParameterScalar RotAxis[3];
+	//sorted and pre evaluated angles
+	double m_StartStopAng[2];
+	//rot axis direction
+	int m_RotAxisDir;
 };
 
 //! Curve Primitive (Polygonal chain)
