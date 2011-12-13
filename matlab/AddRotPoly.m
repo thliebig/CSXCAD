@@ -17,10 +17,10 @@ function CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points,
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
-% CSX = AddLinPoly( CSX, 'PEC', 1, [0 0 1], 254, p , 10, 'CoordSystem',0)
+% % normal direction: z (2)
+% CSX = AddRotPoly( CSX, 'PEC', 1, 2, [0 1 0], p , 10, 'CoordSystem',0)
 %
-% Thorsten Liebig <thorsten.liebig@gmx.de>
-% July 6 2010
+% 2011, Thorsten Liebig <thorsten.liebig@gmx.de>
 %
 % See also InitCSX AddMetal AddMaterial AddPolygon
 

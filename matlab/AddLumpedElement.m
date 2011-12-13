@@ -1,5 +1,5 @@
 function CSX = AddLumpedElement(CSX, name, direction, varargin)
-% function CSX = AddLumpedElement(CSX, name direction, varargin)
+% function CSX = AddLumpedElement(CSX, name, direction, varargin)
 %
 % Add a lumped element property to CSX with the given name.
 % Remember to add at least one or more box primitive to any

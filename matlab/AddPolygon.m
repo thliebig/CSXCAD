@@ -16,13 +16,13 @@ function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, 
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
-% CSX = AddPolygon( CSX, 'PEC', 1, [0 0 1], 254, p, 'CoordSystem',0)
+% CSX = AddPolygon( CSX, 'PEC', 1, 2, 254, p, 'CoordSystem',0)
 %
 %
-% Sebastian Held <sebastian.held@gmx.de>
-% Jun 1 2010
+% (c) 2011 Thorsten Liebig <thorsten.liebig@gmx.de>
+% (c) 2010 Sebastian Held <sebastian.held@gmx.de>
 %
-% See also InitCSX AddMetal AddMaterial
+% See also InitCSX AddMetal AddMaterial AddLinPoly AddRotPoly
 
 polygon.ATTRIBUTE.Priority = prio;
 polygon.ATTRIBUTE.Elevation = elevation;
