@@ -1,8 +1,6 @@
 function struct_2_xml(filename, xml_struct, rootName);
 
-Octave = exist('OCTAVE_VERSION') ~= 0;
-
-if ~Octave
+if ~isOctave()
 	docNode = com.mathworks.xml.XMLUtils.createDocument(rootName);
 	docElem = docNode.getDocumentElement;
 	
