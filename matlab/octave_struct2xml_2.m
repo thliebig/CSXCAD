@@ -2,6 +2,8 @@ function out = octave_struct2xml_2( in, rootName, indent )
 
 out = [indent '<' rootName];
 
+float_accuracy = 15;
+
 % process attributes
 if isstruct( in )
 	fnames = fieldnames( in );
@@ -12,7 +14,7 @@ if isstruct( in )
 			for m=1:numel( attributes )
 				temp = in.ATTRIBUTE.(attributes{m});
 				if ~ischar( temp )
-					temp = num2str( temp );
+					temp = num2str( temp, float_accuracy );
 				end
 				out = [out ' ' attributes{m} '="' temp '"'];
 			end
@@ -27,9 +29,9 @@ out = [out '>'];
 % process content
 if ~isstruct( in )
 	if ~ischar( in )
-		temp = num2str(in(1));
+		temp = num2str(in(1), float_accuracy);
 		for a=2:numel(in)
-			temp = [temp ', ' num2str(in(a))];
+			temp = [temp ', ' num2str(in(a), float_accuracy)];
 		end
 		in = temp;
 	end
