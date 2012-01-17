@@ -16,6 +16,7 @@ function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, 
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
+% % normal direction: z (2)
 % CSX = AddPolygon( CSX, 'PEC', 1, 2, 254, p, 'CoordSystem',0)
 %
 %
