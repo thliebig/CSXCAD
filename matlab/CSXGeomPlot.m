@@ -15,7 +15,7 @@ end
 
 filename = mfilename('fullpath');
 dir = fileparts( filename );
-AppCSXCAD_Path = [dir filesep '../../AppCSXCAD' filesep]
+AppCSXCAD_Path = [dir filesep '../../AppCSXCAD' filesep];
    
 if (~exist(AppCSXCAD_Path,'dir'))
     AppCSXCAD_Path = [dir filesep '..' filesep]  
@@ -28,5 +28,5 @@ else
 end
 
 command = [AppCSXCAD_Path ' ' CSX_filename];
-disp( ['invoking AppCSXCAD : ' command] );
+disp( ['invoking AppCSXCAD, exit to continue script...'] );
 system(command);
