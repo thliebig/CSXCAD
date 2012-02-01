@@ -568,7 +568,6 @@ public:
 	double GetAngle(int index) const {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;}
 	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;}
 
-	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(string *ErrStr=NULL);

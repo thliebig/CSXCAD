@@ -1516,14 +1516,6 @@ CSPrimRotPoly::~CSPrimRotPoly()
 {
 }
 
-bool CSPrimRotPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
-{
-	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	for (int n=0;n<6;++n)
-		dBoundBox[n] = 0;
-	return false;
-}
-
 bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 {
 	if (inCoord==NULL) return false;
