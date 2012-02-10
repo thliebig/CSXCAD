@@ -4,7 +4,7 @@ if (isfield(mat_struct,'ATTRIBUTE'))
     names = fieldnames(mat_struct.ATTRIBUTE);
     for n=1:numel(names)
         if isnumeric(getfield(mat_struct.ATTRIBUTE,names{n})) || islogical(getfield(mat_struct.ATTRIBUTE,names{n}))
-            docElem.setAttribute(names{n},num2str(getfield(mat_struct.ATTRIBUTE,names{n}),15));
+            docElem.setAttribute(names{n},vector2str(getfield(mat_struct.ATTRIBUTE,names{n}),15));
         else
             docElem.setAttribute(names{n},getfield(mat_struct.ATTRIBUTE,names{n}));
         end
@@ -30,10 +30,7 @@ for n=1:numel(names)
         %do nothing...
     elseif isnumeric(getfield(mat_struct,names{n}))
         number = getfield(mat_struct,names{n});
-        str = num2str(number(1),15);
-        for i = 2:numel(number)
-            str = [str ',' num2str(number(i),15)];
-        end
+        str = vector2str(number,15);
         docNewElem = docNode.createElement(names{n});
         docNewElem.appendChild(docNode.createTextNode(str));
         docElem.appendChild(docNewElem);

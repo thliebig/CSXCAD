@@ -14,7 +14,7 @@ if isstruct( in )
 			for m=1:numel( attributes )
 				temp = in.ATTRIBUTE.(attributes{m});
 				if ~ischar( temp )
-					temp = num2str( temp, float_accuracy );
+					temp = vector2str( temp, float_accuracy );
 				end
 				out = [out ' ' attributes{m} '="' temp '"'];
 			end
@@ -29,13 +29,9 @@ out = [out '>'];
 % process content
 if ~isstruct( in )
 	if ~ischar( in )
-		temp = num2str(in(1), float_accuracy);
-		for a=2:numel(in)
-			temp = [temp ', ' num2str(in(a), float_accuracy)];
-		end
-		in = temp;
+		temp = vector2str(in, float_accuracy);
 	end
-	out = [out in '</' rootName '>\n'];
+	out = [out temp '</' rootName '>\n'];
 	return
 end
 
