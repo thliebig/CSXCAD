@@ -179,6 +179,9 @@ protected:
 	CSTransform* m_Transform;
 	string PrimTypeName;
 	bool m_Primtive_Used;
+
+	//internal bounding box, updated by Update(), can be used to speedup IsInside
+	double m_BoundBox[6];
 };
 
 

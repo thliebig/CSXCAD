@@ -51,6 +51,8 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
+	for (int n=0;n<6;++n)
+		m_BoundBox[n]=0;
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
@@ -66,6 +68,8 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	m_Primtive_Used = false;
 	m_MeshType = prim->m_MeshType;
 	m_PrimCoordSystem = prim->m_PrimCoordSystem;
+	for (int n=0;n<6;++n)
+		m_BoundBox[n]=0;
 }
 
 
@@ -81,6 +85,8 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
+	for (int n=0;n<6;++n)
+		m_BoundBox[n]=0;
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)
@@ -228,6 +234,8 @@ bool CSPrimPoint::Update(string *ErrStr)
 		ErrStr->append(stream.str());
 	}
 	m_Coords.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 	return bOK;
 }
 
@@ -344,6 +352,8 @@ bool CSPrimBox::Update(string *ErrStr)
 	}
 	m_Coords[0].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 	m_Coords[1].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 	return bOK;
 }
 
@@ -558,6 +568,8 @@ bool CSPrimMultiBox::Update(string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 	return bOK;
 }
 
@@ -693,6 +705,9 @@ bool CSPrimSphere::Update(string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -799,6 +814,9 @@ bool CSPrimSphericalShell::Update(string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
+
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 
 	return bOK;
 }
@@ -956,6 +974,9 @@ bool CSPrimCylinder::Update(string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -1110,6 +1131,9 @@ bool CSPrimCylindricalShell::Update(string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -1248,9 +1272,6 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	if (inCoord==NULL) return false;
 	if (vCoords.size()<2) return false;
 
-	double box[6]={0,0,0,0,0,0};
-	GetBoundBox(box);
-
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
@@ -1259,8 +1280,9 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 
 	for (unsigned int n=0;n<3;++n)
 	{
-		if ((box[2*n]>Coord[n]) || (box[2*n+1]<Coord[n])) return false;
+		if ((m_BoundBox[2*n]>Coord[n]) || (m_BoundBox[2*n+1]<Coord[n])) return false;
 	}
+
 	double x=0,y=0;
 	int nP = (m_NormDir+1)%3;
 	int nPP = (m_NormDir+2)%3;
@@ -1336,7 +1358,10 @@ bool CSPrimPolygon::Update(string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
-	
+
+	//update local bounding box used to speedup IsInside()
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -1467,7 +1492,10 @@ bool CSPrimLinPoly::Update(string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
-	
+
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -1611,6 +1639,9 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 		m_StartStopAng[0]+=2*PI;
 		m_StartStopAng[1]+=2*PI;
 	}
+
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 
 	return bOK;
 }
@@ -1756,6 +1787,10 @@ bool CSPrimCurve::Update(string *ErrStr)
 		points.at(i)->SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 		bOK &= isOK;
 	}
+
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
@@ -1822,6 +1857,12 @@ bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	bool accurate;
 	accurate = CSPrimCurve::GetBoundBox(dBoundBox,PreserveOrientation);
+	double rad = wireRadius.GetValue();
+	for (int n=0;n<3;++n)
+	{
+		dBoundBox[2*n]-=rad;
+		dBoundBox[2*n+1]+=rad;
+	}
 	return accurate;
 }
 
@@ -1836,6 +1877,11 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 	if (m_Transform)
 		m_Transform->InvertTransform(pos,pos);
+
+	for (unsigned int n=0;n<3;++n)
+	{
+		if ((m_BoundBox[2*n]>pos[n]) || (m_BoundBox[2*n+1]<pos[n])) return false;
+	}
 
 	double foot,dist,distPP;
 	for (size_t i=0;i<GetNumberOfPoints();++i)
@@ -1878,7 +1924,8 @@ bool CSPrimWire::Update(string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
-
+	//update local bounding box used to speedup IsInside()
+	GetBoundBox(m_BoundBox);
 	return bOK;
 }
 
@@ -2076,6 +2123,10 @@ bool CSPrimUserDefined::Update(string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
+
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
+
 	return bOK;
 }
 
