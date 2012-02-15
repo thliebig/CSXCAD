@@ -1842,7 +1842,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	{
 		p0 = points.at(i)->GetCartesianCoords();
 
-		dist = sqrt(pow(Coord[0]-p0[0],2)+pow(Coord[1]-p0[1],2)+pow(Coord[2]-p0[2],2));
+		dist = sqrt(pow(pos[0]-p0[0],2)+pow(pos[1]-p0[1],2)+pow(pos[2]-p0[2],2));
 		if (dist<rad)
 			return true;
 
@@ -1852,7 +1852,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 			distPP = sqrt(pow(p1[0]-p0[0],2)+pow(p1[1]-p0[1],2)+pow(p1[2]-p0[2],2))+rad;
 			if (dist<distPP)
 			{
-				Point_Line_Distance(Coord ,p0 ,p1 ,foot ,dist);
+				Point_Line_Distance(pos ,p0 ,p1 ,foot ,dist);
 				if ((foot>0) && (foot<1) && (dist<rad))
 					return true;
 			}
