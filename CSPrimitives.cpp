@@ -291,8 +291,8 @@ CSPrimBox::~CSPrimBox()
 
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
-		cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
+//		cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
@@ -881,7 +881,7 @@ CSPrimCylinder::~CSPrimCylinder()
 
 bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
@@ -1048,7 +1048,7 @@ CSPrimCylindricalShell::~CSPrimCylindricalShell()
 
 bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-	cerr << "CSPrimCylindricalShell::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCylindricalShell::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
@@ -1741,7 +1741,7 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point, bool transform)
 
 bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 {
-	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	bool accurate=false;
 	for (int n=0;n<6;++n) dBoundBox[n] = 0;
 	for (size_t i=0;i<points.size();++i)
