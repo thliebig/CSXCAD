@@ -1756,7 +1756,7 @@ bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 		}
 		for (int n=0;n<3;++n)
 		{
-			if (points.at(i)->GetValue(n)<dBoundBox[n])
+			if (points.at(i)->GetValue(n)<dBoundBox[2*n])
 				dBoundBox[2*n]=points.at(i)->GetValue(n);
 			else if (points.at(i)->GetValue(n)>dBoundBox[2*n+1])
 				dBoundBox[2*n+1]=points.at(i)->GetValue(n);
