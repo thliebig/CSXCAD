@@ -11,6 +11,10 @@ if (numel(vec)==0)
     return
 end
 
+if (nargin<2)
+    acc = 9;
+end
+
 for n=1:numel(vec)
     str = [str num2str(vec(n),acc) ','];
 end
