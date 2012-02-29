@@ -1,0 +1,18 @@
+Source: csxcad
+Section: contrib/libdevel
+Priority: optional
+Maintainer: Sebastian Held <sebastian.held@gmx.de>
+Build-Depends: debhelper (>=7.0.50~), qt4-qmake, libfparser4, libhdf5-serial-dev, libtinyxml-dev, libvtk5-qt4-dev
+
+Package: csxcad
+Architecture: any
+Depends: ${shlibs:Depends}
+Recommends: appcsxcad
+Description: Library for Geometric Primitives primarily used by openEMS
+ Library for Geometric Primitives primarily used by openEMS.
+
+Package: csxcad-dev
+Architecture: any
+Depends: ${shlibs:Depends} csxcad (= ${binary:Version})
+Description: Development files for csxcad
+ The csxcad-dev package contains libraries and header files for developing applications that use csxcad.

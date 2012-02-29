@@ -1,0 +1,15 @@
+diff --git a/README b/README
+index 9b5056e..fc3176c 100644
+--- a/README
++++ b/README
+@@ -11,8 +11,8 @@ Forum:     http://openems.de/forum/
+ Tutorials: http://openems.de/index.php/Tutorials
+ 
+ 
+-To use CSXCAD from Matlab or Octave, you need to include the <CSXCAD-install-folder>/matlab folder in the respective environment:
+-> addpath( '<CSXCAD-install-folder>/matlab' );
++To use CSXCAD from Matlab or Octave, you need to include the /usr/share/CSXCAD/matlab folder in the respective environment:
++> addpath( '/usr/share/CSXCAD/matlab' );
+ 
+ To verify the correct installation follow the instructions at:
+ http://openems.de/index.php/Tutorial:_First_Steps
