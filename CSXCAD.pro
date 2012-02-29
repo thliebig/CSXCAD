@@ -22,13 +22,12 @@ INCLUDEPATH += ../tinyxml
 INCLUDEPATH += ../fparser
 OBJECTS_DIR = obj
 
-CONFIG-=qt
-
 # add git revision
 QMAKE_CXXFLAGS += -DGIT_VERSION=\\\"`git describe --tags`\\\"
 
+VERSION = 0.2.4
+
 unix { 
-	VERSION = 0.2.4
     LIBS += -L../fparser \
         -lfparser
     LIBS += -L../tinyxml \
@@ -38,8 +37,11 @@ unix {
 #vtk
 	INCLUDEPATH += /usr/include/vtk-5.2 \
 		/usr/include/vtk-5.4 \
-		/usr/include/vtk-5.6
+		/usr/include/vtk-5.6 \
+		/usr/include/vtk-5.8 \
+		/usr/include/vtk
 }
+
 win32 { 
     DEFINES = BUILD_CSXCAD_LIB
     INCLUDEPATH += ../tinyxml
@@ -74,43 +76,35 @@ SOURCES += ContinuousStructure.cpp \
     ParameterCoord.cpp \
     CSTransform.cpp
 
-ABI2 {
-        CONFIG-=debug debug_and_release
-        CONFIG+=release
-        QMAKE_CFLAGS_RELEASE=-O2 -fabi-version=2
-        QMAKE_CXXFLAGS_RELEASE=-O2 -fabi-version=2
-        QMAKE_CC = apgcc
-        QMAKE_CXX = apg++
-        QMAKE_LINK = apg++
-        QMAKE_LINK_SHLIB = apg++
-        QMAKE_LFLAGS_RPATH =
-}
 
-bits64 {
-        QMAKE_CXXFLAGS_RELEASE+=-m64 -march=athlon64
-        QMAKE_LFLAGS_RELEASE+=-m64 -march=athlon64
-        OBJECTS_DIR = ABI2-64
-	LIBS = ../fparser/ABI2-64/libfparser.so
-	LIBS += ../tinyxml/ABI2-64/libtinyxml.so
-	LIBS += ../hdf5-64/lib/libhdf5.so
-	LIBS += ../hdf5-64/lib/libhdf5_cpp.so
-	INCLUDEPATH += ../hdf5-64/include
-}
 
-bits32 {
-        QMAKE_CXXFLAGS_RELEASE+=-m32 -march=i686
-        QMAKE_LFLAGS_RELEASE+=-m32 -march=i686
-        OBJECTS_DIR = ABI2-32
-	LIBS = ../fparser/ABI2-32/libfparser.so
-	LIBS += ../tinyxml/ABI2-32/libtinyxml.so
-	LIBS += ../hdf5-32/lib/libhdf5.so
-	LIBS += ../hdf5-32/lib/libhdf5_cpp.so
-	INCLUDEPATH += ../hdf5-32/include
-}
 
-ABI2 {
-        DESTDIR = $$OBJECTS_DIR
-        MOC_DIR = $$OBJECTS_DIR
-        UI_DIR = $$OBJECTS_DIR
-        RCC_DIR = $$OBJECTS_DIR
-}
+
+
+#
+# create tar file
+#
+tarball.target = tarball
+tarball.commands = git archive --format=tar --prefix=CSXCAD-$$VERSION/ HEAD | bzip2 > CSXCAD-$${VERSION}.tar.bz2
+QMAKE_EXTRA_TARGETS += tarball
+
+
+#
+# INSTALL
+#
+install.target = install
+install.commands = mkdir -p \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX\"
+install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/include/CSXCAD\"
+install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab\"
+install.commands += && cp -at \"$(INSTALL_ROOT)/usr/include/CSXCAD/\" $$HEADERS
+install.commands += && cp -at \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX/\" libCSXCAD.so*
+install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab/\" matlab/*.m
+QMAKE_EXTRA_TARGETS += install
+
+
+#
+# create .PHONY target
+#
+phony.target = .PHONY
+phony.depends = $$QMAKE_EXTRA_TARGETS
+QMAKE_EXTRA_TARGETS += phony
