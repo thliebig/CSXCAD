@@ -1,0 +1,18 @@
+*
+* CSXCAD - Continuous Structure XML
+*
+
+A C++ library to describe geometrical objects and their physical or non-physical properties.
+CSXCAD is licensed under the terms of the LGPLv3.
+
+
+Website:   http://openems.de/index.php/CSXCAD
+Forum:     http://openems.de/forum/
+Tutorials: http://openems.de/index.php/Tutorials
+
+
+To use CSXCAD from Matlab or Octave, you need to include the <CSXCAD-install-folder>/matlab folder in the respective environment:
+> addpath( '<CSXCAD-install-folder>/matlab' );
+
+To verify the correct installation follow the instructions at:
+http://openems.de/index.php/Tutorial:_First_Steps
