@@ -35,7 +35,7 @@ public:
 	CSTransform();
 	CSTransform(CSTransform* transform);
 	CSTransform(ParameterSet* paraSet);
-	~CSTransform();
+	virtual ~CSTransform();
 
 	void SetParameterSet(ParameterSet* paraset) {m_ParaSet=paraset;}
 
