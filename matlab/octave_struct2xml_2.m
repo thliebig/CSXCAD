@@ -2,7 +2,7 @@ function out = octave_struct2xml_2( in, rootName, indent )
 
 out = [indent '<' rootName];
 
-float_accuracy = 9;
+float_accuracy = 15;
 
 % process attributes
 if isstruct( in )
