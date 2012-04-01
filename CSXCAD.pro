@@ -23,7 +23,8 @@ INCLUDEPATH += ../fparser
 OBJECTS_DIR = obj
 
 # add git revision
-QMAKE_CXXFLAGS += -DGIT_VERSION=\\\"`git describe --tags`\\\"
+GITREV = $$system(git describe --tags)
+DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
 VERSION = 0.2.4
 
