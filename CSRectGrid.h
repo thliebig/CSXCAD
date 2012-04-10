@@ -94,6 +94,12 @@ public:
 	//! Get the dimension of current grid. \return 0,1,2 or 3. Returns -1 if one or more directions have no disc-line at all.
 	int GetDimension();
 
+	//! Set the type of mesh (e.g. Cartesian or Cylindrical mesh)
+	void SetMeshType(CoordinateSystem type) {m_meshType=type;}
+
+	//! Get the type of mesh (e.g. Cartesian or Cylindrical mesh)
+	CoordinateSystem GetMeshType() {return m_meshType;}
+
 	//! Increase the resolution in the specified direction by the given factor.
 	void IncreaseResolution(int nu, int factor);
 
@@ -107,4 +113,5 @@ protected:
 	vector<double> Lines[3];
 	double dDeltaUnit;
 	double SimBox[6];
+	CoordinateSystem m_meshType;
 };

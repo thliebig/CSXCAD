@@ -25,6 +25,12 @@ function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
 
 CSX.RectilinearGrid.ATTRIBUTE.DeltaUnit = deltaUnit;
 
+if (isfield(CSX,'ATTRIBUTE'))
+    if (isfield(CSX.ATTRIBUTE,'CoordSystem'))
+        CSX.RectilinearGrid.ATTRIBUTE.CoordSystem = CSX.ATTRIBUTE.CoordSystem;
+    end
+end
+
 if (isfield(mesh,'x'))
     CSX.RectilinearGrid.XLines = mesh.x;
 elseif ( (isfield(mesh,'r')) && (CSX.ATTRIBUTE.CoordSystem==1))

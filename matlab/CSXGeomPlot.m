@@ -27,6 +27,6 @@ else
 	AppCSXCAD_Path = [AppCSXCAD_Path 'AppCSXCAD'];
 end
 
-command = [AppCSXCAD_Path ' ' CSX_filename];
+command = [AppCSXCAD_Path ' ' CSX_filename ' --disableEdit'];
 disp( ['invoking AppCSXCAD, exit to continue script...'] );
 system(command);

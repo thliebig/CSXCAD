@@ -26,6 +26,7 @@
 CSRectGrid::CSRectGrid(void)
 {
 	dDeltaUnit=1;
+	m_meshType = CARTESIAN;
 }
 
 CSRectGrid::~CSRectGrid(void)
@@ -300,6 +301,11 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 {
 	TiXmlElement* Lines=root.ToElement();
 	if (Lines->QueryDoubleAttribute("DeltaUnit",&dDeltaUnit)!=TIXML_SUCCESS) dDeltaUnit=1.0;
+
+	int help;
+	if (Lines->QueryIntAttribute("CoordSystem",&help)==TIXML_SUCCESS)
+		SetMeshType((CoordinateSystem)help);
+
 	TiXmlNode* FN=NULL;
 	TiXmlText* Text=NULL;
 	string LineStr[3];
