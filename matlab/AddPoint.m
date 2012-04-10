@@ -1,5 +1,5 @@
 function CSX = AddPoint(CSX, propName, prio, pos, varargin)
-% function CSX = AddBox(CSX, propName, prio, pos, varargin)
+% CSX = AddPoint(CSX, propName, prio, pos, varargin)
 %
 % CSXCAD matlab interface
 

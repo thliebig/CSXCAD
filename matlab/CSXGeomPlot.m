@@ -29,4 +29,7 @@ end
 
 command = [AppCSXCAD_Path ' ' CSX_filename ' --disableEdit'];
 disp( ['invoking AppCSXCAD, exit to continue script...'] );
+if isOctave()
+    fflush(stdout);
+end
 system(command);
