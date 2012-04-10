@@ -109,6 +109,9 @@ public:
 	//! Get the bounding box of the area defined by the disc-lines.
 	double* GetSimArea();
 
+	//! This will check if the given mesh is a valid 3D mesh (at least 2 lines in all directions);
+	bool isValid();
+
 protected:
 	vector<double> Lines[3];
 	double dDeltaUnit;

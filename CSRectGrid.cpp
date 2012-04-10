@@ -240,6 +240,15 @@ double* CSRectGrid::GetSimArea()
 	return SimBox;
 }
 
+bool CSRectGrid::isValid()
+{
+	for (int n=0;n<3;++n)
+		if (GetQtyLines(n)<2)
+			return false;
+	return true;
+}
+
+
 bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 {
 	if (sorted) {Sort(0);Sort(1);Sort(2);}
