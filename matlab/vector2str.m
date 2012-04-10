@@ -1,9 +1,10 @@
 function str = vector2str(vec, acc)
-% function str = vector2str(vec, acc)
+% str = vector2str( vec [, acc] )
 %
 % internal function for CSXCAD
 % 
 % (c) Thorsten Liebig 2012
+% (C) 2012 Sebastian Held <sebastian.held@gmx.de>
 
 str = [];
 
@@ -15,8 +16,20 @@ if (nargin<2)
     acc = 9;
 end
 
-for n=1:numel(vec)
-    str = [str num2str(vec(n),acc) ','];
+% Octave < 3.8.0 has a bug in num2str() (only 64bit versions)
+% see bug report https://savannah.gnu.org/bugs/index.php?36121
+[isOct,version] = isOctave();
+if (isOct && version.major <= 3 && version.minor < 8)
+    % affected Octave versions
+    for n = 1:numel(vec)
+        str = [str sprintf('%.*g', acc, vec(n)) ','];
+    end
+else
+    % Matlab and non affected Octave
+    for n = 1:numel(vec)
+        str = [str num2str(vec(n),acc) ','];
+    end
 end
 
+% remove the last ','
 str = str(1:end-1);
