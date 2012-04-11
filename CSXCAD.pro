@@ -18,7 +18,6 @@
 CONFIG -= qt
 TEMPLATE = lib
 INCLUDEPATH += .
-INCLUDEPATH += ../tinyxml
 INCLUDEPATH += ../fparser
 OBJECTS_DIR = obj
 
@@ -31,8 +30,7 @@ VERSION = 0.2.5
 unix { 
     LIBS += -L../fparser \
         -lfparser
-    LIBS += -L../tinyxml \
-        -ltinyxml
+    LIBS += -ltinyxml
     LIBS += -lhdf5_cpp -lhdf5
 
 #vtk
