@@ -11,6 +11,9 @@ end
 if ~isfield(CSX.Properties,type)
     return
 end
+if isempty(type)
+    error('openEMS:SetPropertyArgs','type is empty, maybe the property you requested is undefined');
+end
 
 pos=0;
 for n=1:numel(CSX.Properties.(type))

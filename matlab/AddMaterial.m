@@ -5,6 +5,12 @@ function CSX = AddMaterial(CSX, name, varargin)
 % Remember to add at least one or more geometrical primitives to any
 % property.
 %
+% Use SetMaterialProperty to define the material constants:
+%   'Epsilon':  relative electric permitivity
+%   'Mue':      relative magnetic permeability
+%   'Kappa':    electric conductivity
+%   'Sigma':    magnetc conductivity (non-physical property)
+%
 % examples:
 % CSX = AddMaterial( CSX, 'RO3010' );
 % CSX = SetMaterialProperty( CSX, 'RO3010', 'Epsilon', 10.2, 'Mue', 1 );

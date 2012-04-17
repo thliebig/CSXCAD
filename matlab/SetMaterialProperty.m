@@ -1,6 +1,12 @@
 function CSX = SetMaterialProperty(CSX, name, varargin)
 % function CSX = SetMaterialProperty(CSX, name, varargin)
 %
+% Use this function to define the material constants:
+%   'Epsilon':  relative electric permitivity
+%   'Mue':      relative magnetic permeability
+%   'Kappa':    electric conductivity
+%   'Sigma':    magnetc conductivity (non-physical property)
+%
 % examples:
 % CSX = AddMaterial( CSX, 'RO3010' );
 % CSX = SetMaterialProperty( CSX, 'RO3010', 'Epsilon', 10.2, 'Mue', 1 );
@@ -17,5 +23,5 @@ function CSX = SetMaterialProperty(CSX, name, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-CSX = SetPropertyArgs(CSX, 'Material', name, 'Property', varargin{:});
+CSX = SetPropertyArgs(CSX, GetPropertyType(CSX,name), name, 'Property', varargin{:});
 
