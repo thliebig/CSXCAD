@@ -260,13 +260,7 @@ bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 	XLines.SetAttribute("Qty",(int)Lines[0].size());
 	if (Lines[0].size()>0)
 	{
-		stringstream xStr;
-		for (size_t i=0;i<Lines[0].size();++i)
-		{
-			if (i>0) xStr << ",";
-			xStr<<Lines[0].at(i);
-		}
-		TiXmlText XText(xStr.str().c_str());
+		TiXmlText XText(CombineVector2String(Lines[0],','));
 		XLines.InsertEndChild(XText);
 	}
 	grid.InsertEndChild(XLines);
@@ -275,13 +269,7 @@ bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 	YLines.SetAttribute("Qty",(int)Lines[1].size());
 	if (Lines[1].size()>0)
 	{
-		stringstream yStr;
-		for (size_t i=0;i<Lines[1].size();++i)
-		{
-			if (i>0) yStr << ",";
-			yStr<<Lines[1].at(i);
-		}
-		TiXmlText YText(yStr.str().c_str());
+		TiXmlText YText(CombineVector2String(Lines[1],','));
 		YLines.InsertEndChild(YText);
 	}
 	grid.InsertEndChild(YLines);
@@ -290,13 +278,7 @@ bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 	ZLines.SetAttribute("Qty",(int)Lines[2].size());
 	if (Lines[2].size()>0)
 	{
-		stringstream zStr;
-		for (size_t i=0;i<Lines[2].size();++i)
-		{
-			if (i>0) zStr << ",";
-			zStr<<Lines[2].at(i);
-		}
-		TiXmlText ZText(zStr.str().c_str());
+		TiXmlText ZText(CombineVector2String(Lines[2],','));
 		ZLines.InsertEndChild(ZText);
 	}
 	grid.InsertEndChild(ZLines);
