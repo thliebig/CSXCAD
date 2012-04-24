@@ -99,9 +99,10 @@ public:
 	\param coord Give a 3-element array with a 3D-coordinate set (x,y,z).
 	\param type Specify the type searched for. (Default is ANY-type)
 	\param markFoundAsUsed Mark the found primitives as beeing used. \sa WarnUnusedPrimitves
+	\param foundPrimitive return the found primitive, set to NULL if none was found
 	\return Returns NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties* GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
+	CSProperties* GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false, CSPrimitives* foundPrimitive=NULL);
 
 	//! Get properties by its priority at given coordinates and property type.
 	/*!

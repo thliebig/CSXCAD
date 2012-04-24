@@ -201,7 +201,7 @@ CSPrimitives* ContinuousStructure::GetPrimitive(size_t index)
 	return NULL;
 }
 
-CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type, bool markFoundAsUsed)
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type, bool markFoundAsUsed, CSPrimitives* foundPrimitive)
 {
 	CSProperties* winProp=NULL;
 	CSPrimitives* winPrim=NULL;
@@ -232,6 +232,9 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 	}
 	if ((markFoundAsUsed) && (winPrim))
 		winPrim->SetPrimitiveUsed(true);
+	foundPrimitive=NULL;
+	if (winPrim)
+		foundPrimitive=winPrim;
 	return winProp;
 }
 
