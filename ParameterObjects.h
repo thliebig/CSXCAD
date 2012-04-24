@@ -43,6 +43,11 @@ class TiXmlElement;
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val=0.0);
 void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode, bool scientific=true);
 
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, double val=0.0, const char delimiter=',');
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, double val=0.0, const char delimiter=',');
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, bool mode, bool scientific=true, const char delimiter=',');
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, bool mode, bool scientific=true, const char delimiter=',');
+
 class CSXCAD_EXPORT Parameter
 {
 public:

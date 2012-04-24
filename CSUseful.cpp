@@ -5,6 +5,31 @@
 #include <sstream>
 #include <iostream>
 
+string ConvertInt(int number)
+{
+   stringstream ss;
+   ss << number;
+   return ss.str();
+}
+
+int String2Int(string number)
+{
+	int val;
+	stringstream ss(number);
+	ss >> val;
+	return val;
+}
+
+double String2Double(string number, int accurarcy)
+{
+	double val;
+	stringstream ss(number);
+	ss.precision(accurarcy);
+	ss >> val;
+	return val;
+}
+
+
 std::vector<double> SplitString2Double(std::string str, const char delimiter)
 {
 	size_t pos=0;
@@ -16,8 +41,7 @@ std::vector<double> SplitString2Double(std::string str, const char delimiter)
 		if (pos==std::string::npos) pos=str.size();
 		else ++pos;
 		sub=str.substr(0,pos);
-		//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
-		if (sub.empty()==false) values.push_back(atof(sub.c_str()));
+		if (sub.empty()==false) values.push_back(String2Double(sub));
 		str.erase(0,pos);
 	} while (str.size()>0);
 	return values;
@@ -41,7 +65,6 @@ std::vector<string> SplitString2Vector(std::string str, const char delimiter)
 			sub=str.substr(0,pos);
 			++pos;
 		}
-		//fprintf(stderr,"%d -> %s\n",pos,sub.c_str());
 		if (sub.empty()==false) values.push_back(sub);
 		str.erase(0,pos);
 	} while (str.size()>0);
@@ -49,9 +72,10 @@ std::vector<string> SplitString2Vector(std::string str, const char delimiter)
 }
 
 
-string CombineVector2String(vector<double> values, const char delimiter)
+string CombineVector2String(vector<double> values, const char delimiter, int accurarcy)
 {
 	stringstream ss;
+	ss.precision( accurarcy );
 	for (size_t i=0;i<values.size();++i)
 	{
 		if (i>0) ss << delimiter;
@@ -60,9 +84,10 @@ string CombineVector2String(vector<double> values, const char delimiter)
 	return ss.str();
 }
 
-string CombineArray2String(double* values, unsigned int numVal, const char delimiter)
+string CombineArray2String(double* values, unsigned int numVal, const char delimiter, int accurarcy)
 {
 	stringstream ss;
+	ss.precision( accurarcy );
 	for (unsigned int i=0;i<numVal;++i)
 	{
 		if (i>0) ss << delimiter;
@@ -83,8 +108,7 @@ std::vector<int> SplitString2Int(std::string str, const char delimiter)
 		if (pos==std::string::npos) pos=str.size();
 		else ++pos;
 		sub=str.substr(0,pos);
-//		fprintf(stderr,"%d -> %s\n",(int)pos,sub.c_str());
-		if (sub.empty()==false) values.push_back(atoi(sub.c_str()));
+		if (sub.empty()==false) values.push_back(String2Int(sub));
 		str.erase(0,pos);
 	} while (str.size()>0);
 	return values;

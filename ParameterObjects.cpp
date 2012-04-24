@@ -20,6 +20,7 @@
 #include <iostream>
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
+#include "CSUseful.h"
 
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val)
 {
@@ -65,6 +66,62 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 		else
 			elem.SetDoubleAttribute(attr,PS.GetValue());
 	}
+}
+
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, double val, const char delimiter)
+{
+	return ReadVectorTerm(PS, elem, attr.c_str(), val, delimiter);
+}
+
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, double val, const char delimiter)
+{
+	//initialize with default value
+	for (int n=0;n<3;++n)
+		PS[n].SetValue(val);
+
+	const char* values = elem.Attribute(attr);
+	if (values==NULL)
+		return false;
+	std::vector<string> val_list = SplitString2Vector(values, delimiter);
+	if (val_list.size()>3)
+		return false;
+
+	for (int n=0;n<3;++n)
+		PS[n].SetValue(val);
+	for (int n=0;n<val_list.size();++n)
+	{
+		string sHelp=val_list.at(n);
+		size_t tHelp=sHelp.find("term:",0);
+		if (tHelp!=0)
+			PS[n].SetValue(atof(sHelp.c_str()));
+		else
+			PS[n].SetValue(sHelp.erase(0,5).c_str());
+	}
+	return true;
+}
+
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, bool mode, bool scientific, const char delimiter)
+{
+	WriteVectorTerm(PS, elem, attr.c_str(), mode, scientific, delimiter);
+}
+
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, bool mode, bool sci, const char delimiter)
+{
+	stringstream ss;
+	if (sci)
+		ss << scientific;
+	for (int i=0;i<3;++i)
+	{
+		if (PS[i].GetMode() && mode)
+			ss << string("term:")+PS[i].GetString();
+		else if (PS[i].GetValue()==NAN)
+			ss << "NAN" << endl;
+		else
+			ss << PS[i].GetValue();
+		if (i<2)
+			ss << delimiter;
+	}
+	elem.SetAttribute(attr,ss.str().c_str());
 }
 
 Parameter::Parameter()
