@@ -95,6 +95,9 @@ public:
 	//! Get the bounding box (for the given mesh type) for this special primitive. \sa SetCoordInputType
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;};
 
+	//! Get the dimension of this primitive
+	virtual int GetDimension() {return m_Dimension;}
+
 	//! Check if given Coordinate (in the given mesh type) is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
 
@@ -182,6 +185,8 @@ protected:
 
 	//internal bounding box, updated by Update(), can be used to speedup IsInside
 	double m_BoundBox[6];
+
+	int m_Dimension;
 };
 
 

@@ -51,6 +51,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
+	m_Dimension = 0;
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
 }
@@ -68,6 +69,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	m_Primtive_Used = false;
 	m_MeshType = prim->m_MeshType;
 	m_PrimCoordSystem = prim->m_PrimCoordSystem;
+	m_Dimension = prim->m_Dimension;
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
 }
@@ -85,6 +87,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
+	m_Dimension = 0;
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
 }
@@ -214,6 +217,7 @@ bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		dBoundBox[2*i]   = coord[i];
 		dBoundBox[2*i+1] = coord[i];
 	}
+	m_Dimension=0;
 	return true;
 }
 
@@ -296,10 +300,13 @@ bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
+	m_Dimension=0;
 	for (int i=0;i<3;++i)
 	{
 		dBoundBox[2*i]  = start[i];
 		dBoundBox[2*i+1]= stop[i];
+		if (start[i]!=stop[i])
+			++m_Dimension;
 	}
 	if (PreserveOrientation==true) return true;
 	for (int i=0;i<3;++i)
@@ -516,6 +523,12 @@ bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 			}
 		}
 	}
+	m_Dimension=0;
+	for (int n=0;n<3;++n)
+	{
+		if (dBoundBox[2*n]!=dBoundBox[2*n+1])
+			++m_Dimension;
+	}
 	return false;
 }
 
@@ -665,6 +678,10 @@ bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		dBoundBox[2*i]=center[i]-radius;
 		dBoundBox[2*i+1]=center[i]+radius;
 	}
+	if (radius>0)
+		m_Dimension=3;
+	else
+		m_Dimension=0;
 	return true;
 }
 
@@ -782,6 +799,12 @@ bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrienta
 		dBoundBox[2*i]=center[i]-radius-shellwidth/2.0;
 		dBoundBox[2*i+1]=center[i]+radius+shellwidth/2.0;
 	}
+	if (shellwidth>0)
+		m_Dimension=3;
+	else if (radius>0)
+		m_Dimension=1;
+	else
+		m_Dimension=0;
 	return true;
 }
 
@@ -923,6 +946,12 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		accurate=true;
 		break;
 	}
+	if (rad>0)
+		m_Dimension=3;
+	else if (Direction==7)
+		m_Dimension=0;
+	else
+		m_Dimension=1;
 	return accurate;
 }
 
@@ -1090,6 +1119,13 @@ bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrien
 		accurate=true;
 		break;
 	}
+
+	if (rad>0)
+		m_Dimension=3;
+	else if (Direction==7)
+		m_Dimension=0;
+	else
+		m_Dimension=1;
 	return accurate;
 }
 
@@ -1264,6 +1300,12 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	dBoundBox[2*nP+1] = xmax;
 	dBoundBox[2*nPP] = ymin;
 	dBoundBox[2*nPP+1] = ymax;
+	m_Dimension=0;
+	for (int n=0;n<3;++n)
+	{
+		if (dBoundBox[2*n]!=dBoundBox[2*n+1])
+			++m_Dimension;
+	}
 	return accurate;
 }
 
@@ -1461,7 +1503,12 @@ bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		dBoundBox[2*m_NormDir+1] = Elevation.GetValue();
 		dBoundBox[2*m_NormDir] = dBoundBox[2*m_NormDir+1] + len;
 	}
-	
+	m_Dimension=0;
+	for (int n=0;n<3;++n)
+	{
+		if (dBoundBox[2*n]!=dBoundBox[2*n+1])
+			++m_Dimension;
+	}
 	return accurate;
 }
 
@@ -1762,6 +1809,10 @@ bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 				dBoundBox[2*n+1]=points.at(i)->GetValue(n);
 		}
 	}
+	if (points.size()<=1)
+		m_Dimension=0;
+	else
+		m_Dimension=1;
 	return accurate;
 }
 
@@ -1863,6 +1914,8 @@ bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		dBoundBox[2*n]-=rad;
 		dBoundBox[2*n+1]+=rad;
 	}
+	if (rad>0)
+		m_Dimension+=2;
 	return accurate;
 }
 
