@@ -331,10 +331,15 @@ class CSXCAD_EXPORT CSPropDispersiveMaterial : public CSPropMaterial
 public:
 	virtual ~CSPropDispersiveMaterial();
 
+	//! Get the dispersion order
+	virtual int GetDispersionOrder() {return m_Order;}
+
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() const {return string("DispersiveMaterial");}
 
 protected:
+	int m_Order;
+
 	virtual bool Update(string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
@@ -363,68 +368,68 @@ public:
 	virtual const string GetTypeXMLString() const {return string("LorentzMaterial");}
 
 	//! Set the epsilon plasma frequency
-	void SetEpsPlasmaFreq(double val, int ny=0) {SetValue(val,EpsPlasma,ny);}
+	void SetEpsPlasmaFreq(int order, double val, int ny=0) {SetValue(val,EpsPlasma[order],ny);}
 	//! Set the epsilon plasma frequency
-	int  SetEpsPlasmaFreq(const string val, int ny=0)  {return SetValue(val,EpsPlasma,ny);}
+	int  SetEpsPlasmaFreq(int order, const string val, int ny=0)  {return SetValue(val,EpsPlasma[order],ny);}
 	//! Get the epsilon plasma frequency
-	double GetEpsPlasmaFreq(int ny=0) {return GetValue(EpsPlasma,ny);}
+	double GetEpsPlasmaFreq(int order, int ny=0) {return GetValue(EpsPlasma[order],ny);}
 	//! Get the epsilon plasma frequency as a string
-	const string GetEpsPlasmaFreqTerm(int ny=0) {return GetTerm(EpsPlasma,ny);}
+	const string GetEpsPlasmaFreqTerm(int order, int ny=0) {return GetTerm(EpsPlasma[order],ny);}
 
 	//! Set the epsilon plasma frequency weighting
-	int SetEpsPlasmaFreqWeightFunction(const string val, int ny) {return SetValue(val,WeightEpsPlasma,ny);}
+	int SetEpsPlasmaFreqWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightEpsPlasma[order],ny);}
 	//! Get the epsilon plasma frequency weighting string
-	const string GetEpsPlasmaFreqWeightFunction(int ny) {return GetTerm(WeightEpsPlasma,ny);}
+	const string GetEpsPlasmaFreqWeightFunction(int order, int ny) {return GetTerm(WeightEpsPlasma[order],ny);}
 	//! Get the epsilon plasma frequency weighting
-	double GetEpsPlasmaFreqWeighted(int ny, const double* coords) {return GetWeight(WeightEpsPlasma,ny,coords)*GetEpsPlasmaFreq(ny);}
+	double GetEpsPlasmaFreqWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsPlasma[order],ny,coords)*GetEpsPlasmaFreq(order,ny);}
 
 	//! Set the epsilon relaxation time
-	void SetEpsRelaxTime(double val, int ny=0) {SetValue(val,EpsRelaxTime,ny);}
+	void SetEpsRelaxTime(int order, double val, int ny=0) {SetValue(val,EpsRelaxTime[order],ny);}
 	//! Set the epsilon relaxation time
-	int  SetEpsRelaxTime(const string val, int ny=0)  {return SetValue(val,EpsRelaxTime,ny);}
+	int  SetEpsRelaxTime(int order, const string val, int ny=0)  {return SetValue(val,EpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time
-	double GetEpsRelaxTime(int ny=0) {return GetValue(EpsRelaxTime,ny);}
+	double GetEpsRelaxTime(int order, int ny=0) {return GetValue(EpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time as a string
-	const string GetEpsRelaxTimeTerm(int ny=0) {return GetTerm(EpsRelaxTime,ny);}
+	const string GetEpsRelaxTimeTerm(int order, int ny=0) {return GetTerm(EpsRelaxTime[order],ny);}
 
 	//! Set the epsilon relaxation time weighting
-	int SetEpsRelaxTimeWeightFunction(const string val, int ny) {return SetValue(val,WeightEpsRelaxTime,ny);}
+	int SetEpsRelaxTimeWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightEpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time weighting string
-	const string GetEpsRelaxTimeWeightFunction(int ny) {return GetTerm(WeightEpsRelaxTime,ny);}
+	const string GetEpsRelaxTimeWeightFunction(int order, int ny) {return GetTerm(WeightEpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time weighting
-	double GetEpsRelaxTimeWeighted(int ny, const double* coords) {return GetWeight(WeightEpsRelaxTime,ny,coords)*GetEpsPlasmaFreq(ny);}
+	double GetEpsRelaxTimeWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsRelaxTime[order],ny,coords)*GetEpsPlasmaFreq(order,ny);}
 
 	//! Set the mue plasma frequency
-	void SetMuePlasmaFreq(double val, int ny=0)  {SetValue(val,MuePlasma,ny);}
+	void SetMuePlasmaFreq(int order, double val, int ny=0)  {SetValue(val,MuePlasma[order],ny);}
 	//! Set the mue plasma frequency
-	int SetMuePlasmaFreq(const string val, int ny=0)  {return SetValue(val,MuePlasma,ny);}
+	int SetMuePlasmaFreq(int order, const string val, int ny=0)  {return SetValue(val,MuePlasma[order],ny);}
 	//! Get the mue plasma frequency
-	double GetMuePlasmaFreq(int ny=0)  {return GetValue(MuePlasma,ny);}
+	double GetMuePlasmaFreq(int order, int ny=0)  {return GetValue(MuePlasma[order],ny);}
 	//! Get the mue plasma frequency string
-	const string GetMueTermPlasmaFreq(int ny=0)  {return GetTerm(MuePlasma,ny);}
+	const string GetMueTermPlasmaFreq(int order, int ny=0)  {return GetTerm(MuePlasma[order],ny);}
 
 	//! Set the mue plasma frequency weighting
-	int SetMuePlasmaFreqWeightFunction(const string val, int ny) {return SetValue(val,WeightMuePlasma,ny);}
+	int SetMuePlasmaFreqWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightMuePlasma[order],ny);}
 	//! Get the mue plasma frequency weighting string
-	const string GetMuePlasmaFreqWeightFunction(int ny) {return GetTerm(WeightMuePlasma,ny);}
+	const string GetMuePlasmaFreqWeightFunction(int order, int ny) {return GetTerm(WeightMuePlasma[order],ny);}
 	//! Get the mue plasma frequency weighting
-	double GetMuePlasmaFreqWeighted(int ny, const double* coords)  {return GetWeight(WeightMuePlasma,ny,coords)*GetMuePlasmaFreq(ny);}
+	double GetMuePlasmaFreqWeighted(int order, int ny, const double* coords)  {return GetWeight(WeightMuePlasma[order],ny,coords)*GetMuePlasmaFreq(order,ny);}
 
 	//! Set the mue relaxation time
-	void SetMueRelaxTime(double val, int ny=0)  {SetValue(val,MueRelaxTime,ny);}
+	void SetMueRelaxTime(int order, double val, int ny=0)  {SetValue(val,MueRelaxTime[order],ny);}
 	//! Set the mue relaxation time
-	int SetMueRelaxTime(const string val, int ny=0)  {return SetValue(val,MueRelaxTime,ny);}
+	int SetMueRelaxTime(int order, const string val, int ny=0)  {return SetValue(val,MueRelaxTime[order],ny);}
 	//! Get the mue relaxation time
-	double GetMueRelaxTime(int ny=0)  {return GetValue(MueRelaxTime,ny);}
+	double GetMueRelaxTime(int order, int ny=0)  {return GetValue(MueRelaxTime[order],ny);}
 	//! Get the mue relaxation time string
-	const string GetMueTermRelaxTime(int ny=0)  {return GetTerm(MueRelaxTime,ny);}
+	const string GetMueTermRelaxTime(int order, int ny=0)  {return GetTerm(MueRelaxTime[order],ny);}
 
 	//! Set the mue relaxation time weighting
-	int SetMueRelaxTimeWeightFunction(const string val, int ny) {return SetValue(val,WeightMueRelaxTime,ny);}
+	int SetMueRelaxTimeWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightMueRelaxTime[order],ny);}
 	//! Get the mue relaxation time weighting string
-	const string GetMueRelaxTimeWeightFunction(int ny) {return GetTerm(WeightMueRelaxTime,ny);}
+	const string GetMueRelaxTimeWeightFunction(int order, int ny) {return GetTerm(WeightMueRelaxTime[order],ny);}
 	//! Get the mue relaxation time weighting
-	double GetMueRelaxTimeWeighted(int ny, const double* coords)  {return GetWeight(WeightMueRelaxTime,ny,coords)*GetMueRelaxTime(ny);}
+	double GetMueRelaxTimeWeighted(int order, int ny, const double* coords)  {return GetWeight(WeightMueRelaxTime[order],ny,coords)*GetMueRelaxTime(order,ny);}
 
 	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
@@ -433,15 +438,21 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
+	virtual void InitValues();
+	virtual void DeleteValues();
 	//! Epsilon and mue plasma frequncies
-	ParameterScalar EpsPlasma[3],MuePlasma[3];
+	ParameterScalar** EpsPlasma;
+	ParameterScalar** MuePlasma;
 	//! Epsilon and mue plasma frequncies weighting functions
-	ParameterScalar WeightEpsPlasma[3],WeightMuePlasma[3];
+	ParameterScalar** WeightEpsPlasma;
+	ParameterScalar** WeightMuePlasma;
 
 	//! Relaxation times for epsilon and mue
-	ParameterScalar EpsRelaxTime[3], MueRelaxTime[3];
+	ParameterScalar** EpsRelaxTime;
+	ParameterScalar** MueRelaxTime;
 	//! Relaxation times for epsilon and mue weighting functions
-	ParameterScalar WeightEpsRelaxTime[3], WeightMueRelaxTime[3];
+	ParameterScalar** WeightEpsRelaxTime;
+	ParameterScalar** WeightMueRelaxTime;
 };
 
 //! Continuous Structure Discrete Material Property

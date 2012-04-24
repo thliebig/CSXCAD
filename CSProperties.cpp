@@ -469,14 +469,14 @@ void CSPropMaterial::Init()
 	bMaterial=true;
     for (int n=0;n<3;++n)
     {
-        Epsilon[n].SetValue(1);
-        Epsilon[n].SetParameterSet(clParaSet);
-        Mue[n].SetValue(1);
-        Mue[n].SetParameterSet(clParaSet);
-        Kappa[n].SetValue(0.0);
-        Kappa[n].SetParameterSet(clParaSet);
-        Sigma[n].SetValue(0.0);
-        Sigma[n].SetParameterSet(clParaSet);
+		Epsilon[n].SetValue(1);
+		Epsilon[n].SetParameterSet(clParaSet);
+		Mue[n].SetValue(1);
+		Mue[n].SetParameterSet(clParaSet);
+		Kappa[n].SetValue(0.0);
+		Kappa[n].SetParameterSet(clParaSet);
+		Sigma[n].SetValue(0.0);
+		Sigma[n].SetParameterSet(clParaSet);
 		WeightEpsilon[n].SetValue(1);
 		WeightEpsilon[n].SetParameterSet(coordParaSet);
 		WeightMue[n].SetValue(1);
@@ -603,58 +603,24 @@ bool CSPropMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop->SetAttribute("Isotropy",bIsotropy);
 
 	/***************   3D - Properties *****************/
-	TiXmlElement value("PropertyX");
-	WriteTerm(Epsilon[0],value,"Epsilon",parameterised);
-	WriteTerm(Mue[0],value,"Mue",parameterised);
-	WriteTerm(Kappa[0],value,"Kappa",parameterised);
-	WriteTerm(Sigma[0],value,"Sigma",parameterised);
-	prop->InsertEndChild(value);
-
-	value = TiXmlElement("PropertyY");
-	WriteTerm(Epsilon[1],value,"Epsilon",parameterised);
-	WriteTerm(Mue[1],value,"Mue",parameterised);
-	WriteTerm(Kappa[1],value,"Kappa",parameterised);
-	WriteTerm(Sigma[1],value,"Sigma",parameterised);
-	prop->InsertEndChild(value);
-
-	value = TiXmlElement("PropertyZ");
-	WriteTerm(Epsilon[2],value,"Epsilon",parameterised);
-	WriteTerm(Mue[2],value,"Mue",parameterised);
-	WriteTerm(Kappa[2],value,"Kappa",parameterised);
-	WriteTerm(Sigma[2],value,"Sigma",parameterised);
-	prop->InsertEndChild(value);
-	
+	TiXmlElement value("Property");
+	WriteVectorTerm(Epsilon,value,"Epsilon",parameterised);
+	WriteVectorTerm(Mue,value,"Mue",parameterised);
+	WriteVectorTerm(Kappa,value,"Kappa",parameterised);
+	WriteVectorTerm(Sigma,value,"Sigma",parameterised);
 	/***************   1D - Properties *****************/
-	value = TiXmlElement("Property");
 	WriteTerm(Density,value,"Density",parameterised);
 	prop->InsertEndChild(value);
 
 	/**********   3D - Properties  Weight **************/
-	TiXmlElement WeightX("WeightX");
-	WriteTerm(WeightEpsilon[0],WeightX,"Epsilon",parameterised);
-	WriteTerm(WeightMue[0],WeightX,"Mue",parameterised);
-	WriteTerm(WeightKappa[0],WeightX,"Kappa",parameterised);
-	WriteTerm(WeightSigma[0],WeightX,"Sigma",parameterised);
-	prop->InsertEndChild(WeightX);
-
-	TiXmlElement WeightY("WeightY");
-	WriteTerm(WeightEpsilon[1],WeightY,"Epsilon",parameterised);
-	WriteTerm(WeightMue[1],WeightY,"Mue",parameterised);
-	WriteTerm(WeightKappa[1],WeightY,"Kappa",parameterised);
-	WriteTerm(WeightSigma[1],WeightY,"Sigma",parameterised);
-	prop->InsertEndChild(WeightY);
-
-	TiXmlElement WeightZ("WeightZ");
-	WriteTerm(WeightEpsilon[2],WeightZ,"Epsilon",parameterised);
-	WriteTerm(WeightMue[2],WeightZ,"Mue",parameterised);
-	WriteTerm(WeightKappa[2],WeightZ,"Kappa",parameterised);
-	WriteTerm(WeightSigma[2],WeightZ,"Sigma",parameterised);
-	prop->InsertEndChild(WeightZ);
-
+	TiXmlElement Weight("Weight");
+	WriteVectorTerm(WeightEpsilon,Weight,"Epsilon",parameterised);
+	WriteVectorTerm(WeightMue,Weight,"Mue",parameterised);
+	WriteVectorTerm(WeightKappa,Weight,"Kappa",parameterised);
+	WriteVectorTerm(WeightSigma,Weight,"Sigma",parameterised);
 	/**********   1D - Properties  Weight **************/
-	TiXmlElement weight("Weight");
-	WriteTerm(WeightDensity,weight,"Density",parameterised);
-	prop->InsertEndChild(weight);
+	WriteTerm(WeightDensity,Weight,"Density",parameterised);
+	prop->InsertEndChild(Weight);
 
 	return true;
 }
@@ -671,73 +637,27 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 	bIsotropy = attr>0;
 
 	/***************   3D - Properties *****************/
-	TiXmlElement* matProp=prop->FirstChildElement("PropertyX");
-	if (matProp==NULL) //if NULL check for old style "Property"
-		matProp=prop->FirstChildElement("Property");
+	TiXmlElement* matProp=prop->FirstChildElement("Property");
 	if (matProp!=NULL)
 	{
-		ReadTerm(Epsilon[0],*matProp,"Epsilon",1.0);
-		ReadTerm(Mue[0],*matProp,"Mue",1.0);
-		ReadTerm(Kappa[0],*matProp,"Kappa");
-		ReadTerm(Sigma[0],*matProp,"Sigma");
-	}
-
-	matProp=prop->FirstChildElement("PropertyY");
-	if (matProp!=NULL)
-	{
-		ReadTerm(Epsilon[1],*matProp,"Epsilon",1.0);
-		ReadTerm(Mue[1],*matProp,"Mue",1.0);
-		ReadTerm(Kappa[1],*matProp,"Kappa");
-		ReadTerm(Sigma[1],*matProp,"Sigma");
-	}
-	matProp=prop->FirstChildElement("PropertyZ");
-	if (matProp!=NULL)
-	{
-		ReadTerm(Epsilon[2],*matProp,"Epsilon",1.0);
-		ReadTerm(Mue[2],*matProp,"Mue",1.0);
-		ReadTerm(Kappa[2],*matProp,"Kappa");
-		ReadTerm(Sigma[2],*matProp,"Sigma");
-	}
-
-	/***************   1D - Properties *****************/
-	matProp=prop->FirstChildElement("PropertyX");
-	if (matProp!=NULL)
-	{
+		ReadVectorTerm(Epsilon,*matProp,"Epsilon",1.0);
+		ReadVectorTerm(Mue,*matProp,"Mue",1.0);
+		ReadVectorTerm(Kappa,*matProp,"Kappa");
+		ReadVectorTerm(Sigma,*matProp,"Sigma");
 		ReadTerm(Density,*matProp,"Density",0.0);
 	}
 
 	/**********   3D - Properties  Weight **************/
-	TiXmlElement *weight = prop->FirstChildElement("WeightX");
+	TiXmlElement *weight = prop->FirstChildElement("Weight");
 	if (weight!=NULL)
 	{
-		ReadTerm(WeightEpsilon[0],*weight,"Epsilon",1.0);
-		ReadTerm(WeightMue[0],*weight,"Mue",1.0);
-		ReadTerm(WeightKappa[0],*weight,"Kappa",1.0);
-		ReadTerm(WeightSigma[0],*weight,"Sigma",1.0);
-	}
-	weight = prop->FirstChildElement("WeightY");
-	if (weight!=NULL)
-	{
-		ReadTerm(WeightEpsilon[1],*weight,"Epsilon",1.0);
-		ReadTerm(WeightMue[1],*weight,"Mue",1.0);
-		ReadTerm(WeightKappa[1],*weight,"Kappa",1.0);
-		ReadTerm(WeightSigma[1],*weight,"Sigma",1.0);
-	}
-	weight = prop->FirstChildElement("WeightZ");
-	if (weight!=NULL)
-	{
-		ReadTerm(WeightEpsilon[2],*weight,"Epsilon",1.0);
-		ReadTerm(WeightMue[2],*weight,"Mue",1.0);
-		ReadTerm(WeightKappa[2],*weight,"Kappa",1.0);
-		ReadTerm(WeightSigma[2],*weight,"Sigma",1.0);
-	}
-
-	/**********   1D - Properties  Weight **************/
-	weight = prop->FirstChildElement("WeightX");
-	if (weight!=NULL)
-	{
+		ReadVectorTerm(WeightEpsilon,*weight,"Epsilon",1.0);
+		ReadVectorTerm(WeightMue,*weight,"Mue",1.0);
+		ReadVectorTerm(WeightKappa,*weight,"Kappa",1.0);
+		ReadVectorTerm(WeightSigma,*weight,"Sigma",1.0);
 		ReadTerm(WeightDensity,*weight,"Density",1.0);
 	}
+
 	return true;
 }
 
@@ -755,9 +675,9 @@ void CSPropMaterial::ShowPropertyStatus(ostream& stream)
 }
 
 /*********************CSPropDispersiveMaterial********************************************************/
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropMaterial(prop) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
-CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet) {m_Order=0;Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropMaterial(prop) {m_Order=0;Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {m_Order=0;Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
 CSPropDispersiveMaterial::~CSPropDispersiveMaterial() {}
 
 bool CSPropDispersiveMaterial::Update(string *ErrStr)
@@ -779,30 +699,103 @@ bool CSPropDispersiveMaterial::ReadFromXML(TiXmlNode &root)
 CSPropLorentzMaterial::CSPropLorentzMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
 CSPropLorentzMaterial::CSPropLorentzMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
 CSPropLorentzMaterial::CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
-CSPropLorentzMaterial::~CSPropLorentzMaterial() {}
+
+CSPropLorentzMaterial::~CSPropLorentzMaterial()
+{
+	DeleteValues();
+	m_Order = 0;
+}
 
 void CSPropLorentzMaterial::Init()
 {
-	for (int n=0;n<3;++n)
-	{
-		EpsPlasma[n].SetValue(0);
-		EpsPlasma[n].SetParameterSet(clParaSet);
-		MuePlasma[n].SetValue(0);
-		MuePlasma[n].SetParameterSet(clParaSet);
-		WeightEpsPlasma[n].SetValue(1);
-		WeightEpsPlasma[n].SetParameterSet(coordParaSet);
-		WeightMuePlasma[n].SetValue(1);
-		WeightMuePlasma[n].SetParameterSet(coordParaSet);
-		EpsRelaxTime[n].SetValue(0);
-		EpsRelaxTime[n].SetParameterSet(clParaSet);
-		MueRelaxTime[n].SetValue(0);
-		MueRelaxTime[n].SetParameterSet(clParaSet);
-		WeightEpsRelaxTime[n].SetValue(1);
-		WeightEpsRelaxTime[n].SetParameterSet(coordParaSet);
-		WeightMueRelaxTime[n].SetValue(1);
-		WeightMueRelaxTime[n].SetParameterSet(coordParaSet);
-	}
+	m_Order = 0;
+	EpsPlasma=NULL;
+	MuePlasma=NULL;
+	WeightEpsPlasma=NULL;
+	WeightMuePlasma=NULL;
+	EpsRelaxTime=NULL;
+	MueRelaxTime=NULL;
+	WeightEpsRelaxTime=NULL;
+	WeightMueRelaxTime=NULL;
+	InitValues();
 	CSPropDispersiveMaterial::Init();
+}
+
+void CSPropLorentzMaterial::DeleteValues()
+{
+	for (int o=0;o<m_Order;++o)
+	{
+		delete[] EpsPlasma[o];
+		delete[] MuePlasma[o];
+		delete[] WeightEpsPlasma[o];
+		delete[] WeightMuePlasma[o];
+		delete[] EpsRelaxTime[o];
+		delete[] MueRelaxTime[o];
+		delete[] WeightEpsRelaxTime[o];
+		delete[] WeightMueRelaxTime[o];
+	}
+	delete[] EpsPlasma;
+	delete[] MuePlasma;
+	delete[] WeightEpsPlasma;
+	delete[] WeightMuePlasma;
+	delete[] EpsRelaxTime;
+	delete[] MueRelaxTime;
+	delete[] WeightEpsRelaxTime;
+	delete[] WeightMueRelaxTime;
+
+	EpsPlasma=NULL;
+	MuePlasma=NULL;
+	WeightEpsPlasma=NULL;
+	WeightMuePlasma=NULL;
+	EpsRelaxTime=NULL;
+	MueRelaxTime=NULL;
+	WeightEpsRelaxTime=NULL;
+	WeightMueRelaxTime=NULL;
+}
+
+void CSPropLorentzMaterial::InitValues()
+{
+//	DeleteValues();
+	EpsPlasma=new ParameterScalar*[m_Order];
+	MuePlasma=new ParameterScalar*[m_Order];
+	WeightEpsPlasma=new ParameterScalar*[m_Order];
+	WeightMuePlasma=new ParameterScalar*[m_Order];
+	EpsRelaxTime=new ParameterScalar*[m_Order];
+	MueRelaxTime=new ParameterScalar*[m_Order];
+	WeightEpsRelaxTime=new ParameterScalar*[m_Order];
+	WeightMueRelaxTime=new ParameterScalar*[m_Order];
+
+	for (int o=0;o<m_Order;++o)
+	{
+		EpsPlasma[o] = new ParameterScalar[3];
+		MuePlasma[o] = new ParameterScalar[3];
+		WeightEpsPlasma[o] = new ParameterScalar[3];
+		WeightMuePlasma[o] = new ParameterScalar[3];
+		EpsRelaxTime[o] = new ParameterScalar[3];
+		MueRelaxTime[o] = new ParameterScalar[3];
+		WeightEpsRelaxTime[o] = new ParameterScalar[3];
+		WeightMueRelaxTime[o] = new ParameterScalar[3];
+
+		for (int n=0;n<3;++n)
+		{
+			EpsPlasma[o][n].SetValue(0);
+			EpsPlasma[o][n].SetParameterSet(clParaSet);
+			MuePlasma[o][n].SetValue(0);
+			MuePlasma[o][n].SetParameterSet(clParaSet);
+			WeightEpsPlasma[o][n].SetValue(1);
+			WeightEpsPlasma[o][n].SetParameterSet(coordParaSet);
+			WeightMuePlasma[o][n].SetValue(1);
+			WeightMuePlasma[o][n].SetParameterSet(coordParaSet);
+			EpsRelaxTime[o][n].SetValue(0);
+			EpsRelaxTime[o][n].SetParameterSet(clParaSet);
+			MueRelaxTime[o][n].SetValue(0);
+			MueRelaxTime[o][n].SetParameterSet(clParaSet);
+			WeightEpsRelaxTime[o][n].SetValue(1);
+			WeightEpsRelaxTime[o][n].SetParameterSet(coordParaSet);
+			WeightMueRelaxTime[o][n].SetValue(1);
+			WeightMueRelaxTime[o][n].SetParameterSet(coordParaSet);
+		}
+	}
 }
 
 
@@ -810,82 +803,85 @@ bool CSPropLorentzMaterial::Update(string *ErrStr)
 {
 	bool bOK=true;
 	int EC=0;
-	for (int n=0;n<3;++n)
+	for (int o=0;o<m_Order;++o)
 	{
-		EC=EpsPlasma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		for (int n=0;n<3;++n)
 		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency value (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-		EC=MuePlasma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property mue plasma frequency value (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+			EC=EpsPlasma[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency value (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
+			EC=MuePlasma[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property mue plasma frequency value (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
 
-		EC=WeightEpsPlasma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency weighting function (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-		EC=WeightMuePlasma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property mue plasma frequency value weighting function (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+			EC=WeightEpsPlasma[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property epsilon plasma frequency weighting function (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
+			EC=WeightMuePlasma[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property mue plasma frequency value weighting function (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
 
-		EC=EpsRelaxTime[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-		EC=MueRelaxTime[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property mue relaxation time value (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
+			EC=EpsRelaxTime[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
+			EC=MueRelaxTime[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property mue relaxation time value (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
 
-		EC=WeightEpsRelaxTime[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
-		}
-		EC=WeightMueRelaxTime[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
-		{
-			stringstream stream;
-			stream << endl << "Error in Lorentz Material-Property mue relaxation time value weighting function (ID: " << uiID << "): ";
-			ErrStr->append(stream.str());
-			PSErrorCode2Msg(EC,ErrStr);
+			EC=WeightEpsRelaxTime[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
+			EC=WeightMueRelaxTime[o][n].Evaluate();
+			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			{
+				stringstream stream;
+				stream << endl << "Error in Lorentz Material-Property mue relaxation time value weighting function (ID: " << uiID << "): ";
+				ErrStr->append(stream.str());
+				PSErrorCode2Msg(EC,ErrStr);
+			}
 		}
 	}
 	return CSPropDispersiveMaterial::Update(ErrStr);
@@ -897,24 +893,25 @@ bool CSPropLorentzMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool 
 	TiXmlElement* prop=root.ToElement();
 	if (prop==NULL) return false;
 
-	string dirName[3] = {"X","Y","Z"};
-
-	for (int n=0;n<3;++n)
+	string suffix;
+	for (int o=0;o<m_Order;++o)
 	{
-		string name = "PlasmaFrequency" + dirName[n];
-		TiXmlElement value(name.c_str());
-		WriteTerm(EpsPlasma[n],value,"Epsilon",parameterised);
-		WriteTerm(MuePlasma[n],value,"Mue",parameterised);
-		WriteTerm(WeightEpsPlasma[n],value,"WeightEpsilon",parameterised);
-		WriteTerm(WeightMuePlasma[n],value,"WeighMue",parameterised);
-		prop->InsertEndChild(value);
-		name = "RelaxTime" + dirName[n];
-		TiXmlElement valueRT(name.c_str());
-		WriteTerm(EpsRelaxTime[n],valueRT,"Epsilon",parameterised);
-		WriteTerm(MueRelaxTime[n],valueRT,"Mue",parameterised);
-		WriteTerm(WeightEpsRelaxTime[n],valueRT,"WeightEpsilon",parameterised);
-		WriteTerm(WeightMueRelaxTime[n],valueRT,"WeighMue",parameterised);
-		prop->InsertEndChild(valueRT);
+		suffix = ConvertInt(o+1);
+		TiXmlElement* value=prop->FirstChildElement("Property");
+		if (value==NULL)
+			return false;
+		WriteVectorTerm(EpsPlasma[o],*value,"EpsilonPlasmaFrequency_"+suffix,parameterised);
+		WriteVectorTerm(MuePlasma[o],*value,"MuePlasmaFrequency_"+suffix,parameterised);
+		WriteVectorTerm(EpsRelaxTime[o],*value,"EpsilonRelaxTime_"+suffix,parameterised);
+		WriteVectorTerm(MueRelaxTime[o],*value,"MueRelaxTime_"+suffix,parameterised);
+
+		TiXmlElement* weight=prop->FirstChildElement("Weight");
+		if (weight==NULL)
+			return false;
+		WriteVectorTerm(WeightEpsPlasma[o],*weight,"EpsilonPlasmaFrequency_"+suffix,parameterised);
+		WriteVectorTerm(WeightMuePlasma[o],*weight,"MuePlasmaFrequency_"+suffix,parameterised);
+		WriteVectorTerm(WeightEpsRelaxTime[o],*weight,"EpsilonRelaxTime_"+suffix,parameterised);
+		WriteVectorTerm(WeightMueRelaxTime[o],*weight,"MueRelaxTime_"+suffix,parameterised);
 	}
 	return true;
 }
@@ -926,31 +923,70 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 
 	if (prop==NULL) return false;
 
-	string dirName[3] = {"X","Y","Z"};
-
-	for (int n=0;n<3;++n)
+	// count m_Order
+	TiXmlElement* matProp=prop->FirstChildElement("Property");
+	if (matProp!=NULL)
 	{
-		string name = "Property" + dirName[n];
-		TiXmlElement* matProp=prop->FirstChildElement(name.c_str());
-		if (matProp!=NULL)
+		m_Order=1;
+		while (1)
 		{
-			ReadTerm(EpsPlasma[n],*matProp,"EpsilonPlasmaFrequency",0.0);
-			ReadTerm(MuePlasma[n],*matProp,"MuePlasmaFrequency",0.0);
-
-			ReadTerm(EpsRelaxTime[n],*matProp,"EpsilonRelaxTime",0.0);
-			ReadTerm(MueRelaxTime[n],*matProp,"MueRelaxTime",0.0);
-		}
-		name = "Weight" + dirName[n];
-		matProp=prop->FirstChildElement(name.c_str());
-		if (matProp!=NULL)
-		{
-			ReadTerm(WeightEpsPlasma[n],*matProp,"EpsilonPlasmaFrequency",1.0);
-			ReadTerm(WeightMuePlasma[n],*matProp,"EpsilonPlasmaFrequency",1.0);
-
-			ReadTerm(WeightEpsRelaxTime[n],*matProp,"EpsilonRelaxTime",1.0);
-			ReadTerm(WeightMueRelaxTime[n],*matProp,"MueRelaxTime",1.0);
+			if (matProp->Attribute("EpsilonPlasmaFrequency_"+ConvertInt(m_Order+1)))
+				++m_Order;
+			else if (matProp->Attribute("MuePlasmaFrequency_"+ConvertInt(m_Order+1)))
+				++m_Order;
+			else
+				break;
 		}
 	}
+	else
+		return false;
+
+	cerr << "found order " << m_Order << endl;
+	InitValues();
+
+	TiXmlElement* weightProp=prop->FirstChildElement("Weight");
+
+	if (ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency_1",1.0)==false)
+		ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency",1.0);
+	if (ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency_1",1.0)==false)
+		ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency",1.0);
+
+	if (ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime_1",1.0)==false)
+		ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime",1.0);
+	if (ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime_1",1.0)==false)
+		ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime",1.0);
+
+	if (weightProp)
+	{
+		if (ReadVectorTerm(WeightEpsPlasma[0],*weightProp,"EpsilonPlasmaFrequency_1",1.0)==false)
+			ReadVectorTerm(WeightEpsPlasma[0],*weightProp,"EpsilonPlasmaFrequency",1.0);
+		if (ReadVectorTerm(WeightMuePlasma[0],*weightProp,"MuePlasmaFrequency_1",1.0)==false)
+			ReadVectorTerm(WeightMuePlasma[0],*weightProp,"MuePlasmaFrequency",1.0);
+
+		if (ReadVectorTerm(WeightEpsRelaxTime[0],*weightProp,"EpsilonRelaxTime_1",1.0)==false)
+			ReadVectorTerm(WeightEpsRelaxTime[0],*weightProp,"EpsilonRelaxTime",1.0);
+		if (ReadVectorTerm(WeightMueRelaxTime[0],*weightProp,"MueRelaxTime_1",1.0)==false)
+			ReadVectorTerm(WeightMueRelaxTime[0],*weightProp,"MueRelaxTime",1.0);
+	}
+
+	for (int o=1;o<m_Order;++o)
+	{
+		ReadVectorTerm(EpsPlasma[o],*matProp,"EpsilonPlasmaFrequency_"+ConvertInt(o+1),1.0);
+		ReadVectorTerm(MuePlasma[o],*matProp,"MuePlasmaFrequency_"+ConvertInt(o+1),1.0);
+
+		ReadVectorTerm(EpsRelaxTime[o],*matProp,"EpsilonRelaxTime"+ConvertInt(o+1),1.0);
+		ReadVectorTerm(MueRelaxTime[o],*matProp,"MueRelaxTime"+ConvertInt(o+1),1.0);
+
+		if (weightProp)
+		{
+			ReadVectorTerm(WeightEpsPlasma[o],*weightProp,"EpsilonPlasmaFrequency_"+ConvertInt(o+1),1.0);
+			ReadVectorTerm(WeightMuePlasma[o],*weightProp,"MuePlasmaFrequency_"+ConvertInt(o+1),1.0);
+
+			ReadVectorTerm(WeightEpsRelaxTime[o],*weightProp,"EpsilonRelaxTime"+ConvertInt(o+1),1.0);
+			ReadVectorTerm(WeightMueRelaxTime[o],*weightProp,"MueRelaxTime"+ConvertInt(o+1),1.0);
+		}
+	}
+
 	return true;
 }
 

@@ -28,12 +28,6 @@ if (pos==0)
 end
 
 for n=1:(nargin-4)/2
-    if ( (ischar(varargin{2*n})) || isnumeric(varargin{2*n}))
-        CSX.Properties.(type){pos}.([property 'X']).ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
-    else 
-        value = varargin{2*n};
-        CSX.Properties.(type){pos}.([property 'X']).ATTRIBUTE.(varargin{2*n-1}) = value{1};
-        CSX.Properties.(type){pos}.([property 'Y']).ATTRIBUTE.(varargin{2*n-1}) = value{2};
-        CSX.Properties.(type){pos}.([property 'Z']).ATTRIBUTE.(varargin{2*n-1}) = value{3};
+        CSX.Properties.(type){pos}.(property).ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
     end
 end
