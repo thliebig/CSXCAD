@@ -177,41 +177,6 @@ CSPropDumpBox* CSProperties::ToDumpBox() { return dynamic_cast<CSPropDumpBox*>(t
 
 bool CSProperties::Update(string */*ErrStr*/) {return true;}
 
-const string CSProperties::GetTypeString()
-{
-	switch (Type)
-	{
-		case CSProperties::UNKNOWN:
-			sType=string("Unknown");
-			break;
-		case CSProperties::MATERIAL:
-			sType=string("Material");
-			break;
-		case CSProperties::METAL:
-			sType=string("Metal");
-			break;
-		case CSProperties::ELECTRODE:
-			sType=string("Electrode");
-			break;
-		case CSProperties::PROBEBOX:
-			sType=string("Probe-Box");
-			break;
-		case CSProperties::RESBOX:
-			sType=string("Res-Box");
-			break;
-		case CSProperties::DUMPBOX:
-			sType=string("Dump-Box");
-			break;
-		case CSProperties::ANY:
-			sType=string("Any");
-			break;
-		default:
-			sType=string("Invalid Type");
-			break;
-	};
-	return sType;
-}
-
 bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	TiXmlElement* prop=root.ToElement();
@@ -325,7 +290,7 @@ void CSProperties::WarnUnusedPrimitves(ostream& stream)
 
 void CSProperties::ShowPropertyStatus(ostream& stream)
 {
-	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << endl;
+	stream << " Property #" << GetID() << " Type: \"" << GetTypeXMLString() << "\" Name: \"" << GetName() << "\"" << endl;
 	stream << " Primitive Count \t: " << vPrimitives.size() << endl;
 
 	stream << "  -- Primitives: --" << endl;
