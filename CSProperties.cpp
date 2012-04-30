@@ -990,7 +990,6 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-
 /*********************CSPropDiscMaterial********************************************************************/
 CSPropDiscMaterial::CSPropDiscMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet)
 {
@@ -1459,6 +1458,84 @@ bool CSPropMetal::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 bool CSPropMetal::ReadFromXML(TiXmlNode &root)
 {
 	return CSProperties::ReadFromXML(root);
+}
+
+/*********************CSPropConductingSheet********************************************************/
+CSPropConductingSheet::CSPropConductingSheet(ParameterSet* paraSet) : CSPropMetal(paraSet) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
+CSPropConductingSheet::CSPropConductingSheet(CSProperties* prop) : CSPropMetal(prop) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
+CSPropConductingSheet::CSPropConductingSheet(unsigned int ID, ParameterSet* paraSet) : CSPropMetal(ID,paraSet) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
+
+CSPropConductingSheet::~CSPropConductingSheet()
+{
+}
+
+
+void CSPropConductingSheet::Init()
+{
+	Conductivity.SetValue(0);
+	Thickness.SetValue(0);
+}
+
+
+bool CSPropConductingSheet::Update(string *ErrStr)
+{
+	int EC=Conductivity.Evaluate();
+	bool bOK=true;
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in ConductingSheet-Property Conductivity-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
+	EC=Thickness.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in ConductingSheet-Property Thickness-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
+
+	return bOK & CSPropMetal::Update(ErrStr);
+}
+
+bool CSPropConductingSheet::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+{
+	if (CSPropMetal::Write2XML(root,parameterised,sparse) == false) return false;
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	WriteTerm(Conductivity,*prop,"Conductivity",parameterised);
+	WriteTerm(Thickness,*prop,"Thickness",parameterised);
+
+	return true;
+}
+
+bool CSPropConductingSheet::ReadFromXML(TiXmlNode &root)
+{
+	if (CSProperties::ReadFromXML(root)==false) return false;
+
+	TiXmlElement* prop=root.ToElement();
+	if (prop==NULL) return false;
+
+	if (ReadTerm(Conductivity,*prop,"Conductivity")==false)
+		cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Conductivity. Set to 0." << endl;
+	if (ReadTerm(Thickness,*prop,"Thickness")==false)
+		cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Thickness. Set to 0." << endl;
+
+	return true;
+}
+
+void CSPropConductingSheet::ShowPropertyStatus(ostream& stream)
+{
+	CSPropMetal::ShowPropertyStatus(stream);
+	stream << " --- Conducting Sheet Properties --- " << endl;
+	stream << "  Conductivity: " << Conductivity.GetValueString() << endl;
+	stream << "  Thickness: "   << Thickness.GetValueString() << endl;
 }
 
 /*********************CSPropElectrode********************************************************************/

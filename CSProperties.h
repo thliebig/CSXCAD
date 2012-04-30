@@ -49,6 +49,7 @@ class CSPropMaterial;
 	class CSPropDiscMaterial;
 class CSPropLumpedElement;
 class CSPropMetal;
+	class CSPropConductingSheet;
 class CSPropElectrode;
 class CSPropProbeBox;
 	class CSPropDumpBox;
@@ -77,8 +78,8 @@ public:
 	enum PropertyType
 	{
 		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, ELECTRODE = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
-		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400, /* unused dispersive material = 0x800 */
-		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000
+		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400,
+		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000, CONDUCTINGSHEET = 0x4000
 	};
 	
 	//! Get PropertyType \sa PropertyType
@@ -549,6 +550,7 @@ protected:
 	virtual bool ReadFromXML(TiXmlNode &root);
 };
 
+
 //! Continuous Structure Metal Property
 /*!
   This Property defines a metal property (aka. PEC).
@@ -566,6 +568,53 @@ public:
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
+};
+
+//! Continuous Structure Conductive Sheet Material Property
+/*!
+  This is a condiction sheet dispersive model for an efficient wide band Analysis of planar waveguides and circuits.
+  */
+class CSXCAD_EXPORT CSPropConductingSheet : public CSPropMetal
+{
+public:
+	CSPropConductingSheet(ParameterSet* paraSet);
+	CSPropConductingSheet(CSProperties* prop);
+	CSPropConductingSheet(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropConductingSheet();
+
+	virtual void Init();
+
+	//! Get PropertyType as a xml element name \sa PropertyType and GetType
+	virtual const string GetTypeXMLString() const {return string("ConductingSheet");}
+
+	//! Set the Conductivity
+	void SetConductivity(double val) {Conductivity.SetValue(val);}
+	//! Set the Conductivity
+	int  SetConductivity(const string val)  {return Conductivity.SetValue(val);}
+	//! Get the Conductivity
+	double GetConductivity() {return Conductivity.GetValue();}
+	//! Get the Conductivity as a string
+	const string GetConductivityTerm() {return Conductivity.GetString();}
+
+	//! Set the Thickness
+	void SetThickness(double val) {Thickness.SetValue(val);}
+	//! Set the Thickness
+	int  SetThickness(const string val)  {return Thickness.SetValue(val);}
+	//! Get the Thickness
+	double GetThickness() {return Thickness.GetValue();}
+	//! Get the Thickness as a string
+	const string GetThicknessTerm() {return Thickness.GetString();}
+
+	virtual bool Update(string *ErrStr=NULL);
+
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPropertyStatus(ostream& stream);
+
+protected:
+	ParameterScalar Conductivity;
+	ParameterScalar Thickness;
 };
 
 //! Continuous Structure Electrode Property for excitations
