@@ -534,7 +534,7 @@ public:
 	void SetCaps(bool val) {m_Caps=val;}
 	int GetCaps() const {return m_Caps;}
 
-	void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(ostream& stream);
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() const {return string("LumpedElement");}
