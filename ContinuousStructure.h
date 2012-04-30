@@ -102,7 +102,7 @@ public:
 	\param foundPrimitive return the found primitive, set to NULL if none was found
 	\return Returns NULL if coordinate is outside the mesh, no mesh is defined or no property is found.
 	 */
-	CSProperties* GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false, CSPrimitives* foundPrimitive=NULL);
+	CSProperties* GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
 
 	//! Get properties by its priority at given coordinates and property type.
 	/*!

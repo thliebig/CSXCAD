@@ -201,7 +201,7 @@ CSPrimitives* ContinuousStructure::GetPrimitive(size_t index)
 	return NULL;
 }
 
-CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type, bool markFoundAsUsed, CSPrimitives* foundPrimitive)
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, CSProperties::PropertyType type, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
 {
 	CSProperties* winProp=NULL;
 	CSPrimitives* winPrim=NULL;
@@ -232,9 +232,8 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 	}
 	if ((markFoundAsUsed) && (winPrim))
 		winPrim->SetPrimitiveUsed(true);
-	foundPrimitive=NULL;
-	if (winPrim)
-		foundPrimitive=winPrim;
+	if (foundPrimitive)
+		*foundPrimitive=winPrim;
 	return winProp;
 }
 
@@ -424,6 +423,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"LorentzMaterial")==0) newProp = new CSPropLorentzMaterial(clParaSet);
 		else if (strcmp(cProp,"LumpedElement")==0) newProp = new CSPropLumpedElement(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
+		else if (strcmp(cProp,"ConductingSheet")==0) newProp = new CSPropConductingSheet(clParaSet);
 		else if (strcmp(cProp,"Electrode")==0) newProp = new CSPropElectrode(clParaSet);
 		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropProbeBox(clParaSet);
 		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropProbeBox(clParaSet); //old version support
