@@ -86,8 +86,12 @@ public:
 	int GetType();
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() const {return string("Any");}
+
+	//! Get Property Type as a string. (default is the xml element name)
+	virtual const string GetTypeString() const {return GetTypeXMLString();}
+
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
-	bool GetMaterial() {return bMaterial;};
+	bool GetMaterial() {return bMaterial;}
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
 	unsigned int GetID();
 	//!Set ID to this property. USE ONLY WHEN YOU KNOW WHAT YOU ARE DOING!!!! \sa GetID

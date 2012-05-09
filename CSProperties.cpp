@@ -290,7 +290,7 @@ void CSProperties::WarnUnusedPrimitves(ostream& stream)
 
 void CSProperties::ShowPropertyStatus(ostream& stream)
 {
-	stream << " Property #" << GetID() << " Type: \"" << GetTypeXMLString() << "\" Name: \"" << GetName() << "\"" << endl;
+	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << endl;
 	stream << " Primitive Count \t: " << vPrimitives.size() << endl;
 
 	stream << "  -- Primitives: --" << endl;
