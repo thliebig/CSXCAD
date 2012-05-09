@@ -27,7 +27,7 @@ else
 	AppCSXCAD_Path = [AppCSXCAD_Path 'AppCSXCAD'];
 end
 
-command = [AppCSXCAD_Path ' ' CSX_filename ' --disableEdit'];
+command = [AppCSXCAD_Path ' --disableEdit ' CSX_filename];
 disp( ['invoking AppCSXCAD, exit to continue script...'] );
 if isOctave()
     fflush(stdout);
