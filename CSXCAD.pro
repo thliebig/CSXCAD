@@ -25,9 +25,9 @@ OBJECTS_DIR = obj
 GITREV = $$system(git describe --tags)
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
-VERSION = 0.2.5
 
 unix { 
+    VERSION = 0.2.5
     LIBS += -L../fparser \
         -lfparser
     LIBS += -ltinyxml
@@ -42,16 +42,16 @@ unix {
 }
 
 win32 { 
-    DEFINES = BUILD_CSXCAD_LIB
+    DEFINES += BUILD_CSXCAD_LIB
     INCLUDEPATH += ../tinyxml
     INCLUDEPATH += ../fparser
-	LIBS += ..\fparser\release\libfparser4.a \
-		..\tinyxml\release\libtinyxml2.a
+	LIBS += ../fparser/release/libfparser4.a \
+		../tinyxml/release/libtinyxml2.a
 	INCLUDEPATH += ../hdf5/include ../hdf5/include/cpp ../boost/include/boost-1_42
 	LIBS +=  ../hdf5/lib/hdf5_cpp.lib ../hdf5/lib/hdf5.lib
 ### vtk ###
-	 INCLUDEPATH += ..\vtk ..\vtk\Common
-	 LIBS +=..\vtk\bin\libvtkCommon.dll
+	 INCLUDEPATH += ../vtk ../vtk/Common
+	 LIBS +=../vtk/bin/libvtkCommon.dll
 }
 
 # Input
