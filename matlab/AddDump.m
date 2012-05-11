@@ -16,8 +16,8 @@ function CSX = AddDump(CSX, name, varargin)
 %
 %              20 local SAR frequency-domain dump
 % 
-%   DumpMode:   0 no-interpolation   (default)
-%               1 node-interpolation (see warning below)
+%   DumpMode:   0 no-interpolation
+%               1 node-interpolation (default, see warning below)
 %               2 cell-interpolation (see warning below)
 %
 %   FileType:   0 vtk-file dump      (default)
@@ -63,6 +63,9 @@ else
 	CSX.Properties.DumpBox = {}; % create cell array
     CSX.Properties.DumpBox{1}.ATTRIBUTE.Name=name;
 end
+
+% make Node-Interpolation the default
+CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpMode = 1;
 
 for n=1:(nargin-2)/2
     if ~ischar(varargin{2*n-1})
