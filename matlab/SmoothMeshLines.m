@@ -38,7 +38,7 @@ lines = unique(sort(lines));
 
 diff_Lines = diff(lines);
 
-index = find(diff_Lines>max_res);
+index = find(diff_Lines>(1.001*max_res));
 
 % for n=1:numel(diff_Lines)-1
 %     if ( (diff_Lines(n+1)/diff_Lines(n) > ratio) )
