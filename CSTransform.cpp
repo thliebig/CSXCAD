@@ -561,6 +561,9 @@ string CSTransform::GetNameByType(TransformType type, unsigned int &numArgs) con
 	case SCALE:
 		numArgs=1;
 		return "Scale";
+	case SCALE3:
+		numArgs=3;
+		return "Scale3";
 	case TRANSLATE:
 		numArgs=3;
 		return "Translate";
@@ -592,6 +595,11 @@ int CSTransform::GetTypeByName(string name, unsigned int &numArgs) const
 	{
 		numArgs=1;
 		return SCALE;
+	}
+	if (name.compare("Scale3")==0)
+	{
+		numArgs=3;
+		return SCALE3;
 	}
 	if (name.compare("Translate")==0)
 	{
