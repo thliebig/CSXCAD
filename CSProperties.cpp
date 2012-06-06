@@ -941,21 +941,19 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 	else
 		return false;
 
-	cerr << "found order " << m_Order << endl;
 	InitValues();
 
+	if (ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency_1",0.0)==false)
+		ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency",0.0);
+	if (ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency_1",0.0)==false)
+		ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency",0.0);
+
+	if (ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime_1",0.0)==false)
+		ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime",0.0);
+	if (ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime_1",0.0)==false)
+		ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime",0.0);
+
 	TiXmlElement* weightProp=prop->FirstChildElement("Weight");
-
-	if (ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency_1",1.0)==false)
-		ReadVectorTerm(EpsPlasma[0],*matProp,"EpsilonPlasmaFrequency",1.0);
-	if (ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency_1",1.0)==false)
-		ReadVectorTerm(MuePlasma[0],*matProp,"MuePlasmaFrequency",1.0);
-
-	if (ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime_1",1.0)==false)
-		ReadVectorTerm(EpsRelaxTime[0],*matProp,"EpsilonRelaxTime",1.0);
-	if (ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime_1",1.0)==false)
-		ReadVectorTerm(MueRelaxTime[0],*matProp,"MueRelaxTime",1.0);
-
 	if (weightProp)
 	{
 		if (ReadVectorTerm(WeightEpsPlasma[0],*weightProp,"EpsilonPlasmaFrequency_1",1.0)==false)
@@ -971,11 +969,11 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 
 	for (int o=1;o<m_Order;++o)
 	{
-		ReadVectorTerm(EpsPlasma[o],*matProp,"EpsilonPlasmaFrequency_"+ConvertInt(o+1),1.0);
-		ReadVectorTerm(MuePlasma[o],*matProp,"MuePlasmaFrequency_"+ConvertInt(o+1),1.0);
+		ReadVectorTerm(EpsPlasma[o],*matProp,"EpsilonPlasmaFrequency_"+ConvertInt(o+1),0.0);
+		ReadVectorTerm(MuePlasma[o],*matProp,"MuePlasmaFrequency_"+ConvertInt(o+1),0.0);
 
-		ReadVectorTerm(EpsRelaxTime[o],*matProp,"EpsilonRelaxTime"+ConvertInt(o+1),1.0);
-		ReadVectorTerm(MueRelaxTime[o],*matProp,"MueRelaxTime"+ConvertInt(o+1),1.0);
+		ReadVectorTerm(EpsRelaxTime[o],*matProp,"EpsilonRelaxTime"+ConvertInt(o+1),0.0);
+		ReadVectorTerm(MueRelaxTime[o],*matProp,"MueRelaxTime"+ConvertInt(o+1),0.0);
 
 		if (weightProp)
 		{
