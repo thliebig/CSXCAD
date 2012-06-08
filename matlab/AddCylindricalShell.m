@@ -11,7 +11,7 @@ function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_
 %
 %   example:
 %       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
-%       CSX = AddCylinder(CSX,'metal',10,[0 0 0],[0 0 200],50,10);
+%       CSX = AddCylindricalShell(CSX,'metal',10,[0 0 0],[0 0 200],50,10);
 %
 % See also AddBox, AddCylinder, AddSphere, AddSphericalShell,
 % AddCurve, AddWire, AddMetal
