@@ -25,7 +25,7 @@ OBJECTS_DIR = obj
 GITREV = $$system(git describe --tags)
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
-VERSION = 0.2.5
+VERSION = 0.3.0
 
 unix { 
     LIBS += -L../fparser -lfparser
