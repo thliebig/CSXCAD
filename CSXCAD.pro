@@ -33,11 +33,12 @@ unix {
     LIBS += -lhdf5_cpp -lhdf5
 
 #vtk
-	INCLUDEPATH += /usr/include/vtk-5.2 \
-		/usr/include/vtk-5.4 \
-		/usr/include/vtk-5.6 \
-		/usr/include/vtk-5.8 \
-		/usr/include/vtk
+    INCLUDEPATH += /usr/include/vtk-5.2 \
+        /usr/include/vtk-5.4 \
+        /usr/include/vtk-5.6 \
+        /usr/include/vtk-5.8 \
+        /usr/include/vtk-5.10 \
+        /usr/include/vtk
 }
 
 win32 { 
@@ -77,18 +78,12 @@ SOURCES += ContinuousStructure.cpp \
     ParameterCoord.cpp \
     CSTransform.cpp
 
-
-
-
-
-
 #
 # create tar file
 #
 tarball.target = tarball
 tarball.commands = git archive --format=tar --prefix=CSXCAD-$$VERSION/ HEAD | bzip2 > CSXCAD-$${VERSION}.tar.bz2
 QMAKE_EXTRA_TARGETS += tarball
-
 
 #
 # INSTALL
@@ -101,7 +96,6 @@ install.commands += && cp -at \"$(INSTALL_ROOT)/usr/include/CSXCAD/\" $$HEADERS
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX/\" libCSXCAD.so*
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab/\" matlab/*.m
 QMAKE_EXTRA_TARGETS += install
-
 
 #
 # create .PHONY target
