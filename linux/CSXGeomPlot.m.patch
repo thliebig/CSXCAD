@@ -1,5 +1,5 @@
 diff --git a/matlab/CSXGeomPlot.m b/matlab/CSXGeomPlot.m
-index 8770266..3062807 100644
+index 21d3ef8..37427a1 100644
 --- a/matlab/CSXGeomPlot.m
 +++ b/matlab/CSXGeomPlot.m
 @@ -13,18 +13,10 @@ if nargin < 1
@@ -22,4 +22,4 @@ index 8770266..3062807 100644
 +	AppCSXCAD_Path = 'AppCSXCAD';
  end
  
- command = [AppCSXCAD_Path ' ' CSX_filename];
+ command = [AppCSXCAD_Path ' --disableEdit ' CSX_filename];

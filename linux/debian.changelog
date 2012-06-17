@@ -1,3 +1,6 @@
+csxcad (0.3.0-1) stable; urgency=low
+  * New upstream version
+ -- Sebastian Held <sebastian.held@gmx.de>  Sun, 17 Jun 2012 21:54:30 +0200
 csxcad (0.2.4-6) stable; urgency=low
   * New upstream fix
  -- Sebastian Held <sebastian.held@gmx.de>  Wed, 29 Feb 2012 23:20:00 +0100
