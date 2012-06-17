@@ -884,7 +884,7 @@ bool CSPropLorentzMaterial::Update(string *ErrStr)
 			}
 		}
 	}
-	return CSPropDispersiveMaterial::Update(ErrStr);
+	return bOK & CSPropDispersiveMaterial::Update(ErrStr);
 }
 
 bool CSPropLorentzMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
