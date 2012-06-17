@@ -88,7 +88,7 @@ bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr,
 
 	for (int n=0;n<3;++n)
 		PS[n].SetValue(val);
-	for (int n=0;n<val_list.size();++n)
+	for (int n=0;n<(int)val_list.size();++n)
 	{
 		string sHelp=val_list.at(n);
 		size_t tHelp=sHelp.find("term:",0);

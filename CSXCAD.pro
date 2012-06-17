@@ -57,6 +57,10 @@ win32 {
     LIBS += -L../vtk/bin -lvtkCommon
 }
 
+# vtk includes deprecated header files; silence the corresponding warning
+QMAKE_CXXFLAGS += -Wno-deprecated
+
+
 # Input
 HEADERS += ContinuousStructure.h \
     CSPrimitives.h \
