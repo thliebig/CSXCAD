@@ -20,6 +20,13 @@ function CSX = AddConductingSheet(CSX, name, conductivity, thickness)
 % -----------------------
 % author: Thorsten Liebig 2012
 
+
+% fall back to ideal pec for t==0 or c==0
+if ((thickness==0) || (conductivity==0))
+    CSX = AddMetal(CSX,name);
+    return;
+end
+
 if ((conductivity<0) || (thickness<0))
     error('CSXCAD:AddConductingSheet','a negative conductivity or thickness is invalid');
 end
@@ -32,11 +39,6 @@ if (thickness>500e-6)
     warning('CSXCAD:AddConductingSheet','a thickness greater than 500um is not recommended');
 end
 
-% fall back to ideal pec for t==0
-if (thickness==0)
-    CSX = AddMetal(CSX,name);
-    return;
-end
 
 if (thickness<1e-6)
     warning('CSXCAD:AddConductingSheet','a thickness lower than 1um is not recommended');
