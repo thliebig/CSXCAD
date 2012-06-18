@@ -95,8 +95,8 @@ str = ['X' x 'Y' y];
 
 % -----------------------------------------------------------------------------
 function [tool,drill] = primitive_cylinder( CSX_cylinder, drawingunit )
-start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y] * drawingunit;
-stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y] * drawingunit;
+start  = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y] * drawingunit;
+stop   = [CSX_cylinder.P2.ATTRIBUTE.X CSX_cylinder.P2.ATTRIBUTE.Y] * drawingunit;
 radius = CSX_cylinder.ATTRIBUTE.Radius * drawingunit;
 if start(1:2) == stop(1:2)
 	% via in z-plane

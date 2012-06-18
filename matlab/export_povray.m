@@ -153,8 +153,8 @@ str = ['box { ' pov_vect(start) ', ' pov_vect(stop) ' ' options '}'];
 
 % -----------------------------------------------------------------------------
 function str = primitive_cylinder( CSX_cylinder, options )
-start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y CSX_cylinder.P0.ATTRIBUTE.Z];
-stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y CSX_cylinder.P1.ATTRIBUTE.Z];
+start  = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y CSX_cylinder.P1.ATTRIBUTE.Z];
+stop   = [CSX_cylinder.P2.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y CSX_cylinder.P2.ATTRIBUTE.Z];
 radius = CSX_cylinder.ATTRIBUTE.Radius;
 str = ['cylinder { ' pov_vect(start) ', ' pov_vect(stop) ', ' num2str(radius) ' ' options '}'];
 
@@ -172,7 +172,7 @@ str = [str ' ' options '}'];
 % -----------------------------------------------------------------------------
 function str = primitive_polygon( CSX_polygon, options )
 Elevation = -CSX_polygon.ATTRIBUTE.Elevation;
-NormDir = [CSX_polygon.NormDir.ATTRIBUTE.X CSX_polygon.NormDir.ATTRIBUTE.Y CSX_polygon.NormDir.ATTRIBUTE.Z];
+% NormDir = CSX_polygon.ATTRIBUTE.NormDir;
 epsilon = 1; % FIXME this should be small compared to any other linear dimension of any object in the scene
 str = ['prism { linear_spline linear_sweep ' num2str(Elevation - epsilon) ', ' num2str(Elevation + epsilon) ', ' num2str(numel(CSX_polygon.Vertex)+1)];
 for a=1:numel(CSX_polygon.Vertex)

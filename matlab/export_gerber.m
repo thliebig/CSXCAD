@@ -117,8 +117,8 @@ end
 % -----------------------------------------------------------------------------
 function primitive_cylinder( fid, CSX_cylinder, CoordSystem )
 global drawingunit
-start  = [CSX_cylinder.P0.ATTRIBUTE.X CSX_cylinder.P0.ATTRIBUTE.Y];
-stop   = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y];
+start  = [CSX_cylinder.P1.ATTRIBUTE.X CSX_cylinder.P1.ATTRIBUTE.Y];
+stop   = [CSX_cylinder.P2.ATTRIBUTE.X CSX_cylinder.P2.ATTRIBUTE.Y];
 radius = CSX_cylinder.ATTRIBUTE.Radius * drawingunit;
 if start(1:2) == stop(1:2)
 	% via => draw circle
@@ -132,9 +132,8 @@ end
 
 % -----------------------------------------------------------------------------
 function primitive_polygon( fid, CSX_polygon, CoordSystem )
-NormDir = [CSX_polygon.NormDir.ATTRIBUTE.X CSX_polygon.NormDir.ATTRIBUTE.Y CSX_polygon.NormDir.ATTRIBUTE.Z];
-if NormDir ~= [0 0 1]
-	disp( ['omitting   primitive polygon, because the normal vector is not [0 0 1]'] );	
+if CSX_polygon.ATTRIBUTE.NormDir ~= 2
+	disp( ['omitting primitive polygon, because the normal direction is not 2'] );
 end
 fprintf( fid, '%s\n', 'G36*' );
 v = [CSX_polygon.Vertex{1}.ATTRIBUTE.X1 CSX_polygon.Vertex{1}.ATTRIBUTE.X2];
@@ -171,6 +170,9 @@ for num=1:numel(prop)
     
 	disp( ['processing ' prop{num}.ATTRIBUTE.Name '...'] );
 	fprintf( fid, '%s\n', ['%LN' Name '*%'] );
+    if ~isfield(prop{num},'Primitives')
+        continue
+    end
 	if isfield(prop{num}.Primitives,'Box')
 		for a=1:numel(prop{num}.Primitives.Box)
 			% iterate over all boxes
