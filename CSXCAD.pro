@@ -21,11 +21,13 @@ INCLUDEPATH += .
 INCLUDEPATH += ../fparser
 OBJECTS_DIR = obj
 
+VERSION = 0.3.0
+
 # add git revision
 GITREV = $$system(git describe --tags)
+isEmpty($$GITREV):GITREV=$$VERSION
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
-VERSION = 0.3.0
 
 unix { 
     LIBS += -L../fparser -lfparser
@@ -98,7 +100,7 @@ install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/include/CSXCAD\"
 install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab\"
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/include/CSXCAD/\" $$HEADERS
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX/\" libCSXCAD.so*
-install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab/\" matlab/*.m
+install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab/\" matlab/
 QMAKE_EXTRA_TARGETS += install
 
 #
