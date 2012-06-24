@@ -19,7 +19,7 @@
 
 Name:           CSXCAD
 Version:        0.3.0
-Release:        1
+Release:        2
 Summary:        Library for Geometric Primitives primarily used by openEMS
 Group:          Development/Languages/C and C++
 License:        LGPLv3
@@ -108,6 +108,8 @@ rm -rf %{buildroot}
 
 
 %changelog
+* Sat Jun 23 2012 Sebastian Held <sebastian.held@gmx.de> - 0.3.0-2
+- fixed missing files and version information
 * Sun Jun 17 2012 Sebastian Held <sebastian.held@gmx.de> - 0.3.0-1
 - new upstream version
 * Wed Feb 29 2012 Sebastian Held <sebastian.held@gmx.de> - 0.2.4-7

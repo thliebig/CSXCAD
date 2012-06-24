@@ -1,6 +1,6 @@
 Format: 1.0
 Source: csxcad
-Version: 0.3.0-1
+Version: 0.3.0-2
 Binary: csxcad, csxcad-dev
 Maintainer: Thorsten Liebig <thorsten.liebig@uni-due.de>, Sebastian Held <sebastian.held@gmx.de>
 Homepage: http://www.openems.de
