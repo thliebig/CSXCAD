@@ -100,7 +100,7 @@ install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/include/CSXCAD\"
 install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab\"
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/include/CSXCAD/\" $$HEADERS
 install.commands += && cp -at \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX/\" libCSXCAD.so*
-install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab/\" matlab/
+install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/\" matlab/
 QMAKE_EXTRA_TARGETS += install
 
 #
