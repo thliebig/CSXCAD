@@ -11,6 +11,9 @@ function CSX = AddLumpedElement(CSX, name, direction, varargin)
 % optional arguments:
 %   'R', 'C', 'L':  definition of the lumped element properties
 %   'Caps':         0 or 1 to (de)activate lumped element caps (1=default)
+%                   If Caps are enable, a small PEC plate is added to each
+%                   end of the lumped element to ensure contact to e.g 
+%                   a microstrip line
 %
 % examples:
 % lumped element capacitor in y-direction with 1pF
