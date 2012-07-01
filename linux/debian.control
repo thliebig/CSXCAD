@@ -7,7 +7,7 @@ Build-Depends: debhelper (>=7.0.50~), qt4-qmake, libfparser4, libhdf5-serial-dev
 Package: csxcad
 Architecture: any
 Depends: ${shlibs:Depends}
-Recommends: appcsxcad
+Suggests: appcsxcad
 Description: Library for Geometric Primitives primarily used by openEMS
  Library for Geometric Primitives primarily used by openEMS.
 

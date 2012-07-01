@@ -1,3 +1,6 @@
+csxcad (0.3.0-3) stable; urgency=low
+  * replaced recommended deps by suggested deps
+ -- Sebastian Held <sebastian.held@gmx.de>  Sat, 30 Jun 2012 12:16:00 +0200
 csxcad (0.3.0-2) stable; urgency=low
   * fixed missing files and version information
  -- Sebastian Held <sebastian.held@gmx.de>  Sat, 23 Jun 2012 11:58:00 +0200
