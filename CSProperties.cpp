@@ -170,7 +170,7 @@ CSPropUnknown* CSProperties::ToUnknown() { return dynamic_cast<CSPropUnknown*>(t
 CSPropMaterial* CSProperties::ToMaterial() { return dynamic_cast<CSPropMaterial*>(this); }
 CSPropLorentzMaterial* CSProperties::ToLorentzMaterial() { return dynamic_cast<CSPropLorentzMaterial*>(this); }
 CSPropMetal* CSProperties::ToMetal() { return dynamic_cast<CSPropMetal*>(this); }
-CSPropElectrode* CSProperties::ToElectrode() { return dynamic_cast<CSPropElectrode*>(this); }
+CSPropExcitation* CSProperties::ToExcitation() { return dynamic_cast<CSPropExcitation*>(this); }
 CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*>(this); }
 CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }
 CSPropDumpBox* CSProperties::ToDumpBox() { return dynamic_cast<CSPropDumpBox*>(this); }
@@ -1536,64 +1536,64 @@ void CSPropConductingSheet::ShowPropertyStatus(ostream& stream)
 	stream << "  Thickness: "   << Thickness.GetValueString() << endl;
 }
 
-/*********************CSPropElectrode********************************************************************/
-CSPropElectrode::CSPropElectrode(ParameterSet* paraSet,unsigned int number) : CSProperties(paraSet) {Type=ELECTRODE;Init();uiNumber=number;}
-CSPropElectrode::CSPropElectrode(CSProperties* prop) : CSProperties(prop) {Type=ELECTRODE;Init();}
-CSPropElectrode::CSPropElectrode(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=ELECTRODE;Init();}
-CSPropElectrode::~CSPropElectrode() {}
+/*********************CSPropExcitation********************************************************************/
+CSPropExcitation::CSPropExcitation(ParameterSet* paraSet,unsigned int number) : CSProperties(paraSet) {Type=EXCITATION;Init();uiNumber=number;}
+CSPropExcitation::CSPropExcitation(CSProperties* prop) : CSProperties(prop) {Type=EXCITATION;Init();}
+CSPropExcitation::CSPropExcitation(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=EXCITATION;Init();}
+CSPropExcitation::~CSPropExcitation() {}
 
-void CSPropElectrode::SetNumber(unsigned int val) {uiNumber=val;}
-unsigned int CSPropElectrode::GetNumber() {return uiNumber;}
+void CSPropExcitation::SetNumber(unsigned int val) {uiNumber=val;}
+unsigned int CSPropExcitation::GetNumber() {return uiNumber;}
 
-void CSPropElectrode::SetExcitType(int val) {iExcitType=val;}
-int CSPropElectrode::GetExcitType() {return iExcitType;}
+void CSPropExcitation::SetExcitType(int val) {iExcitType=val;}
+int CSPropExcitation::GetExcitType() {return iExcitType;}
 
-void CSPropElectrode::SetExcitation(double val, int Component)
+void CSPropExcitation::SetExcitation(double val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	Excitation[Component].SetValue(val);
 }
 
-void CSPropElectrode::SetExcitation(const string val, int Component)
+void CSPropExcitation::SetExcitation(const string val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	Excitation[Component].SetValue(val);
 }
 
-double CSPropElectrode::GetExcitation(int Component)
+double CSPropExcitation::GetExcitation(int Component)
 {
 	if ((Component<0) || (Component>=3)) return 0;
 	return Excitation[Component].GetValue();
 }
 
-const string CSPropElectrode::GetExcitationString(int Comp)
+const string CSPropExcitation::GetExcitationString(int Comp)
 {
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return Excitation[Comp].GetString();
 }
 
-void CSPropElectrode::SetActiveDir(bool active, int Component)
+void CSPropExcitation::SetActiveDir(bool active, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	ActiveDir[Component]=active;
 }
 
-bool CSPropElectrode::GetActiveDir(int Component)
+bool CSPropExcitation::GetActiveDir(int Component)
 {
 	if ((Component<0) || (Component>=3)) return false;
 	return ActiveDir[Component];
 }
 
-int CSPropElectrode::SetWeightFunction(const string fct, int ny)
+int CSPropExcitation::SetWeightFunction(const string fct, int ny)
 {
 	if ((ny>=0) && (ny<3))
 		return WeightFct[ny].SetValue(fct);
 	return 0;
 }
 
-const string CSPropElectrode::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
+const string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
 
-double CSPropElectrode::GetWeightedExcitation(int ny, const double* coords)
+double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	//Warning: this is not reentrant....!!!!
@@ -1625,21 +1625,21 @@ double CSPropElectrode::GetWeightedExcitation(int ny, const double* coords)
 	int EC = WeightFct[ny].Evaluate();
 	if (EC)
 	{
-		cerr << "CSPropElectrode::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << endl;
+		cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << endl;
 	}
 
 	return WeightFct[ny].GetValue()*GetExcitation(ny);
 }
 
-void CSPropElectrode::SetDelay(double val)	{Delay.SetValue(val);}
+void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
 
-void CSPropElectrode::SetDelay(const string val) {Delay.SetValue(val);}
+void CSPropExcitation::SetDelay(const string val) {Delay.SetValue(val);}
 
-double CSPropElectrode::GetDelay(){return Delay.GetValue();}
+double CSPropExcitation::GetDelay(){return Delay.GetValue();}
 
-const string CSPropElectrode::GetDelayString(){return Delay.GetString();}
+const string CSPropExcitation::GetDelayString(){return Delay.GetString();}
 
-void CSPropElectrode::Init()
+void CSPropExcitation::Init()
 {
 	uiNumber=0;
 	iExcitType=1;
@@ -1656,7 +1656,7 @@ void CSPropElectrode::Init()
 	}
 }
 
-bool CSPropElectrode::Update(string *ErrStr)
+bool CSPropExcitation::Update(string *ErrStr)
 {
 	bool bOK=true;
 	int EC=0;
@@ -1667,7 +1667,7 @@ bool CSPropElectrode::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			stringstream stream;
-			stream << endl << "Error in Electrode-Property Excitaion-Value (ID: " << uiID << "): ";
+			stream << endl << "Error in Excitation-Property Excitaion-Value (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 			//cout << EC << endl;
@@ -1678,7 +1678,7 @@ bool CSPropElectrode::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		stringstream stream;
-		stream << endl << "Error in Electrode-Property Delay-Value";
+		stream << endl << "Error in Excitation-Property Delay-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 		//cout << EC << endl;
@@ -1686,7 +1686,7 @@ bool CSPropElectrode::Update(string *ErrStr)
 	return bOK;
 }
 
-bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
+bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	if (CSProperties::Write2XML(root,parameterised,sparse) == false) return false;
 	TiXmlElement* prop=root.ToElement();
@@ -1695,12 +1695,8 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised, bool sparse
 	prop->SetAttribute("Number",(int)uiNumber);
 	WriteTerm(Delay,*prop,"Delay",parameterised);
 
-	TiXmlElement Excit("Excitation");
-	Excit.SetAttribute("Type",iExcitType);
-	WriteTerm(Excitation[0],Excit,"Excit_X",parameterised);
-	WriteTerm(Excitation[1],Excit,"Excit_Y",parameterised);
-	WriteTerm(Excitation[2],Excit,"Excit_Z",parameterised);
-	prop->InsertEndChild(Excit);
+	prop->SetAttribute("Type",iExcitType);
+	WriteVectorTerm(Excitation,*prop,"Excite",parameterised);
 
 	TiXmlElement Weight("Weight");
 	WriteTerm(WeightFct[0],Weight,"X",parameterised);
@@ -1711,7 +1707,7 @@ bool CSPropElectrode::Write2XML(TiXmlNode& root, bool parameterised, bool sparse
 	return true;
 }
 
-bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
+bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 {
 	if (CSProperties::ReadFromXML(root)==false) return false;
 
@@ -1722,14 +1718,11 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) uiNumber=0;
 	else uiNumber=(unsigned int)iHelp;
 
-	ReadTerm(Delay,*prop,"Delay");
+	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
-	TiXmlElement *excit = prop->FirstChildElement("Excitation");
-	if (excit==NULL) return false;
-	if (excit->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
-	if (ReadTerm(Excitation[0],*excit,"Excit_X")==false) return false;
-	if (ReadTerm(Excitation[1],*excit,"Excit_Y")==false) return false;
-	if (ReadTerm(Excitation[2],*excit,"Excit_Z")==false) return false;
+	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
+
+	ReadTerm(Delay,*prop,"Delay");
 
 	TiXmlElement *weight = prop->FirstChildElement("Weight");
 	if (weight!=NULL)
@@ -1742,10 +1735,10 @@ bool CSPropElectrode::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPropElectrode::ShowPropertyStatus(ostream& stream)
+void CSPropExcitation::ShowPropertyStatus(ostream& stream)
 {
 	CSProperties::ShowPropertyStatus(stream);
-	stream << " --- Electrode Properties --- " << endl;
+	stream << " --- Excitation Properties --- " << endl;
 	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << endl;
 	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << endl;
 	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << endl;

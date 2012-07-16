@@ -293,7 +293,7 @@ bool ContinuousStructure::isGeometryValid()
 	for (size_t i=0;i<vProperties.size();++i)
 	{
 		if (vProperties.at(i)->Update()==false) return false;
-		if (vProperties.at(i)->GetType()==CSProperties::ELECTRODE)
+		if (vProperties.at(i)->GetType()==CSProperties::EXCITATION)
 		{
 			if (vProperties.at(i)->GetQtyPrimitives()>0) ++excit;
 		}
@@ -424,7 +424,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"LumpedElement")==0) newProp = new CSPropLumpedElement(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
 		else if (strcmp(cProp,"ConductingSheet")==0) newProp = new CSPropConductingSheet(clParaSet);
-		else if (strcmp(cProp,"Electrode")==0) newProp = new CSPropElectrode(clParaSet);
+		else if (strcmp(cProp,"Excitation")==0) newProp = new CSPropExcitation(clParaSet);
 		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropProbeBox(clParaSet);
 		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropProbeBox(clParaSet); //old version support
 		else if (strcmp(cProp,"ResBox")==0) newProp = new CSPropResBox(clParaSet);

@@ -50,7 +50,7 @@ class CSPropMaterial;
 class CSPropLumpedElement;
 class CSPropMetal;
 	class CSPropConductingSheet;
-class CSPropElectrode;
+class CSPropExcitation;
 class CSPropProbeBox;
 	class CSPropDumpBox;
 class CSPropResBox;
@@ -77,7 +77,7 @@ public:
 	//! Enumeration of all possible sub-types of this base-class
 	enum PropertyType
 	{
-		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, ELECTRODE = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
+		ANY = 0xfff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, EXCITATION = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
 		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400,
 		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000, CONDUCTINGSHEET = 0x4000
 	};
@@ -156,8 +156,8 @@ public:
 	CSPropLorentzMaterial* ToLorentzMaterial();
 	//! Convert to Metal Property, returns NULL if type is different! \return Returns a CSPropMetal* or NULL if type is different!
 	CSPropMetal* ToMetal();
-	//! Convert to Electrode Property, returns NULL if type is different! \return Returns a CSPropElectrode* or NULL if type is different!
-	CSPropElectrode* ToElectrode();
+	//! Convert to Excitation Property, returns NULL if type is different! \return Returns a CSPropExcitation* or NULL if type is different!
+	CSPropExcitation* ToExcitation();
 	//! Convert to ProbeBox Property, returns NULL if type is different! \return Returns a CSPropProbeBox* or NULL if type is different!
 	CSPropProbeBox* ToProbeBox();
 	//! Convert to ResBox Property, returns NULL if type is different! \return Returns a CSPropResBox* or NULL if type is different!
@@ -621,20 +621,20 @@ protected:
 	ParameterScalar Thickness;
 };
 
-//! Continuous Structure Electrode Property for excitations
+//! Continuous Structure Excitation Property for excitations
 /*!
   This Property defines an excitation which can be location and direction depedent.
   */
-class CSXCAD_EXPORT CSPropElectrode : public CSProperties
+class CSXCAD_EXPORT CSPropExcitation : public CSProperties
 {
 public:
-	CSPropElectrode(ParameterSet* paraSet,unsigned int number=0);
-	CSPropElectrode(CSProperties* prop);
-	CSPropElectrode(unsigned int ID, ParameterSet* paraSet);
-	virtual ~CSPropElectrode();
+	CSPropExcitation(ParameterSet* paraSet,unsigned int number=0);
+	CSPropExcitation(CSProperties* prop);
+	CSPropExcitation(unsigned int ID, ParameterSet* paraSet);
+	virtual ~CSPropExcitation();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Electrode");}
+	virtual const string GetTypeXMLString() const {return string("Excitation");}
 
 	void SetNumber(unsigned int val);
 	unsigned int GetNumber();

@@ -30,15 +30,15 @@ function CSX = SetExcitationWeight(CSX, name, weight)
 % author: Thorsten Liebig
 
 if ~isfield(CSX,'Properties')
-    return
+    error('CSXCAD::SetExcitationWeight: no properties not found');
 end
-if ~isfield(CSX.Properties,'Electrode')
-    return
+if ~isfield(CSX.Properties,'Excitation')
+    error('CSXCAD::SetExcitationWeight: no excitation properties found');
 end
 
 pos=0;
-for n=1:numel(CSX.Properties.Electrode)
-   if  strcmp(CSX.Properties.Electrode{n}.ATTRIBUTE.Name, name)
+for n=1:numel(CSX.Properties.Excitation)
+   if  strcmp(CSX.Properties.Excitation{n}.ATTRIBUTE.Name, name)
        pos=n;
    end
 end
@@ -49,17 +49,17 @@ if (pos==0)
 end
 
 if ischar(weight{1})
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.X = ['term:' weight{1}];
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.X = ['term:' weight{1}];
 else
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.X = weight{1};
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.X = weight{1};
 end
 if ischar(weight{2})
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Y = ['term:' weight{2}];
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Y = ['term:' weight{2}];
 else
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Y = weight{2};
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Y = weight{2};
 end
 if ischar(weight{3})
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Z = ['term:' weight{3}];
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Z = ['term:' weight{3}];
 else
-    CSX.Properties.Electrode{pos}.Weight.ATTRIBUTE.Z = weight{3};
+    CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Z = weight{3};
 end
