@@ -1739,6 +1739,7 @@ void CSPropExcitation::ShowPropertyStatus(ostream& stream)
 {
 	CSProperties::ShowPropertyStatus(stream);
 	stream << " --- Excitation Properties --- " << endl;
+	stream << "  Type: " << iExcitType << endl;
 	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << endl;
 	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << endl;
 	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << endl;

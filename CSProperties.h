@@ -621,9 +621,9 @@ protected:
 	ParameterScalar Thickness;
 };
 
-//! Continuous Structure Excitation Property for excitations
+//! Continuous Structure Excitation Property
 /*!
-  This Property defines an excitation which can be location and direction depedent.
+  This Property defines an excitation which can be location and direction dependent.
   */
 class CSXCAD_EXPORT CSPropExcitation : public CSProperties
 {
@@ -636,10 +636,14 @@ public:
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const string GetTypeXMLString() const {return string("Excitation");}
 
+	//! Set the number for this excitation
 	void SetNumber(unsigned int val);
+	//! Get the number for this excitation
 	unsigned int GetNumber();
 
+	//! Set the excitation type
 	void SetExcitType(int val);
+	//! Get the excitation type
 	int GetExcitType();
 
 	//! Set the active direction for the source, only necessary with hard sources (by default all active)
@@ -647,22 +651,31 @@ public:
 	//! Get the active direction for the source, only necessary with hard sources (by default all active)
 	bool GetActiveDir(int Component=0);
 
+	//! Set the excitation amplitude for a given component
 	void SetExcitation(double val, int Component=0);
+	//! Set the excitation amplitude for a given component
 	void SetExcitation(const string val, int Component=0);
+	//! Get the excitation amplitude for a given component
 	double GetExcitation(int Component=0);
+	//! Get the excitation amplitude as a string for a given component
 	const string GetExcitationString(int Comp=0);
 
-	//! This will override the weight-function
+	//! Set a weighting factor for the given component. This will override the weighting function!
 	void SetWeight(double val, int ny);
-	//! Define a weight function
+	//! Set a weighting function for the given excitation component
 	int SetWeightFunction(const string fct, int ny);
+	//! Get the weighting function for the given excitation component
 	const string GetWeightFunction(int ny);
 
 	double GetWeightedExcitation(int ny, const double* coords);
 
+	//! Set the excitation delay
 	void SetDelay(double val);
+	//! Set the excitation delay
 	void SetDelay(const string val);
+	//! Get the excitation delay
 	double GetDelay();
+	//! Get the excitation delay as a string
 	const string GetDelayString();
 
 	virtual void Init();
@@ -677,9 +690,9 @@ protected:
 	unsigned int uiNumber;
 	int iExcitType;
 	bool ActiveDir[3];
-	ParameterScalar Excitation[3];
-	ParameterScalar WeightFct[3];
-	ParameterScalar Delay;//only for transient solver
+	ParameterScalar Excitation[3];		// excitation amplitude vector
+	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
+	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
 };
 
 //! Continuous Structure Probe Property for calculating integral properties
