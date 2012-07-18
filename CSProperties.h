@@ -669,6 +669,15 @@ public:
 
 	double GetWeightedExcitation(int ny, const double* coords);
 
+	//! Set the propagation direction for a given component
+	void SetPropagationDir(double val, int Component=0);
+	//! Set the propagation direction for a given component
+	void SetPropagationDir(const string val, int Component=0);
+	//! Get the propagation direction for a given component
+	double GetPropagationDir(int Component=0);
+	//! Get the propagation direction as a string for a given component
+	const string GetPropagationDirString(int Comp=0);
+
 	//! Set the excitation delay
 	void SetDelay(double val);
 	//! Set the excitation delay
@@ -692,6 +701,7 @@ protected:
 	bool ActiveDir[3];
 	ParameterScalar Excitation[3];		// excitation amplitude vector
 	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
+	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
 	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
 };
 

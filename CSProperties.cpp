@@ -1656,6 +1656,31 @@ void CSPropExcitation::Init()
 	}
 }
 
+void CSPropExcitation::SetPropagationDir(double val, int Component)
+{
+	if ((Component<0) || (Component>=3)) return;
+	PropagationDir[Component].SetValue(val);
+}
+
+void CSPropExcitation::SetPropagationDir(const string val, int Component)
+{
+	if ((Component<0) || (Component>=3)) return;
+	PropagationDir[Component].SetValue(val);
+}
+
+double CSPropExcitation::GetPropagationDir(int Component)
+{
+	if ((Component<0) || (Component>=3)) return 0;
+	return PropagationDir[Component].GetValue();
+}
+
+const string CSPropExcitation::GetPropagationDirString(int Comp)
+{
+	if ((Comp<0) || (Comp>=3)) return NULL;
+	return PropagationDir[Comp].GetString();
+}
+
+
 bool CSPropExcitation::Update(string *ErrStr)
 {
 	bool bOK=true;
@@ -1670,7 +1695,15 @@ bool CSPropExcitation::Update(string *ErrStr)
 			stream << endl << "Error in Excitation-Property Excitaion-Value (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
-			//cout << EC << endl;
+		}
+		EC=PropagationDir[i].Evaluate();
+		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		{
+			stringstream stream;
+			stream << endl << "Error in Excitation-Property PropagationDir-Value (ID: " << uiID << "): ";
+			ErrStr->append(stream.str());
+			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
 	EC=Delay.Evaluate();
@@ -1681,7 +1714,6 @@ bool CSPropExcitation::Update(string *ErrStr)
 		stream << endl << "Error in Excitation-Property Delay-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
-		//cout << EC << endl;
 	}
 	return bOK;
 }
@@ -1703,6 +1735,8 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 	WriteTerm(WeightFct[1],Weight,"Y",parameterised);
 	WriteTerm(WeightFct[2],Weight,"Z",parameterised);
 	prop->InsertEndChild(Weight);
+
+	WriteVectorTerm(PropagationDir,*prop,"PropDir",parameterised);
 
 	return true;
 }
@@ -1732,6 +1766,8 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 		ReadTerm(WeightFct[2],*weight,"Z");
 	}
 
+	ReadVectorTerm(PropagationDir,*prop,"PropDir",0.0);
+
 	return true;
 }
 
@@ -1743,6 +1779,7 @@ void CSPropExcitation::ShowPropertyStatus(ostream& stream)
 	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << endl;
 	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << endl;
 	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << endl;
+	stream << "  Propagation Dir: " << PropagationDir[0].GetValueString() << ", "  << PropagationDir[1].GetValueString() << ", "  << PropagationDir[2].GetValueString()  << endl;
 	stream << "  Delay\t\t: " << Delay.GetValueString() << endl;
 }
 

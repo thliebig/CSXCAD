@@ -7,10 +7,13 @@ function CSX = AddExcitation(CSX, name, type, excite, varargin)
 % name: property name for the excitation
 % type: 0=E-field soft excitation  1=E-field hard excitation
 %       2=H-field soft excitation  3=H-field hard excitation
+%       10=plane wave excitation
+%
 % excite: e.g. [2 0 0] for excitation of 2 V/m in x-direction
 % 
 % additional options for openEMS:
-%   'Delay' : setup an excitation time delay in seconds
+%   'Delay'  : setup an excitation time delay in seconds
+%   'PropDir': direction of plane wave propagation (plane wave excite only)
 %
 % example:
 %   CSX = AddExcitation( CSX, 'infDipole', 1, [1 0 0] );
