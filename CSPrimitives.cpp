@@ -967,6 +967,10 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 	if (m_Transform)
 		m_Transform->InvertTransform(pos,pos);
 
+	for (int n=0;n<3;++n)
+		if (pos[n]<m_BoundBox[2*n] || pos[n]>m_BoundBox[2*n+1])
+			return false;
+
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
 
@@ -1139,6 +1143,10 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 	if (m_Transform)
 		m_Transform->InvertTransform(pos,pos);
+
+	for (int n=0;n<3;++n)
+		if (pos[n]<m_BoundBox[2*n] || pos[n]>m_BoundBox[2*n+1])
+			return false;
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
