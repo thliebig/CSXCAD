@@ -1644,6 +1644,7 @@ void CSPropExcitation::Init()
 	uiNumber=0;
 	iExcitType=1;
 	coordInputType=UNDEFINED_CS;
+	m_Frequency.SetValue(0.0);
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=true;
@@ -1706,6 +1707,15 @@ bool CSPropExcitation::Update(string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 	}
+	EC=m_Frequency.Evaluate();
+	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	{
+		stringstream stream;
+		stream << endl << "Error in Excitation-Property Frequency-Value";
+		ErrStr->append(stream.str());
+		PSErrorCode2Msg(EC,ErrStr);
+	}
 	EC=Delay.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
@@ -1725,6 +1735,7 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 	if (prop==NULL) return false;
 
 	prop->SetAttribute("Number",(int)uiNumber);
+	WriteTerm(m_Frequency,*prop,"Frequency",parameterised);
 	WriteTerm(Delay,*prop,"Delay",parameterised);
 
 	prop->SetAttribute("Type",iExcitType);
@@ -1756,6 +1767,7 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
 
+	ReadTerm(m_Frequency,*prop,"Frequency");
 	ReadTerm(Delay,*prop,"Delay");
 
 	TiXmlElement *weight = prop->FirstChildElement("Weight");

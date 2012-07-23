@@ -651,6 +651,15 @@ public:
 	//! Get the active direction for the source, only necessary with hard sources (by default all active)
 	bool GetActiveDir(int Component=0);
 
+	//! Set the excitation frequency
+	void SetFrequency(double val) {m_Frequency.SetValue(val);}
+	//! Set the excitation frequency
+	void SetFrequency(const string val) {m_Frequency.SetValue(val);}
+	//! Get the excitation frequency
+	double GetFrequency()  {return m_Frequency.GetValue();}
+	//! Get the excitation frequency as a string
+	const string GetFrequencyString()  {return m_Frequency.GetValueString();}
+
 	//! Set the excitation amplitude for a given component
 	void SetExcitation(double val, int Component=0);
 	//! Set the excitation amplitude for a given component
@@ -699,6 +708,7 @@ protected:
 	unsigned int uiNumber;
 	int iExcitType;
 	bool ActiveDir[3];
+	ParameterScalar m_Frequency;
 	ParameterScalar Excitation[3];		// excitation amplitude vector
 	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
 	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
