@@ -4,10 +4,15 @@ function CSX = AddPlaneWaveExcite(CSX, name, k_dir, E_dir, f0, varargin)
 % Creates a plane wave excitation in the sense of a total-field/scattered
 % field approach.
 %
-% CSX: CSX-struct created by InitCSX
+% Note: A plane wave excitation must not intersect with any kind of
+% material. This exctiation type can only be applies in air/vacuum and
+% completely surrounding a structure!!!
 % 
+% Note: Only a single Box can be applied to this property!!
+%
 % Arguments
-% name: property name for the excitation
+% CSX:   CSX-struct created by InitCSX
+% name:  property name for the excitation
 % k_dir: unit vector of wave progation direction
 % E_dir: electric field polarisation vector (must be orthogonal to k_dir)
 % f0:    frequency for numerical phase velocity compensation (optional)
