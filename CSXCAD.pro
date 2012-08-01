@@ -18,7 +18,6 @@
 CONFIG -= qt
 TEMPLATE = lib
 INCLUDEPATH += .
-INCLUDEPATH += ../fparser
 OBJECTS_DIR = obj
 
 VERSION = 0.3.0
@@ -28,9 +27,8 @@ GITREV = $$system(git describe --tags)
 isEmpty(GITREV):GITREV=$$VERSION
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
-
 unix { 
-    LIBS += -L../fparser -lfparser
+    LIBS += -lfparser
     LIBS += -ltinyxml
     LIBS += -lhdf5_cpp -lhdf5
 
