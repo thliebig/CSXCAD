@@ -51,6 +51,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
+	m_BoundBox_CoordSys = UNDEFINED_CS;
 	m_Dimension = 0;
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
@@ -218,6 +219,7 @@ bool CSPrimPoint::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		dBoundBox[2*i+1] = coord[i];
 	}
 	m_Dimension=0;
+	m_BoundBox_CoordSys = m_PrimCoordSystem;
 	return true;
 }
 
@@ -300,6 +302,7 @@ bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
+	m_BoundBox_CoordSys = m_MeshType;
 	m_Dimension=0;
 	for (int i=0;i<3;++i)
 	{
@@ -524,6 +527,7 @@ bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 		}
 	}
 	m_Dimension=0;
+	m_BoundBox_CoordSys = m_MeshType;
 	for (int n=0;n<3;++n)
 	{
 		if (dBoundBox[2*n]!=dBoundBox[2*n+1])
@@ -671,7 +675,8 @@ CSPrimSphere::~CSPrimSphere()
 bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	double center[3] = {m_Center.GetValue(0),m_Center.GetValue(1),m_Center.GetValue(2)};
+	const double* center = m_Center.GetCartesianCoords();
+	m_BoundBox_CoordSys=CARTESIAN;
 	double radius = psRadius.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
@@ -791,7 +796,8 @@ CSPrimSphericalShell::~CSPrimSphericalShell()
 bool CSPrimSphericalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	double center[3] = {m_Center.GetValue(0),m_Center.GetValue(1),m_Center.GetValue(2)};
+	const double* center = m_Center.GetCartesianCoords();
+	m_BoundBox_CoordSys=CARTESIAN;
 	double radius = psRadius.GetValue();
 	double shellwidth = psShellWidth.GetValue();
 	for (unsigned int i=0;i<3;++i)
@@ -908,14 +914,15 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
-	double dCoords[6];
-	for (unsigned int i=0;i<6;++i)
-		dCoords[i]=GetCoord(i);
+	const double* start=m_AxisCoords[0].GetCartesianCoords();
+	const double* stop =m_AxisCoords[1].GetCartesianCoords();
+	m_BoundBox_CoordSys=CARTESIAN;
+
 	double rad=psRadius.GetValue();
 	for (unsigned int i=0;i<3;++i)
 	{
-		double min=dCoords[2*i];
-		double max=dCoords[2*i+1];
+		double min=start[i];
+		double max=stop[i];
 		if (min<max)
 		{
 			dBoundBox[2*i]=min-rad;
@@ -1085,14 +1092,14 @@ bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrien
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
-	double dCoords[6];
-	for (unsigned int i=0;i<6;++i)
-		dCoords[i]=GetCoord(i);
+	const double* start=m_AxisCoords[0].GetCartesianCoords();
+	const double* stop =m_AxisCoords[1].GetCartesianCoords();
+	m_BoundBox_CoordSys=CARTESIAN;
 	double rad=psRadius.GetValue()+psShellWidth.GetValue()/2.0;
 	for (unsigned int i=0;i<3;++i)
 	{
-		double min=dCoords[2*i];
-		double max=dCoords[2*i+1];
+		double min=start[i];
+		double max=stop[i];
 		if (min<max)
 		{
 			dBoundBox[2*i]=min-rad;
@@ -1285,6 +1292,7 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
+	m_BoundBox_CoordSys = CARTESIAN;
 	if (vCoords.size()<2) 
 	{
 		for (int i=0;i<6;++i) dBoundBox[i]=0;
@@ -1798,6 +1806,7 @@ bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 {
 //	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 	bool accurate=false;
+	m_BoundBox_CoordSys = CARTESIAN;
 	for (int n=0;n<6;++n) dBoundBox[n] = 0;
 	for (size_t i=0;i<points.size();++i)
 	{

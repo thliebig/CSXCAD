@@ -92,8 +92,10 @@ public:
 	//! Create a copy of ths primitive with different property.
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
 
-	//! Get the bounding box (for the given mesh type) for this special primitive. \sa SetCoordInputType
+	//! Get the bounding box (for the given mesh type) for this special primitive. \sa GetBoundBoxCoordSystem
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;};
+
+	virtual CoordinateSystem GetBoundBoxCoordSystem() const {return m_BoundBox_CoordSys;}
 
 	//! Get the dimension of this primitive
 	virtual int GetDimension() {return m_Dimension;}
@@ -185,6 +187,7 @@ protected:
 
 	//internal bounding box, updated by Update(), can be used to speedup IsInside
 	double m_BoundBox[6];
+	CoordinateSystem m_BoundBox_CoordSys;
 
 	int m_Dimension;
 };
