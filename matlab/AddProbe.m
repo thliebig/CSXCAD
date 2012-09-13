@@ -35,34 +35,30 @@ if (nargin<4)
     weight=1;
 end
 
+if (nargin<5)
+    FD_samples = [];
+end
+
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');
 end
 
-if isfield(CSX.Properties,'ProbeBox')
-    CSX.Properties.ProbeBox{end+1}.ATTRIBUTE.Name=name;    
-else
-	CSX.Properties.ProbeBox = {}; % create cell array
-    CSX.Properties.ProbeBox{1}.ATTRIBUTE.Name=name;
-end
-
-CSX.Properties.ProbeBox{end}.ATTRIBUTE.Type=type;
-CSX.Properties.ProbeBox{end}.ATTRIBUTE.Weight=weight;
+[CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
 
 if (nargin>4)
     if (numel(FD_samples)>0)
-        CSX.Properties.ProbeBox{end}.FD_Samples=FD_samples;
+        CSX.Properties.ProbeBox{pos}.FD_Samples=FD_samples;
     end
 end
 
 for n=1:(nargin-5)/2
     if ( (ischar(varargin{2*n})) || isnumeric(varargin{2*n}))
-        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
+        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
     else 
         value = varargin{2*n};
-        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'X']) = value{1};
-        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Y']) = value{2};
-        CSX.Properties.ProbeBox{end}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Z']) = value{3};
+        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'X']) = value{1};
+        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Y']) = value{2};
+        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Z']) = value{3};
     end
 end
 
