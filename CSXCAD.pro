@@ -43,18 +43,21 @@ unix {
 
 win32 { 
     DEFINES += BUILD_CSXCAD_LIB
+
+    # #3rd party libraries#
+    WIN32_LIB_ROOT = ..
     # fparser
-    INCLUDEPATH += ../fparser
-    LIBS += -L../fparser/release -lfparser4
+    INCLUDEPATH += $$WIN32_LIB_ROOT/fparser/include
+    LIBS += -L$$WIN32_LIB_ROOT/fparser/bin -lfparser4
     # tinyxml
-    INCLUDEPATH += ../tinyxml
-    LIBS += -L../tinyxml/release -ltinyxml2
+    INCLUDEPATH += $$WIN32_LIB_ROOT/tinyxml/include
+    LIBS += -L$$WIN32_LIB_ROOT/tinyxml/bin -ltinyxml2
     # hdf5
-    INCLUDEPATH += ../hdf5/include ../hdf5/include/cpp
-    LIBS += -L../hdf5/lib -lhdf5_cpp -lhdf5
+    INCLUDEPATH += $$WIN32_LIB_ROOT/hdf5/include
+    LIBS += -L$$WIN32_LIB_ROOT/hdf5/lib -lhdf5_cpp -lhdf5
     # vtk
-    INCLUDEPATH += ../vtk ../vtk/Common
-    LIBS += -L../vtk/bin -lvtkCommon
+    INCLUDEPATH += $$WIN32_LIB_ROOT/vtk/include/vtk-5.10
+    LIBS += -L$$WIN32_LIB_ROOT/vtk/bin -lvtkCommon
 }
 
 # vtk includes deprecated header files; silence the corresponding warning
