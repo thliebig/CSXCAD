@@ -1,16 +1,24 @@
-function CSXGeomPlot(CSX_filename)
-% function CSXGeomPlot(CSX_filename)
+function CSXGeomPlot(CSX_filename, args_string)
+% function CSXGeomPlot(CSX_filename<, args_string>)
 %
-% plot the geometry stored in the CSX file using QCSXCAD & AppCSXCAD
+% Show the geometry stored in the CSX file using AppCSXCAD
+%
+% Optional AppCSXCAD arguments (args_string):
+%   '--export-polydata-vtk=<path-for-export>'
+%   '--export-STL=<path-for-export>'
 %
 % See also InitCSX, DefineRectGrid
-% 
+%
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig
 
 if nargin < 1
     error 'specify the xml file to open'
+end
+
+if nargin < 2
+    args_string = '';
 end
 
 filename = mfilename('fullpath');
@@ -27,7 +35,7 @@ else
 	AppCSXCAD_Path = [AppCSXCAD_Path 'AppCSXCAD'];
 end
 
-command = [AppCSXCAD_Path ' --disableEdit ' CSX_filename];
+command = [AppCSXCAD_Path ' --disableEdit ' args_string ' ' CSX_filename];
 disp( ['invoking AppCSXCAD, exit to continue script...'] );
 if isOctave()
     fflush(stdout);
