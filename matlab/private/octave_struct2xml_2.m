@@ -30,6 +30,8 @@ out = [out '>'];
 if ~isstruct( in )
 	if ~ischar( in )
 		temp = vector2str(in, float_accuracy);
+	else
+		temp = in;
 	end
 	out = [out temp '</' rootName '>\n'];
 	return
