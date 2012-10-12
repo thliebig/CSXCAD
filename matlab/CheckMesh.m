@@ -36,7 +36,7 @@ if (~isempty(max_err) && ~be_quiet)
 end
 
 min_err = find(diff_lines<min_res);
-if (~isempty(max_err) && ~be_quiet)
+if (~isempty(min_err) && ~be_quiet)
     warning('CSXCAD:CheckMesh','found resolution smaller than min_res');
     pos = [pos min_err];
     EC = EC + numel(min_err);
