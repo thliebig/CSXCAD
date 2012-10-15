@@ -1,15 +1,15 @@
-function lines = SmoothMeshLines( lines, max_res, ratio, recursive)
-%function lines = SmoothMeshLines( lines, max_res, ratio, recursive)
+function lines = SmoothMeshLines( lines, max_res, ratio, recursive, check_mesh)
+%function lines = SmoothMeshLines( lines, max_res, ratio, recursive, check_mesh)
 %
 % create smooth mesh lines
 % 
-%   Warning: This function is still experimental, may not always produce a
-%   desired output.
+%   Warning: This function may not always produce a desired output.
 % 
 %   lines:      given fixed lines to create a smooth mesh in between
 %   max_res:    desired max. resolution
 %   ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
 %   recursive:  SmoothMeshLines a couple of times recursivly (optional, default is 0)
+%   check_mesh: do a final mesh check, default is true
 % 
 % example:
 %   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
@@ -32,6 +32,10 @@ end
 
 if (nargin<4)
     recursive = 0;
+end
+
+if (nargin<5)
+    check_mesh = true;
 end
 
 lines = unique(sort(lines));
@@ -101,4 +105,6 @@ for n=1:recursive
     end
 end
 
-CheckMesh(lines,0,max_res,ratio_relax,0);
+if (check_mesh)
+    CheckMesh(lines,0,max_res,ratio,0);
+end
