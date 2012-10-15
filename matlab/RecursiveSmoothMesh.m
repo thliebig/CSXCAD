@@ -1,5 +1,5 @@
-function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio, check_mesh)
-% function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio, check_mesh)
+function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio, varargin)
+% function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio, varargin)
 %
 % RecursiveSmoothMesh: This function tries to generate an optimal mesh
 %  between the given fixedMeshPoints. The space between the fixed points is
@@ -23,7 +23,9 @@ function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio,
 %               max_res:            Maximum distance between two mesh lines
 %               ratio:              Maximum grading ratio between two
 %                                    neighbour mesh lines
-%               check_mesh:         do a final mesh check, default is true
+%
+% optional variable arguments ('key', value):
+%               CheckMesh:          Do a final mesh check (default is true)
 %
 % Returns:      resultMeshPoints:   List containing the positions of all
 %                                     mesh lines. If a empty list is
@@ -45,8 +47,12 @@ if (ratio < 1.2)
     ratio = 1.2;
 end
 
-if (nargin<4)
-    check_mesh = true;
+check_mesh = true;
+
+for vn=1:2:numel(varargin)
+    if (strcmpi(varargin{vn},'CheckMesh'))
+        check_mesh = varargin{vn+1};
+    end
 end
 
 fixedMeshPoints = sort(unique(fixedMeshPoints(:)'));

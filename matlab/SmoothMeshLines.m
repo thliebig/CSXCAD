@@ -1,5 +1,5 @@
-function lines = SmoothMeshLines( lines, max_res, ratio, check_mesh, varargin)
-%function lines = SmoothMeshLines( lines, max_res, ratio, check_mesh, varargin)
+function lines = SmoothMeshLines( lines, max_res, ratio, varargin)
+%function lines = SmoothMeshLines( lines, max_res, ratio, varargin)
 %
 % create smooth mesh lines
 % 
@@ -8,10 +8,10 @@ function lines = SmoothMeshLines( lines, max_res, ratio, check_mesh, varargin)
 %   lines:      given fixed lines to create a smooth mesh in between
 %   max_res:    desired max. resolution
 %   ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
-%   check_mesh: do a final mesh check, default is true
 %
 % optional variable arguments ('key', value)
 %   recursive:  SmoothMeshLines a couple of times recursivly (default is 0)
+%   CheckMesh:  Do a final mesh check (default is true)
 %
 % example:
 %   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
@@ -32,15 +32,15 @@ if (nargin<3)
     ratio = 1.3;
 end
 
-if (nargin<4)
-    check_mesh = true;
-end
-
 recursive = 0;
+check_mesh = true;
 
 for vn=1:2:numel(varargin)
-    if (strcmp(varargin{vn},'recursive'))
+    if (strcmpi(varargin{vn},'recursive'))
         recursive = varargin{vn+1};
+    end
+    if (strcmpi(varargin{vn},'CheckMesh'))
+        check_mesh = varargin{vn+1};
     end
 end
 

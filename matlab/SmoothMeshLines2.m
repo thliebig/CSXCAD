@@ -1,5 +1,5 @@
-function lines = SmoothMeshLines2(lines, max_res, ratio, check_mesh)
-%lines = SmoothMeshLines2( lines, max_res [, ratio, check_mesh] )
+function lines = SmoothMeshLines2(lines, max_res, ratio, varargin)
+%lines = SmoothMeshLines2( lines, max_res [, ratio, varargin] )
 %
 % Create smooth mesh lines.
 %
@@ -7,7 +7,9 @@ function lines = SmoothMeshLines2(lines, max_res, ratio, check_mesh)
 %   lines:   1xn vector of (fixed) mesh lines
 %   max_res: maximum distance between any two lines (e.g. lambda/10)
 %   ratio:   (optional) default: 1.3
-%   check_mesh: do a final mesh check, default is true
+%
+% optional variable arguments ('key', value)
+%   CheckMesh:  Do a final mesh check (default is true)
 %
 % output:
 %   lines:   1xn vector of (smoothed) mesh lines
@@ -35,8 +37,12 @@ if (nargin<3)
     ratio = 1.3;
 end
 
-if (nargin<4)
-    check_mesh = true;
+check_mesh = true;
+
+for vn=1:2:numel(varargin)
+    if (strcmpi(varargin{vn},'CheckMesh'))
+        check_mesh = varargin{vn+1};
+    end
 end
 
 %
