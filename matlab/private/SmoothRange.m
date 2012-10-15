@@ -15,14 +15,14 @@ end
 
 taper = start_res*ratio;
 start_taper = start;
-while (taper*ratio<max_res)
+while (taper<max_res)
     start_taper = [start_taper start_taper(end)+taper];
     taper = taper*ratio;
 end
 
 taper = stop_res*ratio;
 stop_taper = stop;
-while (taper*ratio<max_res)
+while (taper<max_res)
     stop_taper = [stop_taper stop_taper(end)-taper];
     taper = taper*ratio;
 end
