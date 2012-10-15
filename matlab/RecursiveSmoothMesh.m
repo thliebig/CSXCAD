@@ -25,7 +25,9 @@ function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio,
 %                                    neighbour mesh lines
 %
 % optional variable arguments ('key', value):
-%               CheckMesh:          Do a final mesh check (default is true)
+%      CheckMesh:          Do a final mesh check (default is true)
+%      allowed_max_ratio:  allow only a given max. grading ratio
+%                           (default --> ratio*1.25)
 %
 % Returns:      resultMeshPoints:   List containing the positions of all
 %                                     mesh lines. If a empty list is
@@ -48,10 +50,14 @@ if (ratio < 1.2)
 end
 
 check_mesh = true;
+max_ratio = ratio*1.25;
 
 for vn=1:2:numel(varargin)
     if (strcmpi(varargin{vn},'CheckMesh'))
         check_mesh = varargin{vn+1};
+    end
+    if (strcmpi(varargin{vn},'allowed_max_ratio'))
+        max_ratio = varargin{vn+1};
     end
 end
 

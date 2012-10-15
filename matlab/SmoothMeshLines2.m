@@ -9,8 +9,9 @@ function lines = SmoothMeshLines2(lines, max_res, ratio, varargin)
 %   ratio:   (optional) default: 1.3
 %
 % optional variable arguments ('key', value)
-%   CheckMesh:  Do a final mesh check (default is true)
-%
+%   CheckMesh:          Do a final mesh check (default is true)
+%   allowed_max_ratio:  allow only a given max. grading ratio
+%                           (default --> ratio*1.25)
 % output:
 %   lines:   1xn vector of (smoothed) mesh lines
 %
@@ -38,10 +39,14 @@ if (nargin<3)
 end
 
 check_mesh = true;
+max_ratio = ratio*1.25;
 
 for vn=1:2:numel(varargin)
     if (strcmpi(varargin{vn},'CheckMesh'))
         check_mesh = varargin{vn+1};
+    end
+    if (strcmpi(varargin{vn},'allowed_max_ratio'))
+        max_ratio = varargin{vn+1};
     end
 end
 
@@ -101,7 +106,7 @@ end
 lines = sort(unique(lines));
 
 if (check_mesh)
-    CheckMesh(lines,0,max_res,ratio,0);
+    CheckMesh(lines,0,max_res,max_ratio,0);
 end
 
 end % SmoothMeshLines2()

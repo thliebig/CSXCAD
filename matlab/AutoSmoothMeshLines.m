@@ -9,14 +9,18 @@ function [lines quality] = AutoSmoothMeshLines( lines, max_res, ratio, varargin)
 %  arguments:
 %   lines:      given fixed lines to create a smooth mesh in between
 %   max_res:    desired max. resolution
-%   ratio:      max. neighboring line-delta ratio, (optional, default is 1.5)
+%   ratio:      grading ratio: desired neighboring line-delta ratio
+%                   - default is 1.5
+%                   - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorihm:         define subset of tried algorihm, e.g. [1 3]
-%   symmetric:        0/1 force symmetric mesh (default is input symmetry)
-%   homogeneous:      0/1 force homogeneous mesh
-%   allowed_min_res:  allow a given min resolution only
-%   debug:            0/1 off/on
+%   algorihm:           define subset of tried algorihm, e.g. [1 3]
+%   symmetric:          0/1 force symmetric mesh (default is input symmetry)
+%   homogeneous:        0/1 force homogeneous mesh
+%   allowed_min_res:    allow a given min resolution only
+%   allowed_max_ratio:  allow only a given max. grading ratio
+%                           (default --> ratio*1.25)
+%   debug:              0/1 off/on
 %
 % example:
 %   lines = AutoSmoothMeshLines([-100 -10 10 100], 20, 1.5, 'algorihm', ...
@@ -47,6 +51,7 @@ requires_homogen = 0;
 requires_symmetric = CheckSymmtricLines(lines);
 allowed_min_res = 0;
 debug = 0;
+max_ratio = ratio*1.25;
 
 algorthim = 1:numel(methods);
 
@@ -66,6 +71,9 @@ for vn=1:2:numel(varargin)
     if (strcmpi(varargin{vn},'allowed_min_res'))
         allowed_min_res = varargin{vn+1};
     end
+    if (strcmpi(varargin{vn},'allowed_max_ratio'))
+        max_ratio = varargin{vn+1};
+    end
     if (strcmpi(varargin{vn},'debug'))
         debug = varargin{vn+1};
     end
@@ -73,7 +81,7 @@ end
 
 for m=algorthim
     out_lines{m} = methods{m}(lines, max_res, ratio, 'CheckMesh', false);
-    quality(m) = eval_mesh(out_lines{m}, max_res, ratio, requires_homogen, requires_symmetric, allowed_min_res, 1);
+    quality(m) = eval_mesh(out_lines{m}, max_res, max_ratio, requires_homogen, requires_symmetric, allowed_min_res, 1);
     if (quality(m)==100)           % uncomment to release!
        lines = out_lines{m};
        if (debug>0)

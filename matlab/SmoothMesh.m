@@ -9,16 +9,19 @@ function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
 %
 %  arguments:
 %   lines:      given fixed lines to create a smooth mesh in between
-%   max_res:    scalar or vector of desired max. resolution
-%   ratio:      scalar or vector of max. neighboring line-delta ratio
-%                (optional, default is 1.5)
+%   max_res:    scalar or vector of desired max. allowed resolution
+%   ratio:      grading ratio: scalar or vector of desired neighboring
+%                   line-delta ratio (optional, default is 1.5)
+%                   - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorihm:         define subset of tried algorihm, e.g. [1 3]
-%   symmetric:        0/1 force symmetric mesh (default is input symmetry)
-%   homogeneous:      0/1 force homogeneous mesh
-%   allowed_min_res:  allow a given min resolution only
-%   debug:            0/1 off/on
+%   algorihm:           define subset of tried algorihm, e.g. [1 3]
+%   symmetric:          0/1 force symmetric mesh (default is input symmetry)
+%   homogeneous:        0/1 force homogeneous mesh
+%   allowed_min_res:    allow a given min resolution only
+%   allowed_max_ratio:  allow only a given max. grading ratio
+%                           (default --> ratio*1.25)
+%   debug:              0/1 off/on
 %
 % example:
 %

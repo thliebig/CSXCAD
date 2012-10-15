@@ -10,8 +10,10 @@ function lines = SmoothMeshLines( lines, max_res, ratio, varargin)
 %   ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
 %
 % optional variable arguments ('key', value)
-%   recursive:  SmoothMeshLines a couple of times recursivly (default is 0)
-%   CheckMesh:  Do a final mesh check (default is true)
+%   recursive:          SmoothMeshLines a couple of times recursivly (default is 0)
+%   CheckMesh:          Do a final mesh check (default is true)
+%   allowed_max_ratio:  allow only a given max. grading ratio
+%                           (default --> ratio*1.25)
 %
 % example:
 %   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
@@ -34,6 +36,7 @@ end
 
 recursive = 0;
 check_mesh = true;
+max_ratio = ratio*1.25;
 
 for vn=1:2:numel(varargin)
     if (strcmpi(varargin{vn},'recursive'))
@@ -41,6 +44,9 @@ for vn=1:2:numel(varargin)
     end
     if (strcmpi(varargin{vn},'CheckMesh'))
         check_mesh = varargin{vn+1};
+    end
+    if (strcmpi(varargin{vn},'allowed_max_ratio'))
+        max_ratio = varargin{vn+1};
     end
 end
 
@@ -112,5 +118,5 @@ for n=1:recursive
 end
 
 if (check_mesh)
-    CheckMesh(lines,0,max_res,ratio,0);
+    CheckMesh(lines,0,max_res,max_ratio,0);
 end
