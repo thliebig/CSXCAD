@@ -42,6 +42,11 @@ end
 
 lines = sort(unique(lines));
 
+range = lines(end)-lines(1);
+if (~isempty(find(diff(lines)<range*1e-6)))
+    warning('CSXCAD:AutoSmoothMeshLines','some lines found with very small distance which may cause smoothing failure!');
+end
+
 methods = {};
 methods{end+1} = @SmoothMeshLines;
 methods{end+1} = @SmoothMeshLines2;
