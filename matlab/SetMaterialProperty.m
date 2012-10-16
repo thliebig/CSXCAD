@@ -6,6 +6,8 @@ function CSX = SetMaterialProperty(CSX, name, varargin)
 %   'Mue':      relative magnetic permeability: [Mue} = 1
 %   'Kappa':    electric conductivity: [Kappa] = S/m
 %   'Sigma':    magnetic conductivity (non-physical property): [Sigma] = Ohm/m
+%   'Density':  material mass density: [Density] = kg/m^3, e.g. water: 1000
+%                   necessary for SAR calculations
 %
 % examples:
 % CSX = AddMaterial( CSX, 'RO3010' );
