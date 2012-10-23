@@ -58,6 +58,8 @@ win32 {
     # hdf5
     INCLUDEPATH += $$WIN32_LIB_ROOT/hdf5/include
     LIBS += -L$$WIN32_LIB_ROOT/hdf5/lib -lhdf5_cpp -lhdf5
+    # zlib
+    LIBS += -L$$WIN32_LIB_ROOT/zlib/lib -lz
     # vtk
     INCLUDEPATH += $$WIN32_LIB_ROOT/vtk/include/vtk-5.10
     LIBS += -L$$WIN32_LIB_ROOT/vtk/bin -lvtkCommon
