@@ -1,4 +1,4 @@
-function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
+function CSX = DefineRectGrid(CSX, deltaUnit, mesh)
 % function CSX = DefineRectGrid(CSX, deltaUnit, mesh);
 %
 % Create a rectiliniear grid.

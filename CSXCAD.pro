@@ -54,7 +54,7 @@ win32 {
     # tinyxml
     INCLUDEPATH += $$WIN32_LIB_ROOT/tinyxml/include
     LIBS += -L$$WIN32_LIB_ROOT/tinyxml/bin -ltinyxml2
-	DEFINES += TIXML_USE_STL
+    DEFINES += TIXML_USE_STL
     # hdf5
     INCLUDEPATH += $$WIN32_LIB_ROOT/hdf5/include
     LIBS += -L$$WIN32_LIB_ROOT/hdf5/lib -lhdf5_cpp -lhdf5
