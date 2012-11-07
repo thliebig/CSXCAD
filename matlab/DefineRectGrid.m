@@ -17,7 +17,7 @@ function CSX = DefineRectGrid(CSX, deltaUnit, mesh)
 %     mesh.z = SmoothMeshLines([0 length], 15);
 %     CSX = DefineRectGrid(CSX, unit,mesh);
 % 
-% See also InitCSX, SmoothMeshLines, SmoothMeshLines2
+% See also InitCSX, SmoothMesh, AutoSmoothMeshLines, DetectEdges
 % 
 % CSXCAD matlab interface
 % -----------------------

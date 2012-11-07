@@ -25,7 +25,7 @@ function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
 %
 % example:
 %
-% See also AutoSmoothMeshLines, InitCSX, DefineRectGrid
+% See also AutoSmoothMeshLines, InitCSX, DefineRectGrid, DetectEdges
 %
 % CSXCAD matlab interface
 % -----------------------
