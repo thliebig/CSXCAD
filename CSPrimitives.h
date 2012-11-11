@@ -27,6 +27,15 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+
+#include <CGAL/Simple_cartesian.h>
+#include <CGAL/Polyhedron_incremental_builder_3.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/AABB_tree.h>
+#include <CGAL/AABB_traits.h>
+#include <CGAL/AABB_polyhedron_triangle_primitive.h>
+#include <CGAL/AABB_polyhedron_segment_primitive.h>
+
 #include "ParameterObjects.h"
 #include "ParameterCoord.h"
 #include "CSXCAD_Global.h"
@@ -41,6 +50,7 @@ class CSPrimCylinder;
 class CSPrimPolygon;
 	class CSPrimLinPoly;
 	class CSPrimRotPoly;
+class CSPrimPolyhedron;
 class CSPrimCurve;
 	class CSPrimWire;
 class CSPrimUserDefined;
@@ -71,7 +81,7 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		POINT,BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,CURVE,WIRE,USERDEFINED
+		POINT,BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,POLYHEDRON,CURVE,WIRE,USERDEFINED
 	};
 
 	//! Set or change the property for this primitive.
@@ -138,6 +148,8 @@ public:
 	CSPrimLinPoly* ToLinPoly() { return ( this && Type == LINPOLY ) ? (CSPrimLinPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
 	CSPrimRotPoly* ToRotPoly() { return ( this && Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Polyhedron-Primitive or NULL in case of different type.
+	CSPrimPolyhedron* ToPolyhedron() { return ( this && Type == POLYHEDRON ) ? (CSPrimPolyhedron*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Curve-Primitive or NULL in case of different type.
 	CSPrimCurve* ToCurve() { return ( this && Type == CURVE ) ? (CSPrimCurve*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Wire-Primitive or NULL in case of different type.
@@ -592,6 +604,77 @@ protected:
 	double m_StartStopAng[2];
 	//rot axis direction
 	int m_RotAxisDir;
+};
+
+
+typedef CGAL::Simple_cartesian<double>     Kernel;
+typedef CGAL::Polyhedron_3<Kernel>         Polyhedron;
+typedef Polyhedron::HalfedgeDS             HalfedgeDS;
+
+class Polyhedron_Builder : public CGAL::Modifier_base<HalfedgeDS>
+{
+public:
+    Polyhedron_Builder(CSPrimPolyhedron* polyhedron) {m_polyhedron=polyhedron;}
+    void operator()(HalfedgeDS &hds);
+
+protected:
+	CSPrimPolyhedron* m_polyhedron;
+};
+
+typedef Kernel::Point_3                                             Point;
+typedef CGAL::AABB_polyhedron_triangle_primitive<Kernel,Polyhedron> Primitive;
+typedef CGAL::AABB_traits<Kernel, Primitive>                        Traits;
+typedef CGAL::Simple_cartesian<double>::Ray_3                       Ray;
+typedef Kernel::Segment_3                                           Segment;
+
+//! Polyhedron Primitive
+/*!
+ This is a polyhedron primitive. A 3D solid object, defined by vertices and faces
+ */
+class CSXCAD_EXPORT CSPrimPolyhedron : public CSPrimitives
+{
+	friend class Polyhedron_Builder;
+public:
+	struct face
+	{
+		unsigned int numVertex;
+		int* vertices;
+	};
+	struct vertex
+	{
+		float coord[3];
+	};
+
+	CSPrimPolyhedron(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSProperties *prop=NULL);
+	CSPrimPolyhedron(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimPolyhedron();
+
+	virtual void Reset();
+
+	virtual void AddVertex(float p[3]) {AddVertex(p[0],p[1],p[2]);}
+	virtual void AddVertex(float px, float py, float pz);
+
+	virtual void AddFace(int numVertex, int* vertices);
+	virtual void AddFace(vector<int> vertices);
+
+	virtual CSPrimPolyhedron* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolyhedron(this,prop);}
+
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
+	virtual bool IsInside(const double* Coord, double tol=0);
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+
+	virtual void ShowPrimitiveStatus(ostream& stream);
+
+protected:
+	vector<vertex> m_Vertices;
+	vector<face> m_Faces;
+	Polyhedron m_Polyhedron;
+	Point m_RandPt;
+	CGAL::AABB_tree<Traits> *m_PolyhedronTree;
 };
 
 //! Curve Primitive (Polygonal chain)
