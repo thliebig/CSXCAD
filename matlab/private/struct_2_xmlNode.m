@@ -22,9 +22,15 @@ for n=1:numel(names)
     elseif iscell(getfield(mat_struct,names{n}))
         cellfield = getfield(mat_struct,names{n});
         for m=1:numel(cellfield)
-            docNewElem = docNode.createElement(names{n});
-            docNewElem = struct_2_xmlNode(docNode, docNewElem, cellfield{m});
-            docElem.appendChild(docNewElem);
+            if ischar(cellfield{m})
+                docNewElem = docNode.createElement(names{n});
+                docNewElem.appendChild(docNode.createTextNode(cellfield{m}));
+                docElem.appendChild(docNewElem);
+            else
+                docNewElem = docNode.createElement(names{n});
+                docNewElem = struct_2_xmlNode(docNode, docNewElem, cellfield{m});
+                docElem.appendChild(docNewElem);
+            end
         end
     elseif isempty(getfield(mat_struct,names{n}))
         %do nothing...
