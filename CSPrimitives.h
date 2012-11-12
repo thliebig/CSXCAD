@@ -655,8 +655,14 @@ public:
 	virtual void AddVertex(float p[3]) {AddVertex(p[0],p[1],p[2]);}
 	virtual void AddVertex(float px, float py, float pz);
 
+	virtual unsigned int GetNumVertices() const {return m_Vertices.size();}
+	virtual float* GetVertex(unsigned int n);
+
 	virtual void AddFace(int numVertex, int* vertices);
 	virtual void AddFace(vector<int> vertices);
+
+	virtual unsigned int GetNumFaces() const {return m_Faces.size();}
+	virtual int* GetFace(unsigned int n, unsigned int &numVertices);
 
 	virtual CSPrimPolyhedron* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolyhedron(this,prop);}
 

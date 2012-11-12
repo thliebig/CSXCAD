@@ -1821,6 +1821,13 @@ void CSPrimPolyhedron::AddVertex(float px, float py, float pz)
 	m_Vertices.push_back(nv);
 }
 
+float* CSPrimPolyhedron::GetVertex(unsigned int n)
+{
+	if (n<m_Vertices.size())
+		return m_Vertices.at(n).coord;
+	return NULL;
+}
+
 void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 {
 	face f;
@@ -1839,6 +1846,17 @@ void CSPrimPolyhedron::AddFace(vector<int> vertices)
 	for (unsigned int n=0;n<f.numVertex;++n)
 		f.vertices[n]=vertices.at(n);
 	m_Faces.push_back(f);
+}
+
+int* CSPrimPolyhedron::GetFace(unsigned int n, unsigned int &numVertices)
+{
+	numVertices = 0;
+	if (n<m_Faces.size())
+	{
+		numVertices = m_Faces.at(n).numVertex;
+		return m_Faces.at(n).vertices;
+	}
+	return NULL;
 }
 
 bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
