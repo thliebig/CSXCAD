@@ -34,13 +34,16 @@ unix {
     DEFINES += TIXML_USE_STL
     LIBS += -lhdf5_hl -lhdf5
 
-#vtk
+    #vtk
     INCLUDEPATH += /usr/include/vtk-5.2 \
         /usr/include/vtk-5.4 \
         /usr/include/vtk-5.6 \
         /usr/include/vtk-5.8 \
         /usr/include/vtk-5.10 \
         /usr/include/vtk
+
+    #hdf5
+    INCLUDEPATH += /usr/include/mpi
 }
 
 win32 { 
