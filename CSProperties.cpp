@@ -23,8 +23,8 @@
 #include <iostream>
 #include <sstream>
 #include "tinyxml.h"
-
-#include <H5Cpp.h>
+#include <hdf5.h>
+#include <hdf5_hl.h>
 
 /*********************CSProperties********************************************************************/
 CSProperties::CSProperties(CSProperties* prop)
@@ -1178,153 +1178,184 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-bool CSPropDiscMaterial::ReadHDF5(string filename)
+float *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int &rank, unsigned int &size, bool debug)
 {
-	cout << "CSPropDiscMaterial::ReadHDF5: Reading \"" << filename << "\""<< endl;
+	herr_t status;
+	H5T_class_t class_id;
+	size_t type_size;
+	rank = -1;
 
-	H5::FloatType datatype( H5::PredType::NATIVE_FLOAT );
+	// open hdf5 file
+	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
+	if (file_id < 0)
+	{
+		if (debug)
+			cerr << __func__ << ": Failed to open file, skipping..." << endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
 
+	if (H5Lexists(file_id, d_name.c_str(), H5P_DEFAULT)<=0)
+	{
+		if (debug)
+			cerr << __func__ << ": Warning, dataset: \"" << d_name << "\" not found... skipping" << endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	status = H5LTget_dataset_ndims(file_id, d_name.c_str(), &rank);
+	if (status < 0)
+	{
+		if (debug)
+			cerr << __func__ << ": Warning, failed to read dimension for dataset: \"" << d_name << "\" skipping..." << endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	hsize_t dims[rank];
+	status = H5LTget_dataset_info( file_id, d_name.c_str(), dims, &class_id, &type_size);
+	if (status < 0)
+	{
+		if (debug)
+			cerr << __func__ << ": Warning, failed to read dataset info: \"" << d_name << "\" skipping..." << endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	size = 1;
+	for (int n=0;n<rank;++n)
+		size*=dims[n];
+
+	float* data = new float[size];
+	status = H5LTread_dataset_float( file_id, d_name.c_str(), data );
+	if (status < 0)
+	{
+		if (debug)
+			cerr << __func__ << ": Warning, failed to read dataset: \"" << d_name << "\" skipping..." << endl;
+		delete[] data;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	H5Fclose(file_id);
+	return data;
+}
+
+bool CSPropDiscMaterial::ReadHDF5( string filename )
+{
+	cout << __func__ << ": Reading \"" << filename << "\"" << endl;
+
+	// open hdf5 file
+	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
+	if (file_id < 0)
+	{
+		cerr << __func__ << ": Failed to open file, skipping..." << endl;
+		return false;
+	}
+
+	unsigned int size;
+	int rank;
+	// read mesh
+	unsigned int numCells = 1;
 	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
-
-	//save exception print status
-	H5E_auto2_t func;
-	void* client_data;
-	H5::Exception::getAutoPrint(func, &client_data);
-
-	//disable exception print
-	H5::Exception::dontPrint();
-
-	H5::H5File file;
-	try
+	for (int n=0; n<3; ++n)
 	{
-		file.openFile(filename, H5F_ACC_RDONLY );
+		m_mesh[n] = ReadDataSet(filename, names[n], rank, size);
+		if ((m_mesh[n]==NULL) || (rank!=1))
+		{
+			cerr << __func__ << ": Failed to read mesh, skipping..." << endl;
+			return false;
+		}
+		m_Size[n]=size;
+		numCells*=m_Size[n];
 	}
-	catch (H5::Exception error)
+
+	string name = "/epsR";
+	m_Disc_epsR = ReadDataSet(filename, name, rank, size);
+	if (m_Disc_epsR==NULL)
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: Failed to open file " << filename << " skipping..." << endl;
-		//restore exception print status
-		H5::Exception::setAutoPrint(func,client_data);
+		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
+	}
+	else if (rank!=3)
+	{
+		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
+		return false;
+	}
+	else if (size != numCells)
+	{
+		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
 		return false;
 	}
 
-	try
+
+	name = "/kappa";
+	m_Disc_kappa = ReadDataSet(filename, name, rank, size);
+	if (m_Disc_kappa==NULL)
 	{
-		for (int n=0;n<3;++n)
-		{
-			H5::DataSet dataset = file.openDataSet( names[n].c_str() );
-			H5::DataSpace dataspace = dataset.getSpace();
-			m_Size[n]= dataspace.getSimpleExtentNpoints();
-			delete[] m_mesh[n];
-			m_mesh[n] = new float[m_Size[n]];
-			dataset.read(m_mesh[n],datatype,dataspace);
-			dataspace.close();
-		}
+		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
 	}
-	catch (H5::Exception error)
+	else if (rank!=3)
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: Failed to read mesh, skipping..." << endl;
-		//restore exception print status
-		H5::Exception::setAutoPrint(func,client_data);
+		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
+		return false;
+	}
+	else if (size != numCells)
+	{
+		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
 		return false;
 	}
 
-	try
+	name = "/mueR";
+	m_Disc_mueR = ReadDataSet(filename, name, rank, size);
+	if (m_Disc_mueR==NULL)
 	{
-		H5::DataSet dataset = file.openDataSet( "/epsR");
-		H5::DataSpace dataspace = dataset.getSpace();
-		size_t  size= dataspace.getSimpleExtentNpoints();
-		delete[] m_Disc_epsR;
-		m_Disc_epsR = new float[size];
-		dataset.read(m_Disc_epsR,datatype,dataspace);
-		dataspace.close();
-		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
-		{
-			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		}
+		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
 	}
-	catch( H5::Exception error)
+	else if (rank!=3)
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: No epsR material information found" << endl;
+		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
+		return false;
+	}
+	else if (size != numCells)
+	{
+		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		return false;
 	}
 
-	try
+	name = "/sigma";
+	m_Disc_sigma = ReadDataSet(filename, name, rank, size);
+	if (m_Disc_sigma==NULL)
 	{
-		H5::DataSet dataset = file.openDataSet( "/kappa");
-		H5::DataSpace dataspace = dataset.getSpace();
-		size_t size= dataspace.getSimpleExtentNpoints();
-		delete[] m_Disc_kappa;
-		m_Disc_kappa = new float[size];
-		dataset.read(m_Disc_kappa,datatype,dataspace);
-		dataspace.close();
-		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
-		{
-			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		}
+		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
 	}
-	catch( H5::Exception error)
+	else if (rank!=3)
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: No kappa material information found" << endl;
+		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
+		return false;
+	}
+	else if (size != numCells)
+	{
+		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		return false;
 	}
 
-	try
-	{
-		H5::DataSet dataset = file.openDataSet( "/mueR");
-		H5::DataSpace dataspace = dataset.getSpace();
-		size_t size= dataspace.getSimpleExtentNpoints();
-		delete[] m_Disc_mueR;
-		m_Disc_mueR = new float[size];
-		dataset.read(m_Disc_mueR,datatype,dataspace);
-		dataspace.close();
-		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
-		{
-			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		}
-	}
-	catch( H5::Exception error)
-	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: No mueR material information found" << endl;
-	}
 
-	try
+	name = "/density";
+	m_Disc_Density = ReadDataSet(filename, name, rank, size);
+	if (m_Disc_Density==NULL)
 	{
-		H5::DataSet dataset = file.openDataSet( "/sigma");
-		H5::DataSpace dataspace = dataset.getSpace();
-		size_t size= dataspace.getSimpleExtentNpoints();
-		delete[] m_Disc_sigma;
-		m_Disc_sigma = new float[size];
-		dataset.read(m_Disc_sigma,datatype,dataspace);
-		dataspace.close();
-		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
-		{
-			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		}
+		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
 	}
-	catch( H5::Exception error)
+	else if (rank!=3)
 	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: No sigma material information found" << endl;
+		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
+		return false;
 	}
-
-	try
+	else if (size != numCells)
 	{
-		H5::DataSet dataset = file.openDataSet( "/density");
-		H5::DataSpace dataspace = dataset.getSpace();
-		size_t size= dataspace.getSimpleExtentNpoints();
-		delete[] m_Disc_Density;
-		m_Disc_Density = new float[size];
-		dataset.read(m_Disc_Density,datatype,dataspace);
-		dataspace.close();
-		if (m_Size[0]*m_Size[1]*m_Size[2]!=size)
-		{
-			cerr << "CSPropDiscMaterial::ReadHDF5: Error, data size doen't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		}
+		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		return false;
 	}
-	catch( H5::Exception error)
-	{
-		cerr << "CSPropDiscMaterial::ReadHDF5: No material density information found" << endl;
-	}
-
-	//restore exception print status
-	H5::Exception::setAutoPrint(func,client_data);
 
 	return true;
 }

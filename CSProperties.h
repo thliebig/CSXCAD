@@ -502,6 +502,8 @@ protected:
 	float *m_Disc_Density;
 	double m_Scale;
 	CSTransform* m_Transform;
+
+	float* ReadDataSet(string filename, string d_name, int &rank, unsigned int &size, bool debug=false);
 };
 
 //! Continuous Structure Lumped Element Property

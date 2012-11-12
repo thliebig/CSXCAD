@@ -31,8 +31,8 @@ DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 unix { 
     LIBS += -lfparser
     LIBS += -ltinyxml
-	DEFINES += TIXML_USE_STL
-    LIBS += -lhdf5_cpp -lhdf5
+    DEFINES += TIXML_USE_STL
+    LIBS += -lhdf5_hl -lhdf5
 
 #vtk
     INCLUDEPATH += /usr/include/vtk-5.2 \
@@ -57,7 +57,7 @@ win32 {
     DEFINES += TIXML_USE_STL
     # hdf5
     INCLUDEPATH += $$WIN32_LIB_ROOT/hdf5/include
-    LIBS += -L$$WIN32_LIB_ROOT/hdf5/lib -lhdf5_cpp -lhdf5
+    LIBS += -L$$WIN32_LIB_ROOT/hdf5/lib -lhdf5_hl -lhdf5
     # zlib
     LIBS += -L$$WIN32_LIB_ROOT/zlib/lib -lz
     # vtk
