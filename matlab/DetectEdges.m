@@ -120,8 +120,8 @@ if (isfield(CSX, 'Properties'))
                         y2 = box.P2.ATTRIBUTE.Y;
                         z2 = box.P2.ATTRIBUTE.Z;
                         % add to global list of edges
-                        edges = AddEdge (edges, box, x1, y1, z1);
-                        edges = AddEdge (edges, box, x2, y2, z2);
+                        edges = AddEdge (edges, box, x1, y1, z1, debug);
+                        edges = AddEdge (edges, box, x2, y2, z2, debug);
                     end
                 elseif (strcmp(prim_fn{n_prim}, 'LinPoly') || strcmp(prim_fn{n_prim}, 'Polygon'))
                     for l = 1:length(primitives.(prim_fn{n_prim}))
@@ -138,8 +138,8 @@ if (isfield(CSX, 'Properties'))
                                     vertex = poly.Vertex{v};
                                     x1 = vertex.ATTRIBUTE.X1;
                                     y1 = vertex.ATTRIBUTE.X2;
-                                    edges = AddEdge (edges, poly, x1, y1, z1);
-                                    edges = AddEdge (edges, poly, x1, y1, z2);
+                                    edges = AddEdge (edges, poly, x1, y1, z1, debug);
+                                    edges = AddEdge (edges, poly, x1, y1, z2, debug);
                                 end
                             end
                         end
@@ -170,7 +170,7 @@ end
 
 
 
-function edges = AddEdge(edges, csx_prim, x, y, z)
+function edges = AddEdge(edges, csx_prim, x, y, z, debug)
 % Add edges of CSX primitives including some transformations
 
 xt = x;
