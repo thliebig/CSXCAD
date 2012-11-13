@@ -230,8 +230,8 @@ void CSProperties::RemovePrimitive(CSPrimitives *prim)
 	{
 		if (vPrimitives.at(i)==prim)
 		{
-				vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
-				vPrimitives.erase(iter);
+			vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
+			vPrimitives.erase(iter);
 		}
 	}
 }
@@ -465,10 +465,10 @@ double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 
 void CSPropMaterial::Init()
 {
-    bIsotropy = true;
+	bIsotropy = true;
 	bMaterial=true;
-    for (int n=0;n<3;++n)
-    {
+	for (int n=0;n<3;++n)
+	{
 		Epsilon[n].SetValue(1);
 		Epsilon[n].SetParameterSet(clParaSet);
 		Mue[n].SetValue(1);
@@ -1287,7 +1287,6 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		return false;
 	}
 
-
 	name = "/kappa";
 	m_Disc_kappa = ReadDataSet(filename, name, rank, size);
 	if (m_Disc_kappa==NULL)
@@ -1338,7 +1337,6 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
 		return false;
 	}
-
 
 	name = "/density";
 	m_Disc_Density = ReadDataSet(filename, name, rank, size);
