@@ -1,5 +1,5 @@
 function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
-% function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
+% function [mesh] = SmoothMesh( mesh, max_res, <ratio, varargin>)
 %
 %   Convienent function to create a smooth mesh in all directions.
 %   Generate smooth mesh by choosing an appropriate algorithm in each direction.
@@ -24,6 +24,11 @@ function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
 %   debug:              0/1 off/on
 %
 % example:
+%     mesh.x = [-BoundBox 0 BoundBox];
+%     mesh.y = [-BoundBox 0 BoundBox];
+%     mesh.z = [0 BoundBox];
+%     mesh = SmoothMesh(mesh, lambda/20/unit);
+%     CSX = DefineRectGrid(CSX, unit, mesh);
 %
 % See also AutoSmoothMeshLines, InitCSX, DefineRectGrid, DetectEdges
 %

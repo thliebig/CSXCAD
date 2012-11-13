@@ -14,6 +14,15 @@ function mesh = DetectEdges(CSX, mesh, varargin)
 %   'Set_Property'  set the list of properties to detect (override default)
 %                   e.g. 'Metal' or {'Metal','ConductingSheet'}
 %
+% example:
+%     CSX = InitCSX();
+%     % define all properties and primitives to detect
+%     % ...
+%     % ...
+%     mesh = DetectEdges(CSX);
+%     mesh = SmoothMesh(mesh, lambda/20/unit);
+%     CSX = DefineRectGrid(CSX, unit, mesh);
+%
 % Note:
 % - Only primitives contained in Metal, Material, Excitation, LumpedElement
 %   or ConductingSheet properties are processed

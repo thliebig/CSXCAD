@@ -5,16 +5,16 @@ function CSX = DefineRectGrid(CSX, deltaUnit, mesh)
 % 
 % example Cartesian mesh:
 %     CSX = InitCSX();
-%     mesh.x = SmoothMeshLines([0 a], 10);
-%     mesh.y = SmoothMeshLines([0 b], 10);
-%     mesh.z = SmoothMeshLines([0 length], 15);
+%     mesh.x = AutoSmoothMeshLines([0 a], 10);
+%     mesh.y = AutoSmoothMeshLines([0 b], 10);
+%     mesh.z = AutoSmoothMeshLines([0 length], 15);
 %     CSX = DefineRectGrid(CSX, unit,mesh);
 % 
 % example Cylindrical mesh:
 %     CSX = InitCSX('CoordSystem',1);
-%     mesh.r = SmoothMeshLines([0 a], 10);
-%     mesh.a = SmoothMeshLines([0 b], 10);
-%     mesh.z = SmoothMeshLines([0 length], 15);
+%     mesh.r = AutoSmoothMeshLines([0 a], 10);
+%     mesh.a = AutoSmoothMeshLines([0 2*pi], pi/30);
+%     mesh.z = AutoSmoothMeshLines([-length 0 length], 15);
 %     CSX = DefineRectGrid(CSX, unit,mesh);
 % 
 % See also InitCSX, SmoothMesh, AutoSmoothMeshLines, DetectEdges
