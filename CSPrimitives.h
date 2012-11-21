@@ -58,6 +58,8 @@ class CSTransform;
 */
 void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist);
 
+bool CSXCAD_EXPORT CoordInRange(const double* p, const double* start, const double* stop, CoordinateSystem cs_in);
+
 //! Abstract base class for different geometrical primitives.
 /*!
  This is an abstract base class for different geometrical primitives like boxes, spheres, cylinders etc.

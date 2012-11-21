@@ -22,6 +22,7 @@
 #include <limits>
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
+#include <math.h>
 
 #define PI acos(-1)
 
@@ -36,6 +37,29 @@ void Point_Line_Distance(const double P[], const double start[], const double st
 	double footP[] = {start[0] + foot*dir[0], start[1] + foot*dir[1], start[2] + foot*dir[2]};
 
 	dist = sqrt(pow(P[0]-footP[0],2)+pow(P[1]-footP[1],2)+pow(P[2]-footP[2],2));
+}
+
+bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const double* stop, CoordinateSystem cs_in)
+{
+	double p[] = {coord[0],coord[1],coord[2]};
+	switch (cs_in)
+	{
+	case CYLINDRICAL:
+		if (p[1]<min(start[1],stop[1]))
+			while (p[1]<min(start[1],stop[1]))
+				p[1]+=2*PI;
+		else if (p[1]>max(start[1],stop[1]))
+			while (p[1]>max(start[1],stop[1]))
+				p[1]-=2*PI;
+	case CARTESIAN:
+	default:
+		for (int n=0;n<3;++n)
+			if ((p[n]<min(start[n],stop[n])) || (p[n]>max(start[n],stop[n])))
+				return false;
+		return true;
+		break;
+	}
+	return true;
 }
 
 /*********************CSPrimitives********************************************************************/
@@ -337,20 +361,10 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	//transform incoming coordinates into the coorindate system of the primitive
 	TransformCoordSystem(pos,pos,m_MeshType,m_PrimCoordSystem);
 
-	for (unsigned int n=0;n<3;++n)
-	{
-		if (start[n]<=stop[n])
-		{
-			if ((pos[n]<start[n]) || (pos[n]>stop[n]))
-				return false;
-		}
-		else
-		{
-			if ((pos[n]>start[n]) || (pos[n]<stop[n]))
-				return false;
-		}
-	}
-	return true;
+	if (m_PrimCoordSystem!=UNDEFINED_CS)
+		return CoordInRange(pos, start, stop, m_PrimCoordSystem);
+	else
+		return CoordInRange(pos, start, stop, m_MeshType);
 }
 
 
