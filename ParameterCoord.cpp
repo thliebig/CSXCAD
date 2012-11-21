@@ -163,7 +163,7 @@ const string ParameterCoord::GetValueString(int ny) const
 	return m_Coords[ny]->GetValueString();
 }
 
-double ParameterCoord::GetValue(int ny, CoordinateSystem cs)
+double ParameterCoord::GetCoordValue(int ny, CoordinateSystem cs)
 {
 	if ((ny<0) || (ny>2))
 		return nan("");

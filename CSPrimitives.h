@@ -172,7 +172,8 @@ protected:
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
 	CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 
-	void TransformCoords(double* Coord, bool invers);
+	//! Apply (invers) transformation to the given coordinate in the given coordinate system
+	void TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const;
 
 	unsigned int uiID;
 	int iPriority;

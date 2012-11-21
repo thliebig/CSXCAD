@@ -148,18 +148,18 @@ void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
 	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
 }
 
-void CSPrimitives::TransformCoords(double* Coord, bool invers)
+void CSPrimitives::TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const
 {
 	if (m_Transform==NULL)
 		return;
-	if (m_MeshType!=CARTESIAN) //transform to cartesian if necessary
-		TransformCoordSystem(Coord,Coord,m_MeshType,CARTESIAN);
+	// transform to Cartesian for transformation
+	TransformCoordSystem(Coord,Coord,cs_in,CARTESIAN);
 	if (invers)
 		m_Transform->InvertTransform(Coord,Coord);
 	else
 		m_Transform->Transform(Coord,Coord);
-	if (m_MeshType!=CARTESIAN) //transform back from cartesian if necessary
-		TransformCoordSystem(Coord,Coord,m_MeshType,m_PrimCoordSystem);
+	// transform back from Cartesian to incoming coordinate system
+	TransformCoordSystem(Coord,Coord,CARTESIAN,cs_in);
 }
 
 /*********************CSPrimPoint********************************************************************/
@@ -201,7 +201,7 @@ void CSPrimPoint::SetCoord(int index, const string val)
 
 double CSPrimPoint::GetCoord(int index)
 {
-	return m_Coords.GetValue(index,m_MeshType);
+	return m_Coords.GetCoordValue(index,m_MeshType);
 }
 
 ParameterScalar* CSPrimPoint::GetCoordPS(int index)
@@ -301,17 +301,20 @@ bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 //		cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
 
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
-	const double* stop  = m_Coords[1].GetCoords(m_MeshType);
+	const double* stop = m_Coords[1].GetCoords(m_MeshType);
+
 	m_BoundBox_CoordSys = m_MeshType;
 	m_Dimension=0;
 	for (int i=0;i<3;++i)
 	{
 		dBoundBox[2*i]  = start[i];
 		dBoundBox[2*i+1]= stop[i];
+
 		if (start[i]!=stop[i])
 			++m_Dimension;
 	}
-	if (PreserveOrientation==true) return true;
+	if (PreserveOrientation)
+		return true;
 	for (int i=0;i<3;++i)
 		if (dBoundBox[2*i]>dBoundBox[2*i+1])
 		{
@@ -330,7 +333,7 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	const double* stop  = m_Coords[1].GetCoords(m_PrimCoordSystem);
 	double pos[3] = {Coord[0],Coord[1],Coord[2]};
 
-	TransformCoords(pos, true);
+	TransformCoords(pos, true, m_MeshType);
 	//transform incoming coordinates into the coorindate system of the primitive
 	TransformCoordSystem(pos,pos,m_MeshType,m_PrimCoordSystem);
 
@@ -542,7 +545,7 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 	bool in=false;
 	double UpVal,DownVal;
 	double coords[3]={Coord[0],Coord[1],Coord[2]};
-	TransformCoords(coords, true);
+	TransformCoords(coords, true, m_MeshType);
 	//fprintf(stderr,"here\n");
 	for (unsigned int i=0;i<vCoords.size()/6;++i)
 	{
@@ -1794,11 +1797,11 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
 bool CSPrimCurve::GetPoint(size_t point_index, double* point, bool transform)
 {
 	if (point_index>=GetNumberOfPoints()) return false;
-	point[0] = points.at(point_index)->GetValue(0);
-	point[1] = points.at(point_index)->GetValue(1);
-	point[2] = points.at(point_index)->GetValue(2);
+	point[0] = points.at(point_index)->GetCoordValue(0,m_MeshType);
+	point[1] = points.at(point_index)->GetCoordValue(1,m_MeshType);
+	point[2] = points.at(point_index)->GetCoordValue(2,m_MeshType);
 	if (transform)
-		TransformCoords(point, false);
+		TransformCoords(point, false, m_MeshType);
 	return true;
 }
 
@@ -1814,16 +1817,16 @@ bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 		{
 			for (int n=0;n<3;++n)
 			{
-				dBoundBox[2*n]=points.at(0)->GetValue(n);
+				dBoundBox[2*n]=points.at(0)->GetCoordValue(n,CARTESIAN);
 				dBoundBox[2*n+1]=dBoundBox[2*n];
 			}
 		}
 		for (int n=0;n<3;++n)
 		{
 			if (points.at(i)->GetValue(n)<dBoundBox[2*n])
-				dBoundBox[2*n]=points.at(i)->GetValue(n);
+				dBoundBox[2*n]=points.at(i)->GetCoordValue(n,CARTESIAN);
 			else if (points.at(i)->GetValue(n)>dBoundBox[2*n+1])
-				dBoundBox[2*n+1]=points.at(i)->GetValue(n);
+				dBoundBox[2*n+1]=points.at(i)->GetCoordValue(n,CARTESIAN);
 		}
 	}
 	if (points.size()<=1)

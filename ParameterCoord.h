@@ -48,11 +48,11 @@ public:
 	double GetValue(int ny);
 	//! Get the native coordinate values as string
 	const string GetValueString(int ny) const;
-
-	//! Get the coordinate in the given coordinate system
-	double GetValue(int ny, CoordinateSystem cs);
 	//! Get the internal scalar parameter, use carefully...
 	ParameterScalar* GetCoordPS(int ny);
+
+	//! Get the coordinate in the given coordinate system
+	double GetCoordValue(int ny, CoordinateSystem cs);
 
 	const double* GetNativeCoords() const;
 	const double* GetCartesianCoords() const {return m_CartesianCoords;}
