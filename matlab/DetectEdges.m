@@ -95,6 +95,8 @@ if (~isstruct(CSX))
     error('expected a CSX structure');
 end
 
+CoordSystem = CSX.ATTRIBUTE.CoordSystem;
+
 if (isfield(CSX, 'Properties'))
     prop_fn = fieldnames(CSX.Properties);
     for p = 1:numel(prop_fn)
@@ -120,8 +122,8 @@ if (isfield(CSX, 'Properties'))
                         y2 = box.P2.ATTRIBUTE.Y;
                         z2 = box.P2.ATTRIBUTE.Z;
                         % add to global list of edges
-                        edges = AddEdge (edges, box, x1, y1, z1, debug);
-                        edges = AddEdge (edges, box, x2, y2, z2, debug);
+                        edges = AddEdge (edges, box, x1, y1, z1, CoordSystem, debug);
+                        edges = AddEdge (edges, box, x2, y2, z2, CoordSystem, debug);
                     end
                 elseif (strcmp(prim_fn{n_prim}, 'LinPoly') || strcmp(prim_fn{n_prim}, 'Polygon'))
                     for l = 1:length(primitives.(prim_fn{n_prim}))
@@ -138,8 +140,8 @@ if (isfield(CSX, 'Properties'))
                                     vertex = poly.Vertex{v};
                                     x1 = vertex.ATTRIBUTE.X1;
                                     y1 = vertex.ATTRIBUTE.X2;
-                                    edges = AddEdge (edges, poly, x1, y1, z1, debug);
-                                    edges = AddEdge (edges, poly, x1, y1, z2, debug);
+                                    edges = AddEdge (edges, poly, x1, y1, z1, CoordSystem, debug);
+                                    edges = AddEdge (edges, poly, x1, y1, z2, CoordSystem, debug);
                                 end
                             end
                         end
@@ -170,12 +172,21 @@ end
 
 
 
-function edges = AddEdge(edges, csx_prim, x, y, z, debug)
+function edges = AddEdge(edges, csx_prim, x, y, z, CoordSystem, debug)
 % Add edges of CSX primitives including some transformations
 
 xt = x;
 yt = y;
 zt = z;
+
+if isfield(csx_prim.ATTRIBUTE,'CoordSystem')
+    if (csx_prim.ATTRIBUTE.CoordSystem~=CoordSystem)
+        if (debug>2)
+            warning('CSXCAD:DetectEdges','different coordinate systems not supported, skipping edges');
+        end
+        return
+    end
+end
 
 if (isfield(csx_prim, 'Transformation'))
 
