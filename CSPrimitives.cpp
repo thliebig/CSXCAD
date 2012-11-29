@@ -19,6 +19,12 @@
 #include <iostream>
 #include <limits>
 #include "tinyxml.h"
+#include "stdint.h"
+
+#include <vtkSTLReader.h>
+#include <vtkPLYReader.h>
+#include <vtkPolyData.h>
+#include <vtkCellArray.h>
 
 #include "CSPrimitives.h"
 
@@ -1750,22 +1756,55 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 /*********************Polyhedron_Builder********************************************************************/
 void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 {
-    // Postcondition: `hds' is a valid polyhedral surface.
-    CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> B( hds, true);
-    B.begin_surface( m_polyhedron->m_Vertices.size(), m_polyhedron->m_Faces.size());
-    typedef typename HalfedgeDS::Vertex   Vertex;
-    typedef typename Vertex::Point Point;
+	// Postcondition: `hds' is a valid polyhedral surface.
+	CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> B( hds, true);
+	B.begin_surface( m_polyhedron->m_Vertices.size(), m_polyhedron->m_Faces.size());
+	typedef typename HalfedgeDS::Vertex   Vertex;
+	typedef typename Vertex::Point Point;
 	for (size_t n=0;n<m_polyhedron->m_Vertices.size();++n)
 		B.add_vertex( Point( m_polyhedron->m_Vertices.at(n).coord[0], m_polyhedron->m_Vertices.at(n).coord[1], m_polyhedron->m_Vertices.at(n).coord[2]));
 
 	for (size_t f=0;f<m_polyhedron->m_Faces.size();++f)
 	{
-		B.begin_facet();
-		for (unsigned int n=0;n<m_polyhedron->m_Faces.at(f).numVertex;++n)
-			B.add_vertex_to_facet(m_polyhedron->m_Faces.at(f).vertices[n]);
-		B.end_facet();
+		m_polyhedron->m_Faces.at(f).valid=false;
+		int *first = m_polyhedron->m_Faces.at(f).vertices, *beyond = first+m_polyhedron->m_Faces.at(f).numVertex;
+		if (B.test_facet(first, beyond))
+		{
+			B.add_facet(first, beyond);
+			if (B.error())
+			{
+				cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << endl;
+				break;
+			}
+			m_polyhedron->m_Faces.at(f).valid=true;
+		}
+		else
+		{
+			cerr << "Polyhedron_Builder::operator(): Face " << f << ": Trying reverse order... ";
+			int help[m_polyhedron->m_Faces.at(f).numVertex];
+			for (unsigned int n=0;n<m_polyhedron->m_Faces.at(f).numVertex;++n)
+				help[n]=m_polyhedron->m_Faces.at(f).vertices[m_polyhedron->m_Faces.at(f).numVertex-1-n];
+			first = help;
+			beyond = first+m_polyhedron->m_Faces.at(f).numVertex;
+			if (B.test_facet(first, beyond))
+			{
+				B.add_facet(first, beyond);
+				if (B.error())
+				{
+					cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << endl;
+					break;
+				}
+				cerr << "success" << endl;
+				m_polyhedron->m_Faces.at(f).valid=true;
+			}
+			else
+			{
+				cerr << "failed" << endl;
+				++m_polyhedron->m_InvalidFaces;
+			}
+		}
 	}
-    B.end_surface();
+	B.end_surface();
 }
 
 /*********************CSPrimPolyhedron********************************************************************/
@@ -1774,6 +1813,7 @@ CSPrimPolyhedron::CSPrimPolyhedron(unsigned int ID, ParameterSet* paraSet, CSPro
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
 	m_PolyhedronTree = NULL;
+	m_InvalidFaces = 0;
 }
 
 CSPrimPolyhedron::CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSProperties *prop) : CSPrimitives(primPolyhedron,prop)
@@ -1781,6 +1821,7 @@ CSPrimPolyhedron::CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSPropertie
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
 	m_PolyhedronTree = NULL;
+	m_InvalidFaces = 0;
 
 	//copy all vertices
 	for (size_t n=0;n<primPolyhedron->m_Vertices.size();++n)
@@ -1794,6 +1835,8 @@ CSPrimPolyhedron::CSPrimPolyhedron(ParameterSet* paraSet, CSProperties* prop) : 
 {
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
+	m_PolyhedronTree = NULL;
+	m_InvalidFaces = 0;
 }
 
 CSPrimPolyhedron::~CSPrimPolyhedron()
@@ -1812,6 +1855,7 @@ void CSPrimPolyhedron::Reset()
 	m_Faces.clear();
 	m_Polyhedron.clear();
 	m_PolyhedronTree = NULL;
+	m_InvalidFaces = 0;
 }
 
 void CSPrimPolyhedron::AddVertex(float px, float py, float pz)
@@ -1826,6 +1870,11 @@ float* CSPrimPolyhedron::GetVertex(unsigned int n)
 	if (n<m_Vertices.size())
 		return m_Vertices.at(n).coord;
 	return NULL;
+}
+
+void CSPrimPolyhedron::AddFace(face f)
+{
+	m_Faces.push_back(f);
 }
 
 void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
@@ -1846,6 +1895,34 @@ void CSPrimPolyhedron::AddFace(vector<int> vertices)
 	for (unsigned int n=0;n<f.numVertex;++n)
 		f.vertices[n]=vertices.at(n);
 	m_Faces.push_back(f);
+}
+
+bool CSPrimPolyhedron::BuildTree()
+{
+	Polyhedron_Builder builder(this);
+	m_Polyhedron.delegate(builder);
+
+	if (m_Polyhedron.is_closed())
+		m_Dimension = 3;
+	else
+	{
+		m_Dimension = 2;
+
+		//if structure is not closed due to invalud faces, mark it as 3D
+		if (m_InvalidFaces>0)
+		{
+			m_Dimension = 3;
+			cerr << "CSPrimPolyhedron::BuildTree: Warning, found polyhedron has invalud faces and is not a closed surface, setting to 3D solid anyway!" << endl;
+		}
+	}
+
+	//build tree
+	delete m_PolyhedronTree;
+	m_PolyhedronTree = new CGAL::AABB_tree< Traits >(m_Polyhedron.facets_begin(),m_Polyhedron.facets_end());
+
+	double p[3] = {m_BoundBox[1]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[3]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[5]*(1.0+(double)rand()/RAND_MAX)};
+	m_RandPt = Point(p[0],p[1],p[2]);
+	return true;
 }
 
 int* CSPrimPolyhedron::GetFace(unsigned int n, unsigned int &numVertices)
@@ -1901,7 +1978,7 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 	}
 
 	Point p(pos[0], pos[1], pos[2]);
-    Segment segment_query(p,m_RandPt);
+	Segment segment_query(p,m_RandPt);
 	// return true for an odd number of intersections
 	if ((m_PolyhedronTree->number_of_intersected_primitives(segment_query)%2)==1)
 		return true;
@@ -1913,33 +1990,28 @@ bool CSPrimPolyhedron::Update(string *ErrStr)
 {
 	//update local bounding box
 	GetBoundBox(m_BoundBox);
-
-	Polyhedron_Builder builder(this);
-	m_Polyhedron.delegate(builder);
-
-	if (m_Polyhedron.is_closed())
-		m_Dimension = 3;
-	else
-	{
-		m_Dimension = 2;
-		cerr << "CSPrimPolyhedron::Update: Warning, found polyhedron is not a closed surface and will most likely be skipped!" << endl;
-		ErrStr->append("Warning, found polyhedron is not a closed surface");
-		return CSPrimitives::Update(ErrStr);
-	}
-
-	//build tree
-	delete m_PolyhedronTree;
-	m_PolyhedronTree = new CGAL::AABB_tree< Traits >(m_Polyhedron.facets_begin(),m_Polyhedron.facets_end());
-
-	double p[3] = {m_BoundBox[1]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[3]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[5]*(1.0+(double)rand()/RAND_MAX)};
-	m_RandPt = Point(p[0],p[1],p[2]);
 	return CSPrimitives::Update(ErrStr);
 }
 
 bool CSPrimPolyhedron::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	cerr << "CSPrimPolyhedron::Write2XML: Error, not yet implemented..." << endl;
-	CSPrimitives::Write2XML(elem,parameterised);
+	if (CSPrimitives::Write2XML(elem,parameterised)==false)
+		return false;
+
+	for (size_t n=0;n<m_Vertices.size();++n)
+	{
+		TiXmlElement vertex("Vertex");
+		TiXmlText text(CombineArray2String(m_Vertices.at(n).coord,3,','));
+		vertex.InsertEndChild(text);
+		elem.InsertEndChild(vertex);
+	}
+	for (size_t n=0;n<m_Faces.size();++n)
+	{
+		TiXmlElement face("Face");
+		TiXmlText text(CombineArray2String(m_Faces.at(n).vertices,m_Faces.at(n).numVertex,','));
+		face.InsertEndChild(text);
+		elem.InsertEndChild(face);
+	}
 	return true;
 }
 
@@ -1992,7 +2064,7 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 			return false;
 		face = face->NextSiblingElement("Face");
 	}
-	return true;
+	return BuildTree();
 }
 
 
@@ -2001,6 +2073,148 @@ void CSPrimPolyhedron::ShowPrimitiveStatus(ostream& stream)
 	CSPrimitives::ShowPrimitiveStatus(stream);
 	stream << " Number of Vertices: " << m_Vertices.size() << endl;
 	stream << " Number of Faces: " << m_Faces.size() << endl;
+	stream << " Number of invalid Faces: " << m_InvalidFaces << endl;
+}
+
+/*********************CSPrimPolyhedronReader********************************************************************/
+CSPrimPolyhedronReader::CSPrimPolyhedronReader(ParameterSet* paraSet, CSProperties* prop): CSPrimPolyhedron(paraSet,prop)
+{
+	Type = POLYHEDRONREADER;
+	PrimTypeName = "PolyhedronReader";
+	m_filetype = UNKNOWN;
+}
+
+CSPrimPolyhedronReader::CSPrimPolyhedronReader(CSPrimPolyhedronReader* primPHReader, CSProperties *prop) : CSPrimPolyhedron(primPHReader, prop)
+{
+	Type = POLYHEDRONREADER;
+	PrimTypeName = "PolyhedronReader";
+	
+	m_filename = primPHReader->m_filename;
+	m_filetype = primPHReader->m_filetype;
+}
+
+CSPrimPolyhedronReader::CSPrimPolyhedronReader(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimPolyhedron(ID, paraSet, prop)
+{
+	Type = POLYHEDRONREADER;
+	PrimTypeName = "PolyhedronReader";
+	m_filetype = UNKNOWN;
+}
+
+CSPrimPolyhedronReader::~CSPrimPolyhedronReader()
+{
+}
+
+bool CSPrimPolyhedronReader::Update(string *ErrStr)
+{
+	return CSPrimPolyhedron::Update(ErrStr);
+}
+
+bool CSPrimPolyhedronReader::Write2XML(TiXmlElement &elem, bool parameterised)
+{
+	elem.SetAttribute("Filename",m_filename);
+	
+	switch (m_filetype)
+	{
+	case STL_FILE:
+		elem.SetAttribute("FileType","STL");
+		break;
+	case PLY_FILE:
+		elem.SetAttribute("FileType","PLY");
+		break;
+	default:
+		elem.SetAttribute("FileType","Unkown");
+		break;
+	}
+	return CSPrimitives::Write2XML(elem,parameterised);
+}
+
+bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
+{
+	if (!CSPrimitives::ReadFromXML(root)) return false;
+
+	TiXmlElement* elem=root.ToElement();
+	if (elem==NULL) return false;
+	if (elem->QueryStringAttribute("FileName",&m_filename)!=TIXML_SUCCESS)
+	{
+		cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read filename!" << endl;
+		return false;
+	}
+	string type;
+	if (elem->QueryStringAttribute("FileType",&type)!=TIXML_SUCCESS)
+	{
+		cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read file type!" << endl;
+		return false;
+	}
+	if (type.compare("STL")==0)
+		m_filetype=STL_FILE;
+	if (type.compare("PLY")==0)
+		m_filetype=PLY_FILE;
+	else
+		m_filetype=UNKNOWN;
+
+	if (ReadFile(m_filename)==false)
+	{
+		cerr << "CSPrimPolyhedronReader::ReadFromXML: Failed to read file." << endl;
+		return false;
+	}
+
+	return BuildTree();
+}
+
+bool CSPrimPolyhedronReader::ReadFile(string filename)
+{
+	vtkPolyData *polydata = NULL;
+	switch (m_filetype)
+	{
+	case STL_FILE:
+	{
+		vtkSTLReader* reader = vtkSTLReader::New();
+		reader->SetFileName(filename.c_str());
+		reader->SetMerging(1);
+		polydata = reader->GetOutput(0);
+		break;
+	}
+	case PLY_FILE:
+	{
+		vtkPLYReader* reader = vtkPLYReader::New();
+		reader->SetFileName(filename.c_str());
+		polydata = reader->GetOutput(0);
+		break;
+	}
+	case UNKNOWN:
+	default:
+		cerr << "CSPrimPolyhedronReader::ReadFile: unknown filetype, skipping..." << endl;
+		return false;
+		break;
+	}
+	polydata->Update();
+	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
+	{
+		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
+		return false;
+	}
+	vtkCellArray *verts = polydata->GetPolys();
+	if (verts->GetNumberOfCells()==0)
+	{
+		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
+		return false;
+	}
+
+	for (unsigned int n=0;n<polydata->GetNumberOfPoints();++n)
+		AddVertex(polydata->GetPoint(n));
+
+	vtkIdType numP;
+	vtkIdType *vertices = new vtkIdType[10];
+	while (verts->GetNextCell(numP, vertices))
+	{
+		face f;
+		f.numVertex=numP;
+		f.vertices = new int[f.numVertex];
+		for (unsigned int np=0;np<f.numVertex;++np)
+			f.vertices[np]=vertices[np];
+		AddFace(f);
+	}
+	return true;
 }
 
 /*********************CSPrimCurve********************************************************************/
@@ -2486,7 +2700,7 @@ bool CSPrimUserDefined::ReadFromXML(TiXmlNode &root)
 	int value;
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;
-    if (elem->QueryIntAttribute("CoordSystem",&value)!=TIXML_SUCCESS) return false;
+	if (elem->QueryIntAttribute("CoordSystem",&value)!=TIXML_SUCCESS) return false;
 	SetCoordSystem((UserDefinedCoordSystem)value);
 
 	//P1

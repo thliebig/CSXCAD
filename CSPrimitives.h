@@ -51,6 +51,7 @@ class CSPrimPolygon;
 	class CSPrimLinPoly;
 	class CSPrimRotPoly;
 class CSPrimPolyhedron;
+	class CSPrimPolyhedronReader;
 class CSPrimCurve;
 	class CSPrimWire;
 class CSPrimUserDefined;
@@ -81,7 +82,8 @@ public:
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
-		POINT,BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,POLYHEDRON,CURVE,WIRE,USERDEFINED
+		POINT,BOX,MULTIBOX,SPHERE,SPHERICALSHELL,CYLINDER,CYLINDRICALSHELL,POLYGON,LINPOLY,ROTPOLY,POLYHEDRON,CURVE,WIRE,USERDEFINED,
+		POLYHEDRONREADER
 	};
 
 	//! Set or change the property for this primitive.
@@ -150,6 +152,8 @@ public:
 	CSPrimRotPoly* ToRotPoly() { return ( this && Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Polyhedron-Primitive or NULL in case of different type.
 	CSPrimPolyhedron* ToPolyhedron() { return ( this && Type == POLYHEDRON ) ? (CSPrimPolyhedron*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	//! Get the corresponing Polyhedron-Import-Primitive or NULL in case of different type.
+	CSPrimPolyhedronReader* ToPolyhedronReader() { return ( this && Type == POLYHEDRONREADER ) ? (CSPrimPolyhedronReader*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Curve-Primitive or NULL in case of different type.
 	CSPrimCurve* ToCurve() { return ( this && Type == CURVE ) ? (CSPrimCurve*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Wire-Primitive or NULL in case of different type.
@@ -639,6 +643,7 @@ public:
 	{
 		unsigned int numVertex;
 		int* vertices;
+		bool valid;
 	};
 	struct vertex
 	{
@@ -653,16 +658,21 @@ public:
 	virtual void Reset();
 
 	virtual void AddVertex(float p[3]) {AddVertex(p[0],p[1],p[2]);}
+	virtual void AddVertex(double p[3]) {AddVertex(p[0],p[1],p[2]);}
 	virtual void AddVertex(float px, float py, float pz);
 
 	virtual unsigned int GetNumVertices() const {return m_Vertices.size();}
 	virtual float* GetVertex(unsigned int n);
 
+	virtual void AddFace(face f);
 	virtual void AddFace(int numVertex, int* vertices);
 	virtual void AddFace(vector<int> vertices);
+	
+	virtual bool BuildTree();
 
 	virtual unsigned int GetNumFaces() const {return m_Faces.size();}
 	virtual int* GetFace(unsigned int n, unsigned int &numVertices);
+	virtual bool GetFaceValid(unsigned int n) const {return m_Faces.at(n).valid;}
 
 	virtual CSPrimPolyhedron* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolyhedron(this,prop);}
 
@@ -676,12 +686,47 @@ public:
 	virtual void ShowPrimitiveStatus(ostream& stream);
 
 protected:
+	unsigned int m_InvalidFaces;
 	vector<vertex> m_Vertices;
 	vector<face> m_Faces;
 	Polyhedron m_Polyhedron;
 	Point m_RandPt;
 	CGAL::AABB_tree<Traits> *m_PolyhedronTree;
 };
+
+//! STL import primitive
+class CSXCAD_EXPORT CSPrimPolyhedronReader : public CSPrimPolyhedron
+{
+public:
+	//! Import file type
+	enum FileType
+	{
+		UNKNOWN, STL_FILE, PLY_FILE
+	};
+	
+	CSPrimPolyhedronReader(ParameterSet* paraSet, CSProperties* prop);
+	CSPrimPolyhedronReader(CSPrimPolyhedronReader* primPHReader, CSProperties *prop=NULL);
+	CSPrimPolyhedronReader(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+	virtual ~CSPrimPolyhedronReader();
+
+	virtual CSPrimPolyhedronReader* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolyhedronReader(this,prop);}
+	
+	virtual void SetFilename(string name) {m_filename=name;}
+	virtual string GetFilename() const {return m_filename;}
+	
+	virtual FileType GetFileType() const {return m_filetype;}
+
+	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
+	virtual bool ReadFromXML(TiXmlNode &root);
+	
+	virtual bool ReadFile(string filename);
+
+protected:
+	string m_filename;
+	FileType m_filetype;
+};
+
 
 //! Curve Primitive (Polygonal chain)
 /*!
