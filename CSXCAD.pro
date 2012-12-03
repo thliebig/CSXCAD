@@ -73,25 +73,25 @@ QMAKE_CXXFLAGS += -Wno-deprecated -frounding-math
 
 
 # Input
-HEADERS += ContinuousStructure.h \
-    CSPrimitives.h \
-    CSProperties.h \
-    CSRectGrid.h \
-    CSXCAD_Global.h \
-    ParameterObjects.h \
-    CSFunctionParser.h \
-    CSUseful.h \
-    ParameterCoord.h \
-    CSTransform.h
-SOURCES += ContinuousStructure.cpp \
-    CSPrimitives.cpp \
-    CSProperties.cpp \
-    CSRectGrid.cpp \
-    ParameterObjects.cpp \
-    CSFunctionParser.cpp \
-    CSUseful.cpp \
-    ParameterCoord.cpp \
-    CSTransform.cpp
+HEADERS += src/ContinuousStructure.h \
+    src/CSPrimitives.h \
+    src/CSProperties.h \
+    src/CSRectGrid.h \
+    src/CSXCAD_Global.h \
+    src/ParameterObjects.h \
+    src/CSFunctionParser.h \
+    src/CSUseful.h \
+    src/ParameterCoord.h \
+    src/CSTransform.h
+SOURCES += src/ContinuousStructure.cpp \
+    src/CSPrimitives.cpp \
+    src/CSProperties.cpp \
+    src/CSRectGrid.cpp \
+    src/ParameterObjects.cpp \
+    src/CSFunctionParser.cpp \
+    src/CSUseful.cpp \
+    src/ParameterCoord.cpp \
+    src/CSTransform.cpp
 
 #
 # create tar file
