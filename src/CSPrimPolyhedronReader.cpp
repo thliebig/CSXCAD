@@ -153,7 +153,7 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 		return false;
 	}
 
-	for (unsigned int n=0;n<polydata->GetNumberOfPoints();++n)
+	for (int n=0;n<polydata->GetNumberOfPoints();++n)
 		AddVertex(polydata->GetPoint(n));
 
 	vtkIdType numP;
