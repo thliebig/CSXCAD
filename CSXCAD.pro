@@ -65,7 +65,13 @@ win32 {
     LIBS += -L$$WIN32_LIB_ROOT/zlib/lib -lz
     # vtk
     INCLUDEPATH += $$WIN32_LIB_ROOT/vtk/include/vtk-5.10
-    LIBS += -L$$WIN32_LIB_ROOT/vtk/bin -lvtkCommon
+    LIBS += -L$$WIN32_LIB_ROOT/vtk/bin -lvtkCommon -lvtkIO -lvtkFiltering
+    #boost, needed by cgal
+    INCLUDEPATH += $$WIN32_LIB_ROOT/boost/include
+    LIBS += -L$$WIN32_LIB_ROOT/boost/lib -lboost_thread -lboost_system -lboost_date_time -lboost_serialization
+    #cgal
+    INCLUDEPATH += $$WIN32_LIB_ROOT/cgal/include
+    LIBS += -L$$WIN32_LIB_ROOT/cgal/bin -lCGAL
 }
 
 # vtk includes deprecated header files; silence the corresponding warning
@@ -166,7 +172,8 @@ install.commands = mkdir -p \"$$PREFIX/lib$$LIB_SUFFIX\"
 install.commands += && mkdir -p \"$$PREFIX/include/CSXCAD\"
 install.commands += && mkdir -p \"$$PREFIX/share/CSXCAD/matlab\"
 install.commands += && cp -at \"$$PREFIX/include/CSXCAD/\" $$HEADERS
-install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
+unix:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
+win32:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" release/CSXCAD0.dll
 install.commands += && cp -at \"$$PREFIX/share/CSXCAD/\" matlab/
 QMAKE_EXTRA_TARGETS += install
 
