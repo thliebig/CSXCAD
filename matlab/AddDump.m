@@ -15,6 +15,11 @@ function CSX = AddDump(CSX, name, varargin)
 %              13 for total current density (rot(H)) frequency-domain dump
 %
 %              20 local SAR frequency-domain dump
+%              21  1g averaging SAR frequency-domain dump
+%              22 10g averaging SAR frequency-domain dump
+%
+%              29 raw data needed for SAR calculations (electric field FD,
+%                 cell volume, conductivity and density)
 % 
 %   DumpMode:   0 no-interpolation
 %               1 node-interpolation (default, see warning below)
