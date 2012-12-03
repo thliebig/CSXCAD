@@ -97,7 +97,20 @@ HEADERS += src/ContinuousStructure.h \
     src/CSPrimPolyhedronReader.h \
     src/CSPrimCurve.h \
     src/CSPrimWire.h \
-    src/CSPrimUserDefined.h
+    src/CSPrimUserDefined.h \
+    src/CSPropUnknown.h \
+    src/CSPropMaterial.h \
+    src/CSPropDispersiveMaterial.h \
+    src/CSPropLorentzMaterial.h \
+    src/CSPropDiscMaterial.h \
+    src/CSPropLumpedElement.h \
+    src/CSPropMetal.h \
+    src/CSPropConductingSheet.h \
+    src/CSPropExcitation.h \
+    src/CSPropProbeBox.h \
+    src/CSPropDumpBox.h \
+    src/CSPropResBox.h
+
 SOURCES += src/ContinuousStructure.cpp \
     src/CSPrimitives.cpp \
     src/CSProperties.cpp \
@@ -121,7 +134,19 @@ SOURCES += src/ContinuousStructure.cpp \
     src/CSPrimPolyhedronReader.cpp \
     src/CSPrimCurve.cpp \
     src/CSPrimWire.cpp \
-    src/CSPrimUserDefined.cpp
+    src/CSPrimUserDefined.cpp \
+    src/CSPropUnknown.cpp \
+    src/CSPropMaterial.cpp \
+    src/CSPropDispersiveMaterial.cpp \
+    src/CSPropLorentzMaterial.cpp \
+    src/CSPropDiscMaterial.cpp \
+    src/CSPropLumpedElement.cpp \
+    src/CSPropMetal.cpp \
+    src/CSPropConductingSheet.cpp \
+    src/CSPropExcitation.cpp \
+    src/CSPropProbeBox.cpp \
+    src/CSPropDumpBox.cpp \
+    src/CSPropResBox.cpp
 
 #
 # create tar file

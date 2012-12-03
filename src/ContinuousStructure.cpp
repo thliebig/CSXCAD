@@ -16,6 +16,7 @@
 */
 
 #include "ContinuousStructure.h"
+
 #include "CSPrimPoint.h"
 #include "CSPrimBox.h"
 #include "CSPrimMultiBox.h"
@@ -31,6 +32,19 @@
 #include "CSPrimCurve.h"
 #include "CSPrimWire.h"
 #include "CSPrimUserDefined.h"
+
+#include "CSPropUnknown.h"
+#include "CSPropMaterial.h"
+#include "CSPropDispersiveMaterial.h"
+#include "CSPropLorentzMaterial.h"
+#include "CSPropDiscMaterial.h"
+#include "CSPropLumpedElement.h"
+#include "CSPropMetal.h"
+#include "CSPropConductingSheet.h"
+#include "CSPropExcitation.h"
+#include "CSPropProbeBox.h"
+#include "CSPropDumpBox.h"
+#include "CSPropResBox.h"
 
 #include "tinyxml.h"
 
