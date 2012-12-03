@@ -69,7 +69,7 @@ win32 {
 }
 
 # vtk includes deprecated header files; silence the corresponding warning
-QMAKE_CXXFLAGS += -Wno-deprecated
+QMAKE_CXXFLAGS += -Wno-deprecated -frounding-math
 
 
 # Input

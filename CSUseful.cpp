@@ -112,6 +112,29 @@ string CombineArray2String(double* values, unsigned int numVal, const char delim
 	return ss.str();
 }
 
+string CombineArray2String(float* values, unsigned int numVal, const char delimiter, int accurarcy)
+{
+	stringstream ss;
+	ss.precision( accurarcy );
+	for (unsigned int i=0;i<numVal;++i)
+	{
+		if (i>0) ss << delimiter;
+		ss<<values[i];
+	}
+	return ss.str();
+}
+
+string CombineArray2String(int* values, unsigned int numVal, const char delimiter, int accurarcy)
+{
+	stringstream ss;
+	ss.precision( accurarcy );
+	for (unsigned int i=0;i<numVal;++i)
+	{
+		if (i>0) ss << delimiter;
+		ss<<values[i];
+	}
+	return ss.str();
+}
 
 std::vector<int> SplitString2Int(std::string str, const char delimiter)
 {
