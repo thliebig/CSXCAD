@@ -82,7 +82,22 @@ HEADERS += src/ContinuousStructure.h \
     src/CSFunctionParser.h \
     src/CSUseful.h \
     src/ParameterCoord.h \
-    src/CSTransform.h
+    src/CSTransform.h \
+    src/CSPrimPoint.h \
+    src/CSPrimBox.h \
+    src/CSPrimMultiBox.h \
+    src/CSPrimSphere.h \
+    src/CSPrimSphericalShell.h \
+    src/CSPrimCylinder.h \
+    src/CSPrimCylindricalShell.h \
+    src/CSPrimPolygon.h \
+    src/CSPrimLinPoly.h \
+    src/CSPrimRotPoly.h \
+    src/CSPrimPolyhedron.h \
+    src/CSPrimPolyhedronReader.h \
+    src/CSPrimCurve.h \
+    src/CSPrimWire.h \
+    src/CSPrimUserDefined.h
 SOURCES += src/ContinuousStructure.cpp \
     src/CSPrimitives.cpp \
     src/CSProperties.cpp \
@@ -91,7 +106,22 @@ SOURCES += src/ContinuousStructure.cpp \
     src/CSFunctionParser.cpp \
     src/CSUseful.cpp \
     src/ParameterCoord.cpp \
-    src/CSTransform.cpp
+    src/CSTransform.cpp \
+    src/CSPrimPoint.cpp \
+    src/CSPrimBox.cpp \
+    src/CSPrimMultiBox.cpp \
+    src/CSPrimSphere.cpp \
+    src/CSPrimSphericalShell.cpp \
+    src/CSPrimCylinder.cpp \
+    src/CSPrimCylindricalShell.cpp \
+    src/CSPrimPolygon.cpp \
+    src/CSPrimLinPoly.cpp \
+    src/CSPrimRotPoly.cpp \
+    src/CSPrimPolyhedron.cpp \
+    src/CSPrimPolyhedronReader.cpp \
+    src/CSPrimCurve.cpp \
+    src/CSPrimWire.cpp \
+    src/CSPrimUserDefined.cpp
 
 #
 # create tar file
