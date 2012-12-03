@@ -158,13 +158,16 @@ QMAKE_EXTRA_TARGETS += tarball
 #
 # INSTALL
 #
+isEmpty(PREFIX) {
+ PREFIX = /usr/local
+}
 install.target = install
-install.commands = mkdir -p \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX\"
-install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/include/CSXCAD\"
-install.commands += && mkdir -p \"$(INSTALL_ROOT)/usr/share/CSXCAD/matlab\"
-install.commands += && cp -at \"$(INSTALL_ROOT)/usr/include/CSXCAD/\" $$HEADERS
-install.commands += && cp -at \"$(INSTALL_ROOT)/usr/lib$$LIB_SUFFIX/\" libCSXCAD.so*
-install.commands += && cp -at \"$(INSTALL_ROOT)/usr/share/CSXCAD/\" matlab/
+install.commands = mkdir -p \"$$PREFIX/lib$$LIB_SUFFIX\"
+install.commands += && mkdir -p \"$$PREFIX/include/CSXCAD\"
+install.commands += && mkdir -p \"$$PREFIX/share/CSXCAD/matlab\"
+install.commands += && cp -at \"$$PREFIX/include/CSXCAD/\" $$HEADERS
+install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
+install.commands += && cp -at \"$$PREFIX/share/CSXCAD/\" matlab/
 QMAKE_EXTRA_TARGETS += install
 
 #
