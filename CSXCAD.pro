@@ -28,6 +28,10 @@ GITREV = $$system(git describe --tags)
 isEmpty(GITREV):GITREV=$$VERSION
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
+exists(localPathes.pri) {
+    include(localPathes.pri)
+}
+
 unix { 
     LIBS += -lfparser
     LIBS += -ltinyxml
@@ -49,8 +53,11 @@ unix {
 win32 { 
     DEFINES += BUILD_CSXCAD_LIB
 
+    isEmpty(WIN32_LIB_ROOT) {
+        WIN32_LIB_ROOT = ..
+    }
+
     # #3rd party libraries#
-    WIN32_LIB_ROOT = ..
     # fparser
     INCLUDEPATH += $$WIN32_LIB_ROOT/fparser/include
     LIBS += -L$$WIN32_LIB_ROOT/fparser/bin -lfparser4
