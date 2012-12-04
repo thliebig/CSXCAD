@@ -28,6 +28,9 @@ GITREV = $$system(git describe --tags)
 isEmpty(GITREV):GITREV=$$VERSION
 DEFINES += GIT_VERSION=\\\"$$GITREV\\\"
 
+# remove unnecessary webkit define
+DEFINES -= QT_WEBKIT
+
 exists(localPathes.pri) {
     include(localPathes.pri)
 }
@@ -37,6 +40,7 @@ unix {
     LIBS += -ltinyxml
     DEFINES += TIXML_USE_STL
     LIBS += -lhdf5_hl -lhdf5
+    LIBS += -lCGAL
 
     #vtk
     INCLUDEPATH += /usr/include/vtk-5.2 \
