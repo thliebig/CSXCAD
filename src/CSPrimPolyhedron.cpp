@@ -30,8 +30,8 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 	// Postcondition: `hds' is a valid polyhedral surface.
 	CGAL::Polyhedron_incremental_builder_3<HalfedgeDS> B( hds, true);
 	B.begin_surface( m_polyhedron->m_Vertices.size(), m_polyhedron->m_Faces.size());
-	typedef typename HalfedgeDS::Vertex   Vertex;
-	typedef typename Vertex::Point Point;
+	typedef HalfedgeDS::Vertex   Vertex;
+	typedef Vertex::Point Point;
 	for (size_t n=0;n<m_polyhedron->m_Vertices.size();++n)
 		B.add_vertex( Point( m_polyhedron->m_Vertices.at(n).coord[0], m_polyhedron->m_Vertices.at(n).coord[1], m_polyhedron->m_Vertices.at(n).coord[2]));
 
