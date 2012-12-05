@@ -100,7 +100,7 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 	}
 	if (type.compare("STL")==0)
 		m_filetype=STL_FILE;
-	if (type.compare("PLY")==0)
+	else if (type.compare("PLY")==0)
 		m_filetype=PLY_FILE;
 	else
 		m_filetype=UNKNOWN;
@@ -136,9 +136,11 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 	}
 	case UNKNOWN:
 	default:
+	{
 		cerr << "CSPrimPolyhedronReader::ReadFile: unknown filetype, skipping..." << endl;
 		return false;
 		break;
+	}
 	}
 	polydata->Update();
 	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
