@@ -210,7 +210,6 @@ int* CSPrimPolyhedron::GetFace(unsigned int n, unsigned int &numVertices)
 bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	m_Dimension=0;
 	m_BoundBox_CoordSys=CARTESIAN;
 
 	if (m_Vertices.size()==0)
