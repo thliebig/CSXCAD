@@ -197,3 +197,11 @@ QMAKE_EXTRA_TARGETS += install
 phony.target = .PHONY
 phony.depends = $$QMAKE_EXTRA_TARGETS
 QMAKE_EXTRA_TARGETS += phony
+
+#
+# create documentation
+# use
+#  make docs
+# to start doxygen. It will generate html, latex and compressed help for QtCreator
+#
+include(doc/doc.pri)
