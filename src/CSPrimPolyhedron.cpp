@@ -22,6 +22,7 @@
 #include "stdint.h"
 
 #include "CSPrimPolyhedron.h"
+#include "CSPrimPolyhedron_p.h"
 #include "CSProperties.h"
 #include "CSUseful.h"
 
@@ -79,19 +80,19 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 }
 
 /*********************CSPrimPolyhedron********************************************************************/
-CSPrimPolyhedron::CSPrimPolyhedron(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
+CSPrimPolyhedron::CSPrimPolyhedron(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop), d_ptr(new CSPrimPolyhedronPrivate)
 {
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
-	m_PolyhedronTree = NULL;
+	d_ptr->m_PolyhedronTree = NULL;
 	m_InvalidFaces = 0;
 }
 
-CSPrimPolyhedron::CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSProperties *prop) : CSPrimitives(primPolyhedron,prop)
+CSPrimPolyhedron::CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSProperties *prop) : CSPrimitives(primPolyhedron,prop), d_ptr(new CSPrimPolyhedronPrivate)
 {
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
-	m_PolyhedronTree = NULL;
+	d_ptr->m_PolyhedronTree = NULL;
 	m_InvalidFaces = 0;
 
 	//copy all vertices
@@ -102,17 +103,18 @@ CSPrimPolyhedron::CSPrimPolyhedron(CSPrimPolyhedron* primPolyhedron, CSPropertie
 		AddFace(primPolyhedron->m_Faces.at(n).numVertex,primPolyhedron->m_Faces.at(n).vertices);
 }
 
-CSPrimPolyhedron::CSPrimPolyhedron(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
+CSPrimPolyhedron::CSPrimPolyhedron(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop), d_ptr(new CSPrimPolyhedronPrivate)
 {
 	Type = POLYHEDRON;
 	PrimTypeName = "Polyhedron";
-	m_PolyhedronTree = NULL;
+	d_ptr->m_PolyhedronTree = NULL;
 	m_InvalidFaces = 0;
 }
 
 CSPrimPolyhedron::~CSPrimPolyhedron()
 {
 	Reset();
+	delete d_ptr;
 }
 
 void CSPrimPolyhedron::Reset()
@@ -124,8 +126,8 @@ void CSPrimPolyhedron::Reset()
 		m_Faces.at(n).vertices=NULL;
 	}
 	m_Faces.clear();
-	m_Polyhedron.clear();
-	m_PolyhedronTree = NULL;
+	d_ptr->m_Polyhedron.clear();
+	d_ptr->m_PolyhedronTree = NULL;
 	m_InvalidFaces = 0;
 }
 
@@ -171,9 +173,9 @@ void CSPrimPolyhedron::AddFace(vector<int> vertices)
 bool CSPrimPolyhedron::BuildTree()
 {
 	Polyhedron_Builder builder(this);
-	m_Polyhedron.delegate(builder);
+	d_ptr->m_Polyhedron.delegate(builder);
 
-	if (m_Polyhedron.is_closed())
+	if (d_ptr->m_Polyhedron.is_closed())
 		m_Dimension = 3;
 	else
 	{
@@ -188,11 +190,11 @@ bool CSPrimPolyhedron::BuildTree()
 	}
 
 	//build tree
-	delete m_PolyhedronTree;
-	m_PolyhedronTree = new CGAL::AABB_tree< Traits >(m_Polyhedron.facets_begin(),m_Polyhedron.facets_end());
+	delete d_ptr->m_PolyhedronTree;
+	d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(d_ptr->m_Polyhedron.facets_begin(),d_ptr->m_Polyhedron.facets_end());
 
 	double p[3] = {m_BoundBox[1]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[3]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[5]*(1.0+(double)rand()/RAND_MAX)};
-	m_RandPt = Point(p[0],p[1],p[2]);
+	d_ptr->m_RandPt = Point(p[0],p[1],p[2]);
 	return true;
 }
 
@@ -248,9 +250,9 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 	}
 
 	Point p(pos[0], pos[1], pos[2]);
-	Segment segment_query(p,m_RandPt);
+	Segment segment_query(p,d_ptr->m_RandPt);
 	// return true for an odd number of intersections
-	if ((m_PolyhedronTree->number_of_intersected_primitives(segment_query)%2)==1)
+	if ((d_ptr->m_PolyhedronTree->number_of_intersected_primitives(segment_query)%2)==1)
 		return true;
 	return false;
 }

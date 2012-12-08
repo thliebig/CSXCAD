@@ -90,7 +90,7 @@ QMAKE_CXXFLAGS += -Wno-deprecated -frounding-math
 
 
 # Input
-HEADERS += src/ContinuousStructure.h \
+PUB_HEADERS += src/ContinuousStructure.h \
     src/CSPrimitives.h \
     src/CSProperties.h \
     src/CSRectGrid.h \
@@ -127,6 +127,9 @@ HEADERS += src/ContinuousStructure.h \
     src/CSPropProbeBox.h \
     src/CSPropDumpBox.h \
     src/CSPropResBox.h
+
+HEADERS += $$PUB_HEADERS \
+    src/CSPrimPolyhedron_p.h
 
 SOURCES += src/ContinuousStructure.cpp \
     src/CSPrimitives.cpp \
@@ -176,13 +179,13 @@ QMAKE_EXTRA_TARGETS += tarball
 # INSTALL
 #
 isEmpty(PREFIX) {
- PREFIX = /usr/local
+    PREFIX = /usr/local
 }
 install.target = install
 install.commands = mkdir -p \"$$PREFIX/lib$$LIB_SUFFIX\"
 install.commands += && mkdir -p \"$$PREFIX/include/CSXCAD\"
 install.commands += && mkdir -p \"$$PREFIX/share/CSXCAD/matlab\"
-install.commands += && cp -at \"$$PREFIX/include/CSXCAD/\" $$HEADERS
+install.commands += && cp -at \"$$PREFIX/include/CSXCAD/\" $$PUB_HEADERS
 unix:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
 win32:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" release/CSXCAD0.dll
 install.commands += && cp -at \"$$PREFIX/share/CSXCAD/\" matlab/
