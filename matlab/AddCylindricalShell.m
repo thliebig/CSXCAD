@@ -9,6 +9,10 @@ function CSX = AddCylindricalShell(CSX, propName, prio, start, stop, rad, shell_
 %  shell_width: cylinder shell width
 %  prio :       primitive priority
 %
+%  Note:
+%       the inner radius of this shell is rad-shell_width/2
+%       the outer radius of this shell is rad+shell_width/2
+%
 %   example:
 %       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
 %       CSX = AddCylindricalShell(CSX,'metal',10,[0 0 0],[0 0 200],50,10);

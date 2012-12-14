@@ -8,6 +8,10 @@ function CSX = AddSphericalShell(CSX, propName, prio, center, rad, shell_width, 
 %  shell_width: sphere shell width
 %  prio :       primitive priority
 %
+%  Note:
+%       the inner radius of this shell is rad-shell_width/2
+%       the outer radius of this shell is rad+shell_width/2
+%
 %   example:
 %       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
 %       CSX = AddSphericalShell(CSX,'metal',10,[0 0 0],50,10);
@@ -29,4 +33,4 @@ sphere.Center.ATTRIBUTE.Z=center(3);
 
 sphere = AddPrimitiveArgs(sphere,varargin{:});
 
-CSX = Add2Property(CSX,propName, sphere, 'Sphere');
+CSX = Add2Property(CSX,propName, sphere, 'SphericalShell');
