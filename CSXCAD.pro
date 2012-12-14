@@ -21,7 +21,7 @@ TEMPLATE = lib
 INCLUDEPATH += .
 OBJECTS_DIR = obj
 
-VERSION = 0.3.1
+VERSION = 0.4.0
 
 # add git revision
 GITREV = $$system(git describe --tags)
