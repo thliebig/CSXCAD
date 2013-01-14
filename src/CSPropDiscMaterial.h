@@ -50,10 +50,13 @@ public:
 
 protected:
 	unsigned int GetWeightingPos(const double* coords);
+	int GetDBPos(const double* coords);
 
 	int m_FileType;
 	string m_Filename;
 	unsigned int m_Size[3];
+	unsigned int m_DB_size;
+	int* m_Disc_Ind;
 	float *m_mesh[3];
 	float *m_Disc_epsR;
 	float *m_Disc_kappa;

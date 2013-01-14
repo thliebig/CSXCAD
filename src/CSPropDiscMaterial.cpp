@@ -47,6 +47,8 @@ CSPropDiscMaterial::~CSPropDiscMaterial()
 		delete[] m_mesh[n];
 		m_mesh[n]=NULL;
 	}
+	delete[] m_Disc_Ind;
+	m_Disc_Ind=NULL;
 	delete[] m_Disc_epsR;
 	m_Disc_epsR=NULL;
 	delete[] m_Disc_kappa;
@@ -92,56 +94,71 @@ unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 	return pos[0] + pos[1]*m_Size[0] + pos[2]*m_Size[0]*m_Size[1];
 }
 
+int CSPropDiscMaterial::GetDBPos(const double* coords)
+{
+	if (m_Disc_Ind==NULL)
+		return -1;
+	unsigned int pos = GetWeightingPos(coords);
+	if (pos==(unsigned int)-1)
+		return -1;
+	int db_pos = m_Disc_Ind[pos];
+	if (db_pos>=(int)m_DB_size)
+	{
+		//sanity check, this should not happen!!!
+		cerr << __func__ << ": Error, false DB position!" << endl;
+		return -1;
+	}
+	return db_pos;
+}
+
 double CSPropDiscMaterial::GetEpsilonWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_epsR==NULL)
 		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
-	unsigned int pos1 = GetWeightingPos(inCoords);
-	if (pos1==(unsigned int)-1)
+	int pos = GetDBPos(inCoords);
+	if (pos<0)
 		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
-	return m_Disc_epsR[pos1];
+	return m_Disc_epsR[pos];
 }
 
 double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_kappa==NULL)
 		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
-	unsigned int pos1 = GetWeightingPos(inCoords);
-	if (pos1==(unsigned int)-1)
+	int pos = GetDBPos(inCoords);
+	if (pos<0)
 		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
-	if (m_Disc_kappa[pos1]>3)
-		cerr << "kappa to large? " << m_Disc_kappa[pos1] << endl;
-	return m_Disc_kappa[pos1];
+	return m_Disc_kappa[pos];
 }
 
 double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_mueR==NULL)
 		return CSPropMaterial::GetMueWeighted(ny,inCoords);
-	unsigned int pos1 = GetWeightingPos(inCoords);
-	if (pos1==(unsigned int)-1)
+	int pos = GetDBPos(inCoords);
+	if (pos<0)
 		return CSPropMaterial::GetMueWeighted(ny,inCoords);
-	return m_Disc_mueR[pos1];
+	return m_Disc_mueR[pos];
 }
 
 double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
 {
 	if (m_Disc_sigma==NULL)
 		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
-	unsigned int pos1 = GetWeightingPos(inCoords);
-	if (pos1==(unsigned int)-1)
+	int pos = GetDBPos(inCoords);
+	if (pos<0)
 		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
-	return m_Disc_sigma[pos1];
+	return m_Disc_sigma[pos];
 }
 
 double CSPropDiscMaterial::GetDensityWeighted(const double* inCoords)
 {
 	if (m_Disc_Density==NULL)
 		return CSPropMaterial::GetDensityWeighted(inCoords);
-	unsigned int pos1 = GetWeightingPos(inCoords);
-	if (pos1==(unsigned int)-1)
+	int pos = GetDBPos(inCoords);
+	if (pos<0)
 		return CSPropMaterial::GetDensityWeighted(inCoords);
-	return m_Disc_Density[pos1];
+	return m_Disc_Density[pos];
 }
 
 void CSPropDiscMaterial::Init()
@@ -149,8 +166,11 @@ void CSPropDiscMaterial::Init()
 	m_Filename.clear();
 	m_FileType=-1;
 
+	m_DB_size = 0;
+
 	for (int n=0;n<3;++n)
 		m_mesh[n]=NULL;
+	m_Disc_Ind=NULL;
 	m_Disc_epsR=NULL;
 	m_Disc_kappa=NULL;
 	m_Disc_mueR=NULL;
@@ -282,13 +302,51 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
 	if (file_id < 0)
 	{
-		cerr << __func__ << ": Failed to open file, skipping..." << endl;
+		cerr << __func__ << ": Error, failed to open file, abort..." << endl;
 		return false;
 	}
 
+	double ver;
+	herr_t status = H5LTget_attribute_double(file_id, "/", "Version", &ver);
+	if (status < 0)
+		ver = 1.0;
+
+	if (ver<2.0)
+	{
+		cerr << __func__ << ": Error, older file versions are no longer supported, abort..." << endl;
+		H5Fclose(file_id);
+		return false;
+	}
+
+	int db_size;
+	status = H5LTget_attribute_int(file_id, "/DiscData", "DB_Size", &db_size);
+	if (status<0)
+	{
+		cerr << __func__ << ": Error, can't read database size, abort..." << endl;
+		H5Fclose(file_id);
+		return false;
+	}
+
+	m_DB_size = db_size;
+
+	if (H5Lexists(file_id, "/DiscData", H5P_DEFAULT)<=0)
+	{
+		cerr << __func__ << ": Error, can't read database, abort..." << endl;
+		H5Fclose(file_id);
+		return false;
+	}
+
+	hid_t dataset = H5Dopen(file_id, "/DiscData", H5P_DEFAULT);
+	if (dataset<0)
+	{
+		cerr << __func__ << ": Error, can't open database" << endl;
+		H5Fclose(file_id);
+		return 0;
+	}
+
+	// read mesh
 	unsigned int size;
 	int rank;
-	// read mesh
 	unsigned int numCells = 1;
 	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
 	for (int n=0; n<3; ++n)
@@ -296,97 +354,85 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		m_mesh[n] = ReadDataSet(filename, names[n], rank, size);
 		if ((m_mesh[n]==NULL) || (rank!=1))
 		{
-			cerr << __func__ << ": Failed to read mesh, skipping..." << endl;
+			cerr << __func__ << ": Error, failed to read mesh, abort..." << endl;
+			H5Fclose(file_id);
 			return false;
 		}
 		m_Size[n]=size;
 		numCells*=m_Size[n];
 	}
 
-	string name = "/epsR";
-	m_Disc_epsR = ReadDataSet(filename, name, rank, size);
-	if (m_Disc_epsR==NULL)
+	// read database
+	if (H5LTfind_attribute(dataset, "epsR")==1)
 	{
-		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
+		m_Disc_epsR = new float[db_size];
+		status = H5LTget_attribute_float(file_id, "/DiscData", "epsR", m_Disc_epsR);
 	}
-	else if (rank!=3)
+	else
 	{
-		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
-		return false;
+		cerr << __func__ << ": No \"/DiscData/epsR\" found, skipping..." << endl;
+		m_Disc_epsR=NULL;
 	}
-	else if (size != numCells)
+
+	delete[] m_Disc_kappa;
+	if (H5LTfind_attribute(dataset, "kappa")==1)
 	{
-		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
+		m_Disc_kappa = new float[db_size];
+		status = H5LTget_attribute_float(file_id, "/DiscData", "kappa", m_Disc_kappa);
+	}
+	else
+	{
+		cerr << __func__ << ": No \"/DiscData/kappa\" found, skipping..." << endl;
+		m_Disc_kappa=NULL;
+	}
+
+	delete[] m_Disc_mueR;
+	if (H5LTfind_attribute(dataset, "mueR")==1)
+	{
+		m_Disc_mueR = new float[db_size];
+		status = H5LTget_attribute_float(file_id, "/DiscData", "mueR", m_Disc_mueR);
+	}
+	else
+	{
+		cerr << __func__ << ": No \"/DiscData/mueR\" found, skipping..." << endl;
+		m_Disc_mueR=NULL;
+	}
+
+	delete[] m_Disc_sigma;
+	if (H5LTfind_attribute(dataset, "sigma")==1)
+	{
+		m_Disc_sigma = new float[db_size];
+		status = H5LTget_attribute_float(file_id, "/DiscData", "sigma", m_Disc_sigma);
+	}
+	else
+	{
+		cerr << __func__ << ": No \"/DiscData/sigma\" found, skipping..." << endl;
+		m_Disc_sigma=NULL;
+	}
+
+	delete[] m_Disc_Density;
+	if (H5LTfind_attribute(dataset, "density")==1)
+	{
+		m_Disc_Density = new float[db_size];
+		status = H5LTget_attribute_float(file_id, "/DiscData", "density", m_Disc_Density);
+	}
+	else
+	{
+		cerr << __func__ << ": no \"/DiscData/density\" found, skipping..." << endl;
+		m_Disc_Density=NULL;
+	}
+
+	delete[] m_Disc_Ind;
+	m_Disc_Ind = new int[numCells];
+	status = H5LTread_dataset_int(file_id, "/DiscData", m_Disc_Ind);
+	if (status<0)
+	{
+		cerr << __func__ << ": Error, can't read database indizies, abort..." << endl;
+		delete[] m_Disc_Ind;
+		H5Fclose(file_id);
 		return false;
 	}
 
-	name = "/kappa";
-	m_Disc_kappa = ReadDataSet(filename, name, rank, size);
-	if (m_Disc_kappa==NULL)
-	{
-		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
-	}
-	else if (rank!=3)
-	{
-		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
-		return false;
-	}
-	else if (size != numCells)
-	{
-		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		return false;
-	}
-
-	name = "/mueR";
-	m_Disc_mueR = ReadDataSet(filename, name, rank, size);
-	if (m_Disc_mueR==NULL)
-	{
-		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
-	}
-	else if (rank!=3)
-	{
-		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
-		return false;
-	}
-	else if (size != numCells)
-	{
-		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		return false;
-	}
-
-	name = "/sigma";
-	m_Disc_sigma = ReadDataSet(filename, name, rank, size);
-	if (m_Disc_sigma==NULL)
-	{
-		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
-	}
-	else if (rank!=3)
-	{
-		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
-		return false;
-	}
-	else if (size != numCells)
-	{
-		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		return false;
-	}
-
-	name = "/density";
-	m_Disc_Density = ReadDataSet(filename, name, rank, size);
-	if (m_Disc_Density==NULL)
-	{
-		cerr << __func__ << ": Failed to read " << name << ", skipping..." << endl;
-	}
-	else if (rank!=3)
-	{
-		cerr << __func__ << ": Error, data dimension error!!! Found rank: " << rank << endl;
-		return false;
-	}
-	else if (size != numCells)
-	{
-		cerr << __func__ << ": Error, data size doesn't match!!! " << size << " vs. " << m_Size[0]*m_Size[1]*m_Size[2] << endl;
-		return false;
-	}
-
+	H5Fclose(file_id);
 	return true;
 }
