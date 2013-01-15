@@ -118,14 +118,14 @@ end
 
 if (center_Model>0)
     disp('centering model...');
-    x = x - x(1) - range(x)/2;
-    y = y - y(1) - range(y)/2;
-    z = z - z(1) - range(z)/2;
+    x = x - x(1) - (max(x)-min(x))/2;
+    y = y - y(1) - (max(y)-min(y))/2;
+    z = z - z(1) - (max(z)-min(z))/2;
 end
 
-disp(['Width (x) of the model: ' num2str(range(x))])
-disp(['Height (y) of the model: ' num2str(range(y))])
-disp(['Length (z) of the model: ' num2str(range(z))])
+disp(['Width (x) of the model: ' num2str(max(x)-min(x))])
+disp(['Height (y) of the model: ' num2str(max(y)-min(y))])
+disp(['Length (z) of the model: ' num2str(max(z)-min(z))])
 
 mesh.x=x;
 mesh.y=y;
