@@ -19,9 +19,9 @@
 
 #include "CSPropProbeBox.h"
 
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
@@ -46,6 +46,8 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	if (prop==NULL) return false;
 
 	prop->SetAttribute("Number",(int)uiNumber);
+	if ((m_NormDir>0) && (m_NormDir<3))
+			prop->SetAttribute("NormDir",(int)uiNumber);
 	prop->SetAttribute("Type",ProbeType);
 	prop->SetAttribute("Weight",m_weight);
 
@@ -72,6 +74,8 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	int iHelp;
 	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) uiNumber=0;
 	else uiNumber=(unsigned int)iHelp;
+
+	if (prop->QueryIntAttribute("NormDir",&m_NormDir)!=TIXML_SUCCESS) m_NormDir=-1;
 
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
 

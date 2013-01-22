@@ -1,5 +1,5 @@
-function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
-% function CSX = AddProbe(CSX, name, type, weight)
+function CSX = AddProbe(CSX, name, type, varargin)
+% function CSX = AddProbe(CSX, name, type, varargin)
 %
 % Add a probe property to CSX with the given name.
 % Remember to add a geometrical primitive to any property.
@@ -14,11 +14,12 @@ function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
 %           10 for waveguide voltage mode matching
 %           11 for waveguide current mode matching
 %
-% all following parameter are optional:
+% all following parameter are optional key/value parameter:
 %
-% weight:   weighting factor (default is 1)
-%
-% FD_samples: dump in the frequency domain at the given samples (in Hz)
+% weight:       weighting factor (default is 1)
+% frequency:    dump in the frequency domain at the given samples (in Hz)
+% ModeFunction: A mode function (used only with type 3/4)
+% NormDir:      necessary for current probing box with dimension~=2
 %
 % examples:
 %       CSX = AddProbe(CSX,'ut1',0); %voltate probe
@@ -31,34 +32,42 @@ function CSX = AddProbe(CSX, name, type, weight, FD_samples, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-if (nargin<4)
-    weight=1;
-end
-
-if (nargin<5)
-    FD_samples = [];
-end
+weight=1;
+FD_samples = [];
+ModeFunction = {};
+NormDir = nan;
 
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');
 end
 
-[CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
-
-if (nargin>4)
-    if (numel(FD_samples)>0)
-        CSX.Properties.ProbeBox{pos}.FD_Samples=FD_samples;
+for n=1:2:numel(varargin)
+    if (strcmpi(varargin{n},'weight')==1);
+        weight = varargin{n+1};
+    elseif (strcmpi(varargin{n},'Frequency')==1);
+        FD_samples = varargin{n+1};
+    elseif (strcmpi(varargin{n},'ModeFunction')==1);
+        ModeFunction = varargin{n+1};
+    elseif (strcmpi(varargin{n},'NormDir')==1);
+        NormDir = varargin{n+1};
+    else
+        warning('CSXCAD:AddProbe',['variable argument key: "' varargin{n+1} '" unknown']);
     end
 end
 
-for n=1:(nargin-5)/2
-    if ( (ischar(varargin{2*n})) || isnumeric(varargin{2*n}))
-        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.(varargin{2*n-1}) = varargin{2*n};
-    else 
-        value = varargin{2*n};
-        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'X']) = value{1};
-        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Y']) = value{2};
-        CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.([varargin{2*n-1} 'Z']) = value{3};
-    end
+[CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
+
+if ~isnan(NormDir)
+    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'NormDir', NormDir);
+end
+
+if (numel(FD_samples)>0)
+    CSX.Properties.ProbeBox{pos}.FD_Samples=FD_samples;
+end
+
+if (numel(ModeFunction)>0)
+    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionX = ModeFunction{1};
+    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionY = ModeFunction{2};
+    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionZ = ModeFunction{3};
 end
 
