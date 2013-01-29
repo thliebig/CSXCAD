@@ -336,7 +336,7 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		return false;
 	}
 
-	hid_t dataset = H5Dopen(file_id, "/DiscData", H5P_DEFAULT);
+	hid_t dataset = H5Dopen2(file_id, "/DiscData", H5P_DEFAULT);
 	if (dataset<0)
 	{
 		cerr << __func__ << ": Error, can't open database" << endl;
