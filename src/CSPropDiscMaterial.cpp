@@ -82,16 +82,16 @@ unsigned int CSPropDiscMaterial::GetWeightingPos(const double* inCoords)
 		if (coords[n]>m_mesh[n][m_Size[n]-1])
 			return -1;
 		pos[n]=0;
-		for (unsigned int i=0;i<m_Size[n];++i)
+		for (unsigned int i=1;i<m_Size[n];++i)
 		{
 			if (coords[n]<m_mesh[n][i])
 			{
-				pos[n]=i;
+				pos[n]=i-1;
 				break;
 			}
 		}
 	}
-	return pos[0] + pos[1]*m_Size[0] + pos[2]*m_Size[0]*m_Size[1];
+	return pos[0] + pos[1]*(m_Size[0]-1) + pos[2]*(m_Size[0]-1)*(m_Size[1]-1);
 }
 
 int CSPropDiscMaterial::GetDBPos(const double* coords)
@@ -352,14 +352,14 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 	for (int n=0; n<3; ++n)
 	{
 		m_mesh[n] = ReadDataSet(filename, names[n], rank, size);
-		if ((m_mesh[n]==NULL) || (rank!=1))
+		if ((m_mesh[n]==NULL) || (rank!=1) || (size<=1))
 		{
-			cerr << __func__ << ": Error, failed to read mesh, abort..." << endl;
+			cerr << __func__ << ": Error, failed to read or invalid mesh, abort..." << endl;
 			H5Fclose(file_id);
 			return false;
 		}
 		m_Size[n]=size;
-		numCells*=m_Size[n];
+		numCells*=(m_Size[n]-1);
 	}
 
 	// read database

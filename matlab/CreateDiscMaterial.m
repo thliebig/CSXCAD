@@ -13,7 +13,7 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 %               example:
 %
 %   mat_db:     material database
-%   mesh:       used voxel mesh
+%   mesh:       used voxel mesh. Note size is size(data)+[1 1 1]
 %
 % example:
 %   mat_db.epsR    = [1     3      4];    %relative permittivity
@@ -21,10 +21,10 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 %   mat_db.density = [0     1000   1010]; %material density (kg/m³)
 %   mat_db.Name    = {'Air','mat1','mat2'};
 %
-%   data = [0 1 0; 2 2 2; 0 3 0];
-%   mesh.x = [0    0.1 0.2];
-%   mesh.y = [-0.1 0   0.1];
-%   mesh.z = [0    0.4 0.8];
+%   data = [0 1 0; 2 2 2; 0 3 0];   % 3x3x3 data
+%   mesh.x = [0    0.1 0.2 0.3];    % 4 mesh lines in x-dir (3 cells)
+%   mesh.y = [-0.1 0   0.1 0.2];    % 4 mesh lines in y-dir (3 cells)
+%   mesh.z = [0    0.4 0.8 1.2];    % 4 mesh lines in z-dir (3 cells)
 %
 %   CreateDiscMaterial_v2('test_mat.h5', data, mat_db, mesh);
 %
@@ -39,7 +39,12 @@ if isOctave
     error('CreateDiscMaterial currently does not support Octave, due to missing hdf5 functions!');
 end
 
-data_size = [numel(mesh.x) numel(mesh.y) numel(mesh.z)];
+data_size = size(data);
+mesh_size = [numel(mesh.x) numel(mesh.y) numel(mesh.z)];
+
+if ((mesh_size-1)~=data_size)
+    error('data size and mesh size mismatch');
+end
 
 if (exist(filename,'file'))
     error(['file "' filename '" already exist. Delete/rename first!']);
@@ -55,13 +60,13 @@ h5writeatt(filename, '/DiscData', 'kappa', mat_db.kappa);
 h5writeatt(filename, '/DiscData', 'density', mat_db.density);
 h5writeatt(filename, '/DiscData', 'Name', strjoin(mat_db.Name,','));
 
-h5create(filename, '/mesh/x', data_size(1));
+h5create(filename, '/mesh/x', mesh_size(1));
 h5write(filename, '/mesh/x', mesh.x);
 
-h5create(filename, '/mesh/y', data_size(2));
+h5create(filename, '/mesh/y', mesh_size(2));
 h5write(filename, '/mesh/y', mesh.y);
 
-h5create(filename, '/mesh/z', data_size(3));
+h5create(filename, '/mesh/z', mesh_size(3));
 h5write(filename, '/mesh/z', mesh.z);
 
 h5writeatt(filename, '/', 'Version', 2);

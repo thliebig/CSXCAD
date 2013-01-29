@@ -27,7 +27,6 @@ clc
 %% settings (edit below)
 
 center_Model = 1;
-remove_Air = 1;   % remove unnecessary air regions around the model
 
 % name of the voxel model
 % name = 'Billie_11y_V2_1mm';
@@ -36,7 +35,7 @@ remove_Air = 1;   % remove unnecessary air regions around the model
 % name = 'Thelonious_6y_V6_1mm';
 
 % root path to virtual family models with each model in its own folder
-VF_model_root_path = '.';
+VF_model_root_path = '<path/to/model/root>';
 
 % tissue database file (incl. full path if necessary)
 mat_db_file = 'DB_h5_20120711_SEMCADv14.8.h5';
@@ -93,28 +92,9 @@ max_mat = max(mat);
 % mat = data;
 % clear data;
 
-x = (0:nx-1)*dx;
-y = (0:ny-1)*dy;
-z = (0:nz-1)*dz;
-
-if (remove_Air>0)
-    disp('removing unused areas...');
-    ind = find(mat>0) - 1;
-    ind_z = floor(ind/nx/ny);
-    range_z = [min(ind_z):max(ind_z)]+1;
-    ind = ind - ind_z*nx*ny;
-    ind_y = floor(ind/nx);
-    range_y = [min(ind_y) : max(ind_y)]+1;
-    ind_x = mod(ind,nx);
-    range_x = [min(ind_x) : max(ind_x)]+1;
-
-    x=x(range_x);
-	y=y(range_y);
-	z=z(range_z);
-
-    mat = mat(range_x,range_y,range_z);
-end
-
+x = (0:nx)*dx;
+y = (0:ny)*dy;
+z = (0:nz)*dz;
 
 if (center_Model>0)
     disp('centering model...');
