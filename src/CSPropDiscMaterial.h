@@ -66,6 +66,6 @@ protected:
 	double m_Scale;
 	CSTransform* m_Transform;
 
-	float* ReadDataSet(string filename, string d_name, int &rank, unsigned int &size, bool debug=false);
+	void* ReadDataSet(string filename, string d_name, int type_id, int &rank, unsigned int &size, bool debug=false);
 };
 

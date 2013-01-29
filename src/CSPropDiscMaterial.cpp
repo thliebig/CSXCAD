@@ -231,7 +231,7 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-float *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int &rank, unsigned int &size, bool debug)
+void *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int type_id, int &rank, unsigned int &size, bool debug)
 {
 	herr_t status;
 	H5T_class_t class_id;
@@ -279,13 +279,27 @@ float *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int &rank
 	for (int n=0;n<rank;++n)
 		size*=dims[n];
 
-	float* data = new float[size];
-	status = H5LTread_dataset_float( file_id, d_name.c_str(), data );
+	void* data;
+	if (type_id==H5T_NATIVE_FLOAT)
+		data = (void*) new float[size];
+	else if (type_id==H5T_NATIVE_INT)
+		data = (void*) new int[size];
+	else
+	{
+		cerr << __func__ << ": Error, unknown data type" << endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	status = H5LTread_dataset( file_id, d_name.c_str(), type_id, data );
 	if (status < 0)
 	{
 		if (debug)
 			cerr << __func__ << ": Warning, failed to read dataset: \"" << d_name << "\" skipping..." << endl;
-		delete[] data;
+		if (type_id==H5T_NATIVE_FLOAT)
+			delete[] (float*)data;
+		else if (type_id==H5T_NATIVE_INT)
+			delete[] (int*)data;
 		H5Fclose(file_id);
 		return NULL;
 	}
@@ -328,7 +342,6 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 	}
 
 	m_DB_size = db_size;
-
 	if (H5Lexists(file_id, "/DiscData", H5P_DEFAULT)<=0)
 	{
 		cerr << __func__ << ": Error, can't read database, abort..." << endl;
@@ -342,24 +355,6 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		cerr << __func__ << ": Error, can't open database" << endl;
 		H5Fclose(file_id);
 		return 0;
-	}
-
-	// read mesh
-	unsigned int size;
-	int rank;
-	unsigned int numCells = 1;
-	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
-	for (int n=0; n<3; ++n)
-	{
-		m_mesh[n] = ReadDataSet(filename, names[n], rank, size);
-		if ((m_mesh[n]==NULL) || (rank!=1) || (size<=1))
-		{
-			cerr << __func__ << ": Error, failed to read or invalid mesh, abort..." << endl;
-			H5Fclose(file_id);
-			return false;
-		}
-		m_Size[n]=size;
-		numCells*=(m_Size[n]-1);
 	}
 
 	// read database
@@ -422,17 +417,35 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 		m_Disc_Density=NULL;
 	}
 
-	delete[] m_Disc_Ind;
-	m_Disc_Ind = new int[numCells];
-	status = H5LTread_dataset_int(file_id, "/DiscData", m_Disc_Ind);
-	if (status<0)
+	H5Fclose(file_id);
+
+	// read mesh
+	unsigned int size;
+	int rank;
+	unsigned int numCells = 1;
+	string names[] = {"/mesh/x","/mesh/y","/mesh/z"};
+	for (int n=0; n<3; ++n)
 	{
-		cerr << __func__ << ": Error, can't read database indizies, abort..." << endl;
-		delete[] m_Disc_Ind;
-		H5Fclose(file_id);
-		return false;
+		m_mesh[n] = (float*)ReadDataSet(filename, names[n], H5T_NATIVE_FLOAT, rank, size);
+		if ((m_mesh[n]==NULL) || (rank!=1) || (size<=1))
+		{
+			cerr << __func__ << ": Error, failed to read or invalid mesh, abort..." << endl;
+			H5Fclose(file_id);
+			return false;
+		}
+		m_Size[n]=size;
+		numCells*=(m_Size[n]-1);
 	}
 
-	H5Fclose(file_id);
+	delete[] m_Disc_Ind;
+	m_Disc_Ind = (int*)ReadDataSet(filename, "/DiscData", H5T_NATIVE_INT, rank, size, true);
+
+	if ((m_Disc_Ind==NULL) || (rank!=3) || (size!=numCells))
+	{
+		cerr << __func__ << ": Error, can't read database indizies or size/rank is invalid, abort..." << endl;
+		delete[] m_Disc_Ind;
+		m_Disc_Ind = NULL;
+		return false;
+	}
 	return true;
 }
