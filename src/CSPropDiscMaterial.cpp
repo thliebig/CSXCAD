@@ -101,7 +101,10 @@ int CSPropDiscMaterial::GetDBPos(const double* coords)
 	unsigned int pos = GetWeightingPos(coords);
 	if (pos==(unsigned int)-1)
 		return -1;
-	int db_pos = m_Disc_Ind[pos];
+	// material with index 0 is assumed to be background material
+	if (m_Disc_Ind[pos]==0)
+			return -1;
+	int db_pos = (int)m_Disc_Ind[pos];
 	if (db_pos>=(int)m_DB_size)
 	{
 		//sanity check, this should not happen!!!
@@ -284,6 +287,8 @@ void *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int type_i
 		data = (void*) new float[size];
 	else if (type_id==H5T_NATIVE_INT)
 		data = (void*) new int[size];
+	else if (type_id==H5T_NATIVE_UINT8)
+		data = (void*) new uint8[size];
 	else
 	{
 		cerr << __func__ << ": Error, unknown data type" << endl;
@@ -300,6 +305,8 @@ void *CSPropDiscMaterial::ReadDataSet(string filename, string d_name, int type_i
 			delete[] (float*)data;
 		else if (type_id==H5T_NATIVE_INT)
 			delete[] (int*)data;
+		else if (type_id==H5T_NATIVE_UINT8)
+			delete[] (uint8*)data;
 		H5Fclose(file_id);
 		return NULL;
 	}
@@ -438,7 +445,7 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 	}
 
 	delete[] m_Disc_Ind;
-	m_Disc_Ind = (int*)ReadDataSet(filename, "/DiscData", H5T_NATIVE_INT, rank, size, true);
+	m_Disc_Ind = (uint8*)ReadDataSet(filename, "/DiscData", H5T_NATIVE_UINT8, rank, size, true);
 
 	if ((m_Disc_Ind==NULL) || (rank!=3) || (size!=numCells))
 	{

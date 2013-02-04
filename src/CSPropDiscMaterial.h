@@ -20,6 +20,8 @@
 #include "CSProperties.h"
 #include "CSPropMaterial.h"
 
+typedef unsigned char uint8;
+
 //! Continuous Structure Discrete Material Property
 /*!
   This Property reads a discrete material distribution from a file. (currently only HDF5)
@@ -56,7 +58,7 @@ protected:
 	string m_Filename;
 	unsigned int m_Size[3];
 	unsigned int m_DB_size;
-	int* m_Disc_Ind;
+	uint8* m_Disc_Ind;
 	float *m_mesh[3];
 	float *m_Disc_epsR;
 	float *m_Disc_kappa;
