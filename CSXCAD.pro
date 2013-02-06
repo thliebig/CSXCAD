@@ -88,6 +88,8 @@ win32 {
 # vtk includes deprecated header files; silence the corresponding warning
 QMAKE_CXXFLAGS += -Wno-deprecated -frounding-math
 
+# enable this flag to use with valgrind! valgrind emulates a buggy FPU
+# QMAKE_CXXFLAGS += -DCGAL_DISABLE_ROUNDING_MATH_CHECK=ON
 
 # Input
 PUB_HEADERS += src/ContinuousStructure.h \
