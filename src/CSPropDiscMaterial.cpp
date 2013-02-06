@@ -456,3 +456,18 @@ bool CSPropDiscMaterial::ReadHDF5( string filename )
 	}
 	return true;
 }
+
+void CSPropDiscMaterial::ShowPropertyStatus(ostream& stream)
+{
+	CSProperties::ShowPropertyStatus(stream);
+	stream << " --- Discrete Material Properties --- " << endl;
+	stream << "  Data-Base Size:\t: " << m_DB_size << endl;
+	stream << "  Number of Voxels:\t: " << m_Size[0] << "x" << m_Size[1] << "x" << m_Size[2] << endl;
+	stream << " Background Material Properties: " << endl;
+	stream << "  Isotropy\t: " << bIsotropy << endl;
+	stream << "  Epsilon_R\t: " << Epsilon[0].GetValueString() << ", "  << Epsilon[1].GetValueString() << ", "  << Epsilon[2].GetValueString()  << endl;
+	stream << "  Kappa\t\t: " << Kappa[0].GetValueString() << ", "  << Kappa[1].GetValueString() << ", "  << Kappa[2].GetValueString()  << endl;
+	stream << "  Mue_R\t\t: " << Mue[0].GetValueString() << ", "  << Mue[1].GetValueString() << ", "  << Mue[2].GetValueString()  << endl;
+	stream << "  Sigma\t\t: " << Sigma[0].GetValueString() << ", "  << Sigma[1].GetValueString() << ", "  << Sigma[2].GetValueString()  << endl;
+	stream << "  Density\t: " << Density.GetValueString() << endl;
+}

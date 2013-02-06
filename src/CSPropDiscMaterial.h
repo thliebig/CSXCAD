@@ -50,6 +50,8 @@ public:
 
 	bool ReadHDF5(string filename);
 
+	virtual void ShowPropertyStatus(ostream& stream);
+
 protected:
 	unsigned int GetWeightingPos(const double* coords);
 	int GetDBPos(const double* coords);
