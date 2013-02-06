@@ -71,14 +71,14 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
 	points.at(point_index)->SetValue(nu,val);
 }
 
-bool CSPrimCurve::GetPoint(size_t point_index, double* point, bool transform)
+bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c_system, bool transform)
 {
 	if (point_index>=GetNumberOfPoints()) return false;
-	point[0] = points.at(point_index)->GetCoordValue(0,m_MeshType);
-	point[1] = points.at(point_index)->GetCoordValue(1,m_MeshType);
-	point[2] = points.at(point_index)->GetCoordValue(2,m_MeshType);
+	point[0] = points.at(point_index)->GetCoordValue(0,c_system);
+	point[1] = points.at(point_index)->GetCoordValue(1,c_system);
+	point[2] = points.at(point_index)->GetCoordValue(2,c_system);
 	if (transform)
-		TransformCoords(point, false, m_MeshType);
+		TransformCoords(point, false, c_system);
 	return true;
 }
 
