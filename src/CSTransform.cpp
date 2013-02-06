@@ -35,6 +35,12 @@ CSTransform::CSTransform()
 
 CSTransform::CSTransform(CSTransform* transform)
 {
+	if (transform==NULL)
+	{
+		Reset();
+		SetParameterSet(NULL);
+		return;
+	}
 	m_PostMultiply = transform->m_PostMultiply;
 	m_AngleRadian = transform->m_AngleRadian;
 	m_TransformList = transform->m_TransformList;
