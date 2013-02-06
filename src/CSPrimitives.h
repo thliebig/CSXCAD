@@ -59,7 +59,7 @@ class CSTransform;
 	Foot will return the normalized foot-point on the line. A value between 0..1 means the foot-point is one the given line.
 	foot == 0 --> foot-point is on start, foot == 1 --> foot-point is on stop
 */
-void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist);
+void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist, CoordinateSystem c_system=UNDEFINED_CS);
 
 bool CSXCAD_EXPORT CoordInRange(const double* p, const double* start, const double* stop, CoordinateSystem cs_in);
 

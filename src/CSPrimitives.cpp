@@ -31,17 +31,22 @@
 
 #define PI acos(-1)
 
-void Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist)
+void Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist, CoordinateSystem c_system)
 {
-	double dir[] = {stop[0]-start[0],stop[1]-start[1],stop[2]-start[2]};
+	double l_P[3],l_start[3],l_stop[3];
+	TransformCoordSystem(P,l_P,c_system,CARTESIAN);
+	TransformCoordSystem(start,l_start,c_system,CARTESIAN);
+	TransformCoordSystem(stop,l_stop,c_system,CARTESIAN);
+
+	double dir[] = {l_stop[0]-l_start[0],l_stop[1]-l_start[1],l_stop[2]-l_start[2]};
 
 	double LL = pow(dir[0],2)+pow(dir[1],2)+pow(dir[2],2); //Line length^2
-	foot = (P[0]-start[0])*dir[0] +  (P[1]-start[1])*dir[1] + (P[2]-start[2])*dir[2];
+	foot = (l_P[0]-l_start[0])*dir[0] +  (l_P[1]-l_start[1])*dir[1] + (l_P[2]-l_start[2])*dir[2];
 	foot /= LL;
 
-	double footP[] = {start[0] + foot*dir[0], start[1] + foot*dir[1], start[2] + foot*dir[2]};
+	double footP[] = {l_start[0] + foot*dir[0], l_start[1] + foot*dir[1], l_start[2] + foot*dir[2]};
 
-	dist = sqrt(pow(P[0]-footP[0],2)+pow(P[1]-footP[1],2)+pow(P[2]-footP[2],2));
+	dist = sqrt(pow(l_P[0]-footP[0],2)+pow(l_P[1]-footP[1],2)+pow(l_P[2]-footP[2],2));
 }
 
 bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const double* stop, CoordinateSystem cs_in)
