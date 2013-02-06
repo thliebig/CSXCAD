@@ -4,6 +4,9 @@ function CSXGeomPlot(CSX_filename, args_string)
 % Show the geometry stored in the CSX file using AppCSXCAD
 %
 % Optional AppCSXCAD arguments (args_string):
+%   '--RenderDiscMaterial', enable material rendering
+%
+%  exports:
 %   '--export-polydata-vtk=<path-for-export>'
 %   '--export-STL=<path-for-export>'
 %

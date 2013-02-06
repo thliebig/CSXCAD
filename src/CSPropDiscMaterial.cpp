@@ -19,6 +19,10 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
+#include "vtkPolyData.h"
+#include "vtkCellArray.h"
+#include "vtkPoints.h"
+
 #include "ParameterCoord.h"
 #include "CSPropDiscMaterial.h"
 
@@ -470,4 +474,141 @@ void CSPropDiscMaterial::ShowPropertyStatus(ostream& stream)
 	stream << "  Mue_R\t\t: " << Mue[0].GetValueString() << ", "  << Mue[1].GetValueString() << ", "  << Mue[2].GetValueString()  << endl;
 	stream << "  Sigma\t\t: " << Sigma[0].GetValueString() << ", "  << Sigma[1].GetValueString() << ", "  << Sigma[2].GetValueString()  << endl;
 	stream << "  Density\t: " << Density.GetValueString() << endl;
+}
+
+vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel() const
+{
+	vtkPolyData* polydata = vtkPolyData::New();
+	vtkCellArray *poly = vtkCellArray::New();
+	vtkPoints *points = vtkPoints::New();
+
+
+	int* pointIdx[2];
+	pointIdx[0] = new int[m_Size[0]*m_Size[1]];
+	pointIdx[1] = new int[m_Size[0]*m_Size[1]];
+	// init point idx
+	for (unsigned int n=0;n<m_Size[0]*m_Size[1];++n)
+	{
+		pointIdx[0][n]=-1;
+		pointIdx[1][n]=-1;
+	}
+
+	unsigned int mat_idx, mat_idx_down;
+	unsigned int mesh_idx=0;
+	bool bd, bu;
+	int nP, nPP;
+	unsigned int pos[3],rpos[3];
+	for (pos[2]=0;pos[2]<m_Size[2]-1;++pos[2])
+	{ // each xy-plane
+		for (unsigned int n=0;n<m_Size[0]*m_Size[1];++n)
+		{
+			pointIdx[0][n]=pointIdx[1][n];
+			pointIdx[1][n]=-1;
+		}
+		for (pos[0]=0;pos[0]<m_Size[0]-1;++pos[0])
+			for (pos[1]=0;pos[1]<m_Size[1]-1;++pos[1])
+			{
+				mat_idx = pos[0] + pos[1]*(m_Size[0]-1) + pos[2]*(m_Size[0]-1)*(m_Size[1]-1);
+				for (int n=0;n<3;++n)
+				{
+					// reset relative pos
+					rpos[0]=pos[0];
+					rpos[1]=pos[1];
+					rpos[2]=pos[2];
+					bd = false;
+					bu = false;
+					if (pos[n]==0)
+					{
+						if (m_Disc_Ind[mat_idx]>0)
+							bd=true;
+					}
+					else if (pos[n]==m_Size[n]-2)
+					{
+						if (m_Disc_Ind[mat_idx]>0)
+							bu=true;
+					}
+					else
+					{
+						rpos[n] = pos[n]-1; // set relative pos
+						mat_idx_down  = rpos[0] + rpos[1]*(m_Size[0]-1) + rpos[2]*(m_Size[0]-1)*(m_Size[1]-1);
+						rpos[n] = pos[n]; // reset relative pos
+						if ((m_Disc_Ind[mat_idx]>0) && (m_Disc_Ind[mat_idx_down]==0))
+							bd=true;
+						else if (m_Disc_Ind[mat_idx]==0 && (m_Disc_Ind[mat_idx_down]>0))
+							bu=true;
+					}
+
+					rpos[0]=pos[0];
+					rpos[1]=pos[1];
+					rpos[2]=0;
+
+					if (bu) // draw poly for surface up
+					{
+						nP = (n+1)%3;
+						nPP = (n+2)%3;
+						poly->InsertNextCell(4);
+
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						++rpos[nP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						++rpos[nPP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						--rpos[nP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+					}
+					else if (bd) // draw poly for surface down
+					{
+						nP = (n+1)%3;
+						nPP = (n+2)%3;
+						poly->InsertNextCell(4);
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						++rpos[nPP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						++rpos[nP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+
+						--rpos[nPP];
+						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+						if (pointIdx[rpos[2]][mesh_idx]<0)
+							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
+						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+					}
+				}
+			}
+	}
+	delete[] pointIdx[0];
+	delete[] pointIdx[1];
+
+	polydata->SetPoints(points);
+	points->Delete();
+	polydata->SetPolys(poly);
+	poly->Delete();
+
+	return polydata;
 }

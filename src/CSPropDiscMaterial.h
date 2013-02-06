@@ -22,6 +22,8 @@
 
 typedef unsigned char uint8;
 
+class vtkPolyData;
+
 //! Continuous Structure Discrete Material Property
 /*!
   This Property reads a discrete material distribution from a file. (currently only HDF5)
@@ -43,6 +45,10 @@ public:
 
 	virtual double GetDensityWeighted(const double* coords);
 
+	CSTransform* GetTransform() {return m_Transform;}
+
+	double GetScale() {return m_Scale;}
+
 	virtual void Init();
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
@@ -51,6 +57,9 @@ public:
 	bool ReadHDF5(string filename);
 
 	virtual void ShowPropertyStatus(ostream& stream);
+
+	//! Create a vtkPolyData surface that separates the discrete material from background material
+	virtual vtkPolyData* CreatePolyDataModel() const;
 
 protected:
 	unsigned int GetWeightingPos(const double* coords);
