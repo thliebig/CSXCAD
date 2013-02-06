@@ -177,7 +177,9 @@ void CSProperties::SetVisibility(bool val) {bVisisble=val;}
 CSPropUnknown* CSProperties::ToUnknown() { return dynamic_cast<CSPropUnknown*>(this); }
 CSPropMaterial* CSProperties::ToMaterial() { return dynamic_cast<CSPropMaterial*>(this); }
 CSPropLorentzMaterial* CSProperties::ToLorentzMaterial() { return dynamic_cast<CSPropLorentzMaterial*>(this); }
+CSPropDiscMaterial* CSProperties::ToDiscMaterial() { return dynamic_cast<CSPropDiscMaterial*>(this); }
 CSPropMetal* CSProperties::ToMetal() { return dynamic_cast<CSPropMetal*>(this); }
+CSPropConductingSheet* CSProperties::ToConductingSheet() { return dynamic_cast<CSPropConductingSheet*>(this); }
 CSPropExcitation* CSProperties::ToExcitation() { return dynamic_cast<CSPropExcitation*>(this); }
 CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*>(this); }
 CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }

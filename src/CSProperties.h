@@ -155,8 +155,12 @@ public:
 	CSPropMaterial* ToMaterial();
 	//! Convert to Lorentzs-Material Property, returns NULL if type is different! \return Returns a CSPropLorentzMaterial* or NULL if type is different!
 	CSPropLorentzMaterial* ToLorentzMaterial();
+	//! Convert to Discrete-Material Property, returns NULL if type is different! \return Returns a CSPropDiscMaterial* or NULL if type is different!
+	CSPropDiscMaterial* ToDiscMaterial();
 	//! Convert to Metal Property, returns NULL if type is different! \return Returns a CSPropMetal* or NULL if type is different!
 	CSPropMetal* ToMetal();
+	//! Convert to Conducting Sheet Property, returns NULL if type is different! \return Returns a CSPropConductingSheet* or NULL if type is different!
+	CSPropConductingSheet* ToConductingSheet();
 	//! Convert to Excitation Property, returns NULL if type is different! \return Returns a CSPropExcitation* or NULL if type is different!
 	CSPropExcitation* ToExcitation();
 	//! Convert to ProbeBox Property, returns NULL if type is different! \return Returns a CSPropProbeBox* or NULL if type is different!
