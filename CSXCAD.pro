@@ -206,4 +206,4 @@ QMAKE_EXTRA_TARGETS += phony
 #  make docs
 # to start doxygen. It will generate html, latex and compressed help for QtCreator
 #
-include(doc/doc.pri)
+include(doc.pri)
