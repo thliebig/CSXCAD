@@ -32,7 +32,7 @@ function [lines quality] = AutoSmoothMeshLines( lines, max_res, ratio, varargin)
 % -----------------------
 % author: Thorsten Liebig (C) 2012
 
-if (numel(lines)<2)
+if (nargin<2)
     error('CSXCAD:AutoSmoothMeshLines','lines and max_res are a required parameter');
 end
 
