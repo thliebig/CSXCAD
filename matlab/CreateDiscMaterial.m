@@ -19,9 +19,9 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 %   mat_db.epsR    = [1     3      4];    %relative permittivity
 %   mat_db.kappa   = [0     0.2    0.4];  %electric conductivity (S/m)
 %   mat_db.density = [0     1000   1010]; %material density (kg/m³)
-%   mat_db.Name    = {'Air','mat1','mat2'};
+%   mat_db.Name    = {'Background','mat2','mat3'};
 %
-%   data = [0 1 0; 2 2 2; 0 3 0];   % 3x3x3 data
+%   data = [0 1 0; 2 1 2; 0 1 0];   % 3x3x3 data
 %   mesh.x = [0    0.1 0.2 0.3];    % 4 mesh lines in x-dir (3 cells)
 %   mesh.y = [-0.1 0   0.1 0.2];    % 4 mesh lines in y-dir (3 cells)
 %   mesh.z = [0    0.4 0.8 1.2];    % 4 mesh lines in z-dir (3 cells)
@@ -33,7 +33,6 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 % CSXCAD matlab interface
 % -----------------------
 % author: Thorsten Liebig (2013)
-
 
 if isOctave
     error('CreateDiscMaterial currently does not support Octave, due to missing hdf5 functions!');
@@ -50,8 +49,10 @@ if (exist(filename,'file'))
     error(['file "' filename '" already exist. Delete/rename first!']);
 end
 
-h5create(filename, '/DiscData',data_size, 'Datatype', 'int32', 'ChunkSize',data_size, 'Deflate',9);
-h5write(filename, '/DiscData', data - 1);
+h5create(filename, '/DiscData',data_size, 'Datatype', 'uint8', 'ChunkSize',data_size, 'Deflate',9);
+h5write(filename, '/DiscData', data);
+
+clear data;
 
 h5writeatt(filename, '/DiscData', 'DB_Size', int32(numel(mat_db.epsR)));
 

@@ -30,8 +30,8 @@ center_Model = 1;
 
 % name of the voxel model
 % name = 'Billie_11y_V2_1mm';
-% name = 'Duke_34y_V5_1mm'; %requires huge amounts of memory, maybe use 2mm?
-% name = 'Ella_26y_V2_1mm';
+% name = 'Duke_34y_V5_1mm'; %the 0.5mm requires large amounts of memory ~3GB, maybe use 1mm?
+% name = 'Ella_26y_V2_1mm'; %the 0.5mm requires large amounts of memory ~3GB, maybe use 1mm?
 % name = 'Thelonious_6y_V6_1mm';
 
 % root path to virtual family models with each model in its own folder
@@ -79,6 +79,8 @@ nx = n_cells{2}(1);
 ny = n_cells{2}(2);
 nz = n_cells{2}(3);
 
+disp(['body model contains ' num2str(nx*ny*nz) ' voxels']);
+
 dx = d_cells{2}(1);
 dy = d_cells{2}(2);
 dz = d_cells{2}(3);
@@ -86,12 +88,15 @@ dz = d_cells{2}(3);
 tic
 disp('reading raw body data...');
 fid = fopen([VF_model_root_path filesep name filesep name '.raw']);
-mat = int32(reshape(fread(fid),nx,ny,nz));
-fclose(fid);
-max_mat = max(mat);
-% mat = data;
-% clear data;
 
+% read in line by line to save memory
+for n=1:nz
+    data_plane = reshape(fread(fid,nx*ny),nx,ny);
+    mat(:,:,n) = uint8(data_plane);
+end
+fclose(fid);
+
+%
 x = (0:nx)*dx;
 y = (0:ny)*dy;
 z = (0:nz)*dz;
@@ -119,6 +124,12 @@ disp(['reading/analysing material database: ' mat_db_file]);
 mat_db_info = h5info(mat_db_file);
 
 %%
+% there is no material in the list for number 0
+mat_db.epsR(1)   = 1;
+mat_db.kappa(1)  = 0;
+mat_db.density(1) = 0;
+mat_db.Name{1} = 'Background';
+
 for n=1:numel(material_list{end})
     mat_para = GetColeData(mat_db_info, material_list{end}{n});
     eps_colo_cole = mat_para.ef + mat_para.sig/(1j*w*EPS0);
@@ -134,10 +145,10 @@ for n=1:numel(material_list{end})
     if (mat_para.del4>0)
         eps_colo_cole = eps_colo_cole + mat_para.del4/(1 + (1j*w*mat_para.tau4*1e-3)^(1-mat_para.alf4));
     end
-    mat_db.epsR(n)   = real(eps_colo_cole);
-    mat_db.kappa(n)  = -1*imag(eps_colo_cole)*w*EPS0;
-    mat_db.density(n) = mat_para.Dens;
-    mat_db.Name{n} = mat_para.Name;
+    mat_db.epsR(n+1)   = real(eps_colo_cole);
+    mat_db.kappa(n+1)  = -1*imag(eps_colo_cole)*w*EPS0;
+    mat_db.density(n+1) = mat_para.Dens;
+    mat_db.Name{n+1} = mat_para.Name;
 end
 toc
 %%
