@@ -82,6 +82,6 @@ protected:
 };
 
 //! Convert a given coordinate into another coordinate system
-double* TransformCoordSystem(const double* in, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out);
+double* CSXCAD_EXPORT TransformCoordSystem(const double* in, double* out, CoordinateSystem CS_In, CoordinateSystem CS_out);
 
 #endif // PARAMETERCOORD_H
