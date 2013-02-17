@@ -146,12 +146,10 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 	if (m_Transform && Type==POLYGON)
-		m_Transform->InvertTransform(Coord,Coord);
+		TransformCoords(Coord,true, CARTESIAN);
 
 	for (unsigned int n=0;n<3;++n)
-	{
 		if ((m_BoundBox[2*n]>Coord[n]) || (m_BoundBox[2*n+1]<Coord[n])) return false;
-	}
 
 	double x=0,y=0;
 	int nP = (m_NormDir+1)%3;

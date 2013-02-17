@@ -59,7 +59,7 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 	if (m_Transform && Type==ROTPOLY)
-		m_Transform->InvertTransform(Coord,Coord);
+		TransformCoords(Coord,true, CARTESIAN);
 
 	double origin[3]={0,0,0};
 	double dir[3]={0,0,0};

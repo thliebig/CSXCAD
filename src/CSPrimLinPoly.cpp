@@ -81,10 +81,9 @@ bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimLinPoly::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
-	double coords[3];
+	double coords[3]={Coord[0],Coord[1],Coord[2]};
 	if (m_Transform && Type==LINPOLY)
-		m_Transform->InvertTransform(Coord,coords);
-
+		TransformCoords(coords,true, m_MeshType);
 	return CSPrimPolygon::IsInside(coords, tol);
 }
 
