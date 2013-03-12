@@ -20,7 +20,9 @@ function CSX = AddDump(CSX, name, varargin)
 %
 %              29 raw data needed for SAR calculations (electric field FD,
 %                 cell volume, conductivity and density)
-% 
+%
+%   Frequency:  specify a frequency vector (required for dump types >=10)
+%
 %   DumpMode:   0 no-interpolation
 %               1 node-interpolation (default, see warning below)
 %               2 cell-interpolation (see warning below)
@@ -33,15 +35,18 @@ function CSX = AddDump(CSX, name, varargin)
 % 
 %   Warning:
 %       FDTD Interpolation abnormalities:
-%           - no-interpolation: fields are located in the mesh by the
+%         - no-interpolation: fields are located in the mesh by the
 %           Yee-scheme, the mesh only specifies E- or H-Yee-nodes 
 %             --> use node- or cell-interpolation or be aware of the offset
-%           - E-field dump & node-interpolation: normal electric fields on
+%         - E-field dump & node-interpolation: normal electric fields on
 %           boundaries will have false amplitude due to forward/backward
-%           interpolation --> use no- or cell-interpolation
-%           - H-field dump & cell-interpolation: normal magnetic fields on
+%           interpolation  in case of (strong) changes in material
+%           permittivity or on metal surfaces
+%             --> use no- or cell-interpolation
+%         - H-field dump & cell-interpolation: normal magnetic fields on
 %           boundaries will have false amplitude due to forward/backward
-%           interpolation --> use no- or node-interpolation
+%           interpolation in case of (strong) changes in material permeability
+%             --> use no- or node-interpolation
 %
 % e.g. AddDump(CSX,'Et');
 %      CSX = AddBox(CSX,'Et',10,[0 0 0],[100 100 200]); %assign box
