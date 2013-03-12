@@ -29,7 +29,7 @@ dir = fileparts( filename );
 AppCSXCAD_Path = [dir filesep '../../AppCSXCAD' filesep];
    
 if (~exist(AppCSXCAD_Path,'dir'))
-    AppCSXCAD_Path = [dir filesep '..' filesep]  
+    AppCSXCAD_Path = [dir filesep '..' filesep];
 end
 
 if isunix
