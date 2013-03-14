@@ -53,6 +53,22 @@ public:
 	//! Get the epsilon plasma frequency weighting
 	double GetEpsPlasmaFreqWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsPlasma[order],ny,coords)*GetEpsPlasmaFreq(order,ny);}
 
+	//! Set the epsilon lorentz pole frequency
+	void SetEpsLorPoleFreq(int order, double val, int ny=0) {SetValue(val,EpsLorPole[order],ny);}
+	//! Set the epsilon lorentz pole frequency
+	int  SetEpsLorPoleFreq(int order, const string val, int ny=0)  {return SetValue(val,EpsLorPole[order],ny);}
+	//! Get the epsilon lorentz pole frequency
+	double GetEpsLorPoleFreq(int order, int ny=0) {return GetValue(EpsLorPole[order],ny);}
+	//! Get the epsilon lorentz pole frequency as a string
+	const string GetEpsLorPoleFreqTerm(int order, int ny=0) {return GetTerm(EpsLorPole[order],ny);}
+
+	//! Set the epsilon lorentz pole frequency weighting
+	int SetEpsLorPoleFreqWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightEpsLorPole[order],ny);}
+	//! Get the epsilon lorentz pole frequency weighting string
+	const string GetEpsLorPoleFreqWeightFunction(int order, int ny) {return GetTerm(WeightEpsLorPole[order],ny);}
+	//! Get the epsilon lorentz pole frequency weighting
+	double GetEpsLorPoleFreqWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsLorPole[order],ny,coords)*GetEpsLorPoleFreq(order,ny);}
+
 	//! Set the epsilon relaxation time
 	void SetEpsRelaxTime(int order, double val, int ny=0) {SetValue(val,EpsRelaxTime[order],ny);}
 	//! Set the epsilon relaxation time
@@ -85,6 +101,22 @@ public:
 	//! Get the mue plasma frequency weighting
 	double GetMuePlasmaFreqWeighted(int order, int ny, const double* coords)  {return GetWeight(WeightMuePlasma[order],ny,coords)*GetMuePlasmaFreq(order,ny);}
 
+	//! Set the mue lorentz pole frequency
+	void SetMueLorPoleFreq(int order, double val, int ny=0)  {SetValue(val,MueLorPole[order],ny);}
+	//! Set the mue lorentz pole frequency
+	int SetMueLorPoleFreq(int order, const string val, int ny=0)  {return SetValue(val,MueLorPole[order],ny);}
+	//! Get the mue lorentz pole frequency
+	double GetMueLorPoleFreq(int order, int ny=0)  {return GetValue(MueLorPole[order],ny);}
+	//! Get the mue lorentz pole frequency string
+	const string GetMueTermLorPoleFreq(int order, int ny=0)  {return GetTerm(MueLorPole[order],ny);}
+
+	//! Set the mue lorentz pole frequency weighting
+	int SetMueLorPoleFreqWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightMueLorPole[order],ny);}
+	//! Get the mue lorentz pole frequency weighting string
+	const string GetMueLorPoleFreqWeightFunction(int order, int ny) {return GetTerm(WeightMueLorPole[order],ny);}
+	//! Get the mue lorentz pole frequency weighting
+	double GetMueLorPoleFreqWeighted(int order, int ny, const double* coords)  {return GetWeight(WeightMueLorPole[order],ny,coords)*GetMueLorPoleFreq(order,ny);}
+
 	//! Set the mue relaxation time
 	void SetMueRelaxTime(int order, double val, int ny=0)  {SetValue(val,MueRelaxTime[order],ny);}
 	//! Set the mue relaxation time
@@ -107,6 +139,8 @@ public:
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
+	virtual void ShowPropertyStatus(ostream& stream);
+
 protected:
 	virtual void InitValues();
 	virtual void DeleteValues();
@@ -116,6 +150,13 @@ protected:
 	//! Epsilon and mue plasma frequncies weighting functions
 	ParameterScalar** WeightEpsPlasma;
 	ParameterScalar** WeightMuePlasma;
+
+	//! Epsilon and mue lorentz pole frequncies
+	ParameterScalar** EpsLorPole;
+	ParameterScalar** MueLorPole;
+	//! Epsilon and mue lorentz pole frequncies weighting functions
+	ParameterScalar** WeightEpsLorPole;
+	ParameterScalar** WeightMueLorPole;
 
 	//! Relaxation times for epsilon and mue
 	ParameterScalar** EpsRelaxTime;

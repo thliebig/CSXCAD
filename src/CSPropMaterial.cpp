@@ -293,7 +293,7 @@ bool CSPropMaterial::ReadFromXML(TiXmlNode &root)
 void CSPropMaterial::ShowPropertyStatus(ostream& stream)
 {
 	CSProperties::ShowPropertyStatus(stream);
-	stream << " --- Material Properties --- " << endl;
+	stream << " --- " << GetTypeString() << " --- " << endl;
 	stream << "  Isotropy\t: " << bIsotropy << endl;
 	stream << "  Epsilon_R\t: " << Epsilon[0].GetValueString() << ", "  << Epsilon[1].GetValueString() << ", "  << Epsilon[2].GetValueString()  << endl;
 	stream << "  Kappa\t\t: " << Kappa[0].GetValueString() << ", "  << Kappa[1].GetValueString() << ", "  << Kappa[2].GetValueString()  << endl;
