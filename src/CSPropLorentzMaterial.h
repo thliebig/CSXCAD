@@ -83,7 +83,7 @@ public:
 	//! Get the epsilon relaxation time weighting string
 	const string GetEpsRelaxTimeWeightFunction(int order, int ny) {return GetTerm(WeightEpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time weighting
-	double GetEpsRelaxTimeWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsRelaxTime[order],ny,coords)*GetEpsPlasmaFreq(order,ny);}
+	double GetEpsRelaxTimeWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsRelaxTime[order],ny,coords)*GetEpsRelaxTime(order,ny);}
 
 	//! Set the mue plasma frequency
 	void SetMuePlasmaFreq(int order, double val, int ny=0)  {SetValue(val,MuePlasma[order],ny);}

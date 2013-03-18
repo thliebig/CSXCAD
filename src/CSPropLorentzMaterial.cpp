@@ -382,8 +382,8 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 		ReadVectorTerm(EpsLorPole[o],*matProp,"EpsilonLorPoleFrequency_"+ConvertInt(o+1),0.0);
 		ReadVectorTerm(MueLorPole[o],*matProp,"MueLorPoleFrequency_"+ConvertInt(o+1),0.0);
 
-		ReadVectorTerm(EpsRelaxTime[o],*matProp,"EpsilonRelaxTime"+ConvertInt(o+1),0.0);
-		ReadVectorTerm(MueRelaxTime[o],*matProp,"MueRelaxTime"+ConvertInt(o+1),0.0);
+		ReadVectorTerm(EpsRelaxTime[o],*matProp,"EpsilonRelaxTime_"+ConvertInt(o+1),0.0);
+		ReadVectorTerm(MueRelaxTime[o],*matProp,"MueRelaxTime_"+ConvertInt(o+1),0.0);
 
 		if (weightProp)
 		{
@@ -393,8 +393,8 @@ bool CSPropLorentzMaterial::ReadFromXML(TiXmlNode &root)
 			ReadVectorTerm(WeightEpsLorPole[o],*weightProp,"EpsilonLorPoleFrequency_"+ConvertInt(o+1),1.0);
 			ReadVectorTerm(WeightMueLorPole[o],*weightProp,"MueLorPoleFrequency_"+ConvertInt(o+1),1.0);
 
-			ReadVectorTerm(WeightEpsRelaxTime[o],*weightProp,"EpsilonRelaxTime"+ConvertInt(o+1),1.0);
-			ReadVectorTerm(WeightMueRelaxTime[o],*weightProp,"MueRelaxTime"+ConvertInt(o+1),1.0);
+			ReadVectorTerm(WeightEpsRelaxTime[o],*weightProp,"EpsilonRelaxTime_"+ConvertInt(o+1),1.0);
+			ReadVectorTerm(WeightMueRelaxTime[o],*weightProp,"MueRelaxTime_"+ConvertInt(o+1),1.0);
 		}
 	}
 	return true;
