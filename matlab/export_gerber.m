@@ -184,14 +184,14 @@ for num=1:numel(prop)
 		for a=1:numel(prop{num}.Primitives.Cylinder)
 			% iterate over all cylinders
 			Cylinder = prop{num}.Primitives.Cylinder{a};
-        	primitive_cylinder( fid, Cylinder, GetCoordSystem(Box) );
+        	primitive_cylinder( fid, Cylinder, GetCoordSystem(Cylinder) );
 		end
 	end
 	if isfield(prop{num}.Primitives,'Polygon')
 		for a=1:numel(prop{num}.Primitives.Polygon)
 			% iterate over all polygons
 			Polygon = prop{num}.Primitives.Polygon{a};
-        	primitive_polygon( fid, Polygon, GetCoordSystem(Box) );
+        	primitive_polygon( fid, Polygon, GetCoordSystem(Polygon) );
 		end
 	end
 end
