@@ -121,6 +121,7 @@ PUB_HEADERS += src/ContinuousStructure.h \
     src/CSPropMaterial.h \
     src/CSPropDispersiveMaterial.h \
     src/CSPropLorentzMaterial.h \
+    src/CSPropDebyeMaterial.h \
     src/CSPropDiscMaterial.h \
     src/CSPropLumpedElement.h \
     src/CSPropMetal.h \
@@ -161,6 +162,7 @@ SOURCES += src/ContinuousStructure.cpp \
     src/CSPropMaterial.cpp \
     src/CSPropDispersiveMaterial.cpp \
     src/CSPropLorentzMaterial.cpp \
+    src/CSPropDebyeMaterial.cpp \
     src/CSPropDiscMaterial.cpp \
     src/CSPropLumpedElement.cpp \
     src/CSPropMetal.cpp \

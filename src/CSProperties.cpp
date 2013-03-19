@@ -20,6 +20,7 @@
 #include "CSPropMaterial.h"
 #include "CSPropDispersiveMaterial.h"
 #include "CSPropLorentzMaterial.h"
+#include "CSPropDebyeMaterial.h"
 #include "CSPropDiscMaterial.h"
 #include "CSPropLumpedElement.h"
 #include "CSPropMetal.h"
@@ -177,6 +178,7 @@ void CSProperties::SetVisibility(bool val) {bVisisble=val;}
 CSPropUnknown* CSProperties::ToUnknown() { return dynamic_cast<CSPropUnknown*>(this); }
 CSPropMaterial* CSProperties::ToMaterial() { return dynamic_cast<CSPropMaterial*>(this); }
 CSPropLorentzMaterial* CSProperties::ToLorentzMaterial() { return dynamic_cast<CSPropLorentzMaterial*>(this); }
+CSPropDebyeMaterial* CSProperties::ToDebyeMaterial() { return dynamic_cast<CSPropDebyeMaterial*>(this); }
 CSPropDiscMaterial* CSProperties::ToDiscMaterial() { return dynamic_cast<CSPropDiscMaterial*>(this); }
 CSPropMetal* CSProperties::ToMetal() { return dynamic_cast<CSPropMetal*>(this); }
 CSPropConductingSheet* CSProperties::ToConductingSheet() { return dynamic_cast<CSPropConductingSheet*>(this); }

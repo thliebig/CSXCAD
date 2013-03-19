@@ -37,6 +37,7 @@
 #include "CSPropMaterial.h"
 #include "CSPropDispersiveMaterial.h"
 #include "CSPropLorentzMaterial.h"
+#include "CSPropDebyeMaterial.h"
 #include "CSPropDiscMaterial.h"
 #include "CSPropLumpedElement.h"
 #include "CSPropMetal.h"
@@ -451,6 +452,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"Material")==0) newProp = new CSPropMaterial(clParaSet);
 		else if (strcmp(cProp,"DiscMaterial")==0) newProp = new CSPropDiscMaterial(clParaSet);
 		else if (strcmp(cProp,"LorentzMaterial")==0) newProp = new CSPropLorentzMaterial(clParaSet);
+		else if (strcmp(cProp,"DebyeMaterial")==0) newProp = new CSPropDebyeMaterial(clParaSet);
 		else if (strcmp(cProp,"LumpedElement")==0) newProp = new CSPropLumpedElement(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
 		else if (strcmp(cProp,"ConductingSheet")==0) newProp = new CSPropConductingSheet(clParaSet);

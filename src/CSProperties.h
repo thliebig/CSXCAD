@@ -155,6 +155,8 @@ public:
 	CSPropMaterial* ToMaterial();
 	//! Convert to Lorentzs-Material Property, returns NULL if type is different! \return Returns a CSPropLorentzMaterial* or NULL if type is different!
 	CSPropLorentzMaterial* ToLorentzMaterial();
+	//! Convert to Debye-Material Property, returns NULL if type is different! \return Returns a CSPropDebyeMaterial* or NULL if type is different!
+	CSPropDebyeMaterial* ToDebyeMaterial();
 	//! Convert to Discrete-Material Property, returns NULL if type is different! \return Returns a CSPropDiscMaterial* or NULL if type is different!
 	CSPropDiscMaterial* ToDiscMaterial();
 	//! Convert to Metal Property, returns NULL if type is different! \return Returns a CSPropMetal* or NULL if type is different!
