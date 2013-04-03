@@ -26,7 +26,7 @@ function mesh = DetectEdges(CSX, mesh, varargin)
 % Note:
 % - Only primitives contained in Metal, Material, Excitation, LumpedElement
 %   or ConductingSheet properties are processed
-% - Currently this function handles only Box, Polygons and LinPoly primitives
+% - Currently this function handles only Box, Polygons, LinPoly and Cylinder.
 %
 % CSXCAD matlab interface
 % -----------------------
@@ -144,6 +144,32 @@ if (isfield(CSX, 'Properties'))
                                     edges = AddEdge (edges, poly, x1, y1, z2, CoordSystem, debug);
                                 end
                             end
+                        end
+                    end
+                elseif (strcmp(prim_fn{n_prim}, 'Cylinder'))
+                    for c = 1:length(primitives.Cylinder)
+                        cylinder = primitives.Cylinder{c};
+                        r = cylinder.ATTRIBUTE.Radius;
+                        x1 = cylinder.P1.ATTRIBUTE.X;
+                        y1 = cylinder.P1.ATTRIBUTE.Y;
+                        z1 = cylinder.P1.ATTRIBUTE.Z;
+                        x2 = cylinder.P2.ATTRIBUTE.X;
+                        y2 = cylinder.P2.ATTRIBUTE.Y;
+                        z2 = cylinder.P2.ATTRIBUTE.Z;
+                        if ((x1 == x2) && (y1 == y2) && (z1 ~= z2))
+                          % cylinder parallel with z axis
+                          edges = AddEdge (edges, cylinder, x1 - r, y1 - r, z1, CoordSystem, debug);
+                          edges = AddEdge (edges, cylinder, x2 + r, y2 + r, z2, CoordSystem, debug);
+                        elseif ((x1 == x2) && (y1 ~= y2) && (z1 == z2))
+                          % cylinder parallel with y axis
+                          edges = AddEdge (edges, cylinder, x1 - r, y1, z1 - r, CoordSystem, debug);
+                          edges = AddEdge (edges, cylinder, x2 + r, y2, z2 + r, CoordSystem, debug);
+                        elseif ((x1 ~= x2) && (y1 == y2) && (z1 == z2))
+                          % cylinder parallel with x axis
+                          edges = AddEdge (edges, cylinder, x1, y1 - r, z1 - r, CoordSystem, debug);
+                          edges = AddEdge (edges, cylinder, x2, y2 + r, z2 + r, CoordSystem, debug);
+                        elseif (debug > 0)
+                          warning('CSXCAD:DetectEdges',['unsupported primitive of type: "' prim_fn{n_prim} '" found, skipping edges']);
                         end
                     end
                 else
