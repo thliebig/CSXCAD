@@ -24,7 +24,7 @@ function [isOct,ver] = isOctave()
 %
 % openEMS matlab/octave interface
 % -----------------------
-% author: Thorsten Liebig (2011)
+% (C) 2011 Thorsten Liebig <thorsten.leibig@gmx.de>
 % (C) 2012 Sebastian Held <sebastian.held@gmx.de>
 
 isOct = exist('OCTAVE_VERSION','builtin') ~= 0;
