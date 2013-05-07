@@ -133,14 +133,17 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 
 void CSPrimitives::SetProperty(CSProperties *prop)
 {
-	if (clProperty!=NULL) clProperty->RemovePrimitive(this);
+	if ((clProperty!=NULL) && (clProperty!=prop))
+		clProperty->RemovePrimitive(this);
 	clProperty=prop;
-	if (prop!=NULL) prop->AddPrimitive(this);
+	if ((prop!=NULL) && (!prop->HasPrimitive(this)))
+		prop->AddPrimitive(this);
 }
 
 CSPrimitives::~CSPrimitives()
 {
-	if (clProperty!=NULL) clProperty->RemovePrimitive(this);
+	if (clProperty!=NULL)
+		clProperty->RemovePrimitive(this);
 	delete m_Transform;
 	m_Transform=NULL;
 }

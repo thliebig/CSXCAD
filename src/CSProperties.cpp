@@ -70,6 +70,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 	Type=ANY;
 	InitCoordParameter();
 }
+
 CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
@@ -91,10 +92,8 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 
 CSProperties::~CSProperties()
 {
-	for (size_t i=0;i<vPrimitives.size();++i)
-	{
-		vPrimitives.at(i)->SetProperty(NULL);
-	}
+	while (vPrimitives.size()>0)
+		DeletePrimitive(vPrimitives.back());
 	delete coordParaSet;
 	coordParaSet=NULL;
 }
@@ -161,8 +160,6 @@ void CSProperties::AddAttribute(string name, string value)
 	m_Attribute_Name.push_back(name);
 	m_Attribute_Value.push_back(value);
 }
-
-void CSProperties::AddPrimitive(CSPrimitives *prim) {vPrimitives.push_back(prim);}
 
 size_t CSProperties::GetQtyPrimitives() {return vPrimitives.size();}
 CSPrimitives* CSProperties::GetPrimitive(size_t index) {if (index<vPrimitives.size()) return vPrimitives.at(index); else return NULL;}
@@ -235,6 +232,26 @@ bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	return true;
 }
 
+void CSProperties::AddPrimitive(CSPrimitives *prim)
+{
+	if (HasPrimitive(prim)==true)
+	{
+		cerr << __func__ << ": Error, primitive is already owned by this property!" << endl;
+		return;
+	}
+	vPrimitives.push_back(prim);
+	prim->SetProperty(this);
+}
+
+bool CSProperties::HasPrimitive(CSPrimitives *prim)
+{
+	if (prim==NULL)
+		return false;
+	for (size_t i=0; i<vPrimitives.size();++i)
+		if (vPrimitives.at(i)==prim)
+			return true;
+	return false;
+}
 
 void CSProperties::RemovePrimitive(CSPrimitives *prim)
 {
@@ -244,8 +261,21 @@ void CSProperties::RemovePrimitive(CSPrimitives *prim)
 		{
 			vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
 			vPrimitives.erase(iter);
+			prim->SetProperty(NULL);
+			return;
 		}
 	}
+}
+
+void CSProperties::DeletePrimitive(CSPrimitives *prim)
+{
+	if (!HasPrimitive(prim))
+	{
+		cerr << __func__ << ": Error, primitive not found, can't delete it! Skipping." << endl;
+		return;
+	}
+	RemovePrimitive(prim);
+	delete prim;
 }
 
 CSPrimitives* CSProperties::TakePrimitive(size_t index)

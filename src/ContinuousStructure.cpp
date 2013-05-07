@@ -60,27 +60,8 @@ ContinuousStructure::ContinuousStructure(void)
 ContinuousStructure::~ContinuousStructure(void)
 {
 	clear();
-	delete clParaSet;clParaSet=NULL;
-//	for (unsigned int n=0;n<vPrimitives.size();++n)
-//	{
-//			delete vPrimitives.at(n);vPrimitives.at(n)=NULL;
-//	}
-//	vPrimitives.clear();
-//	for (unsigned int n=0;n<vProperties.size();++n)
-//	{
-//			delete vProperties.at(n);vProperties.at(n)=NULL;
-//	}
-//	vProperties.clear();
-}
-
-void ContinuousStructure::AddPrimitive(CSPrimitives* prim)
-{
-	if (prim==NULL) return;
-	vPrimitives.push_back(prim);
-	prim->SetCoordInputType(m_MeshType, false);
-	prim->Update(&ErrString);
-	if (prim->GetID()<=maxID) prim->SetID(maxID++);
-	else maxID=prim->GetID()+1;
+	delete clParaSet;
+	clParaSet=NULL;
 }
 
 void ContinuousStructure::AddProperty(CSProperties* prop)
@@ -88,8 +69,6 @@ void ContinuousStructure::AddProperty(CSProperties* prop)
 	if (prop==NULL) return;
 	prop->SetCoordInputType(m_MeshType);
 	prop->Update(&ErrString);
-	//unsigned int ID=prop->GetID();
-	//for (size_t i=0;i<vProperties.size();++i) if (vProperties.at(i)->GetID()==ID) return false;
 	vProperties.push_back(prop);
 	prop->SetUniqueID(UniqueIDCounter++);
 	this->UpdateIDs();
@@ -118,28 +97,6 @@ bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* n
 	return false;
 }
 
-
-void ContinuousStructure::DeletePrimitive(size_t index)
-{
-	if (index>=vPrimitives.size()) return;
-	vector<CSPrimitives*>::iterator iter=vPrimitives.begin();
-	delete vPrimitives.at(index);
-	vPrimitives.erase(iter+index);
-}
-
-void ContinuousStructure::DeletePrimitive(CSPrimitives* prim)
-{
-	vector<CSPrimitives*>::iterator iter;
-	for (iter=vPrimitives.begin();iter<vPrimitives.end();++iter)
-	{
-		if (*iter==prim)
-		{
-			delete *iter;
-			vPrimitives.erase(iter);
-		}
-	}
-}
-
 void ContinuousStructure::DeleteProperty(size_t index)
 {
 	if (index>=vProperties.size()) return;
@@ -161,14 +118,6 @@ void ContinuousStructure::DeleteProperty(CSProperties* prop)
 		}
 	}
 	this->UpdateIDs();
-}
-
-int ContinuousStructure::GetIndex(CSPrimitives* prim)
-{
-	if (prim==NULL) return -1;
-	for (size_t i=0;i<vPrimitives.size();++i)
-		if (vPrimitives.at(i)==prim) return (int)i;
-	return -1;
 }
 
 int ContinuousStructure::GetIndex(CSProperties* prop)
@@ -195,12 +144,41 @@ vector<CSProperties*>  ContinuousStructure::GetPropertyByType(CSProperties::Prop
 	return found;
 }
 
+size_t ContinuousStructure::GetQtyPrimitives()
+{
+	size_t count = 0;
+	for (size_t i=0;i<vProperties.size();++i)
+		count+=vProperties.at(i)->GetQtyPrimitives();
+	return count;
+}
+
+vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives()
+{
+	vector<CSPrimitives*> vPrim;
+	vPrim.reserve(GetQtyPrimitives());
+	for (size_t i=0;i<vProperties.size();++i)
+	{
+		vector<CSPrimitives*> prop_prims = vProperties.at(i)->GetAllPrimitives();
+		vPrim.insert(vPrim.end(),prop_prims.begin(),prop_prims.end());
+	}
+	return vPrim;
+}
+
+vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::PrimitiveType type)
+{
+	UNUSED(type);
+	vector<CSPrimitives*> vPrim;
+	cerr << __func__ << ": Error, not yet implemented!" << endl;
+	return vPrim;
+}
+
 bool ContinuousStructure::InsertEdges2Grid(int nu)
 {
 	if (nu<0) return false;
 	if (nu>2) return false;
 	double box[6] = {0,0,0,0,0,0};
 	bool accBound=false;
+	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		accBound = vPrimitives.at(i)->GetBoundBox(box);
@@ -216,19 +194,25 @@ bool ContinuousStructure::InsertEdges2Grid(int nu)
 
 CSPrimitives* ContinuousStructure::GetPrimitiveByID(unsigned int ID)
 {
-	for (size_t i=0;i<vPrimitives.size();++i) if (vPrimitives.at(i)->GetID()==ID) return vPrimitives.at(i);
+	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	for (size_t i=0;i<vPrimitives.size();++i)
+		if (vPrimitives.at(i)->GetID()==ID)
+			return vPrimitives.at(i);
 	return NULL;
+}
+
+vector<CSProperties*> ContinuousStructure::GetPropertiesByName(string name)
+{
+	vector<CSProperties*> vProp;
+	for (size_t i=0;i<vProperties.size();++i)
+		if (name.compare(vProperties.at(i)->GetName())==0)
+			vProp.push_back(vProperties.at(i));
+	return vProp;
 }
 
 CSProperties* ContinuousStructure::GetProperty(size_t index)
 {
 	if (index<vProperties.size()) return vProperties.at(index);
-	return NULL;
-}
-
-CSPrimitives* ContinuousStructure::GetPrimitive(size_t index)
-{
-	if (index<vPrimitives.size()) return vPrimitives.at(index);
 	return NULL;
 }
 
@@ -315,9 +299,11 @@ bool ContinuousStructure::isGeometryValid()
 	if (clGrid.GetQtyLines(1)<=1) return false;
 	if (clGrid.GetQtyLines(2)<=0) return false;
 
+	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
-		if (vPrimitives.at(i)->Update()==false) return false;
+		if (vPrimitives.at(i)->Update()==false)
+			return false;
 	}
 
 	int excit=0;
@@ -337,9 +323,10 @@ double* ContinuousStructure::GetObjectArea()
 {
 	CSPrimitives* prim=NULL;
 	bool AccBound;
-	for (size_t i=0;i<GetQtyPrimitives();++i)
+	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	for (size_t i=0;i<vPrimitives.size();++i)
 	{
-		prim=GetPrimitive(i);
+		prim=vPrimitives.at(i);
 		double box[6] = {0,0,0,0,0,0};
 		AccBound = prim->GetBoundBox(box);
 		if (box!=NULL && AccBound)
@@ -361,8 +348,13 @@ double* ContinuousStructure::GetObjectArea()
 const char* ContinuousStructure::Update()
 {
 	ErrString.clear();
-	for (size_t i=0;i<vProperties.size();++i) vProperties.at(i)->Update(&ErrString);
-	for (size_t i=0;i<vPrimitives.size();++i) vPrimitives.at(i)->Update(&ErrString);
+
+	for (size_t i=0;i<vProperties.size();++i)
+		vProperties.at(i)->Update(&ErrString);
+
+	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	for (size_t i=0;i<vPrimitives.size();++i)
+		vPrimitives.at(i)->Update(&ErrString);
 
 	return ErrString.c_str();
 }
@@ -372,12 +364,15 @@ void ContinuousStructure::clear()
 	UniqueIDCounter=0;
 	dDrawingTol=0;
 	maxID=0;
-	SetCoordInputType(CARTESIAN);
-	for (size_t i=0;i<vPrimitives.size();++i) delete vPrimitives.at(i);
-	vPrimitives.clear();
-	for (size_t i=0;i<vProperties.size();++i) delete vProperties.at(i);
+	for (unsigned int n=0;n<vProperties.size();++n)
+	{
+		delete vProperties.at(n);
+		vProperties.at(n)=NULL;
+	}
 	vProperties.clear();
-	clParaSet->clear();
+	SetCoordInputType(CARTESIAN);
+	if (clParaSet)
+		clParaSet->clear();
 	clGrid.clear();
 }
 
@@ -581,7 +576,11 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 		}
 		if (newPrim)
 		{
-			if (newPrim->ReadFromXML(*PrimNode)) AddPrimitive(newPrim);
+			if (newPrim->ReadFromXML(*PrimNode))
+			{
+				newPrim->SetCoordInputType(m_MeshType, false);
+				newPrim->Update(&ErrString);
+			}
 			else
 			{
 				delete newPrim;

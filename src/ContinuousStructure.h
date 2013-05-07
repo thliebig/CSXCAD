@@ -54,34 +54,28 @@ public:
 	/*!
 	 \return ParameterSet owned by this class.
 	 */
-	ParameterSet* GetParameterSet() {return clParaSet;};
+	ParameterSet* GetParameterSet() {return clParaSet;}
 
 	//! Get the Grid of this Structure.
-	CSRectGrid* GetGrid() {return &clGrid;};
+	CSRectGrid* GetGrid() {return &clGrid;}
 
-	//! Add an existing CSPrimitive. Class takes ownership!
-	void AddPrimitive(CSPrimitives* prim);
 	//! Add an existing CSProperty. Class takes ownership!
 	void AddProperty(CSProperties* prop);
 
 	//! Replace an existing property with a new one. \sa AddProperty, DeleteProperty
 	bool ReplaceProperty(CSProperties* oldProp, CSProperties* newProp);
 
-	//! Remove and delete Primitive with known index 
-	void DeletePrimitive(size_t index);
-
-	//! Remove and delete Property with known index 
+	//! Remove and delete Property at known index
 	void DeleteProperty(size_t index);
 
-	//! Remove and delete a known Primitive
-	void DeletePrimitive(CSPrimitives* prim);
 	//! Remove and delete a known Property
 	void DeleteProperty(CSProperties* prop);
 
-	//! Get a Primitive by its internal index number. \sa GetQtyPrimitives
-	CSPrimitives* GetPrimitive(size_t index);
 	//! Get a primitive by its unique ID.
 	CSPrimitives* GetPrimitiveByID(unsigned int ID);
+
+	//! Get all primitives with the given name
+	vector<CSProperties*> GetPropertiesByName(string name);
 
 	//! Get a property by its internal index number. \sa GetQtyProperties
 	CSProperties* GetProperty(size_t index);
@@ -120,15 +114,20 @@ public:
 	//! Show status of all properties with given type
 	void ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
-	//! Get the internal index of the primitive.
-	int GetIndex(CSPrimitives* prim);
+	//! Get the quantity of primitives included in this structure.
+	size_t GetQtyPrimitives();
+
+	//! Get a primitives array
+	vector<CSPrimitives*>  GetAllPrimitives();
+
+	//! Get a primitives array of a certian type
+	vector<CSPrimitives*>  GetPrimitivesByType(CSPrimitives::PrimitiveType type);
+
 	//! Get the internal index of the property.
 	int GetIndex(CSProperties* prop);
 
-	//! Get the quantity of primitives included in this structure.
-	size_t GetQtyPrimitives() {return vPrimitives.size();};
 	//! Get the quantity of properties included in this structure.
-	size_t GetQtyProperties() {return vProperties.size();};
+	size_t GetQtyProperties() {return vProperties.size();}
 
 	//! Get the quantity of properties of a certain type included in this structure.
 	size_t GetQtyPropertyType(CSProperties::PropertyType type);
@@ -182,7 +181,6 @@ public:
 protected:
 	ParameterSet* clParaSet;
 	CSRectGrid clGrid;
-	vector<CSPrimitives*> vPrimitives;
 	vector<CSProperties*> vProperties;
 	bool ReadPropertyPrimitives(TiXmlElement* PropNode, CSProperties* prop);
 

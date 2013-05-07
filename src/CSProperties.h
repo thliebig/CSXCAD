@@ -117,8 +117,12 @@ public:
 
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
-	//! Removes and deletes a primitive of this Property. \sa CSPrimitives, AddPrimitive, TakePrimitive
+	//! Check if primitive is owned by this Propertie. \sa CSPrimitives, AddPrimitive, RemovePrimitive, TakePrimitive
+	bool HasPrimitive(CSPrimitives *prim);
+	//! Removes a primitive of this Property. Caller must take ownership! \sa CSPrimitives, AddPrimitive, TakePrimitive
 	void RemovePrimitive(CSPrimitives *prim);
+	//! Removes and deletes a primitive of this Property. \sa CSPrimitives, RemovePrimitive, AddPrimitive, TakePrimitive
+	void DeletePrimitive(CSPrimitives *prim);
 	//! Take a primitive of this Propertie at index. Releases ownership of this primitive to caller! \sa CSPrimitives, RemovePrimitive, AddPrimitive \return NULL if not found!
 	CSPrimitives* TakePrimitive(size_t index);
 
