@@ -488,52 +488,6 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		}
         PropNode=PropNode->NextSiblingElement();
 	}
-
-//	/***THIS IS THE OLD Primitives read-in***/
-//	TiXmlNode* prims = root->FirstChild("Primitives");
-//	if (prims==NULL) { ErrString.append("Warning: Primitives not found!!!\n");}
-//
-//	TiXmlElement* PrimNode = prims->FirstChildElement();
-//	CSPrimitives* newPrim=NULL;
-//	while (PrimNode!=NULL)
-//	{
-//		int PropID;
-//		if (PrimNode->QueryIntAttribute("PropertyID",&PropID)!=TIXML_SUCCESS)
-//		{
-//			ErrString.append("Warning: invalid Primitve found!!!\n");
-//			PropID=-1;
-//		}
-//		CSProperties* prop=NULL;
-//		if (PropID>=0) prop=this->GetProperty(PropID);
-//		if (prop==NULL) ErrString.append("Warning: Can't read Primitve with invalid Property-ID!!!\n");
-//		else
-//		{
-//			const char* cPrim=PrimNode->Value();
-//			if (strcmp(cPrim,"Box")==0) newPrim = new CSPrimBox(clParaSet,prop);
-//			else if (strcmp(cPrim,"MultiBox")==0) newPrim = new CSPrimMultiBox(clParaSet,prop);
-//			else if (strcmp(cPrim,"Sphere")==0) newPrim = new CSPrimSphere(clParaSet,prop);
-//			else if (strcmp(cPrim,"SphericalShell")==0) newPrim = new CSPrimSphericalShell(clParaSet,prop);
-//			else if (strcmp(cPrim,"Cylinder")==0) newPrim = new CSPrimCylinder(clParaSet,prop);
-//			else if (strcmp(cPrim,"CylindricalShell")==0) newPrim = new CSPrimCylindricalShell(clParaSet,prop);
-//			else if (strcmp(cPrim,"Polygon")==0) newPrim = new CSPrimPolygon(clParaSet,prop);
-//			else if (strcmp(cPrim,"LinPoly")==0) newPrim = new CSPrimLinPoly(clParaSet,prop);
-//			else if (strcmp(cPrim,"RotPoly")==0) newPrim = new CSPrimRotPoly(clParaSet,prop);
-//			else if (strcmp(cPrim,"Curve")==0) newPrim = new CSPrimCurve(clParaSet,prop);
-//			else if (strcmp(cPrim,"Wire")==0) newPrim = new CSPrimWire(clParaSet,prop);
-//			else if (strcmp(cPrim,"UserDefined")==0) newPrim = new CSPrimUserDefined(clParaSet,prop);
-//			else
-//			{
-//				cerr << "ContinuousStructure::ReadFromXML: Primitive with type: " << cPrim << " is unknown... " << endl;
-//				newPrim=NULL;
-//			}
-//			if (newPrim)
-//			{
-//				if (newPrim->ReadFromXML(*PrimNode)) AddPrimitive(newPrim);
-//				else {delete newPrim; ErrString.append("Warning: invalid Primitive found!!!\n");}
-//			}
-//		}
-//		PrimNode=PrimNode->NextSiblingElement();
-//	}
 	return ErrString.c_str();
 }
 
