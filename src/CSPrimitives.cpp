@@ -184,6 +184,7 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
 {
 	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
+	stream << "  Primary Coord-System: " << m_PrimCoordSystem << " Mesh Coord-System: " << m_MeshType << " Bound-Box Coord-System: " << m_BoundBox_CoordSys << endl;
 }
 
 void CSPrimitives::TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const

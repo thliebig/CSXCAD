@@ -304,6 +304,7 @@ void CSProperties::ShowPropertyStatus(ostream& stream)
 {
 	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << endl;
 	stream << " Primitive Count \t: " << vPrimitives.size() << endl;
+	stream << " Coordinate System \t: " << coordInputType << endl;
 
 	stream << "  -- Primitives: --" << endl;
 	for (size_t i=0; i<vPrimitives.size();++i)
