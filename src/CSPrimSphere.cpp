@@ -54,6 +54,33 @@ CSPrimSphere::~CSPrimSphere()
 {
 }
 
+void CSPrimSphere::SetCenter(double x1, double x2, double x3)
+{
+	SetCoord(0,x1);
+	SetCoord(1,x2);
+	SetCoord(2,x3);
+}
+
+void CSPrimSphere::SetCenter(double x[3])
+{
+	for (int n=0;n<3;++n)
+		SetCoord(n, x[n]);
+}
+
+void CSPrimSphere::SetCenter(string x1, string x2, string x3)
+{
+	SetCoord(0,x1);
+	SetCoord(1,x2);
+	SetCoord(2,x3);
+}
+
+void CSPrimSphere::SetCenter(string x[3])
+{
+	for (int n=0;n<3;++n)
+		SetCoord(n, x[n]);
+}
+
+
 bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways

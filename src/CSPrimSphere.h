@@ -33,9 +33,18 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimSphere(this,prop);}
 
+	//! Set the center point coordinate
 	void SetCoord(int index, double val) {m_Center.SetValue(index,val);}
+	//! Set the center point coordinate as paramater string
 	void SetCoord(int index, const char* val) {m_Center.SetValue(index,val);}
+	//! Set the center point coordinate as paramater string
 	void SetCoord(int index, string val) {m_Center.SetValue(index,val);}
+
+	void SetCenter(double x1, double x2, double x3);
+	void SetCenter(double x[3]);
+
+	void SetCenter(string x1, string x2, string x3);
+	void SetCenter(string x[3]);
 
 	double GetCoord(int index) {return m_Center.GetValue(index);}
 	ParameterScalar* GetCoordPS(int index) {return m_Center.GetCoordPS(index);}
