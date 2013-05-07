@@ -37,9 +37,9 @@ CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSPropert
 CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : CSPrimitives(cylinder,prop)
 {
 	Type=CYLINDER;
-	m_AxisCoords[0] = ParameterCoord(cylinder->m_AxisCoords[0]);
-	m_AxisCoords[1] = ParameterCoord(cylinder->m_AxisCoords[1]);
-	psRadius=ParameterScalar(cylinder->psRadius);
+	m_AxisCoords[0].Copy(&cylinder->m_AxisCoords[0]);
+	m_AxisCoords[1].Copy(&cylinder->m_AxisCoords[1]);
+	psRadius.Copy(&cylinder->psRadius);
 	PrimTypeName = string("Cylinder");
 }
 

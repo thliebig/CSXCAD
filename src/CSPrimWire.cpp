@@ -36,7 +36,7 @@ CSPrimWire::CSPrimWire(CSPrimWire* primCurve, CSProperties *prop) : CSPrimCurve(
 {
 	Type=WIRE;
 	PrimTypeName = string("Wire");
-	wireRadius = ParameterScalar(primCurve->wireRadius);
+	wireRadius.Copy(&primCurve->wireRadius);
 }
 
 CSPrimWire::CSPrimWire(ParameterSet* paraSet, CSProperties* prop) : CSPrimCurve(paraSet,prop)

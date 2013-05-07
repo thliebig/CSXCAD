@@ -242,6 +242,9 @@ public:
 
 	double GetEvaluated(double* ParaValues, int &EC);
 
+	// Copy all values and parameter from ps to this.
+	void Copy(ParameterScalar* ps);
+
 protected:
 	ParameterSet* clParaSet;
 	bool bModified;

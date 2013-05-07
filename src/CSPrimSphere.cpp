@@ -36,8 +36,8 @@ CSPrimSphere::CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties*
 CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimitives(sphere,prop)
 {
 	Type=SPHERE;
-	m_Center=ParameterCoord(sphere->m_Center);
-	psRadius=ParameterScalar(sphere->psRadius);
+	m_Center.Copy(&sphere->m_Center);
+	psRadius.Copy(&sphere->psRadius);
 	PrimTypeName = string("Sphere");
 }
 

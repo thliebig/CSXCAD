@@ -34,7 +34,8 @@ CSPrimMultiBox::CSPrimMultiBox(unsigned int ID, ParameterSet* paraSet, CSPropert
 CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : CSPrimitives(multiBox, prop)
 {
 	Type=MULTIBOX;
-	for (size_t i=0;i<multiBox->vCoords.size();++i) vCoords.push_back(ParameterScalar(multiBox->vCoords.at(i)));
+	for (size_t i=0;i<multiBox->vCoords.size();++i)
+		vCoords.push_back(new ParameterScalar(multiBox->vCoords.at(i)));
 	PrimTypeName = string("Multi Box");
 }
 
@@ -50,22 +51,24 @@ CSPrimMultiBox::~CSPrimMultiBox()
 
 void CSPrimMultiBox::SetCoord(int index, double val)
 {
-	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
+	if ((index>=0) && (index<(int)vCoords.size()))
+		vCoords.at(index)->SetValue(val);
 }
 
 void CSPrimMultiBox::SetCoord(int index, const char* val)
 {
-	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
+	if ((index>=0) && (index<(int)vCoords.size()))
+		vCoords.at(index)->SetValue(val);
 }
 
 void CSPrimMultiBox::AddCoord(double val)
 {
-	vCoords.push_back(ParameterScalar(clParaSet,val));
+	vCoords.push_back(new ParameterScalar(clParaSet,val));
 }
 
 void CSPrimMultiBox::AddCoord(const char* val)
 {
-	vCoords.push_back(ParameterScalar(clParaSet,val));
+	vCoords.push_back(new ParameterScalar(clParaSet,val));
 }
 
 void CSPrimMultiBox::AddBox(int initBox)
@@ -73,16 +76,18 @@ void CSPrimMultiBox::AddBox(int initBox)
 	ClearOverlap();
 	if ((initBox<0) || (((initBox+1)*6)>(int)vCoords.size()))
 	{
-		for (unsigned int i=0;i<6;++i) AddCoord(0.0);
+		for (unsigned int i=0;i<6;++i)
+			AddCoord(0.0);
 	}
-	else for (unsigned int i=0;i<6;++i) vCoords.push_back(ParameterScalar(vCoords.at(6*initBox+i)));
+	else for (unsigned int i=0;i<6;++i)
+		vCoords.push_back(new ParameterScalar(vCoords.at(6*initBox+i)));
 }
 
 void CSPrimMultiBox::DeleteBox(size_t box)
 {
 	if ((box+1)*6>vCoords.size()) return;
-	vector<ParameterScalar>::iterator start=vCoords.begin()+(box*6);
-	vector<ParameterScalar>::iterator end=vCoords.begin()+(box*6+6);
+	vector<ParameterScalar*>::iterator start=vCoords.begin()+(box*6);
+	vector<ParameterScalar*>::iterator end=vCoords.begin()+(box*6+6);
 
 	vCoords.erase(start,end);
 }
@@ -90,13 +95,15 @@ void CSPrimMultiBox::DeleteBox(size_t box)
 
 double CSPrimMultiBox::GetCoord(int index)
 {
-	if ((index>=0) && (index<(int)vCoords.size())) return vCoords.at(index).GetValue();
+	if ((index>=0) && (index<(int)vCoords.size()))
+		return vCoords.at(index)->GetValue();
 	return 0;
 }
 
 ParameterScalar* CSPrimMultiBox::GetCoordPS(int index)
 {
-	if ((index>=0) && (index<(int)vCoords.size())) return &vCoords.at(index);
+	if ((index>=0) && (index<(int)vCoords.size()))
+		return vCoords.at(index);
 	return NULL;
 }
 
@@ -105,7 +112,8 @@ double* CSPrimMultiBox::GetAllCoords(size_t &Qty, double* array)
 	Qty=vCoords.size();
 	delete[] array;
 	array = new double[Qty];
-	for (size_t i=0;i<Qty;++i) array[i]=vCoords.at(i).GetValue();
+	for (size_t i=0;i<Qty;++i)
+		array[i]=vCoords.at(i)->GetValue();
 	return array;
 }
 
@@ -125,17 +133,17 @@ bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	{
 		for (unsigned int n=0;n<3;++n)
 		{
-			if (vCoords.at(6*i+2*n).GetValue()<=vCoords.at(6*i+2*n+1).GetValue())
+			if (vCoords.at(6*i+2*n)->GetValue()<=vCoords.at(6*i+2*n+1)->GetValue())
 			{
 				if (i==0)
 				{
-					dBoundBox[2*n]=vCoords.at(6*i+2*n).GetValue();
-					dBoundBox[2*n+1]=vCoords.at(6*i+2*n+1).GetValue();
+					dBoundBox[2*n]=vCoords.at(6*i+2*n)->GetValue();
+					dBoundBox[2*n+1]=vCoords.at(6*i+2*n+1)->GetValue();
 				}
 				else
 				{
-					if (vCoords.at(6*i+2*n).GetValue()<dBoundBox[2*n]) dBoundBox[2*n]=vCoords.at(6*i+2*n).GetValue();
-					if (vCoords.at(6*i+2*n+1).GetValue()>dBoundBox[2*n+1]) dBoundBox[2*n+1]=vCoords.at(6*i+2*n+1).GetValue();
+					if (vCoords.at(6*i+2*n)->GetValue()<dBoundBox[2*n]) dBoundBox[2*n]=vCoords.at(6*i+2*n)->GetValue();
+					if (vCoords.at(6*i+2*n+1)->GetValue()>dBoundBox[2*n+1]) dBoundBox[2*n+1]=vCoords.at(6*i+2*n+1)->GetValue();
 				}
 
 			}
@@ -143,13 +151,13 @@ bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 			{
 				if (i==0)
 				{
-					dBoundBox[2*n]=vCoords.at(6*i+2*n+1).GetValue();
-					dBoundBox[2*n+1]=vCoords.at(6*i+2*n).GetValue();
+					dBoundBox[2*n]=vCoords.at(6*i+2*n+1)->GetValue();
+					dBoundBox[2*n+1]=vCoords.at(6*i+2*n)->GetValue();
 				}
 				else
 				{
-					if (vCoords.at(6*i+2*n+1).GetValue()<dBoundBox[2*n]) dBoundBox[2*n]=vCoords.at(6*i+2*n+1).GetValue();
-					if (vCoords.at(6*i+2*n).GetValue()>dBoundBox[2*n+1]) dBoundBox[2*n+1]=vCoords.at(6*i+2*n).GetValue();
+					if (vCoords.at(6*i+2*n+1)->GetValue()<dBoundBox[2*n]) dBoundBox[2*n]=vCoords.at(6*i+2*n+1)->GetValue();
+					if (vCoords.at(6*i+2*n)->GetValue()>dBoundBox[2*n+1]) dBoundBox[2*n+1]=vCoords.at(6*i+2*n)->GetValue();
 				}
 			}
 		}
@@ -177,9 +185,9 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 		in=true;
 		for (unsigned int n=0;n<3;++n)
 		{
-			//fprintf(stderr,"%e %e %e \n",vCoords.at(6*i+2*n).GetValue(),vCoords.at(6*i+2*n+1).GetValue());
-			UpVal=vCoords.at(6*i+2*n+1).GetValue();
-			DownVal=vCoords.at(6*i+2*n).GetValue();
+			//fprintf(stderr,"%e %e %e \n",vCoords.at(6*i+2*n)->GetValue(),vCoords.at(6*i+2*n+1)->GetValue());
+			UpVal=vCoords.at(6*i+2*n+1)->GetValue();
+			DownVal=vCoords.at(6*i+2*n)->GetValue();
 			if (DownVal<UpVal)
 			{
 				if (DownVal>coords[n]) {in=false;break;}
@@ -202,7 +210,7 @@ bool CSPrimMultiBox::Update(string *ErrStr)
 	bool bOK=true;
 	for (size_t i=0;i<vCoords.size();++i)
 	{
-		EC=vCoords.at(i).Evaluate();
+		EC=vCoords.at(i)->Evaluate();
 		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 		if ((EC!=0)  && (ErrStr!=NULL))
 		{
@@ -226,15 +234,15 @@ bool CSPrimMultiBox::Write2XML(TiXmlElement &elem, bool parameterised)
 	for (size_t i=0;i<vCoords.size()/6;++i)
 	{
 		TiXmlElement SP("StartP");
-		WriteTerm(vCoords.at(i*6),SP,"X",parameterised);
-		WriteTerm(vCoords.at(i*6+2),SP,"Y",parameterised);
-		WriteTerm(vCoords.at(i*6+4),SP,"Z",parameterised);
+		WriteTerm(*vCoords.at(i*6),SP,"X",parameterised);
+		WriteTerm(*vCoords.at(i*6+2),SP,"Y",parameterised);
+		WriteTerm(*vCoords.at(i*6+4),SP,"Z",parameterised);
 		elem.InsertEndChild(SP);
 
 		TiXmlElement EP("EndP");
-		WriteTerm(vCoords.at(i*6+1),EP,"X",parameterised);
-		WriteTerm(vCoords.at(i*6+3),EP,"Y",parameterised);
-		WriteTerm(vCoords.at(i*6+5),EP,"Z",parameterised);
+		WriteTerm(*vCoords.at(i*6+1),EP,"X",parameterised);
+		WriteTerm(*vCoords.at(i*6+3),EP,"Y",parameterised);
+		WriteTerm(*vCoords.at(i*6+5),EP,"Z",parameterised);
 		elem.InsertEndChild(EP);
 	}
 	return true;
@@ -252,15 +260,15 @@ bool CSPrimMultiBox::ReadFromXML(TiXmlNode &root)
 	{
 		for (int n=0;n<6;++n) this->AddCoord(0.0);
 
-		if (ReadTerm(vCoords.at(i*6),*SP,"X")==false) return false;
-		if (ReadTerm(vCoords.at(i*6+2),*SP,"Y")==false) return false;
-		if (ReadTerm(vCoords.at(i*6+4),*SP,"Z")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6),*SP,"X")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6+2),*SP,"Y")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6+4),*SP,"Z")==false) return false;
 
-		if (ReadTerm(vCoords.at(i*6+1),*EP,"X")==false) return false;
-		if (ReadTerm(vCoords.at(i*6+3),*EP,"Y")==false) return false;
-		if (ReadTerm(vCoords.at(i*6+5),*EP,"Z")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6+1),*EP,"X")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6+3),*EP,"Y")==false) return false;
+		if (ReadTerm(*vCoords.at(i*6+5),*EP,"Z")==false) return false;
 
-//		for (int n=0;n<6;++n) fprintf(stderr,"%e ",vCoords.at(i*6+n).GetValue());
+//		for (int n=0;n<6;++n) fprintf(stderr,"%e ",vCoords.at(i*6+n)->GetValue());
 //		fprintf(stderr,"\n");
 
 		SP=SP->NextSiblingElement("StartP");

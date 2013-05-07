@@ -35,7 +35,7 @@ CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
 {
 	Type=LINPOLY;
-	extrudeLength = ParameterScalar(primLinPoly->extrudeLength);
+	extrudeLength.Copy(&primLinPoly->extrudeLength);
 	PrimTypeName = string("LinPoly");
 }
 

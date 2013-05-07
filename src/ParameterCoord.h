@@ -62,6 +62,9 @@ public:
 	//! Evaluate the parametric coordinates and return an error message. This methode should be called before requesting coordinate values to check for valid parametric coordinates.
 	bool Evaluate(string *ErrStr);
 
+	// Copy all values and parameter from pc to this.
+	void Copy(ParameterCoord* pc);
+
 	//! Write this coords to a XML-node.
 	bool Write2XML(TiXmlElement *elem, bool parameterised=true);
 	//! Read coords from a XML-node.

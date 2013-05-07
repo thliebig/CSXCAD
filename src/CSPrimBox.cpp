@@ -36,8 +36,8 @@ CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 CSPrimBox::CSPrimBox(CSPrimBox* primBox, CSProperties *prop) : CSPrimitives(primBox,prop)
 {
 	Type=BOX;
-	m_Coords[0]=ParameterCoord(primBox->m_Coords[0]);
-	m_Coords[1]=ParameterCoord(primBox->m_Coords[1]);
+	m_Coords[0].Copy(&primBox->m_Coords[0]);
+	m_Coords[1].Copy(&primBox->m_Coords[1]);
 	PrimTypeName = string("Box");
 }
 

@@ -103,10 +103,10 @@ ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const string value[3])
 
 ParameterCoord::ParameterCoord(ParameterCoord* pc)
 {
-	m_CoordSystem = pc->m_CoordSystem;
+	m_CoordSystem = UNDEFINED_CS;
 	for (int n=0;n<3;++n)
-		m_Coords[n] = new ParameterScalar(pc->m_Coords[n]);
-	Update();
+		m_Coords[n]=NULL;
+	Copy(pc);
 }
 
 ParameterCoord::~ParameterCoord()
@@ -220,6 +220,17 @@ bool ParameterCoord::Evaluate(string *ErrStr)
 		}
 	}
 	return bOK;
+}
+
+void ParameterCoord::Copy(ParameterCoord* pc)
+{
+	m_CoordSystem = pc->m_CoordSystem;
+	for (int n=0;n<3;++n)
+	{
+		delete m_Coords[n];
+		m_Coords[n] = new ParameterScalar(pc->m_Coords[n]);
+	}
+	Update();
 }
 
 void ParameterCoord::Update()

@@ -36,7 +36,7 @@ CSPrimSphericalShell::CSPrimSphericalShell(CSPrimSphericalShell* sphere, CSPrope
 {
 	Type=SPHERICALSHELL;
 	PrimTypeName = string("SphericalShell");
-	psShellWidth=ParameterScalar(sphere->psShellWidth);
+	psShellWidth.Copy(&sphere->psShellWidth);
 }
 
 CSPrimSphericalShell::CSPrimSphericalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(paraSet,prop)

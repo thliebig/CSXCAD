@@ -551,13 +551,8 @@ ParameterScalar::ParameterScalar(ParameterSet* ParaSet, double value)
 
 ParameterScalar::ParameterScalar(ParameterScalar* ps)
 {
-	SetParameterSet(ps->clParaSet);
-	bModified=ps->bModified;
-	ParameterMode=ps->ParameterMode;
-	sValue=string(ps->sValue);
-	dValue=ps->dValue;
+	Copy(ps);
 }
-
 
 ParameterScalar::~ParameterScalar()
 {
@@ -652,6 +647,15 @@ double ParameterScalar::GetEvaluated(double* ParaValues, int &EC)
 	double dvalue = fParse.Eval(ParaValues);
 	EC = fParse.EvalError();
 	return dvalue;
+}
+
+void ParameterScalar::Copy(ParameterScalar* ps)
+{
+	SetParameterSet(ps->clParaSet);
+	bModified=ps->bModified;
+	ParameterMode=ps->ParameterMode;
+	sValue=string(ps->sValue);
+	dValue=ps->dValue;
 }
 
 string PSErrorCode2Msg(int code)

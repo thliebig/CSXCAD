@@ -59,6 +59,6 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	vector<ParameterScalar> vCoords;
+	vector<ParameterScalar*> vCoords;
 };
 

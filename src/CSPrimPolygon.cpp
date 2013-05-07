@@ -37,7 +37,7 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 {
 	Type=POLYGON;
 	m_NormDir = primPolygon->m_NormDir;
-	Elevation = ParameterScalar(primPolygon->Elevation);
+	Elevation.Copy(&primPolygon->Elevation);
 	PrimTypeName = string("Polygon");
 }
 

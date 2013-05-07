@@ -36,7 +36,7 @@ CSPrimCylindricalShell::CSPrimCylindricalShell(CSPrimCylindricalShell* cylinder,
 {
 	Type=CYLINDRICALSHELL;
 	PrimTypeName = string("CylindricalShell");
-	psShellWidth=ParameterScalar(cylinder->psShellWidth);
+	psShellWidth.Copy(&cylinder->psShellWidth);
 }
 
 CSPrimCylindricalShell::CSPrimCylindricalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(paraSet,prop)

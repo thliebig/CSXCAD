@@ -28,15 +28,14 @@
 CSPrimPoint::CSPrimPoint(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type = POINT;
-		m_Coords.SetParameterSet(paraSet);
+	m_Coords.SetParameterSet(paraSet);
 	PrimTypeName = "Point";
 }
 
 CSPrimPoint::CSPrimPoint(CSPrimPoint* primPoint, CSProperties *prop) : CSPrimitives(primPoint,prop)
 {
 	Type = POINT;
-	for (int i=0;i<3;++i)
-		m_Coords = ParameterCoord(primPoint->m_Coords);
+	m_Coords.Copy(&primPoint->m_Coords);
 	PrimTypeName = "Point";
 }
 
