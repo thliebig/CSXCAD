@@ -30,7 +30,6 @@ CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSP
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser();
-//	fParse->AddConstant("pi", 3.1415926535897932);
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
@@ -41,10 +40,10 @@ CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser(*primUDef->fParse);
-//	fParse = primUDef->fParse;
 	stFunction = string(primUDef->stFunction);
 	CoordSystem = primUDef->CoordSystem;
-	for (int i=0;i<3;++i) {dPosShift[i]=ParameterScalar(primUDef->dPosShift[i]);}
+	for (int i=0;i<3;++i)
+		dPosShift[i].Copy(&primUDef->dPosShift[i]);
 	PrimTypeName = string("User-Defined");
 }
 
@@ -52,10 +51,10 @@ CSPrimUserDefined::CSPrimUserDefined(ParameterSet* paraSet, CSProperties* prop) 
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser();
-//	fParse->AddConstant("pi", 3.1415926535897932);
 	stFunction = string();
 	CoordSystem=CARESIAN_SYSTEM;
-	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
+	for (int i=0;i<3;++i)
+		dPosShift[i].SetParameterSet(paraSet);
 	PrimTypeName = string("User-Defined");
 }
 
