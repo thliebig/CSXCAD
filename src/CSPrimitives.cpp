@@ -31,6 +31,8 @@
 
 #define PI acos(-1)
 
+int g_PrimUniqueIDCounter=0;
+
 void Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist, CoordinateSystem c_system)
 {
 	double l_P[3],l_start[3],l_stop[3];
@@ -94,9 +96,11 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 {
 	clProperty=NULL;
-	if (prop==NULL) SetProperty(prim->clProperty);
-	else SetProperty(prop);
-	uiID=prim->uiID;
+	if (prop==NULL)
+		SetProperty(prim->clProperty);
+	else
+		SetProperty(prop);
+	uiID=g_PrimUniqueIDCounter++;
 	clParaSet=prim->clParaSet;
 	m_Transform=CSTransform::New(prim->m_Transform);
 	iPriority=prim->iPriority;
@@ -116,7 +120,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	SetProperty(prop);
 	clParaSet=paraSet;
 	m_Transform=NULL;
-	uiID=0;
+	uiID=g_PrimUniqueIDCounter++;
 	iPriority=0;
 	PrimTypeName = string("Base Type");
 	m_Primtive_Used = false;
