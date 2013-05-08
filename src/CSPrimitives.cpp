@@ -150,9 +150,6 @@ CSPrimitives::~CSPrimitives()
 
 bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 {
-	elem.SetAttribute("ID",uiID);
-//	if (clProperty!=NULL) elem.SetAttribute("PropertyID",clProperty->GetID());
-//	else elem.SetAttribute("PropertyID",-1);
 	elem.SetAttribute("Priority",iPriority);
 
 	if (m_PrimCoordSystem!=UNDEFINED_CS)
@@ -169,10 +166,6 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	int help;
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;
-	if (elem->QueryIntAttribute("ID",&help)!=TIXML_SUCCESS)
-		uiID=0;
-	else
-		uiID=(unsigned int)help;
 	if (elem->QueryIntAttribute("Priority",&iPriority)!=TIXML_SUCCESS) return false;
 
 	if (elem->QueryIntAttribute("CoordSystem",&help)==TIXML_SUCCESS)
