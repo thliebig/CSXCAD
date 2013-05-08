@@ -164,6 +164,21 @@ vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives()
 	return vPrim;
 }
 
+
+CSProperties* ContinuousStructure::HasPrimitive(CSPrimitives* prim)
+{
+	for (size_t i=0;i<vProperties.size();++i)
+		if (vProperties.at(i)->HasPrimitive(prim))
+			return vProperties.at(i);
+	return NULL;
+}
+
+void ContinuousStructure::DeletePrimitive(CSPrimitives* prim)
+{
+	// no special handling is necessary, deleted primitive will release itself from its owning property
+	delete prim;
+}
+
 vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::PrimitiveType type)
 {
 	UNUSED(type);

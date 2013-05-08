@@ -114,6 +114,12 @@ public:
 	//! Show status of all properties with given type
 	void ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
+	//! Find the property owning the given primitive or return NULL if primitive is not to be found
+	CSProperties* HasPrimitive(CSPrimitives* prim);
+
+	//! Delete the given primitive
+	void DeletePrimitive(CSPrimitives* prim);
+
 	//! Get the quantity of primitives included in this structure.
 	size_t GetQtyPrimitives();
 

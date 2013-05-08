@@ -131,6 +131,7 @@ public:
 
 	//! Get the quentity of primitives assigned to this property! \return Number of primitives in this property
 	size_t GetQtyPrimitives();
+
 	//! Get the Primitive at certain index position. \sa GetQtyPrimitives
 	CSPrimitives* GetPrimitive(size_t index);
 
