@@ -576,7 +576,8 @@ const char* ContinuousStructure::ReadFromXML(const char* file)
 
 void ContinuousStructure::UpdateIDs()
 {
-	for (size_t i=0;i<vProperties.size();++i) vProperties.at(i)->SetID((unsigned int)i);
+	for (size_t i=0;i<vProperties.size();++i)
+		vProperties.at(i)->SetID((unsigned int)i);
 }
 
 string ContinuousStructure::GetInfoLine(bool shortInfo)
