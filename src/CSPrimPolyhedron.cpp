@@ -193,6 +193,8 @@ bool CSPrimPolyhedron::BuildTree()
 	delete d_ptr->m_PolyhedronTree;
 	d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(d_ptr->m_Polyhedron.facets_begin(),d_ptr->m_Polyhedron.facets_end());
 
+	//update local bounding box
+	GetBoundBox(m_BoundBox);
 	double p[3] = {m_BoundBox[1]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[3]*(1.0+(double)rand()/RAND_MAX),m_BoundBox[5]*(1.0+(double)rand()/RAND_MAX)};
 	d_ptr->m_RandPt = Point(p[0],p[1],p[2]);
 	return true;
