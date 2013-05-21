@@ -164,6 +164,8 @@ void CSPrimPolyhedron::AddFace(vector<int> vertices)
 {
 	face f;
 	f.numVertex=vertices.size();
+	if (f.numVertex>3)
+		cerr << __func__ << ": Warning, faces other than triangles are currently not supported for discretization, expect false results!!!" << endl;
 	f.vertices=new int[f.numVertex];
 	for (unsigned int n=0;n<f.numVertex;++n)
 		f.vertices[n]=vertices.at(n);
