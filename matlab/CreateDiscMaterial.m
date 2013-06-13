@@ -10,8 +10,6 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 %   filename:   hdf5 file to create (must not exist)
 %   data:       voxel based index data, index as used in mat_db or 0 for
 %               background material
-%               example:
-%
 %   mat_db:     material database
 %   mesh:       used voxel mesh. Note size is size(data)+[1 1 1]
 %
@@ -26,7 +24,7 @@ function CreateDiscMaterial(filename, data, mat_db, mesh)
 %   mesh.y = [-0.1 0   0.1 0.2];    % 4 mesh lines in y-dir (3 cells)
 %   mesh.z = [0    0.4 0.8 1.2];    % 4 mesh lines in z-dir (3 cells)
 %
-%   CreateDiscMaterial_v2('test_mat.h5', data, mat_db, mesh);
+%   CreateDiscMaterial('test_mat.h5', data, mat_db, mesh);
 %
 % See also AddDiscMaterial
 %
