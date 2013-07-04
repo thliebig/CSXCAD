@@ -9,10 +9,13 @@ function mesh = DetectEdges(CSX, mesh, varargin)
 %
 % optional: 'keyword', value
 %   'Debug'         enable debug mode (default is 1)
-%   'Add_Property'  add a list of additional properties to detect
+%   'AddPropertyType'  add a list of additional property types to detect
 %                   e.g. 'DumpBox' or {'DumpBox','ProbeBox'}
-%   'Set_Property'  set the list of properties to detect (override default)
+%   'SetPropertyType'  set the list of property types to detect (override default)
 %                   e.g. 'Metal' or {'Metal','ConductingSheet'}
+%   'ExcludeProperty'  give a list of property names to exclude from
+%                      detection
+%   'SetProperty'  give a list of property names to handly exlusively for detection
 %
 % advanced options: 'keyword', value
 %   '2D_Metal_Edge_Res' define a one-third/two-third metal edge resolution
@@ -45,13 +48,16 @@ supported_properties{end+1}='Excitation';
 supported_properties{end+1}='LumpedElement';
 supported_properties{end+1}='ConductingSheet';
 
+exclude_list = {};
+prop_list_only = {};
+
 debug = 1;
 mesh_2D_metal_edges = 0;
 
 for n=1:2:numel(varargin)
     if (strcmpi(varargin{n},'debug')==1);
         debug = varargin{n+1};
-    elseif (strcmpi(varargin{n},'add_property')==1);
+    elseif (strcmpi(varargin{n},'AddPropertyType')==1);
         if iscell(varargin{n+1})
             supported_properties(end+1) = varargin{n+1};
         elseif ischar(varargin{n+1})
@@ -59,7 +65,7 @@ for n=1:2:numel(varargin)
         else
            error('CSXCAD:DetectEdges','unknown property definition');
         end
-    elseif (strcmpi(varargin{n},'set_property')==1);
+    elseif (strcmpi(varargin{n},'SetPropertyType')==1);
         if iscell(varargin{n+1})
             supported_properties = varargin{n+1};
         elseif ischar(varargin{n+1})
@@ -67,8 +73,14 @@ for n=1:2:numel(varargin)
         else
            error('CSXCAD:DetectEdges','unknown property definition');
         end
+    elseif (strcmpi(varargin{n},'ExcludeProperty')==1);
+        exclude_list = varargin{n+1};
+    elseif (strcmpi(varargin{n},'SetProperty')==1);
+        prop_list_only = varargin{n+1};
     elseif (strcmpi(varargin{n},'2D_Metal_Edge_Res')==1);
         mesh_2D_metal_edges = varargin{n+1}*[-1 2]/3;
+    else
+        warning('CSXCAD:DetectEdges',['unknown argument: ' varargin{n}]);
     end
 end
 
@@ -112,6 +124,12 @@ if (isfield(CSX, 'Properties'))
         for m = 1:numel(property_group)
             property=property_group{m};
             if ~isfield(property, 'Primitives')
+                continue;
+            end
+            if (sum(strcmpi(property.ATTRIBUTE.Name,exclude_list)))
+                continue;
+            end
+            if (~isempty(prop_list_only) && (sum(strcmpi(property.ATTRIBUTE.Name,prop_list_only))==0))
                 continue;
             end
             primitives = property.Primitives;
