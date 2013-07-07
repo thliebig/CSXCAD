@@ -19,7 +19,7 @@
 
 #include "CSPrimitives.h"
 
-class CSPrimPolyhedronPrivate;
+struct CSPrimPolyhedronPrivate;
 
 //! Polyhedron Primitive
 /*!
