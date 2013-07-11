@@ -1,0 +1,8 @@
+Changes since v0.4.0
+-------------------------------
+- new file-format for discrete materials
+- new create function for discrete materials
+- fix for curve primitive in cylindrical coordinates
+- full multi-pole Lorentz/Drude/Debye material models
+- extensive code-cleanup
+- bug fixes
