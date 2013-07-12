@@ -1,12 +1,14 @@
-function CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points, angle, varargin)
-% CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points, angle, varargin)
+function CSX = AddRotPoly( CSX, materialname, prio, normDir, points, RotAxisDir, angle, varargin)
+% function CSX = AddRotPoly( CSX, materialname, prio, normDir, points, RotAxisDir, angle, varargin)
 %
 % CSX:          CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
 % prio:         priority
-% normDir:      normal direction of the polygon (0->x, 1->y, 2->z)
+% normDir:      normal direction of the polygon,
+%               e.g. 'x', 'y' or 'z', or numeric 0..2
 % points:       two-dimensional coordinates
-% RotAxisDir:   direction of the rotational axis (0->x, 1->y, 2->z)
+% RotAxisDir:   direction of the rotational axis
+%               e.g. 'x', 'y' or 'z', or numeric 0..2
 % angle (optional): rotational start/stop angle, default is [0 2pi]
 %
 % Warning: Polygon has to be defined using Cartesian Coords
@@ -17,8 +19,8 @@ function CSX = AddRotPoly( CSX, materialname, prio, normDir, RotAxisDir, points,
 % p(2,1) = 0;  % y-coord point 1
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
-% % normal direction: z (2)
-% CSX = AddRotPoly( CSX, 'PEC', 1, 2, [0 1 0], p , 10, 'CoordSystem',0)
+% % normal direction: z
+% CSX = AddRotPoly( CSX, 'PEC', 1, 'z', p , 'y');
 %
 % 2011, Thorsten Liebig <thorsten.liebig@gmx.de>
 %
@@ -29,8 +31,8 @@ if (nargin<7)
 end
 
 polygon.ATTRIBUTE.Priority = prio;
-polygon.ATTRIBUTE.NormDir = normDir;
-polygon.ATTRIBUTE.RotAxisDir = RotAxisDir;
+polygon.ATTRIBUTE.NormDir = DirChar2Int(normDir);
+polygon.ATTRIBUTE.RotAxisDir = DirChar2Int(RotAxisDir);
 
 polygon.Angles.ATTRIBUTE.Start = angle(1);
 polygon.Angles.ATTRIBUTE.Stop = angle(2);

@@ -4,7 +4,8 @@ function CSX = AddLinPoly( CSX, materialname, prio, normDir, elevation, points, 
 % CSX:          CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
 % prio:         priority
-% normDir:      normal direction of the polygon (0->x, 1->y, 2->z)
+% normDir:      normal direction of the polygon,
+%               e.g. 'x', 'y' or 'z', or numeric 0..2
 % elevation:    position of the polygon plane
 % points:       two-dimensional coordinates
 % length:       linear extrution in normal direction, starting at elevation
@@ -27,7 +28,7 @@ function CSX = AddLinPoly( CSX, materialname, prio, normDir, elevation, points, 
 polygon.ATTRIBUTE.Priority = prio;
 polygon.ATTRIBUTE.Elevation = elevation;
 polygon.ATTRIBUTE.Length = Length;
-polygon.ATTRIBUTE.NormDir = normDir;
+polygon.ATTRIBUTE.NormDir = DirChar2Int(normDir);
 
 polygon.Vertex = {};
 for s=1:size(points,2)

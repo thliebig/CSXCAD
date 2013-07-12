@@ -4,7 +4,8 @@ function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, 
 % CSX:          CSX-object created by InitCSX()
 % materialname: created by AddMetal() or AddMaterial()
 % prio:         priority
-% normDir:      normal direction of the polygon (0->x, 1->y, 2->z)
+% normDir:      normal direction of the polygon,
+%               e.g. 'x', 'y' or 'z', or numeric 0..2
 % elevation:    position of the polygon plane
 % points:       two-dimensional coordinates
 %
@@ -17,7 +18,7 @@ function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, 
 % p(1,2) = 10; % x-coord point 2
 % p(2,2) = 20; % y-coord point 2
 % % normal direction: z (2)
-% CSX = AddPolygon( CSX, 'PEC', 1, 2, 254, p, 'CoordSystem',0)
+% CSX = AddPolygon( CSX, 'PEC', 1, 'z', 254, p, 'CoordSystem',0)
 %
 %
 % (c) 2011 Thorsten Liebig <thorsten.liebig@gmx.de>
@@ -27,7 +28,7 @@ function CSX = AddPolygon( CSX, materialname, prio, normDir, elevation, points, 
 
 polygon.ATTRIBUTE.Priority = prio;
 polygon.ATTRIBUTE.Elevation = elevation;
-polygon.ATTRIBUTE.NormDir = normDir;
+polygon.ATTRIBUTE.NormDir = DirChar2Int(normDir);
 
 polygon.Vertex = {};
 for s=1:size(points,2)
