@@ -170,6 +170,8 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 {
 	if (CSPrimPolygon::ReadFromXML(root)==false) return false;
 
+	if (Elevation.GetValue()!=0)
+		cerr << __func__ << ": Warning: An elevation for a rotational poly is not supported! Skipping!" << endl;
 	Elevation.SetValue(0);
 
 	TiXmlElement *elem = root.ToElement();
