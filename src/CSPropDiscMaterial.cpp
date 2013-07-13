@@ -106,7 +106,7 @@ int CSPropDiscMaterial::GetDBPos(const double* coords)
 	if (pos==(unsigned int)-1)
 		return -1;
 	// material with index 0 is assumed to be background material
-	if (m_Disc_Ind[pos]==0)
+	if ((m_DB_Background==false) && (m_Disc_Ind[pos]==0))
 			return -1;
 	int db_pos = (int)m_Disc_Ind[pos];
 	if (db_pos>=(int)m_DB_size)
@@ -174,6 +174,7 @@ void CSPropDiscMaterial::Init()
 	m_FileType=-1;
 
 	m_DB_size = 0;
+	m_DB_Background = true;
 
 	for (int n=0;n<3;++n)
 		m_mesh[n]=NULL;
@@ -199,7 +200,7 @@ bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool spa
 	TiXmlElement filename("DiscFile");
 	filename.SetAttribute("Type",m_FileType);
 	filename.SetAttribute("File",m_Filename.c_str());
-
+	filename.SetAttribute("UseDBBackground",m_DB_Background);
 	filename.SetAttribute("Scale",m_Scale);
 
 	if (m_Transform)
@@ -220,6 +221,10 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	m_FileType = 0;
 	prop->QueryIntAttribute("Type",&m_FileType);
 	const char* c_filename = prop->Attribute("File");
+
+	int help;
+	if (prop->QueryIntAttribute("UseDBBackground",&help)==TIXML_SUCCESS)
+		SetUseDataBaseForBackground(help!=0);
 
 	delete m_Transform;
 	m_Transform = CSTransform::New(prop, clParaSet);

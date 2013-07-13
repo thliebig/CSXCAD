@@ -45,6 +45,9 @@ public:
 
 	virtual double GetDensityWeighted(const double* coords);
 
+	//! Set true if database index 0 is used as background material (default), or false if CSPropMaterial should be used as index 0
+	virtual void SetUseDataBaseForBackground(bool val) {m_DB_Background=val;}
+
 	CSTransform* GetTransform() {return m_Transform;}
 
 	double GetScale() {return m_Scale;}
@@ -77,6 +80,7 @@ protected:
 	float *m_Disc_sigma;
 	float *m_Disc_Density;
 	double m_Scale;
+	bool m_DB_Background;
 	CSTransform* m_Transform;
 
 	void* ReadDataSet(string filename, string d_name, int type_id, int &rank, unsigned int &size, bool debug=false);
