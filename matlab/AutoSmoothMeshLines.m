@@ -85,7 +85,14 @@ for vn=1:2:numel(varargin)
 end
 
 for m=algorithm
+    if (debug>0)
+      disp(['AutoSmoothMeshLines: trying method: ' func2str(methods{m})]);
+      tic
+    end
     out_lines{m} = methods{m}(lines, max_res, ratio, 'CheckMesh', false);
+    if (debug>0)
+      toc
+    end
     quality(m) = eval_mesh(out_lines{m}, max_res, max_ratio, requires_homogen, requires_symmetric, allowed_min_res, 1);
     if (quality(m)==100)           % uncomment to release!
        lines = out_lines{m};
