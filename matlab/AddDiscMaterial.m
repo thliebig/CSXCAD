@@ -5,6 +5,14 @@ function CSX = AddDiscMaterial(CSX, name, varargin)
 % Discretized model has to be stored in an hdf5 file.
 % Use Transform option to perfom some transformation actions.
 %
+% variable arguments (key/value)
+%  'File' (mandatory): define the filename of the discrete material
+%  'Scale':            scale the discrete material
+%                      e.g. to your drawing units: 'Scale', 1/unit
+%  'Transform':        Apply a transformation, see AddBox for more infos
+%  'UseDBBackground':  set to 0, to use the properties background material
+%                      instead of the database material with index 0 (default)
+%
 % examples:
 % %add human body model
 % CSX = AddDiscMaterial(CSX, 'Ella', 'Scale', 1/unit, ...
