@@ -15,7 +15,7 @@ function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
 %                   - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorihm:           define subset of tried algorihm, e.g. [1 3]
+%   algorithm:          define subset of tried algorihm, e.g. [1 3]
 %   symmetric:          0/1 force symmetric mesh (default is input symmetry)
 %   homogeneous:        0/1 force homogeneous mesh
 %   allowed_min_res:    allow a given min resolution only

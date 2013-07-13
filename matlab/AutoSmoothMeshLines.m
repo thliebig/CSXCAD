@@ -14,7 +14,7 @@ function [lines quality] = AutoSmoothMeshLines( lines, max_res, ratio, varargin)
 %                   - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorihm:           define subset of tried algorihm, e.g. [1 3]
+%   algorithm:          define subset of tried algorihm, e.g. [1 3]
 %   symmetric:          0/1 force symmetric mesh (default is input symmetry)
 %   homogeneous:        0/1 force homogeneous mesh
 %   allowed_min_res:    allow a given min resolution only
@@ -58,11 +58,11 @@ allowed_min_res = 0;
 debug = 0;
 max_ratio = ratio*1.25;
 
-algorthim = 1:numel(methods);
+algorithm = 1:numel(methods);
 
 for vn=1:2:numel(varargin)
-    if (strcmpi(varargin{vn},'algorihm'))
-        algorthim = intersect(varargin{vn+1},algorthim);
+    if (strcmpi(varargin{vn},'algorithm'))
+        algorithm = intersect(varargin{vn+1},algorithm);
     end
     if (strcmpi(varargin{vn},'symmetric'))
         requires_symmetric = varargin{vn+1};
@@ -84,7 +84,7 @@ for vn=1:2:numel(varargin)
     end
 end
 
-for m=algorthim
+for m=algorithm
     out_lines{m} = methods{m}(lines, max_res, ratio, 'CheckMesh', false);
     quality(m) = eval_mesh(out_lines{m}, max_res, max_ratio, requires_homogen, requires_symmetric, allowed_min_res, 1);
     if (quality(m)==100)           % uncomment to release!
