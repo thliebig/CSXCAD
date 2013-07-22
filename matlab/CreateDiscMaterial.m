@@ -35,6 +35,10 @@ if isOctave
     error('CreateDiscMaterial currently does not support Octave, due to missing hdf5 functions!');
 end
 
+if (exist('h5create')==0)
+    error('CSXCAD:CreateDiscMaterial','Your matlab seems to be too old, h5create cannot be found!');
+end
+
 data_size = size(data);
 mesh_size = [numel(mesh.x) numel(mesh.y) numel(mesh.z)];
 
