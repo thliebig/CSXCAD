@@ -10,6 +10,10 @@ function n = DirChar2Int(dir_char)
 % -----------------------
 % author: Thorsten Liebig (c) 2013
 
+if (numel(dir_char)>1)
+    error('CSXCAD:DirChar2Int','invalid normal direction')
+end
+
 if (ischar(dir_char))
     if (strcmp(dir_char,'x') || strcmp(dir_char,'r'))
         n = 0; return;
