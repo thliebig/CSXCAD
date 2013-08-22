@@ -162,20 +162,23 @@ if (isfield(CSX, 'Properties'))
                 elseif (strcmp(prim_fn{n_prim}, 'LinPoly') || strcmp(prim_fn{n_prim}, 'Polygon'))
                     for l = 1:length(primitives.(prim_fn{n_prim}))
                         poly = primitives.(prim_fn{n_prim}){l};
-                        if (poly.ATTRIBUTE.NormDir == 2) % parallel to xy plane
-                            z1 = poly.ATTRIBUTE.Elevation;
-                            if (strcmp(prim_fn{n_prim}, 'LinPoly'))
-                                z2 = z1 + poly.ATTRIBUTE.Length;
-                            else
-                                z2 = z1;
-                            end
-                            if (isfield(poly, 'Vertex'))
-                                for v = 1:length(poly.Vertex)
-                                    vertex = poly.Vertex{v};
-                                    x1 = vertex.ATTRIBUTE.X1;
-                                    y1 = vertex.ATTRIBUTE.X2;
-                                    edges = AddEdge (edges, poly, x1, y1, z1, CoordSystem, debug);
-                                    edges = AddEdge (edges, poly, x1, y1, z2, CoordSystem, debug);
+                        dir = poly.ATTRIBUTE.NormDir + 1;
+                        dirP = mod(poly.ATTRIBUTE.NormDir+1,3) + 1;
+                        dirPP = mod(poly.ATTRIBUTE.NormDir+2,3) + 1;
+                        lin_length = 0;
+                        if (strcmp(prim_fn{n_prim}, 'LinPoly'))
+                            lin_length = poly.ATTRIBUTE.Length;
+                        end
+                        if (isfield(poly, 'Vertex'))
+                            for v = 1:length(poly.Vertex)
+                                vertex = poly.Vertex{v};
+                                edge(dir) = poly.ATTRIBUTE.Elevation;
+                                edge(dirP) = vertex.ATTRIBUTE.X1;
+                                edge(dirPP) = vertex.ATTRIBUTE.X2;
+                                edges = AddEdge (edges, poly, edge(1), edge(2), edge(3), CoordSystem, debug);
+                                if (lin_length~=0)
+                                    edge(dir) = edge(dir) + lin_length;
+                                    edges = AddEdge (edges, poly, edge(1), edge(2), edge(3), CoordSystem, debug);
                                 end
                             end
                         end
