@@ -171,6 +171,13 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	{
 		x2 = vCoords[2*i].GetValue();
 		y2 = vCoords[2*i+1].GetValue();
+
+		//check if coord is on a cartesian edge exactly
+		if ((x2==x1) && (x1==x) && ( ((y<y1) && (y>y2)) || ((y>y1) && (y<y2)) ))
+			return true;
+		if ((y2==y1) && (y1==y) && ( ((x<x1) && (x>x2)) || ((x>x1) && (x<x2)) ))
+			return true;
+
 		endover = y2 >= y ? true : false;
 		if (startover != endover)
 		{
@@ -187,8 +194,10 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 		y1 = y2;
 		x1 = x2;
 	}
+	// return true if polygon is inside the polygon
 	if (wn != 0)
 		return true;
+
 	return false;
 }
 
