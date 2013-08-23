@@ -1,11 +1,28 @@
-function Convert_VF_DiscMaterial
-% Script to convert the virtual family raw voxel data to a disc material
+function Convert_VF_DiscMaterial(raw_filesuffix, mat_db_file, out_filename, varargin)
+% function Convert_VF_DiscMaterial(raw_filesuffix, mat_db_file, out_filename, varargin)
+%
+% function to convert the virtual family raw voxel data to a disc material
 % property required by CSXCAD/openEMS
 %
 % Note: The conversion is (currently) done, converting the broad-band data
 % into a relative permittivity and conductivity for a given frequency of
 % interest. Thus the converted model is only valid within a small frequency
 % range around the used conversion frequency.
+%
+% required arguments:
+%   raw_filesuffix:     suffix for the virtual family body model files
+%                       the files:
+%                       <raw_filesuffix>.txt and <raw_filesuffix>.raw
+%                       must be found!
+%                       example: '/tmp/Ella_26y_V2_1mm'
+%   mat_db_file:        tissue database file (incl. full path if necessary)
+%                       example: '/tmp/DB_h5_20120711_SEMCADv14.8.h5'
+%   out_filename:       outfile name, e.g. 'Ella_298MHz.h5'
+%
+% variable arguments (key/value):
+%   'Frequency':        specifiy the frequency of interest (required!)
+%   'Center':           0/1 make the model centered around (0,0,0)
+%                       (default is off)
 %
 % Requirements:
 %   - Matlab, Octave is currently not supported due to missing hdf5 write
@@ -18,50 +35,54 @@ function Convert_VF_DiscMaterial
 %       e.g. DB_h5_20120711_SEMCADv14.8.h5
 %       Download from: http://www.itis.ethz.ch/assets/Downloads/TissueDb/DBh5_20120711_SEMCADv14.8.zip
 %
+% example:
+% Convert_VF_DiscMaterial('/tmp/Ella_26y_V2_1mm', ...
+%                         '/tmp/DB_h5_20120711_SEMCADv14.8.h5', ...
+%                         'Ella_centered_298MHz.h5', ...
+%                         'Frequency', 2.4e9);
+%
 % (c) 2013 Thorsten Liebig
 
-close all
-clear
-clc
-
-%% settings (edit below)
-
-center_Model = 1;
-
-% name of the voxel model
-% name = 'Billie_11y_V2_1mm';
-% name = 'Duke_34y_V5_1mm'; %the 0.5mm requires large amounts of memory ~3GB, maybe use 1mm?
-% name = 'Ella_26y_V2_1mm'; %the 0.5mm requires large amounts of memory ~3GB, maybe use 1mm?
-% name = 'Thelonious_6y_V6_1mm';
-
-% root path to virtual family models with each model in its own folder
-VF_model_root_path = '<path/to/model/root>';
-
-% tissue database file (incl. full path if necessary)
-mat_db_file = 'DB_h5_20120711_SEMCADv14.8.h5';
-
-% frequency of interest
-freq = 298e6;
-
-%% end of settings (do not edit below)
-
-file_name = name;
-
-if (center_Model>0)
-    file_name = [file_name '_centered_'];
+if exist(out_filename,'file')
+    disp(['requested model file: "' out_filename '" already exists, skipping']);
+    return
 end
 
-file_name = [file_name int2str(freq) '.h5'];
+%% default settings
+center_Model = 0; % make the model centered around (0,0,0)
+freq = nan; % frequency of interest
+range = {[],[],[]};
 
+% internal
+range_used = 0;
+
+for n=1:2:numel(varargin)
+    if (strcmp(varargin{n},'Frequency'))
+        freq = varargin{n+1};
+    elseif (strcmp(varargin{n},'Center'))
+        center_Model = varargin{n+1};
+    elseif (strcmp(varargin{n},'Range'))
+        range = varargin{n+1};
+        range_used = 1;
+    else
+        warning('CSXCAD:Convert_VF_DiscMaterial',['unknown argument: ' varagin{n}]);
+    end
+end
+
+if (isnan(freq))
+    error('CSXCAD:Convert_VF_DiscMaterial','a frequency of interest must be specified');
+end
+
+%% end of settings (do not edit below)
 physical_constants
 w = 2*pi*freq;
 
 %%
-fid = fopen([VF_model_root_path filesep name filesep name '.txt']);
+disp(['reading raw body specs: ' raw_filesuffix '.txt']);
+fid = fopen([raw_filesuffix '.txt']);
 material_list = textscan(fid,'%d	%f	%f	%f	%s');
 
 frewind(fid)
-line = [];
 feof(fid);
 while ~feof(fid)
     line = fgetl(fid);
@@ -85,17 +106,6 @@ dx = d_cells{2}(1);
 dy = d_cells{2}(2);
 dz = d_cells{2}(3);
 
-tic
-disp('reading raw body data...');
-fid = fopen([VF_model_root_path filesep name filesep name '.raw']);
-
-% read in line by line to save memory
-for n=1:nz
-    data_plane = reshape(fread(fid,nx*ny),nx,ny);
-    mat(:,:,n) = uint8(data_plane);
-end
-fclose(fid);
-
 %
 x = (0:nx)*dx;
 y = (0:ny)*dy;
@@ -108,9 +118,56 @@ if (center_Model>0)
     z = z - z(1) - (max(z)-min(z))/2;
 end
 
-disp(['Width (x) of the model: ' num2str(max(x)-min(x))])
-disp(['Height (y) of the model: ' num2str(max(y)-min(y))])
-disp(['Length (z) of the model: ' num2str(max(z)-min(z))])
+disp('Body model mesh range (original):');
+disp(['x: ' num2str(x(1)) ' --> ' num2str(x(end)) ', width: ' num2str(max(x)-min(x))]);
+disp(['y: ' num2str(y(1)) ' --> ' num2str(y(end)) ', width: ' num2str(max(y)-min(y))]);
+disp(['z: ' num2str(z(1)) ' --> ' num2str(z(end)) ', width: ' num2str(max(z)-min(z))]);
+
+%% map to range
+if (isempty(range{1}))
+    x_idx = 1:nx;
+else
+    x_idx = find(x>=range{1}(1) & x<=range{1}(2));
+end
+
+if (isempty(range{2}))
+    y_idx = 1:ny;
+else
+    y_idx = find(y>=range{2}(1) & y<=range{2}(2));
+end
+
+if (isempty(range{3}))
+    z_idx = 1:nz;
+else
+    z_idx = find(z>=range{3}(1) & z<=range{3}(2));
+end
+
+tic
+disp(['reading raw body data: ' raw_filesuffix '.raw']);
+fid = fopen([raw_filesuffix '.raw']);
+
+% read in line by line to save memory
+for n=z_idx
+    data_plane = reshape(fread(fid,nx*ny),nx,ny);
+    mat(1:numel(x_idx),1:numel(y_idx),n) = uint8(data_plane(x_idx,y_idx));
+end
+fclose(fid);
+
+% resize to range
+x = x(x_idx);x=[x x(end)+dx];
+y = y(y_idx);y=[y y(end)+dx];
+z = z(z_idx);z=[z z(end)+dx];
+
+if (range_used)
+    disp('Body model mesh range (new):');
+    disp(['x: ' num2str(x(1)) ' --> ' num2str(x(end)) ', width: ' num2str(max(x)-min(x))]);
+    disp(['y: ' num2str(y(1)) ' --> ' num2str(y(end)) ', width: ' num2str(max(y)-min(y))]);
+    disp(['z: ' num2str(z(1)) ' --> ' num2str(z(end)) ', width: ' num2str(max(z)-min(z))]);
+end
+
+nx = numel(x_idx);
+ny = numel(y_idx);
+nz = numel(z_idx);
 
 mesh.x=x;
 mesh.y=y;
@@ -153,8 +210,8 @@ end
 toc
 %%
 
-disp(['Creating DiscMaterial file: ' file_name]);
-CreateDiscMaterial(file_name, mat, mat_db, mesh)
+disp(['Creating DiscMaterial file: ' out_filename]);
+CreateDiscMaterial(out_filename, mat, mat_db, mesh)
 toc
 
 disp('done..');
