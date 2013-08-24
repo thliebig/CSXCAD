@@ -36,7 +36,6 @@ exists(localPathes.pri) {
 }
 
 unix { 
-    LIBS += -lfparser
     LIBS += -ltinyxml
     DEFINES += TIXML_USE_STL
     LIBS += -lhdf5_hl -lhdf5
@@ -52,6 +51,15 @@ unix {
 
     #hdf5
     INCLUDEPATH += /usr/include/mpi
+
+    #fparser
+    isEmpty(FPARSER_ROOT) {
+        FPARSER_ROOT = /usr
+    } else {
+        QMAKE_LFLAGS += \'-Wl,-rpath,$$FPARSER_ROOT/lib\'
+    }
+    INCLUDEPATH += $$FPARSER_ROOT/include
+    LIBS += -L$$FPARSER_ROOT/lib -lfparser
 }
 
 win32 { 
