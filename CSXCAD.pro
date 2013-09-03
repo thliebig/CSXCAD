@@ -56,10 +56,11 @@ unix {
     isEmpty(FPARSER_ROOT) {
         FPARSER_ROOT = /usr
     } else {
+        INCLUDEPATH += $$FPARSER_ROOT/include
+        LIBS += -L$$FPARSER_ROOT/lib
         QMAKE_LFLAGS += \'-Wl,-rpath,$$FPARSER_ROOT/lib\'
     }
-    INCLUDEPATH += $$FPARSER_ROOT/include
-    LIBS += -L$$FPARSER_ROOT/lib -lfparser
+    LIBS += -lfparser
 }
 
 win32 { 
