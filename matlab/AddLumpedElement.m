@@ -6,7 +6,7 @@ function CSX = AddLumpedElement(CSX, name, direction, varargin)
 % property.
 % 
 % arguments:
-%   direction:  0,1,2 for x-,y- or z-orientation of the lumped element
+%   direction:  0,1,2 or 'x','y','z' for the orientation of the lumped element
 % 
 % optional arguments:
 %   'R', 'C', 'L':  definition of the lumped element properties
@@ -26,4 +26,4 @@ function CSX = AddLumpedElement(CSX, name, direction, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-CSX = AddProperty(CSX, 'LumpedElement', name, 'Direction', direction, varargin{:});
+CSX = AddProperty(CSX, 'LumpedElement', name, 'Direction', DirChar2Int(direction), varargin{:});
