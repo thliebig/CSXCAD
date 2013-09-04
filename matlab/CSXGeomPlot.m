@@ -29,17 +29,17 @@ dir = fileparts( filename );
 
 if isunix
     % try development path
-    AppCSXCAD_bin = [dir filesep '../../AppCSXCAD' filesep  'AppCSXCAD.sh'];
+    AppCSXCAD_bin = [dir filesep '..' filesep '..' filesep 'AppCSXCAD' filesep  'AppCSXCAD.sh'];
     if (~exist(AppCSXCAD_bin,'file'))
         % fallback to install path
-        AppCSXCAD_bin = [dir filesep '../../../bin' filesep 'AppCSXCAD.sh'];
+        AppCSXCAD_bin = [dir filesep '..' filesep '..' filesep '..' filesep 'bin' filesep 'AppCSXCAD.sh'];
     end
-else
-    AppCSXCAD_bin = [dir filesep '..' filesep 'AppCSXCAD'];
+else % assume windows
+    AppCSXCAD_bin = [dir filesep '..' filesep 'AppCSXCAD.exe'];
 end
 
 if (~exist(AppCSXCAD_bin,'file'))
-    error('CSXCAD:CSXGeomPlot',['Binary not found: ' AppCSXCAD_bin]);
+    error('CSXCAD:CSXGeomPlot', 'AppCSXCAD binary not found!');
 end
 
 command = [AppCSXCAD_bin ' --disableEdit ' args_string ' ' CSX_filename];
