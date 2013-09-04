@@ -26,19 +26,23 @@ end
 
 filename = mfilename('fullpath');
 dir = fileparts( filename );
-AppCSXCAD_Path = [dir filesep '../../AppCSXCAD' filesep];
-   
-if (~exist(AppCSXCAD_Path,'dir'))
-    AppCSXCAD_Path = [dir filesep '..' filesep];
-end
 
 if isunix
-	AppCSXCAD_Path = [AppCSXCAD_Path 'AppCSXCAD.sh'];
+    % try development path
+    AppCSXCAD_bin = [dir filesep '../../AppCSXCAD' filesep  'AppCSXCAD.sh'];
+    if (~exist(AppCSXCAD_bin,'file'))
+        % fallback to install path
+        AppCSXCAD_bin = [dir filesep '../../../bin' filesep 'AppCSXCAD.sh'];
+    end
 else
-	AppCSXCAD_Path = [AppCSXCAD_Path 'AppCSXCAD'];
+    AppCSXCAD_bin = [dir filesep '..' filesep 'AppCSXCAD'];
 end
 
-command = [AppCSXCAD_Path ' --disableEdit ' args_string ' ' CSX_filename];
+if (~exist(AppCSXCAD_bin,'file'))
+    error('CSXCAD:CSXGeomPlot',['Binary not found: ' AppCSXCAD_bin]);
+end
+
+command = [AppCSXCAD_bin ' --disableEdit ' args_string ' ' CSX_filename];
 disp( ['invoking AppCSXCAD, exit to continue script...'] );
 if isOctave()
     fflush(stdout);
