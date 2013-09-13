@@ -40,6 +40,8 @@ for n=1:numel(searchpath)
 end
 
 % binary not found
+binary_location = '';
+
 if (err_fail)
     error('CSXCAD:binary_location', [name ' binary not found!']);
 end
