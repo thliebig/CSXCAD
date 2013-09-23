@@ -7,18 +7,20 @@ function CSX = Add2Property(CSX, propName, newPrim, primName)
 % -----------------------
 % author: Thorsten Liebig
 
-names = fieldnames(CSX.Properties);
+type = GetPropertyType(CSX, propName);
+if isempty(type)
+    error('CSXCAD:Add2Property',['the type for the property "' propName '" cannot be found']);
+end
 
-for n=1:numel(names)
-    for pos=1:numel(CSX.Properties.(names{n}))
-        if strcmp(CSX.Properties.(names{n}){pos}.ATTRIBUTE.Name,propName)
-             if ~isfield(CSX.Properties.(names{n}){pos},'Primitives')
-                CSX.Properties.(names{n}){pos}.Primitives.(primName){1}=newPrim;
-             elseif ~isfield(CSX.Properties.(names{n}){pos}.Primitives,primName)
-                CSX.Properties.(names{n}){pos}.Primitives.(primName){1}=newPrim;
-             else
-                CSX.Properties.(names{n}){pos}.Primitives.(primName){end+1}=newPrim;
-             end
-        end
-    end
+pos = GetPropertyPosition(CSX, type, propName);
+if (pos==0)
+    error('CSXCAD:Add2Property',['property "' propName '" of type "' type '" not found!']);
+end
+
+if ~isfield(CSX.Properties.(type){pos}, 'Primitives')
+    CSX.Properties.(type){pos}.Primitives.(primName){1}=newPrim;
+elseif ~isfield(CSX.Properties.(type){pos}.Primitives, primName)
+    CSX.Properties.(type){pos}.Primitives.(primName){1}=newPrim;
+else
+    CSX.Properties.(type){pos}.Primitives.(primName){end+1}=newPrim;
 end

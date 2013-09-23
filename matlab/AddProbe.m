@@ -55,10 +55,10 @@ for n=1:2:numel(varargin)
     end
 end
 
-[CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
-
-if ~isnan(NormDir)
-    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'NormDir', NormDir);
+if isnan(NormDir)
+    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
+else
+    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight, 'NormDir', NormDir);
 end
 
 if (numel(FD_samples)>0)
