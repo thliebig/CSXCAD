@@ -63,27 +63,18 @@ function CSX = AddDump(CSX, name, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-if ~ischar(name)
-    error('CSXCAD::AddDump: name must be a string');
-end
-
-if isfield(CSX.Properties,'DumpBox')
-    CSX.Properties.DumpBox{end+1}.ATTRIBUTE.Name=name;    
-else
-	CSX.Properties.DumpBox = {}; % create cell array
-    CSX.Properties.DumpBox{1}.ATTRIBUTE.Name=name;
-end
+[CSX pos] = AddProperty(CSX, 'DumpBox', name);
 
 % make Node-Interpolation the default
-CSX.Properties.DumpBox{end}.ATTRIBUTE.DumpMode = 1;
+CSX.Properties.DumpBox{pos}.ATTRIBUTE.DumpMode = 1;
 
-for n=1:(nargin-2)/2
+for n=1:numel(varargin)/2
     if ~ischar(varargin{2*n-1})
         error(['CSXCAD::AddDump: not an attribute: ' varargin{2*n-1}]);
     end
     if strcmp(varargin{2*n-1},'Frequency')
-        CSX.Properties.DumpBox{end}.FD_Samples=varargin{2*n};
+        CSX.Properties.DumpBox{pos}.FD_Samples=varargin{2*n};
     else
-        CSX.Properties.DumpBox{end}.ATTRIBUTE = setfield(CSX.Properties.DumpBox{end}.ATTRIBUTE, varargin{2*n-1},varargin{2*n});
+        CSX.Properties.DumpBox{pos}.ATTRIBUTE.(varargin{2*n-1})=varargin{2*n};
     end
 end

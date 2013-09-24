@@ -15,6 +15,10 @@ if ~isfield(CSX,'Properties')
 end
 
 type_name = '';
+if isempty(CSX.Properties)
+    return
+end
+
 prop_types = fieldnames(CSX.Properties);
 for n=1:numel(prop_types)
     for p = 1:numel(CSX.Properties.(prop_types{n}))
