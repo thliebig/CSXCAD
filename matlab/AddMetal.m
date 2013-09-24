@@ -15,4 +15,12 @@ function CSX = AddMetal(CSX, name)
 % -----------------------
 % author: Thorsten Liebig
 
+% check if this property already exists
+[type_found pos] = FindProperty(CSX, name);
+
+% since it has no varargs, accept already existing metal with this name
+if ((pos>0) && strcmp(type_found,'Metal'))
+    return
+end
+
 CSX = AddProperty(CSX, 'Metal', name);
