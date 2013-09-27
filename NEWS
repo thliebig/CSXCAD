@@ -1,3 +1,7 @@
+Changes in v0.5.1
+-------------------------------
+- matlab interface: throw an error when re-adding an already existing property (fix)
+
 Changes in v0.5.0
 -------------------------------
 - new file-format for discrete materials
