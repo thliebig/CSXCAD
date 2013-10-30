@@ -2,6 +2,12 @@ function CSX = InitCSX(varargin)
 % function CSX = InitCSX()
 %
 % Inititalize the CSX data-structure.
+%
+% variable arguments:
+%   'CoordSystem'       : define the default coordinate system
+%                         0 -> Cartesian
+%                         1 -> Cylindircal
+%                         2 -> Sphercial (not yet implemented)
 % 
 % example:
 %     CSX = InitCSX(); %for a default cartesian mesh
@@ -19,8 +25,6 @@ CSX.Properties = [];
 %Cartesian mesh as default coordinate system
 CSX.ATTRIBUTE.CoordSystem = 0;
 
-if (nargin>0)
-    for n=1:nargin/2
-        CSX.ATTRIBUTE.(varargin{2*n-1}) = (varargin{2*n});
-    end
+for n=1:2:numel(varargin)
+    CSX.ATTRIBUTE.(varargin{n}) = (varargin{n+1});
 end
