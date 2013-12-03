@@ -379,6 +379,7 @@ void ContinuousStructure::clear()
 	UniqueIDCounter=0;
 	dDrawingTol=0;
 	maxID=0;
+	m_BG_Mat.Reset();
 	for (unsigned int n=0;n<vProperties.size();++n)
 	{
 		delete vProperties.at(n);
@@ -400,6 +401,8 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised, boo
 	Struct.SetAttribute("CoordSystem",GetCoordInputType());
 
 	clGrid.Write2XML(Struct,false);
+
+	m_BG_Mat.Write2XML(Struct, false);
 
 	clParaSet->Write2XML(Struct);
 
@@ -441,6 +444,16 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		if (rootElem->QueryIntAttribute("CoordSystem",&CS_mesh) == TIXML_SUCCESS)
 			SetCoordInputType((CoordinateSystem)CS_mesh);
 	}
+
+	TiXmlNode* bg_node = root->FirstChild("BackgroundMaterial");
+	if (bg_node==NULL)
+		m_BG_Mat.Reset(); //reset to default;
+	else
+		if (m_BG_Mat.ReadFromXML(*bg_node)==false)
+		{
+			ErrString.append("Error: BackgroundMaterial invalid!!!\n");
+			return ErrString.c_str();
+		}
 
 	TiXmlNode* grid = root->FirstChild("RectilinearGrid");
 	if (grid==NULL) { ErrString.append("Error: No RectilinearGrid found!!!\n"); return ErrString.c_str();}

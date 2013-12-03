@@ -14,7 +14,8 @@ function CSX = InitCSX(varargin)
 % or
 %     CSX = InitCSX('CoordSystem','1'); % for a cylindrical mesh definition
 % 
-% See also DefineRectGrid, SmoothMeshLines, SmoothMeshLines2
+% See also DefineRectGrid, SmoothMeshLines, SmoothMeshLines2,
+%          SetBackgroundMaterial
 % 
 % CSXCAD matlab interface
 % -----------------------

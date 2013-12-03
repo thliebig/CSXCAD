@@ -32,6 +32,7 @@
 #include "CSProperties.h"
 #include "CSPrimitives.h"
 #include "CSRectGrid.h"
+#include "CSBackgroundMaterial.h"
 #include "ParameterObjects.h"
 #include "CSUseful.h"
 
@@ -58,6 +59,9 @@ public:
 
 	//! Get the Grid of this Structure.
 	CSRectGrid* GetGrid() {return &clGrid;}
+
+	//! Get the background material
+	CSBackgroundMaterial* GetBackgroundMaterial() {return &m_BG_Mat;}
 
 	//! Add an existing CSProperty. Class takes ownership!
 	void AddProperty(CSProperties* prop);
@@ -187,6 +191,7 @@ public:
 protected:
 	ParameterSet* clParaSet;
 	CSRectGrid clGrid;
+	CSBackgroundMaterial m_BG_Mat;
 	vector<CSProperties*> vProperties;
 	bool ReadPropertyPrimitives(TiXmlElement* PropNode, CSProperties* prop);
 

@@ -111,6 +111,7 @@ PUB_HEADERS += src/ContinuousStructure.h \
     src/CSUseful.h \
     src/ParameterCoord.h \
     src/CSTransform.h \
+    src/CSBackgroundMaterial.h \
     src/CSPrimPoint.h \
     src/CSPrimBox.h \
     src/CSPrimMultiBox.h \
@@ -179,7 +180,8 @@ SOURCES += src/ContinuousStructure.cpp \
     src/CSPropExcitation.cpp \
     src/CSPropProbeBox.cpp \
     src/CSPropDumpBox.cpp \
-    src/CSPropResBox.cpp
+    src/CSPropResBox.cpp \
+    src/CSBackgroundMaterial.cpp
 
 #
 # create tar file
