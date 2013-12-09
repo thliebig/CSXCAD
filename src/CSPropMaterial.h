@@ -23,7 +23,7 @@
 //! Continuous Structure Material Property
 /*!
   This Property can hold information about the properties of materials, such as epsilon, mue, kappa or sigma (aka. magnetic losses in FDTD).
-  The material can be location dependent an unisotropic.
+  The material can be location dependent and unisotropic.
   */
 class CSXCAD_EXPORT CSPropMaterial : public CSProperties
 {
@@ -81,8 +81,8 @@ public:
 	const string GetDensityWeightFunction() {return WeightDensity.GetString();}
 	virtual double GetDensityWeighted(const double* coords)	{return GetWeight(WeightDensity,coords)*GetDensity();}
 
-	void SetIsotropy(bool val) {bIsotropy=val;};
-	bool GetIsotropy() {return bIsotropy;};
+	void SetIsotropy(bool val) {bIsotropy=val;}
+	bool GetIsotropy() {return bIsotropy;}
 
 	virtual void Init();
 	virtual bool Update(string *ErrStr=NULL);
