@@ -50,6 +50,11 @@ public:
 	//! Get the arbitrary file-type \sa SetFileType
 	int GetFileType() {return FileType;}
 
+	//! Set the multi grid level to use (default is 0) \sa GetMultiGridLevel
+	void SetMultiGridLevel(int mgl) {MultiGridLevel=mgl;}
+	//! Get the multi grid level to use \sa SetMultiGridLevel
+	int GetMultiGridLevel() {return MultiGridLevel;}
+
 	bool GetSubSampling() {return m_SubSampling;}
 	void SetSubSampling(bool val) {m_SubSampling=val;}
 	void SetSubSampling(int ny, unsigned int val);
@@ -81,6 +86,7 @@ protected:
 	int DumpType;
 	int DumpMode;
 	int FileType;
+	int MultiGridLevel;
 
 	//sub-sampling
 	bool m_SubSampling;

@@ -32,6 +32,10 @@ function CSX = AddDump(CSX, name, varargin)
 %
 %   SubSampling:   field domain sub-sampling, e.g. '2,2,4'
 %   OptResolution: field domain dump resolution, e.g. '10' or '10,20,5'
+%
+%   MultiGridLevel: Request to dump from a multigrid level (default is 0)
+%                   Note: This only takes effect if the method supports and
+%                   uses multiple grids!
 % 
 %   Warning:
 %       FDTD Interpolation abnormalities:

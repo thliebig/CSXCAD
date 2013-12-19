@@ -29,6 +29,7 @@ void CSPropDumpBox::Init()
 	DumpType = 0;
 	DumpMode = 0;
 	FileType = 0;
+	MultiGridLevel = 0;
 	m_SubSampling=false;
 	SubSampling[0]=1;
 	SubSampling[1]=1;
@@ -110,6 +111,7 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop->SetAttribute("DumpType",DumpType);
 	prop->SetAttribute("DumpMode",DumpMode);
 	prop->SetAttribute("FileType",FileType);
+	prop->SetAttribute("MultiGridLevel",MultiGridLevel);
 
 	if (m_SubSampling)
 	{
@@ -137,6 +139,7 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("DumpType",&DumpType)!=TIXML_SUCCESS) DumpType=0;
 	if (prop->QueryIntAttribute("DumpMode",&DumpMode)!=TIXML_SUCCESS) DumpMode=0;
 	if (prop->QueryIntAttribute("FileType",&FileType)!=TIXML_SUCCESS) FileType=0;
+	if (prop->QueryIntAttribute("MultiGridLevel",&MultiGridLevel)!=TIXML_SUCCESS) MultiGridLevel=0;
 
 	SetSubSampling(prop->Attribute("SubSampling"));
 	SetOptResolution(prop->Attribute("OptResolution"));
@@ -149,7 +152,7 @@ void CSPropDumpBox::ShowPropertyStatus(ostream& stream)
 	//skip output of prarent CSPropProbeBox
 	CSProperties::ShowPropertyStatus(stream);
 	stream << " --- Dump Properties --- " << endl;
-	stream << "  DumpType: " << DumpType << "  DumpMode: " << DumpMode << " FileType: " << FileType << endl;
+	stream << "  DumpType: " << DumpType << "  DumpMode: " << DumpMode << " FileType: " << FileType << " MultiGridLevel: " << MultiGridLevel << endl;
 	if (m_FD_Samples.size()>0)
 		stream << "  Dump Frequencies: " << CombineVector2String(m_FD_Samples,',') << endl;
 }
