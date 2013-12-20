@@ -146,8 +146,11 @@ tic
 disp(['reading raw body data: ' raw_filesuffix '.raw']);
 fid = fopen([raw_filesuffix '.raw']);
 
+skip=(z(z_idx(1))-z(1))/dz*nx*ny;
+fseek(fid,skip,'bof');
+
 % read in line by line to save memory
-for n=z_idx
+for n=1:length(z_idx)
     data_plane = reshape(fread(fid,nx*ny),nx,ny);
     mat(1:numel(x_idx),1:numel(y_idx),n) = uint8(data_plane(x_idx,y_idx));
 end
