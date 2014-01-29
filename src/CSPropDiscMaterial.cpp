@@ -26,6 +26,9 @@
 #include "ParameterCoord.h"
 #include "CSPropDiscMaterial.h"
 
+#define vtkRenderingCore_AUTOINIT4(vtkInteractionStyle,vtkRenderingFreeType,vtkRenderingFreeTypeOpenGL,vtkRenderingOpenGL)
+#define vtkRenderingVolume_AUTOINIT 1(vtkRenderingVolumeOpenGL)
+
 CSPropDiscMaterial::CSPropDiscMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet)
 {
 	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);

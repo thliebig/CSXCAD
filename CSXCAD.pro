@@ -42,12 +42,18 @@ unix {
     LIBS += -lCGAL
 
     #vtk
-    INCLUDEPATH += /usr/include/vtk-5.2 \
+    isEmpty(VTK_INCLUDEPATH) {
+        INCLUDEPATH += /usr/include/vtk-5.2 \
         /usr/include/vtk-5.4 \
         /usr/include/vtk-5.6 \
         /usr/include/vtk-5.8 \
         /usr/include/vtk-5.10 \
+        /usr/include/vtk-6.0 \
+        /usr/include/vtk-6.1 \
         /usr/include/vtk
+    } else {
+        INCLUDEPATH += $$VTK_INCLUDEPATH
+    }
 
     #hdf5
     INCLUDEPATH += /usr/include/mpi

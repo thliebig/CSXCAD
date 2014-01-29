@@ -142,7 +142,8 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 		break;
 	}
 	}
-	polydata->Update();
+	// update possible but necessary for vtk 5.x ??
+	//polydata->Update(); // not availabe for vtk 6.x
 	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
 	{
 		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
