@@ -61,9 +61,9 @@ public:
 	void ClearLines(int direct);
 
 	//! Set the drawing unit. e.g. 1e-3 for mm as drawing unit.
-	void SetDeltaUnit(double val) {dDeltaUnit=val;};
+	void SetDeltaUnit(double val) {dDeltaUnit=val;}
 	//! Get the current drawing unit.
-	double GetDeltaUnit() {return dDeltaUnit;};
+	double GetDeltaUnit() {return dDeltaUnit;}
 
 	//! Set a disc-line in a certain direction at a given index. Will return true on success.
 	bool SetLine(int direct, size_t Index, double value);
@@ -77,7 +77,7 @@ public:
 	 */
 	double* GetLines(int direct, double *array, unsigned int &qty, bool sorted=true);
 	//! Get quantity of lines in certain direction.
-	size_t GetQtyLines(int direct) {if ((direct>=0) && (direct<3)) return Lines[direct].size(); else return 0;};
+	size_t GetQtyLines(int direct) {if ((direct>=0) && (direct<3)) return Lines[direct].size(); else return 0;}
 	//! Get a disc-line in a certain direction an at given index.
 	double GetLine(int direct, size_t Index);
 	//! Get disc-lines as a comma-seperated string for given direction

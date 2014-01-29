@@ -83,23 +83,23 @@ public:
 	//! Set or change the property for this primitive.
 	void SetProperty(CSProperties *prop);
 	//! Get the property for this primitive.
-	CSProperties* GetProperty() {return clProperty;};
+	CSProperties* GetProperty() {return clProperty;}
 
 	//! Getthe unique ID for this primitive.
-	unsigned int GetID() {return uiID;};
+	unsigned int GetID() {return uiID;}
 	//! Change the unique ID for this primitive. This is not recommended! Be sure what you are doing!
-	void SetID(unsigned int ID) {uiID=ID;};
+	void SetID(unsigned int ID) {uiID=ID;}
 
 	//! Get the type of this primitive. \sa PrimitiveType
-	int GetType() {return Type;};
+	int GetType() {return Type;}
 	
-	string GetTypeName() {return PrimTypeName;};
+	string GetTypeName() {return PrimTypeName;}
 
 	//! Create a copy of ths primitive with different property.
-	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);};
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);}
 
 	//! Get the bounding box (for the given mesh type) for this special primitive. \sa GetBoundBoxCoordSystem
-	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;};
+	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false) {UNUSED(PreserveOrientation);UNUSED(dBoundBox);return false;}
 
 	virtual CoordinateSystem GetBoundBoxCoordSystem() const {return m_BoundBox_CoordSys;}
 
@@ -107,7 +107,7 @@ public:
 	virtual int GetDimension() {return m_Dimension;}
 
 	//! Check if given Coordinate (in the given mesh type) is inside the Primitive.
-	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;};
+	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;}
 
 	//! Check whether this primitive was used. (--> IsInside() return true) \sa SetPrimitiveUsed
 	bool GetPrimitiveUsed() {return m_Primtive_Used;}
@@ -115,12 +115,12 @@ public:
 	void SetPrimitiveUsed(bool val) {m_Primtive_Used=val;}
 
 	//! Set or change the priotity for this primitive.
-	void SetPriority(int val) {iPriority=val;};
+	void SetPriority(int val) {iPriority=val;}
 	//! Get the priotity for this primitive.
-	int GetPriority() {return iPriority;};
+	int GetPriority() {return iPriority;}
 
 	//! Update this primitive with respect to the parameters set.
-	virtual bool Update(string *ErrStr=NULL) {UNUSED(ErrStr);return true;};
+	virtual bool Update(string *ErrStr=NULL) {UNUSED(ErrStr);return true;}
 	//! Write this primitive to a XML-node.
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	//! Read this primitive from a XML-node.
@@ -157,10 +157,10 @@ public:
 	//! Get the corresponing Point-Primitive or 0 in case of different type.
 	CSPrimPoint* ToPoint() { return ( this && Type == POINT ) ? (CSPrimPoint*) this : 0; } //!< Cast Primitive to a more defined type. Will return 0 if not of the requested type.
 
-	bool operator<(CSPrimitives& vgl) { return iPriority<vgl.GetPriority();};
-	bool operator>(CSPrimitives& vgl) { return iPriority>vgl.GetPriority();};
-	bool operator==(CSPrimitives& vgl) { return iPriority==vgl.GetPriority();};
-	bool operator!=(CSPrimitives& vgl) { return iPriority!=vgl.GetPriority();};
+	bool operator<(CSPrimitives& vgl) { return iPriority<vgl.GetPriority();}
+	bool operator>(CSPrimitives& vgl) { return iPriority>vgl.GetPriority();}
+	bool operator==(CSPrimitives& vgl) { return iPriority==vgl.GetPriority();}
+	bool operator!=(CSPrimitives& vgl) { return iPriority!=vgl.GetPriority();}
 
 	//! Define the input type for the weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	void SetCoordInputType(CoordinateSystem type, bool doUpdate=true) {m_MeshType=type; if (doUpdate) Update();}

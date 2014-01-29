@@ -521,7 +521,7 @@ bool ParameterSet::ReadFromXML(TiXmlNode &root)
 				}
 			}
 		}
-        paraNode=paraNode->NextSiblingElement("Parameter");
+		paraNode=paraNode->NextSiblingElement("Parameter");
 	};
 	return true;
 }

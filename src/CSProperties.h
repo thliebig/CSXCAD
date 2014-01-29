@@ -143,7 +143,6 @@ public:
 	//! Get a fill-color for this property. \sa SetFillColor \return RGBa color object.
 	RGBa GetFillColor();
 
-	//void SetEdgeColor(int val) {iEdgeColor=val;};
 	//! Set a edge-color for this property. \sa SetEdgeColor
 	void SetEdgeColor(RGBa color);
 	//! Get a fill-color for this property. \sa GetEdgeColor \return RGBa color object.
