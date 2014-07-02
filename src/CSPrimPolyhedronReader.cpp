@@ -125,6 +125,7 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 		reader->SetFileName(filename.c_str());
 		reader->SetMerging(1);
 		polydata = reader->GetOutput(0);
+		reader->Update();
 		break;
 	}
 	case PLY_FILE:
@@ -132,6 +133,7 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 		vtkPLYReader* reader = vtkPLYReader::New();
 		reader->SetFileName(filename.c_str());
 		polydata = reader->GetOutput(0);
+		reader->Update();
 		break;
 	}
 	case UNKNOWN:
@@ -142,8 +144,7 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 		break;
 	}
 	}
-	// update possible but necessary for vtk 5.x ??
-	//polydata->Update(); // not availabe for vtk 6.x
+	//polydata->Update(); // not availabe for vtk 6.x, now done only on reader?
 	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
 	{
 		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
