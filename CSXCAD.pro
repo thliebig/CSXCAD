@@ -35,7 +35,7 @@ exists(localPaths.pri) {
     include(localPaths.pri)
 }
 
-unix { 
+unix:!macx { 
     LIBS += -ltinyxml
     DEFINES += TIXML_USE_STL
     LIBS += -lhdf5_hl -lhdf5
@@ -98,6 +98,39 @@ win32 {
     #cgal
     INCLUDEPATH += $$WIN32_LIB_ROOT/cgal/include
     LIBS += -L$$WIN32_LIB_ROOT/cgal/bin -lCGAL
+}
+
+macx {
+    LIBS += -ltinyxml
+    DEFINES += TIXML_USE_STL
+    LIBS += -lhdf5_hl -lhdf5
+    LIBS += -lCGAL
+
+    #vtk5 provided with Homebrew
+    isEmpty(VTK_INCLUDEPATH) {
+        INCLUDEPATH += \
+          /usr/local/opt/vtk5/include  \
+          /usr/local/opt/vtk5/include/vtk-5.10
+
+    } else {
+        INCLUDEPATH += $$VTK_INCLUDEPATH
+    }
+
+    LIBS += -L/usr/local/opt/vtk5/lib/vtk-5.10  -lvtkCommon  -lvtkIO -lvtkFiltering
+    LIBS += -L/usr/local/lib -lboost_thread-mt -lboost_system -lboost_date_time -lboost_serialization
+
+    #hdf5 (is this MPI?)
+    INCLUDEPATH += /usr/local/opt/hd5/include
+
+    #fparser
+    #isEmpty(FPARSER_ROOT) {
+    #    FPARSER_ROOT = /usr
+    #} else {
+        INCLUDEPATH += $$FPARSER_ROOT/include
+        LIBS += -L$$FPARSER_ROOT/lib
+        QMAKE_LFLAGS += \'-Wl,-rpath,$$FPARSER_ROOT/lib\'
+    #}
+    LIBS += -lfparser
 }
 
 # vtk includes deprecated header files; silence the corresponding warning
@@ -206,10 +239,11 @@ install.target = install
 install.commands = mkdir -p \"$$PREFIX/lib$$LIB_SUFFIX\"
 install.commands += && mkdir -p \"$$PREFIX/include/CSXCAD\"
 install.commands += && mkdir -p \"$$PREFIX/share/CSXCAD/matlab\"
-install.commands += && cp -at \"$$PREFIX/include/CSXCAD/\" $$PUB_HEADERS
-unix:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
+install.commands += && cp $$PUB_HEADERS \"$$PREFIX/include/CSXCAD/\"
+unix:!macx:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" libCSXCAD.so*
 win32:install.commands += && cp -at \"$$PREFIX/lib$$LIB_SUFFIX/\" release/CSXCAD0.dll
-install.commands += && cp -at \"$$PREFIX/share/CSXCAD/\" matlab/
+macx:install.commands += && cp  libCSXCAD*.dylib \"$$PREFIX/lib$$LIB_SUFFIX/\"
+install.commands += && cp -r matlab/* \"$$PREFIX/share/CSXCAD/matlab\"
 QMAKE_EXTRA_TARGETS += install
 
 #
