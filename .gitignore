@@ -18,3 +18,9 @@ Thumbs.db
 *.pro.user
 *.user.*
 localPaths.pri
+
+#cmake
+**CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt

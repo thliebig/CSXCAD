@@ -22,9 +22,22 @@ ENDIF()
 
 ADD_DEFINITIONS(-DGIT_VERSION=\"${VERSION}\")
 
+# set an RPATH to the local folder
+SET(CMAKE_INSTALL_RPATH ".")
 
 # Set locations of CMake modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CSXCAD_SOURCE_DIR}/cmake/Modules/")
+
+# fparser
+# $ cmake -D FPARSER_ROOT_DIR=~/opt/openEMS .
+# SET(FPARSER_ROOT_DIR ~/opt/openEMS)
+find_library(fparser_LIBRARIES NAMES fparser
+  HINTS
+  ${FPARSER_ROOT_DIR}/lib
+)
+message(STATUS "fparser: ${fparser_LIBRARIES}" )
+#TODO test if fparser was found
+INCLUDE_DIRECTORIES( ${FPARSER_ROOT_DIR}/include ) 
 
 # TinyXML module from https://github.com/ros/cmake_modules
 find_package(TinyXML REQUIRED)
@@ -92,9 +105,6 @@ endif(VTK_FOUND)
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
 
 #message(status "VTK selected: ${vtk_LIBS}")
-
-
-INCLUDE_DIRECTORIES( ${fparser_SOURCE_DIR} )
 
 
 # depend on fparser.hh

@@ -86,7 +86,7 @@ set(SOURCES
 add_library( CSXCAD SHARED ${SOURCES} )
 
 TARGET_LINK_LIBRARIES( CSXCAD
-  fparser
+  ${fparser_LIBRARIES}
   ${TinyXML_LIBRARIES}
   hdf5
   hdf5_hl
