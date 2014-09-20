@@ -24,3 +24,4 @@ localPaths.pri
 CMakeCache.txt
 cmake_install.cmake
 install_manifest.txt
+localConfig.cmake

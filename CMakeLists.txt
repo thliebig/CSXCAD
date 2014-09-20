@@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 2.8)
 # default
 set(VERSION "v0.5.2")
 
+
+IF(EXISTS ${PROJECT_SOURCE_DIR}/localConfig.cmake)
+   include(${PROJECT_SOURCE_DIR}/localConfig.cmake)
+ENDIF()
+
 # add git revision
 IF(EXISTS ${PROJECT_SOURCE_DIR}/.git )
   FIND_PACKAGE(Git)
