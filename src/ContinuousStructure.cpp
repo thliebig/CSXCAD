@@ -144,26 +144,34 @@ vector<CSProperties*>  ContinuousStructure::GetPropertyByType(CSProperties::Prop
 	return found;
 }
 
-size_t ContinuousStructure::GetQtyPrimitives()
+size_t ContinuousStructure::GetQtyPrimitives(CSProperties::PropertyType type)
 {
 	size_t count = 0;
 	for (size_t i=0;i<vProperties.size();++i)
-		count+=vProperties.at(i)->GetQtyPrimitives();
+		if (vProperties.at(i)->GetType() & type)
+			count+=vProperties.at(i)->GetQtyPrimitives();
 	return count;
 }
 
-vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives()
+bool sortPrimByPrio(CSPrimitives* a, CSPrimitives* b)
 {
-	vector<CSPrimitives*> vPrim;
-	vPrim.reserve(GetQtyPrimitives());
-	for (size_t i=0;i<vProperties.size();++i)
-	{
-		vector<CSPrimitives*> prop_prims = vProperties.at(i)->GetAllPrimitives();
-		vPrim.insert(vPrim.end(),prop_prims.begin(),prop_prims.end());
-	}
-	return vPrim;
+	return a->GetPriority()<b->GetPriority();
 }
 
+vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives(bool sorted, CSProperties::PropertyType type)
+{
+	vector<CSProperties*> props = this->GetPropertyByType(type);
+	vector<CSPrimitives*> vPrim;
+	vPrim.reserve(GetQtyPrimitives(type));
+	for (size_t i=0;i<props.size();++i)
+	{
+		vector<CSPrimitives*> prop_prims = props.at(i)->GetAllPrimitives();
+		vPrim.insert(vPrim.end(),prop_prims.begin(),prop_prims.end());
+	}
+	if (sorted)
+		sort(vPrim.rbegin(), vPrim.rend(), sortPrimByPrio);
+	return vPrim;
+}
 
 CSProperties* ContinuousStructure::HasPrimitive(CSPrimitives* prim)
 {

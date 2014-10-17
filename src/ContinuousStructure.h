@@ -125,10 +125,10 @@ public:
 	void DeletePrimitive(CSPrimitives* prim);
 
 	//! Get the quantity of primitives included in this structure.
-	size_t GetQtyPrimitives();
+	size_t GetQtyPrimitives(CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get a primitives array
-	vector<CSPrimitives*>  GetAllPrimitives();
+	vector<CSPrimitives*>  GetAllPrimitives(bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get a primitives array of a certian type
 	vector<CSPrimitives*>  GetPrimitivesByType(CSPrimitives::PrimitiveType type);
