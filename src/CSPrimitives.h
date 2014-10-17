@@ -197,6 +197,7 @@ protected:
 	bool m_Primtive_Used;
 
 	//internal bounding box, updated by Update(), can be used to speedup IsInside
+	bool m_BoundBoxValid;
 	double m_BoundBox[6];
 	CoordinateSystem m_BoundBox_CoordSys;
 

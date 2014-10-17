@@ -102,7 +102,7 @@ bool CSPrimPoint::Update(string *ErrStr)
 	}
 	m_Coords.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
 	//update local bounding box
-	GetBoundBox(m_BoundBox);
+	m_BoundBoxValid = GetBoundBox(m_BoundBox);
 	return bOK;
 }
 

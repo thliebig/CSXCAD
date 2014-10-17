@@ -137,7 +137,7 @@ bool CSPrimSphere::Update(string *ErrStr)
 	}
 
 	//update local bounding box
-	GetBoundBox(m_BoundBox);
+	m_BoundBoxValid = GetBoundBox(m_BoundBox);
 
 	return bOK;
 }

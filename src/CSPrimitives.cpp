@@ -91,6 +91,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	m_Dimension = 0;
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
+	m_BoundBoxValid = false;
 }
 
 CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)

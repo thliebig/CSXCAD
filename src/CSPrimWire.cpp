@@ -126,7 +126,7 @@ bool CSPrimWire::Update(string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	//update local bounding box used to speedup IsInside()
-	GetBoundBox(m_BoundBox);
+	m_BoundBoxValid = GetBoundBox(m_BoundBox);
 	return bOK;
 }
 

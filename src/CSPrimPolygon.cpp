@@ -237,7 +237,7 @@ bool CSPrimPolygon::Update(string *ErrStr)
 	}
 
 	//update local bounding box used to speedup IsInside()
-	GetBoundBox(m_BoundBox);
+	m_BoundBoxValid = GetBoundBox(m_BoundBox);
 
 	return bOK;
 }
