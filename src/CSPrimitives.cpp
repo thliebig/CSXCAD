@@ -149,6 +149,27 @@ CSPrimitives::~CSPrimitives()
 	m_Transform=NULL;
 }
 
+int CSPrimitives::IsInsideBox(const double *boundbox)
+{
+	if (m_BoundBoxValid==false)
+		return 0;  // unable to decide with an invalid bounding box
+	if ((this->GetBoundBoxCoordSystem()!=UNDEFINED_CS) && (this->GetBoundBoxCoordSystem()==this->GetCoordInputType()))
+		return 0;  // unable to decide if coordinate system do not match
+	if (this->GetTransform()!=NULL)
+		return 0;  // unable to decide if a transformation is used
+
+	for (int i=0;i<3;++i)
+	{
+		int d_l = 2*i;
+		int d_u = d_l+1;
+		if ((boundbox[d_l]<m_BoundBox[d_l]) && (boundbox[d_l]<m_BoundBox[d_u]) && (boundbox[d_u]<m_BoundBox[d_l]) && (boundbox[d_u]<m_BoundBox[d_u]))
+			return -1;
+		if ((boundbox[d_l]>m_BoundBox[d_l]) && (boundbox[d_l]>m_BoundBox[d_u]) && (boundbox[d_u]>m_BoundBox[d_l]) && (boundbox[d_u]>m_BoundBox[d_u]))
+			return -1;
+	}
+	return 1;
+}
+
 bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 {
 	elem.SetAttribute("Priority",iPriority);

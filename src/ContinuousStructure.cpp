@@ -195,6 +195,19 @@ vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::Pri
 	return vPrim;
 }
 
+vector<CSPrimitives*>  ContinuousStructure::GetPrimitivesByBoundBox(const double* boundbox, CSProperties::PropertyType type)
+{
+	vector<CSPrimitives*> out_list;
+	vector<CSPrimitives*> prims =this->GetAllPrimitives(type);
+	for (size_t j=0;j<prims.size();++j)
+	{
+		// add primitive to list of IsInside reports 0 or 1 (unknown or true)
+		if (prims.at(j)->IsInsideBox(boundbox)>=0)
+			out_list.push_back(prims.at(j));
+	}
+	return out_list;
+}
+
 bool ContinuousStructure::InsertEdges2Grid(int nu)
 {
 	if (nu<0) return false;

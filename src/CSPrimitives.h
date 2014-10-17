@@ -109,6 +109,10 @@ public:
 	//! Check if given Coordinate (in the given mesh type) is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;}
 
+	//! Check if the primitive is inside a given box (box must be specified in the bounding box coordinate system)
+	//! @return -1 if not, +1 if it is, 0 if unknown
+	virtual int IsInsideBox(const double*  boundbox);
+
 	//! Check whether this primitive was used. (--> IsInside() return true) \sa SetPrimitiveUsed
 	bool GetPrimitiveUsed() {return m_Primtive_Used;}
 	//! Set the primitve uses flag. \sa GetPrimitiveUsed
