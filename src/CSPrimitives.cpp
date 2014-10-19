@@ -153,7 +153,7 @@ int CSPrimitives::IsInsideBox(const double *boundbox)
 {
 	if (m_BoundBoxValid==false)
 		return 0;  // unable to decide with an invalid bounding box
-	if ((this->GetBoundBoxCoordSystem()!=UNDEFINED_CS) && (this->GetBoundBoxCoordSystem()==this->GetCoordInputType()))
+	if ((this->GetBoundBoxCoordSystem()!=UNDEFINED_CS) && (this->GetBoundBoxCoordSystem()!=this->GetCoordInputType()))
 		return 0;  // unable to decide if coordinate system do not match
 	if (this->GetTransform()!=NULL)
 		return 0;  // unable to decide if a transformation is used
