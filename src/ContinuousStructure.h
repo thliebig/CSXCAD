@@ -135,7 +135,7 @@ public:
 
 
 	//! Get a primitives array inside a bounding box and with a certian property type (default is any)
-	vector<CSPrimitives*>  GetPrimitivesByBoundBox(const double* boundbox, CSProperties::PropertyType type=CSProperties::ANY);
+	vector<CSPrimitives*>  GetPrimitivesByBoundBox(const double* boundbox, bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get the internal index of the property.
 	int GetIndex(CSProperties* prop);

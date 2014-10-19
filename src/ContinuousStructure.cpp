@@ -195,10 +195,10 @@ vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::Pri
 	return vPrim;
 }
 
-vector<CSPrimitives*>  ContinuousStructure::GetPrimitivesByBoundBox(const double* boundbox, CSProperties::PropertyType type)
+vector<CSPrimitives*>  ContinuousStructure::GetPrimitivesByBoundBox(const double* boundbox, bool sorted, CSProperties::PropertyType type)
 {
 	vector<CSPrimitives*> out_list;
-	vector<CSPrimitives*> prims =this->GetAllPrimitives(type);
+	vector<CSPrimitives*> prims =this->GetAllPrimitives(sorted, type);
 	for (size_t j=0;j<prims.size();++j)
 	{
 		// add primitive to list of IsInside reports 0 or 1 (unknown or true)
