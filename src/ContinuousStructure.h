@@ -112,6 +112,8 @@ public:
 	 */
 	CSProperties** GetPropertiesByCoordsPriority(const double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
+	CSProperties* GetPropertyByCoordPriority(const double* coord, vector<CSPrimitives*> primList, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
+
 	//! Check and warn for unused primitives in properties of given type
 	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 

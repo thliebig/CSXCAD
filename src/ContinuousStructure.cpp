@@ -295,6 +295,24 @@ CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(const double* 
 	return NULL;
 }
 
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, vector<CSPrimitives*> primList, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
+{
+	CSProperties* prop = NULL;
+	// search in all given primitives if coordinate given is inside
+	for (size_t i=0;i<primList.size();++i)
+		if (primList.at(i)->IsInside(coord))
+		{
+			if (foundPrimitive)
+				*foundPrimitive = primList.at(i);
+			prop = primList.at(i)->GetProperty();
+			if (markFoundAsUsed)
+				primList.at(i)->SetPrimitiveUsed(true);
+			// break as soon as a primitive is found since it is expected that the vPrim vector is priority sorted!
+			break;
+		}
+	return prop;
+}
+
 void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type)
 {
 	for (size_t i=0;i<vProperties.size();++i)
