@@ -203,6 +203,14 @@ void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
 {
 	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
 	stream << "  Primary Coord-System: " << m_PrimCoordSystem << " Mesh Coord-System: " << m_MeshType << " Bound-Box Coord-System: " << m_BoundBox_CoordSys << endl;
+	stream << "  Bounding Box (Valid: " << m_BoundBoxValid << "): P1: (" << m_BoundBox[0] << "," << m_BoundBox[2] << "," << m_BoundBox[4] << ") P2: (" << m_BoundBox[1] << "," << m_BoundBox[3] << "," << m_BoundBox[5] << ")" << endl;
+	if (m_Transform)
+	{
+		stream << "  Transform: " << endl;
+		m_Transform->PrintTransformations(stream, "\t* ");
+	}
+	else
+		stream << "  Transform: None" << endl;
 }
 
 void CSPrimitives::TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const

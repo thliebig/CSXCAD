@@ -649,11 +649,11 @@ void CSTransform::PrintMatrix(ostream& stream)
 	}
 }
 
-void CSTransform::PrintTransformations(ostream& stream)
+void CSTransform::PrintTransformations(ostream& stream, string prefix)
 {
 	for (size_t n=0;n<m_TransformList.size();++n)
 	{
-		stream << GetNameByType(m_TransformList.at(n)) << "(";
+		stream << prefix << GetNameByType(m_TransformList.at(n)) << "(";
 		for (size_t a=0;a<m_TransformArguments.at(n).size();++a)
 		{
 			stream << m_TransformArguments.at(n).at(a).GetValueString();

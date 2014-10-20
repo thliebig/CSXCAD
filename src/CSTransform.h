@@ -103,7 +103,7 @@ public:
 
 	void PrintMatrix(ostream& stream);
 
-	void PrintTransformations(ostream& stream);
+	void PrintTransformations(ostream& stream, string prefix="");
 
 	//! Write this transformations to a xml-node. \param parameterised Use false if parameters should be written as values. Parameters are lost!
 	virtual bool Write2XML(TiXmlNode* root, bool parameterised=true, bool sparse=false);
