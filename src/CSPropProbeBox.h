@@ -55,6 +55,16 @@ public:
 	//! Get the probe type \sa SetProbeType
 	int GetProbeType() {return ProbeType;}
 
+	//! Set the probe start time
+	void SetStartTime(float value) {startTime=value;}
+	//! Get the probe start time
+	double GetStartTime() {return startTime;}
+
+	//! Set the probe stop time
+	void SetStopTime(float value) {stopTime=value;}
+	//! Get the probe stop time
+	double GetStopTime() {return stopTime;}
+
 	size_t CountFDSamples() {return m_FD_Samples.size();}
 	vector<double> *GetFDSamples()	{return &m_FD_Samples;}
 	void ClearFDSamples() {m_FD_Samples.clear();}
@@ -64,11 +74,13 @@ public:
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
+
 protected:
 	unsigned int uiNumber;
 	int m_NormDir;
 	double m_weight;
 	int ProbeType;
 	vector<double> m_FD_Samples;
+	double startTime, stopTime;
 };
 

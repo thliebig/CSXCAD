@@ -20,7 +20,9 @@ function CSX = AddProbe(CSX, name, type, varargin)
 % frequency:    dump in the frequency domain at the given samples (in Hz)
 % ModeFunction: A mode function (used only with type 3/4)
 % NormDir:      necessary for current probing box with dimension~=2
-%
+% StartTime/StopTime: Define a start and/or stop time (in seconds) 
+%                     for this probe to be active.
+
 % examples:
 %       CSX = AddProbe(CSX,'ut1',0); %voltate probe
 %       CSX = AddProbe(CSX,'it1',1); %current probe
@@ -32,34 +34,38 @@ function CSX = AddProbe(CSX, name, type, varargin)
 % -----------------------
 % author: Thorsten Liebig
 
-weight=1;
 FD_samples = [];
 ModeFunction = {};
-NormDir = nan;
 
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');
 end
 
+prop_args = {'Type', type};
+
 for n=1:2:numel(varargin)
     if (strcmpi(varargin{n},'weight')==1);
-        weight = varargin{n+1};
+        prop_args{end+1} = 'Weight';
+        prop_args{end+1} = varargin{n+1};
     elseif (strcmpi(varargin{n},'Frequency')==1);
         FD_samples = varargin{n+1};
     elseif (strcmpi(varargin{n},'ModeFunction')==1);
         ModeFunction = varargin{n+1};
     elseif (strcmpi(varargin{n},'NormDir')==1);
-        NormDir = varargin{n+1};
+        prop_args{end+1} = 'NormDir';
+        prop_args{end+1} = varargin{n+1};
+    elseif (strcmpi(varargin{n},'StartTime')==1);
+        prop_args{end+1} = 'StartTime';
+        prop_args{end+1} = varargin{n+1};
+    elseif (strcmpi(varargin{n},'StopTime')==1);
+        prop_args{end+1} = 'StopTime';
+        prop_args{end+1} = varargin{n+1};
     else
         warning('CSXCAD:AddProbe',['variable argument key: "' varargin{n+1} '" unknown']);
     end
 end
 
-if isnan(NormDir)
-    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight);
-else
-    [CSX pos] = AddProperty(CSX, 'ProbeBox', name, 'Type', type, 'Weight', weight, 'NormDir', NormDir);
-end
+[CSX pos] = AddProperty(CSX, 'ProbeBox', name, prop_args{:});
 
 if (numel(FD_samples)>0)
     CSX.Properties.ProbeBox{pos}.FD_Samples=FD_samples;

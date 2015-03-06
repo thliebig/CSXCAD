@@ -19,9 +19,9 @@
 
 #include "CSPropProbeBox.h"
 
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
@@ -50,6 +50,8 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 			prop->SetAttribute("NormDir",(int)uiNumber);
 	prop->SetAttribute("Type",ProbeType);
 	prop->SetAttribute("Weight",m_weight);
+	prop->SetAttribute("StartTime",startTime);
+	prop->SetAttribute("StopTime" ,stopTime );
 
 	if (m_FD_Samples.size())
 	{
@@ -80,6 +82,9 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
 
 	if (prop->QueryDoubleAttribute("Weight",&m_weight)!=TIXML_SUCCESS) m_weight=1;
+
+	if (prop->QueryDoubleAttribute("StartTime",&startTime)!=TIXML_SUCCESS) startTime=0;
+	if (prop->QueryDoubleAttribute("StopTime" ,&stopTime )!=TIXML_SUCCESS) stopTime =0;
 
 	TiXmlElement* FDSamples = prop->FirstChildElement("FD_Samples");
 	if (FDSamples!=NULL)
