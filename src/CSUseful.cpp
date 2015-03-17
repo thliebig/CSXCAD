@@ -36,29 +36,35 @@ int String2Int(string number)
 	return val;
 }
 
-double String2Double(string number, int accurarcy)
+double String2Double(string number, bool &ok, int accurarcy)
 {
 	double val;
 	stringstream ss(number);
 	ss.precision(accurarcy);
 	ss >> val;
+	ok = ss.eof() && !ss.fail();
 	return val;
 }
-
 
 std::vector<double> SplitString2Double(std::string str, const char delimiter)
 {
 	size_t pos=0;
 	std::string sub;
 	std::vector<double> values;
+	bool ok;
+	double val;
 	do
 	{
 		pos=str.find_first_of(delimiter);
 		if (pos==std::string::npos) pos=str.size();
-		else ++pos;
 		sub=str.substr(0,pos);
-		if (sub.empty()==false) values.push_back(String2Double(sub));
-		str.erase(0,pos);
+		if (sub.empty()==false)
+		{
+			val = String2Double(sub, ok);
+			if (ok)
+				values.push_back(val);
+		}
+		str.erase(0,pos+1);
 	} while (str.size()>0);
 	return values;
 }

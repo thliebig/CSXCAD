@@ -14,7 +14,7 @@ using namespace std;
 
 string CSXCAD_EXPORT ConvertInt(int number);
 int CSXCAD_EXPORT String2Int(string number);
-double CSXCAD_EXPORT String2Double(string number, int accurarcy=15);
+double CSXCAD_EXPORT String2Double(string number, bool &ok, int accurarcy=15);
 vector<double> CSXCAD_EXPORT SplitString2Double(string str, const char delimiter);
 vector<string> CSXCAD_EXPORT SplitString2Vector(string str, const char delimiter);
 string CSXCAD_EXPORT CombineVector2String(vector<double> values, const char delimiter, int accurarcy=15);

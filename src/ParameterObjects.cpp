@@ -25,23 +25,16 @@
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val)
 {
 	double dHelp;
-	const char* chHelp;
-	string sHelp;
-	size_t tHelp;
 
-	if (elem.QueryDoubleAttribute(attr,&dHelp)==TIXML_SUCCESS) PS.SetValue(dHelp);
+	PS.SetValue(val); // set default value
+	if (elem.QueryDoubleAttribute(attr,&dHelp)==TIXML_SUCCESS)
+		PS.SetValue(dHelp); // set double value if found
 	else
 	{
-	    chHelp=elem.Attribute(attr);
-		if (chHelp==NULL) return false;
-		sHelp=string(chHelp);
-		tHelp=sHelp.find("term:",0);
-		if (tHelp!=0) //set default value and return false
-		{
-			PS.SetValue(val);
+		const char* chHelp=elem.Attribute(attr);
+		if (chHelp==NULL)
 			return false;
-		}
-		PS.SetValue(sHelp.erase(0,5).c_str());
+		PS.SetValue(chHelp); // set string value if found
 	}
 	return true;
 }
@@ -49,10 +42,7 @@ bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double 
 void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode, bool scientific)
 {
 	if (PS.GetMode() && mode)
-	{
-		string sHelp=string("term:")+PS.GetString();
-		elem.SetAttribute(attr,sHelp.c_str());
-	}
+		elem.SetAttribute(attr,PS.GetString().c_str());
 	else
 	{
 		if (PS.GetValue()==NAN)
@@ -91,11 +81,12 @@ bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr,
 	for (int n=0;n<(int)val_list.size();++n)
 	{
 		string sHelp=val_list.at(n);
-		size_t tHelp=sHelp.find("term:",0);
-		if (tHelp!=0)
-			PS[n].SetValue(atof(sHelp.c_str()));
+		bool ok;
+		double val = String2Double(sHelp, ok);
+		if (ok)
+			PS[n].SetValue(val);
 		else
-			PS[n].SetValue(sHelp.erase(0,5).c_str());
+			PS[n].SetValue(sHelp.c_str());
 	}
 	return true;
 }
@@ -113,7 +104,7 @@ void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr
 	for (int i=0;i<3;++i)
 	{
 		if (PS[i].GetMode() && mode)
-			ss << string("term:")+PS[i].GetString();
+			ss << PS[i].GetString();
 		else if (PS[i].GetValue()==NAN)
 			ss << "NAN" << endl;
 		else
