@@ -56,6 +56,8 @@ unix:!macx {
     }
 
     #hdf5
+    !isEmpty(HDF5_ROOT) {LIBS += -L$$HDF5_ROOT}
+    INCLUDEPATH += /usr/include/hdf5/serial
     INCLUDEPATH += /usr/include/mpi
 
     #fparser
