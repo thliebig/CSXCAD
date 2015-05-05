@@ -77,7 +77,8 @@ link_directories(${HDF5_LIBRARY_DIRS})
 # hdf5 compat
 ADD_DEFINITIONS( -DH5_USE_16_API )
 
-#message(status "hdf5 all libs: ${HDF5_LIBRARIES}")
+# message(status "hdf5 all libs: ${HDF5_LIBRARIES}")
+
 
 find_package(CGAL REQUIRED)
 INCLUDE_DIRECTORIES (${CGAL_INCLUDE_DIR})
@@ -96,45 +97,12 @@ find_package(Boost 1.46 COMPONENTS
   chrono
 )
 
+# vtk, prefer >=6.1, fallback to >=5.4
 find_package(VTK REQUIRED)
 
-if("${VTK_MAJOR_VERSION}" EQUAL 5)
-  set( vtk_LIBS
-    vtkCommon
-    vtkFiltering
-    vtkGraphics
-    vtkHybrid
-    vtkIO
-    vtkRendering
-    vtkWidgets
-    QVTK
-  )
-endif()
-
-if("${VTK_MAJOR_VERSION}" EQUAL 6)
-  set( vtk_LIBS
-    vtkCommonCore
-    vtkCommonDataModel
-    vtkIOLegacy
-    vtkIOXML
-    vtkIOGeometry
-    vtkIOPLY
-    vtksys
-    vtkIOCore
-  )
-endif()
-
-if(VTK_FOUND)
-	message(STATUS "Found package VTK. Using " ${VTK_USE_FILE})
-    include(${VTK_USE_FILE})
-else(VTK_FOUND)
-    message(FATAL_ERROR "VTK not found. Please set VTK_DIR.")
-endif(VTK_FOUND)
-
+# message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
+include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
-
-#message(status "VTK selected: ${vtk_LIBS}")
-
 
 # depend on fparser.hh
 ADD_SUBDIRECTORY( src )
