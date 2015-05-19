@@ -33,6 +33,10 @@ ENDIF()
 
 ADD_DEFINITIONS(-DGIT_VERSION=\"${VERSION}\")
 
+if (WIN32)
+    ADD_DEFINITIONS( -DBUILD_CSXCAD_LIB )
+endif (WIN32)
+
 #
 # Set up RPATH for the project
 #
@@ -97,13 +101,40 @@ find_package(Boost 1.46 COMPONENTS
   chrono
 )
 
-# vtk, prefer >=6.1, fallback to >=5.4
-find_package(VTK REQUIRED)
+# vtk
+if (WIN32)
+    find_package(VTK 6.1 REQUIRED)
+else()
+    # prefer >=6.1, fallback to >=5.4
+    find_package(VTK REQUIRED)
+endif()
 
-# message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
+message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
 include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
-
+if("${VTK_MAJOR_VERSION}" EQUAL 6)
+    set( vtk_LIBS
+        vtkCommonCore
+        vtkCommonDataModel
+        vtkIOLegacy
+        vtkIOXML
+        vtkIOGeometry
+        vtkIOPLY
+        vtksys
+        vtkIOCore
+    )
+else()
+    set( vtk_LIBS
+        vtkCommon
+        vtkFiltering
+        vtkGraphics
+        vtkHybrid
+        vtkIO
+        vtkRendering
+        vtkWidgets
+        QVTK
+    )    
+endif()
 # depend on fparser.hh
 ADD_SUBDIRECTORY( src )
 

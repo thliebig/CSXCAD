@@ -88,8 +88,7 @@ add_library( CSXCAD SHARED ${SOURCES} )
 TARGET_LINK_LIBRARIES( CSXCAD
   ${fparser_LIBRARIES}
   ${TinyXML_LIBRARIES}
-  hdf5
-  hdf5_hl
+  ${HDF5_LIBRARIES}
   CGAL
   ${Boost_LIBRARIES}
   ${vtk_LIBS}
