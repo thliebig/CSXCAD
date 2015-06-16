@@ -3,10 +3,10 @@ function str = vector2str(vec, acc)
 %
 % internal function for CSXCAD
 % 
-% (c) Thorsten Liebig 2012
+% (c) 2012-2015 Thorsten Liebig <thorsten.liebig@gmx.de>
 % (C) 2012 Sebastian Held <sebastian.held@gmx.de>
 
-str = [];
+str = '';
 
 if (numel(vec)==0)
     return
