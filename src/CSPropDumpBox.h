@@ -33,7 +33,7 @@ public:
 	virtual ~CSPropDumpBox();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("DumpBox");}
+	virtual const std::string GetTypeXMLString() const {return std::string("DumpBox");}
 
 	//! Define an arbitrary dump-type \sa GetDumpType
 	void SetDumpType(int type) {DumpType=type;}
@@ -80,7 +80,7 @@ public:
 
 	virtual void Init();
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	int DumpType;

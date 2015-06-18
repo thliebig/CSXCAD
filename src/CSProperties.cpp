@@ -45,7 +45,7 @@ CSProperties::CSProperties(CSProperties* prop)
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
 	bVisisble=prop->bVisisble;
-	sName=string(prop->sName);
+	sName=std::string(prop->sName);
 	for (size_t i=0;i<prop->vPrimitives.size();++i)
 	{
 		vPrimitives.push_back(prop->vPrimitives.at(i));
@@ -131,10 +131,10 @@ void CSProperties::SetID(unsigned int ID) {uiID=ID;}
 unsigned int CSProperties::GetUniqueID() {return UniqueID;}
 void CSProperties::SetUniqueID(unsigned int uID) {UniqueID=uID;}
 
-void CSProperties::SetName(const string name) {sName=string(name);}
-const string CSProperties::GetName() {return sName;}
+void CSProperties::SetName(const std::string name) {sName=std::string(name);}
+const std::string CSProperties::GetName() {return sName;}
 
-bool CSProperties::ExistAttribute(string name)
+bool CSProperties::ExistAttribute(std::string name)
 {
 	for (size_t n=0;n<m_Attribute_Name.size();++n)
 	{
@@ -144,17 +144,17 @@ bool CSProperties::ExistAttribute(string name)
 	return false;
 }
 
-string CSProperties::GetAttributeValue(string name)
+std::string CSProperties::GetAttributeValue(std::string name)
 {
 	for (size_t n=0;n<m_Attribute_Name.size();++n)
 	{
 		if (m_Attribute_Name.at(n) == name)
 			return m_Attribute_Value.at(n);
 	}
-	return string();
+	return std::string();
 }
 
-void CSProperties::AddAttribute(string name, string value)
+void CSProperties::AddAttribute(std::string name, std::string value)
 {
 	if (name.empty()) return;
 	m_Attribute_Name.push_back(name);
@@ -184,7 +184,7 @@ CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*
 CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }
 CSPropDumpBox* CSProperties::ToDumpBox() { return dynamic_cast<CSPropDumpBox*>(this); }
 
-bool CSProperties::Update(string */*ErrStr*/) {return true;}
+bool CSProperties::Update(std::string */*ErrStr*/) {return true;}
 
 bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
@@ -236,7 +236,7 @@ void CSProperties::AddPrimitive(CSPrimitives *prim)
 {
 	if (HasPrimitive(prim)==true)
 	{
-		cerr << __func__ << ": Error, primitive is already owned by this property!" << endl;
+		std::cerr << __func__ << ": Error, primitive is already owned by this property!" << std::endl;
 		return;
 	}
 	vPrimitives.push_back(prim);
@@ -259,7 +259,7 @@ void CSProperties::RemovePrimitive(CSPrimitives *prim)
 	{
 		if (vPrimitives.at(i)==prim)
 		{
-			vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
+			std::vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
 			vPrimitives.erase(iter);
 			prim->SetProperty(NULL);
 			return;
@@ -271,7 +271,7 @@ void CSProperties::DeletePrimitive(CSPrimitives *prim)
 {
 	if (!HasPrimitive(prim))
 	{
-		cerr << __func__ << ": Error, primitive not found, can't delete it! Skipping." << endl;
+		std::cerr << __func__ << ": Error, primitive not found, can't delete it! Skipping." << std::endl;
 		return;
 	}
 	RemovePrimitive(prim);
@@ -282,7 +282,7 @@ CSPrimitives* CSProperties::TakePrimitive(size_t index)
 {
 	if (index>=vPrimitives.size()) return NULL;
 	CSPrimitives* prim=vPrimitives.at(index);
-	vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+index;
+	std::vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+index;
 	vPrimitives.erase(iter);
 	return prim;
 }
@@ -314,34 +314,34 @@ CSPrimitives* CSProperties::CheckCoordInPrimitive(const double *coord, int &prio
 	return found_CSPrim;
 }
 
-void CSProperties::WarnUnusedPrimitves(ostream& stream)
+void CSProperties::WarnUnusedPrimitves(std::ostream& stream)
 {
 	if (vPrimitives.size()==0)
 	{
-		stream << "Warning: No primitives found in property: " << GetName() << "!" << endl;
+		stream << "Warning: No primitives found in property: " << GetName() << "!" << std::endl;
 		return;
 	}
 	for (size_t i=0; i<vPrimitives.size();++i)
 	{
 		if (vPrimitives.at(i)->GetPrimitiveUsed()==false)
 		{
-			stream << "Warning: Unused primitive (type: " << vPrimitives.at(i)->GetTypeName() << ") detected in property: " << GetName() << "!" << endl;
+			stream << "Warning: Unused primitive (type: " << vPrimitives.at(i)->GetTypeName() << ") detected in property: " << GetName() << "!" << std::endl;
 		}
 	}
 }
 
-void CSProperties::ShowPropertyStatus(ostream& stream)
+void CSProperties::ShowPropertyStatus(std::ostream& stream)
 {
-	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << endl;
-	stream << " Primitive Count \t: " << vPrimitives.size() << endl;
-	stream << " Coordinate System \t: " << coordInputType << endl;
+	stream << " Property #" << GetID() << " Type: \"" << GetTypeString() << "\" Name: \"" << GetName() << "\"" << std::endl;
+	stream << " Primitive Count \t: " << vPrimitives.size() << std::endl;
+	stream << " Coordinate System \t: " << coordInputType << std::endl;
 
-	stream << "  -- Primitives: --" << endl;
+	stream << "  -- Primitives: --" << std::endl;
 	for (size_t i=0; i<vPrimitives.size();++i)
 	{
 		vPrimitives.at(i)->ShowPrimitiveStatus(stream);
 		if (i<vPrimitives.size()-1)
-			stream << " ---- " << endl;
+			stream << " ---- " << std::endl;
 	}
 }
 
@@ -355,7 +355,7 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 		uiID=help;
 
 	const char* cHelp=prop->Attribute("Name");
-	if (cHelp!=NULL) sName=string(cHelp);
+	if (cHelp!=NULL) sName=std::string(cHelp);
 	else sName.clear();
 
 	TiXmlElement* FC = root.FirstChildElement("FillColor");

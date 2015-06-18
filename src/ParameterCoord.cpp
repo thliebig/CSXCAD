@@ -93,7 +93,7 @@ ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const double value[3])
 	Update();
 }
 
-ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const string value[3])
+ParameterCoord::ParameterCoord(ParameterSet* ParaSet, const std::string value[3])
 {
 	m_CoordSystem = UNDEFINED_CS;
 	for (int n=0;n<3;++n)
@@ -132,7 +132,7 @@ void ParameterCoord::SetCoordinateSystem(CoordinateSystem cs, CoordinateSystem f
 	return SetCoordinateSystem(fallBack_cs);
 }
 
-int ParameterCoord::SetValue(int ny, string value)
+int ParameterCoord::SetValue(int ny, std::string value)
 {
 	if ((ny<0) || (ny>2))
 		return -1;
@@ -156,7 +156,7 @@ double ParameterCoord::GetValue(int ny)
 	return m_Coords[ny]->GetValue();
 }
 
-const string ParameterCoord::GetValueString(int ny) const
+const std::string ParameterCoord::GetValueString(int ny) const
 {
 	if ((ny<0) || (ny>2))
 		return "nan";
@@ -203,7 +203,7 @@ const double* ParameterCoord::GetCoords(CoordinateSystem cs) const
 	}
 }
 
-bool ParameterCoord::Evaluate(string *ErrStr)
+bool ParameterCoord::Evaluate(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
@@ -213,8 +213,8 @@ bool ParameterCoord::Evaluate(string *ErrStr)
 		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
-			stringstream stream;
-			stream << endl << "Error in ParameterCoord (component: " << i << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in ParameterCoord (component: " << i << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}

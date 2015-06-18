@@ -34,47 +34,47 @@ public:
 	virtual ~CSPropDebyeMaterial();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("DebyeMaterial");}
+	virtual const std::string GetTypeXMLString() const {return std::string("DebyeMaterial");}
 
 	//! Set the epsilon plasma frequency
 	void SetEpsDelta(int order, double val, int ny=0) {SetValue(val,EpsDelta[order],ny);}
 	//! Set the epsilon plasma frequency
-	int  SetEpsDelta(int order, const string val, int ny=0)  {return SetValue(val,EpsDelta[order],ny);}
+	int  SetEpsDelta(int order, const std::string val, int ny=0)  {return SetValue(val,EpsDelta[order],ny);}
 	//! Get the epsilon plasma frequency
 	double GetEpsDelta(int order, int ny=0) {return GetValue(EpsDelta[order],ny);}
 	//! Get the epsilon plasma frequency as a string
-	const string GetEpsDeltaTerm(int order, int ny=0) {return GetTerm(EpsDelta[order],ny);}
+	const std::string GetEpsDeltaTerm(int order, int ny=0) {return GetTerm(EpsDelta[order],ny);}
 
 	//! Set the epsilon plasma frequency weighting
-	int SetEpsDeltaWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightEpsDelta[order],ny);}
+	int SetEpsDeltaWeightFunction(int order, const std::string val, int ny) {return SetValue(val,WeightEpsDelta[order],ny);}
 	//! Get the epsilon plasma frequency weighting string
-	const string GetEpsDeltaWeightFunction(int order, int ny) {return GetTerm(WeightEpsDelta[order],ny);}
+	const std::string GetEpsDeltaWeightFunction(int order, int ny) {return GetTerm(WeightEpsDelta[order],ny);}
 	//! Get the epsilon plasma frequency weighting
 	double GetEpsDeltaWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsDelta[order],ny,coords)*GetEpsDelta(order,ny);}
 
 	//! Set the epsilon relaxation time
 	void SetEpsRelaxTime(int order, double val, int ny=0) {SetValue(val,EpsRelaxTime[order],ny);}
 	//! Set the epsilon relaxation time
-	int  SetEpsRelaxTime(int order, const string val, int ny=0)  {return SetValue(val,EpsRelaxTime[order],ny);}
+	int  SetEpsRelaxTime(int order, const std::string val, int ny=0)  {return SetValue(val,EpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time
 	double GetEpsRelaxTime(int order, int ny=0) {return GetValue(EpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time as a string
-	const string GetEpsRelaxTimeTerm(int order, int ny=0) {return GetTerm(EpsRelaxTime[order],ny);}
+	const std::string GetEpsRelaxTimeTerm(int order, int ny=0) {return GetTerm(EpsRelaxTime[order],ny);}
 
 	//! Set the epsilon relaxation time weighting
-	int SetEpsRelaxTimeWeightFunction(int order, const string val, int ny) {return SetValue(val,WeightEpsRelaxTime[order],ny);}
+	int SetEpsRelaxTimeWeightFunction(int order, const std::string val, int ny) {return SetValue(val,WeightEpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time weighting string
-	const string GetEpsRelaxTimeWeightFunction(int order, int ny) {return GetTerm(WeightEpsRelaxTime[order],ny);}
+	const std::string GetEpsRelaxTimeWeightFunction(int order, int ny) {return GetTerm(WeightEpsRelaxTime[order],ny);}
 	//! Get the epsilon relaxation time weighting
 	double GetEpsRelaxTimeWeighted(int order, int ny, const double* coords) {return GetWeight(WeightEpsRelaxTime[order],ny,coords)*GetEpsRelaxTime(order,ny);}
 
 	virtual void Init();
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	virtual void InitValues();

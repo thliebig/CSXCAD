@@ -28,21 +28,21 @@
 CSPrimCylindricalShell::CSPrimCylindricalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(ID,paraSet,prop)
 {
 	Type=CYLINDRICALSHELL;
-	PrimTypeName = string("CylindricalShell");
+	PrimTypeName = std::string("CylindricalShell");
 	psShellWidth.SetParameterSet(paraSet);
 }
 
 CSPrimCylindricalShell::CSPrimCylindricalShell(CSPrimCylindricalShell* cylinder, CSProperties *prop) : CSPrimCylinder(cylinder,prop)
 {
 	Type=CYLINDRICALSHELL;
-	PrimTypeName = string("CylindricalShell");
+	PrimTypeName = std::string("CylindricalShell");
 	psShellWidth.Copy(&cylinder->psShellWidth);
 }
 
 CSPrimCylindricalShell::CSPrimCylindricalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimCylinder(paraSet,prop)
 {
 	Type=CYLINDRICALSHELL;
-	PrimTypeName = string("CylindricalShell");
+	PrimTypeName = std::string("CylindricalShell");
 	psShellWidth.SetParameterSet(paraSet);
 }
 
@@ -52,7 +52,7 @@ CSPrimCylindricalShell::~CSPrimCylindricalShell()
 
 bool CSPrimCylindricalShell::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-//	cerr << "CSPrimCylindricalShell::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCylindricalShell::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
@@ -130,7 +130,7 @@ bool CSPrimCylindricalShell::IsInside(const double* Coord, double /*tol*/)
 	return true;
 }
 
-bool CSPrimCylindricalShell::Update(string *ErrStr)
+bool CSPrimCylindricalShell::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=CSPrimCylinder::Update(ErrStr);
@@ -140,8 +140,8 @@ bool CSPrimCylindricalShell::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -170,8 +170,8 @@ bool CSPrimCylindricalShell::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimCylindricalShell::ShowPrimitiveStatus(ostream& stream)
+void CSPrimCylindricalShell::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimCylinder::ShowPrimitiveStatus(stream);
-	stream << "  Shell width: " << psShellWidth.GetValueString() << endl;
+	stream << "  Shell width: " << psShellWidth.GetValueString() << std::endl;
 }

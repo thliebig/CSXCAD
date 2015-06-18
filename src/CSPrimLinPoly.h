@@ -36,7 +36,7 @@ public:
 	virtual CSPrimLinPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimLinPoly(this,prop);}
 
 	void SetLength(double val) {extrudeLength.SetValue(val);}
-	void SetLength(const string val) {extrudeLength.SetValue(val);}
+	void SetLength(const std::string val) {extrudeLength.SetValue(val);}
 
 	double GetLength() {return extrudeLength.GetValue();}
 	ParameterScalar* GetLengthPS() {return &extrudeLength;}
@@ -44,7 +44,7 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 

@@ -29,21 +29,21 @@ CSPrimLinPoly::CSPrimLinPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
-	PrimTypeName = string("LinPoly");
+	PrimTypeName = std::string("LinPoly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(CSPrimLinPoly* primLinPoly, CSProperties *prop) : CSPrimPolygon(primLinPoly,prop)
 {
 	Type=LINPOLY;
 	extrudeLength.Copy(&primLinPoly->extrudeLength);
-	PrimTypeName = string("LinPoly");
+	PrimTypeName = std::string("LinPoly");
 }
 
 CSPrimLinPoly::CSPrimLinPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=LINPOLY;
 	extrudeLength.SetParameterSet(paraSet);
-	PrimTypeName = string("LinPoly");
+	PrimTypeName = std::string("LinPoly");
 }
 
 
@@ -88,7 +88,7 @@ bool CSPrimLinPoly::IsInside(const double* Coord, double tol)
 }
 
 
-bool CSPrimLinPoly::Update(string *ErrStr)
+bool CSPrimLinPoly::Update(std::string *ErrStr)
 {
 	int EC=0;
 
@@ -99,8 +99,8 @@ bool CSPrimLinPoly::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}

@@ -24,7 +24,7 @@ CSPropDispersiveMaterial::CSPropDispersiveMaterial(CSProperties* prop) : CSPropM
 CSPropDispersiveMaterial::CSPropDispersiveMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID,paraSet) {m_Order=0;Type=(CSProperties::PropertyType)(DISPERSIVEMATERIAL | MATERIAL);}
 CSPropDispersiveMaterial::~CSPropDispersiveMaterial() {}
 
-bool CSPropDispersiveMaterial::Update(string *ErrStr)
+bool CSPropDispersiveMaterial::Update(std::string *ErrStr)
 {
 	return CSPropMaterial::Update(ErrStr);
 }

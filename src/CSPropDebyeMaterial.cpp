@@ -90,7 +90,7 @@ void CSPropDebyeMaterial::InitValues()
 }
 
 
-bool CSPropDebyeMaterial::Update(string *ErrStr)
+bool CSPropDebyeMaterial::Update(std::string *ErrStr)
 {
 	bool bOK=true;
 	int EC=0;
@@ -102,8 +102,8 @@ bool CSPropDebyeMaterial::Update(string *ErrStr)
 			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
 			{
-				stringstream stream;
-				stream << endl << "Error in Debye Material-Property epsilon Delta frequency value (ID: " << uiID << "): ";
+				std::stringstream stream;
+				stream << std::endl << "Error in Debye Material-Property epsilon Delta frequency value (ID: " << uiID << "): ";
 				ErrStr->append(stream.str());
 				PSErrorCode2Msg(EC,ErrStr);
 			}
@@ -112,8 +112,8 @@ bool CSPropDebyeMaterial::Update(string *ErrStr)
 			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
 			{
-				stringstream stream;
-				stream << endl << "Error in Debye Material-Property epsilon Delta frequency weighting function (ID: " << uiID << "): ";
+				std::stringstream stream;
+				stream << std::endl << "Error in Debye Material-Property epsilon Delta frequency weighting function (ID: " << uiID << "): ";
 				ErrStr->append(stream.str());
 				PSErrorCode2Msg(EC,ErrStr);
 			}
@@ -122,8 +122,8 @@ bool CSPropDebyeMaterial::Update(string *ErrStr)
 			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
 			{
-				stringstream stream;
-				stream << endl << "Error in Debye Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
+				std::stringstream stream;
+				stream << std::endl << "Error in Debye Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
 				ErrStr->append(stream.str());
 				PSErrorCode2Msg(EC,ErrStr);
 			}
@@ -132,8 +132,8 @@ bool CSPropDebyeMaterial::Update(string *ErrStr)
 			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
 			{
-				stringstream stream;
-				stream << endl << "Error in Debye Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";
+				std::stringstream stream;
+				stream << std::endl << "Error in Debye Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";
 				ErrStr->append(stream.str());
 				PSErrorCode2Msg(EC,ErrStr);
 			}
@@ -148,7 +148,7 @@ bool CSPropDebyeMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sp
 	TiXmlElement* prop=root.ToElement();
 	if (prop==NULL) return false;
 
-	string suffix;
+	std::string suffix;
 	for (int o=0;o<m_Order;++o)
 	{
 		suffix = ConvertInt(o+1);
@@ -226,13 +226,13 @@ bool CSPropDebyeMaterial::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPropDebyeMaterial::ShowPropertyStatus(ostream& stream)
+void CSPropDebyeMaterial::ShowPropertyStatus(std::ostream& stream)
 {
 	CSPropDispersiveMaterial::ShowPropertyStatus(stream);
-	stream << "  Debye model order:\t" << m_Order << endl;
+	stream << "  Debye model order:\t" << m_Order << std::endl;
 	for (int o=0;o<m_Order;++o)
 	{
-		stream << " Epsilon Delta #" << o << ":\t" << GetEpsDelta(o,0) << "," << GetEpsDelta(o,1) << "," << GetEpsDelta(o,2) << endl;
-		stream << " Epsilon Relax Time #" << o << ":\t" << GetEpsRelaxTime(o,0) << "," << GetEpsRelaxTime(o,1) << "," << GetEpsRelaxTime(o,2) << endl;
+		stream << " Epsilon Delta #" << o << ":\t" << GetEpsDelta(o,0) << "," << GetEpsDelta(o,1) << "," << GetEpsDelta(o,2) << std::endl;
+		stream << " Epsilon Relax Time #" << o << ":\t" << GetEpsRelaxTime(o,0) << "," << GetEpsRelaxTime(o,1) << "," << GetEpsRelaxTime(o,2) << std::endl;
 	}
 }

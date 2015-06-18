@@ -28,7 +28,7 @@ public:
 	ParameterCoord(ParameterSet* ParaSet);
 	ParameterCoord(CoordinateSystem cs);
 	ParameterCoord(ParameterSet* ParaSet, const double value[3]);
-	ParameterCoord(ParameterSet* ParaSet, const string value[3]);
+	ParameterCoord(ParameterSet* ParaSet, const std::string value[3]);
 	ParameterCoord(ParameterCoord* pc);
 	~ParameterCoord();
 
@@ -41,13 +41,13 @@ public:
 	//! Get the coordinate system that has been set for this coordinate
 	CoordinateSystem GetCoordinateSystem() const {return m_CoordSystem;}
 
-	int SetValue(int ny, string value);
+	int SetValue(int ny, std::string value);
 	void SetValue(int ny, double value);
 
 	//! Get the native coordinate values
 	double GetValue(int ny);
 	//! Get the native coordinate values as string
-	const string GetValueString(int ny) const;
+	const std::string GetValueString(int ny) const;
 	//! Get the internal scalar parameter, use carefully...
 	ParameterScalar* GetCoordPS(int ny);
 
@@ -60,7 +60,7 @@ public:
 	const double* GetCoords(CoordinateSystem cs) const;
 
 	//! Evaluate the parametric coordinates and return an error message. This methode should be called before requesting coordinate values to check for valid parametric coordinates.
-	bool Evaluate(string *ErrStr);
+	bool Evaluate(std::string *ErrStr);
 
 	// Copy all values and parameter from pc to this.
 	void Copy(ParameterCoord* pc);

@@ -40,14 +40,14 @@ public:
 	int GetRotAxisDir() const {return m_RotAxisDir;}
 
 	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
-	void SetAngle(int index, const string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
+	void SetAngle(int index, const std::string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
 
 	double GetAngle(int index) const {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;}
 	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;}
 
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 

@@ -28,7 +28,7 @@
 CSPrimCurve::CSPrimCurve(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=CURVE;
-	PrimTypeName = string("Curve");
+	PrimTypeName = std::string("Curve");
 }
 
 CSPrimCurve::CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop) : CSPrimitives(primCurve,prop)
@@ -36,13 +36,13 @@ CSPrimCurve::CSPrimCurve(CSPrimCurve* primCurve, CSProperties *prop) : CSPrimiti
 	Type=CURVE;
 	for (size_t i=0;i<primCurve->points.size();++i)
 		points.push_back(new ParameterCoord(primCurve->points.at(i)));
-	PrimTypeName = string("Curve");
+	PrimTypeName = std::string("Curve");
 }
 
 CSPrimCurve::CSPrimCurve(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=CURVE;
-	PrimTypeName = string("Curve");
+	PrimTypeName = std::string("Curve");
 }
 
 
@@ -64,7 +64,7 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, double val)
 	points.at(point_index)->SetValue(nu,val);
 }
 
-void CSPrimCurve::SetCoord(size_t point_index, int nu, string val)
+void CSPrimCurve::SetCoord(size_t point_index, int nu, std::string val)
 {
 	if (point_index>=GetNumberOfPoints()) return;
 	if ((nu<0) || (nu>2)) return;
@@ -84,7 +84,7 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c
 
 bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)
 {
-//	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCurve::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
 	bool accurate=false;
 	m_BoundBox_CoordSys = CARTESIAN;
 	for (int n=0;n<6;++n) dBoundBox[n] = 0;
@@ -120,7 +120,7 @@ bool CSPrimCurve::IsInside(const double* /*Coord*/, double /*tol*/)
 }
 
 
-bool CSPrimCurve::Update(string *ErrStr)
+bool CSPrimCurve::Update(std::string *ErrStr)
 {
 	bool bOK=true;
 	for (size_t i=0;i<GetNumberOfPoints();++i)
@@ -128,8 +128,8 @@ bool CSPrimCurve::Update(string *ErrStr)
 		bool isOK = points.at(i)->Evaluate(ErrStr);
 		if (isOK==false)
 		{
-			stringstream stream;
-			stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 		}
 		points.at(i)->SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);

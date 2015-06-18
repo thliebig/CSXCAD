@@ -57,13 +57,13 @@ void CSRectGrid::AddDiscLines(int direct, int numLines, double* vals)
 	}
 }
 
-string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, string DistFunction)
+std::string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, std::string DistFunction)
 {
-	if ((direct<0)||(direct>=3)) return string("Unknown grid direction!");
+	if ((direct<0)||(direct>=3)) return std::string("Unknown grid direction!");
 	if (DistFunction.empty()==false)
 	{
 		CSFunctionParser fParse;
-		string dirVar;
+		std::string dirVar;
 		switch (direct)
 		{
 		case 0:
@@ -78,7 +78,7 @@ string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, string D
 		}
 		fParse.Parse(DistFunction,dirVar);
 		if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR)
-			return string("An error occured parsing f(") + dirVar + string(") - Parser message:\n") + string(fParse.ErrorMsg());
+			return std::string("An error occured parsing f(") + dirVar + std::string(") - Parser message:\n") + std::string(fParse.ErrorMsg());
 
 		double dValue=0;
 		bool error=false;
@@ -88,7 +88,7 @@ string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, string D
 			if (fParse.EvalError()!=0) error=true;
 			AddDiscLine(direct,dValue);
 		}
-		if (error) return string("An error occured evaluation the grid function f(") + dirVar + string(")!");
+		if (error) return std::string("An error occured evaluation the grid function f(") + dirVar + std::string(")!");
 	}
 	return "";
 }
@@ -97,7 +97,7 @@ bool CSRectGrid::RemoveDiscLine(int direct, int index)
 {
 	if ((direct<0) || (direct>=3)) return false;
 	if ((index>=(int)Lines[direct].size()) || (index<0)) return false;
-	vector<double>::iterator vIter=Lines[direct].begin();
+	std::vector<double>::iterator vIter=Lines[direct].begin();
 	Lines[direct].erase(vIter+index);
 	return true;
 }
@@ -152,9 +152,9 @@ double* CSRectGrid::GetLines(int direct, double *array, unsigned int &qty, bool 
 	return array;
 }
 
-string CSRectGrid::GetLinesAsString(int direct)
+std::string CSRectGrid::GetLinesAsString(int direct)
 {
-	stringstream xStr;
+	std::stringstream xStr;
 	if ((direct<0)||(direct>=3)) return xStr.str();
 	if (Lines[direct].size()>0)
 	{
@@ -219,8 +219,8 @@ void CSRectGrid::IncreaseResolution(int nu, int factor)
 void CSRectGrid::Sort(int direct)
 {
 	if ((direct<0) || (direct>=3)) return;
-	vector<double>::iterator start = Lines[direct].begin();
-	vector<double>::iterator end = Lines[direct].end();
+	std::vector<double>::iterator start = Lines[direct].begin();
+	std::vector<double>::iterator end = Lines[direct].end();
 	sort(start,end);
 	end=unique(start,end);
 	Lines[direct].erase(end,Lines[direct].end());
@@ -299,7 +299,7 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 
 	TiXmlNode* FN=NULL;
 	TiXmlText* Text=NULL;
-	string LineStr[3];
+	std::string LineStr[3];
 
 	Lines = root.FirstChildElement("XLines");
 	if (Lines==NULL) return false;
@@ -307,7 +307,7 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 	if (FN!=NULL)
 	{
 		Text = FN->ToText();
-		if (Text!=NULL)	LineStr[0]=string(Text->Value());
+		if (Text!=NULL)	LineStr[0]=std::string(Text->Value());
 	}
 
 	Lines = root.FirstChildElement("YLines");
@@ -316,7 +316,7 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 	if (FN!=NULL)
 	{
 		Text = FN->ToText();
-		if (Text!=NULL)	LineStr[1]=string(Text->Value());
+		if (Text!=NULL)	LineStr[1]=std::string(Text->Value());
 	}
 
 	Lines = root.FirstChildElement("ZLines");
@@ -325,12 +325,12 @@ bool CSRectGrid::ReadFromXML(TiXmlNode &root)
 	if (FN!=NULL)
 	{
 		Text = FN->ToText();
-		if (Text!=NULL)	LineStr[2]=string(Text->Value());
+		if (Text!=NULL)	LineStr[2]=std::string(Text->Value());
 	}
 
 	for (int i=0;i<3;++i)
 	{
-		vector<double> lines = SplitString2Double(LineStr[i],',');
+		std::vector<double> lines = SplitString2Double(LineStr[i],',');
 		for (size_t n=0;n<lines.size();++n)
 			AddDiscLine(i,lines.at(n));
 		Sort(i);

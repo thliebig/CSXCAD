@@ -31,8 +31,6 @@
 #include <math.h>
 #include "CSXCAD_Global.h"
 
-using namespace std;
-
 class Parameter;
 class LinearParameter;
 class ParameterSet;
@@ -43,17 +41,17 @@ class TiXmlElement;
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val=0.0);
 void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool mode, bool scientific=true);
 
-bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, double val=0.0, const char delimiter=',');
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, std::string attr, double val=0.0, const char delimiter=',');
 bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, double val=0.0, const char delimiter=',');
-void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, bool mode, bool scientific=true, const char delimiter=',');
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, std::string attr, bool mode, bool scientific=true, const char delimiter=',');
 void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, bool mode, bool scientific=true, const char delimiter=',');
 
 class CSXCAD_EXPORT Parameter
 {
 public:
 	Parameter();
-	Parameter(const string Paraname, double val);
-	Parameter(const Parameter* parameter) {sName=string(parameter->sName);dValue=parameter->dValue;bModified=true;Type=parameter->Type;bSweep=parameter->bSweep;}
+	Parameter(const std::string Paraname, double val);
+	Parameter(const Parameter* parameter) {sName=std::string(parameter->sName);dValue=parameter->dValue;bModified=true;Type=parameter->Type;bSweep=parameter->bSweep;}
 	virtual ~Parameter();
 	enum ParameterType
 	{
@@ -61,8 +59,8 @@ public:
 	};
 	ParameterType GetType() {return Type;}
 
-	const string GetName() {return sName;}
-	void SetName(const string Paraname) {sName=string(Paraname);bModified=true;}
+	const std::string GetName() {return sName;}
+	void SetName(const std::string Paraname) {sName=std::string(Paraname);bModified=true;}
 
 	virtual double GetValue() {return dValue;}
 	virtual void SetValue(double val) {dValue=val;bModified=true;}
@@ -92,7 +90,7 @@ public:
 	LinearParameter* ToLinear() { return ( this && Type == Linear ) ? (LinearParameter*) this : 0; } /// Cast Parameter to a more defined type. Will return null if not of the requested type.
 
 protected:
-	string sName;
+	std::string sName;
 	double dValue;
 	double dValueSaved;
 	bool bModified;
@@ -104,7 +102,7 @@ class CSXCAD_EXPORT LinearParameter :  public Parameter
 {
 public:
 	LinearParameter();
-	LinearParameter(const string Paraname, double val, double min, double max, double step);
+	LinearParameter(const std::string Paraname, double val, double min, double max, double step);
 	//copy-constructor
 	LinearParameter(const LinearParameter *parameter);
 	virtual ~LinearParameter(void) {}
@@ -173,9 +171,9 @@ public:
 	void SetParaSetModified(bool val) {bModified=val;}
 
 	//! Get the string of all parameter separated by the given spacer
-	const string GetParameterString(const string spacer=",");
+	const std::string GetParameterString(const std::string spacer=",");
 	//! Get a string of all parameter and values or only the values separated by the given spacer
-	const string GetParameterValueString(const string spacer=",", bool ValuesOnly=false);
+	const std::string GetParameterValueString(const std::string spacer=",", bool ValuesOnly=false);
 
 	//! Get the number of parameters in this Parameter-Set
 	size_t GetQtyParameter() {return vParameter.size();}
@@ -201,13 +199,13 @@ public:
 	bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	vector<Parameter* > vParameter;
+	std::vector<Parameter* > vParameter;
 	bool bModified;
 	int SweepPara;
 };
 
-void PSErrorCode2Msg(int code, string* msg);
-string PSErrorCode2Msg(int code);
+void PSErrorCode2Msg(int code, std::string* msg);
+std::string PSErrorCode2Msg(int code);
 
 class CSXCAD_EXPORT ParameterScalar
 {
@@ -218,21 +216,21 @@ public:
     };
 	ParameterScalar();
 	ParameterScalar(ParameterSet* ParaSet, double value);
-	ParameterScalar(ParameterSet* ParaSet, const string value);
+	ParameterScalar(ParameterSet* ParaSet, const std::string value);
 	ParameterScalar(ParameterScalar* ps);
 	~ParameterScalar();
 
 	void SetParameterSet(ParameterSet *paraSet);
 
-	int SetValue(const string value, bool Eval=true); ///returns eval-error-code
+	int SetValue(const std::string value, bool Eval=true); ///returns eval-error-code
 	void SetValue(double value);
 
 	bool GetMode() const {return ParameterMode;}
-	const string GetString() const {return sValue;}
+	const std::string GetString() const {return sValue;}
 
 	double GetValue() const;
 
-	const string GetValueString() const;
+	const std::string GetValueString() const;
 
 	//returns error-code
 	int Evaluate();
@@ -246,7 +244,7 @@ protected:
 	ParameterSet* clParaSet;
 	bool bModified;
 	bool ParameterMode;
-	string sValue;
+	std::string sValue;
 	double dValue;
 };
 

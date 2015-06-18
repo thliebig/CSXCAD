@@ -79,7 +79,7 @@ public:
 	CSPrimitives* GetPrimitiveByID(unsigned int ID);
 
 	//! Get all primitives with the given name
-	vector<CSProperties*> GetPropertiesByName(string name);
+	std::vector<CSProperties*> GetPropertiesByName(std::string name);
 
 	//! Get a property by its internal index number. \sa GetQtyProperties
 	CSProperties* GetProperty(size_t index);
@@ -112,13 +112,13 @@ public:
 	 */
 	CSProperties** GetPropertiesByCoordsPriority(const double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
-	CSProperties* GetPropertyByCoordPriority(const double* coord, vector<CSPrimitives*> primList, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
+	CSProperties* GetPropertyByCoordPriority(const double* coord, std::vector<CSPrimitives*> primList, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
 
 	//! Check and warn for unused primitives in properties of given type
-	void WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
+	void WarnUnusedPrimitves(std::ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Show status of all properties with given type
-	void ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
+	void ShowPropertyStatus(std::ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Find the property owning the given primitive or return NULL if primitive is not to be found
 	CSProperties* HasPrimitive(CSPrimitives* prim);
@@ -130,14 +130,14 @@ public:
 	size_t GetQtyPrimitives(CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get a primitives array
-	vector<CSPrimitives*>  GetAllPrimitives(bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
+	std::vector<CSPrimitives*>  GetAllPrimitives(bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get a primitives array of a certian type
-	vector<CSPrimitives*>  GetPrimitivesByType(CSPrimitives::PrimitiveType type);
+	std::vector<CSPrimitives*>  GetPrimitivesByType(CSPrimitives::PrimitiveType type);
 
 
 	//! Get a primitives array inside a bounding box and with a certian property type (default is any)
-	vector<CSPrimitives*>  GetPrimitivesByBoundBox(const double* boundbox, bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
+	std::vector<CSPrimitives*>  GetPrimitivesByBoundBox(const double* boundbox, bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Get the internal index of the property.
 	int GetIndex(CSProperties* prop);
@@ -149,7 +149,7 @@ public:
 	size_t GetQtyPropertyType(CSProperties::PropertyType type);
 
 	//! Get a properties array of a certian type
-	vector<CSProperties*>  GetPropertyByType(CSProperties::PropertyType type);
+	std::vector<CSProperties*>  GetPropertyByType(CSProperties::PropertyType type);
 
 	//! Get the edges of all includes primitives and add to the desired grid direction. \param nu Direction of grid (x=0,y=1,z=2).
 	bool InsertEdges2Grid(int nu);
@@ -192,13 +192,13 @@ public:
 	const char* ReadFromXML(TiXmlNode* rootNode);
 
 	//! Get a Info-Line containing lib-name, -version etc. 
-	static string GetInfoLine(bool shortInfo=false);
+	static std::string GetInfoLine(bool shortInfo=false);
 
 protected:
 	ParameterSet* clParaSet;
 	CSRectGrid clGrid;
 	CSBackgroundMaterial m_BG_Mat;
-	vector<CSProperties*> vProperties;
+	std::vector<CSProperties*> vProperties;
 	bool ReadPropertyPrimitives(TiXmlElement* PropNode, CSProperties* prop);
 
 	void UpdateIDs();
@@ -210,7 +210,7 @@ protected:
 	double ObjArea[6];
 	double dDrawingTol;
 
-	string ErrString;
+	std::string ErrString;
 	unsigned int UniqueIDCounter;
 };
 

@@ -57,7 +57,7 @@ void CSPropDumpBox::SetSubSampling(const char* vals)
 {
 	if (vals==NULL) return;
 	m_SubSampling=true;
-	vector<int> values = SplitString2Int(string(vals),',');
+	std::vector<int> values = SplitString2Int(std::string(vals),',');
 	for (int ny=0;ny<3 && ny<(int)values.size();++ny)
 		SetSubSampling(ny,values.at(ny));
 }
@@ -85,7 +85,7 @@ void CSPropDumpBox::SetOptResolution(const char* vals)
 {
 	if (vals==NULL) return;
 	m_OptResolution=true;
-	vector<double> values = SplitString2Double(string(vals),',');
+	std::vector<double> values = SplitString2Double(std::string(vals),',');
 	if (values.size()==1) //allow one resolution for all directions
 	{
 		for (int ny=0;ny<3;++ny)
@@ -115,13 +115,13 @@ bool CSPropDumpBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	if (m_SubSampling)
 	{
-		stringstream ss;
+		std::stringstream ss;
 		ss << GetSubSampling(0) << "," << GetSubSampling(1) << "," << GetSubSampling(2) ;
 		prop->SetAttribute("SubSampling",ss.str().c_str());
 	}
 	if (m_OptResolution)
 	{
-		stringstream ss;
+		std::stringstream ss;
 		ss << GetOptResolution(0) << "," << GetOptResolution(1) << "," << GetOptResolution(2) ;
 		prop->SetAttribute("OptResolution",ss.str().c_str());
 	}
@@ -147,12 +147,12 @@ bool CSPropDumpBox::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPropDumpBox::ShowPropertyStatus(ostream& stream)
+void CSPropDumpBox::ShowPropertyStatus(std::ostream& stream)
 {
 	//skip output of prarent CSPropProbeBox
 	CSProperties::ShowPropertyStatus(stream);
-	stream << " --- Dump Properties --- " << endl;
-	stream << "  DumpType: " << DumpType << "  DumpMode: " << DumpMode << " FileType: " << FileType << " MultiGridLevel: " << MultiGridLevel << endl;
+	stream << " --- Dump Properties --- " << std::endl;
+	stream << "  DumpType: " << DumpType << "  DumpMode: " << DumpMode << " FileType: " << FileType << " MultiGridLevel: " << MultiGridLevel << std::endl;
 	if (m_FD_Samples.size()>0)
-		stream << "  Dump Frequencies: " << CombineVector2String(m_FD_Samples,',') << endl;
+		stream << "  Dump Frequencies: " << CombineVector2String(m_FD_Samples,',') << std::endl;
 }

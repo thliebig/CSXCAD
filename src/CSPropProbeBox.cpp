@@ -27,15 +27,15 @@ CSPropProbeBox::~CSPropProbeBox() {}
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
-void CSPropProbeBox::AddFDSample(vector<double> *freqs)
+void CSPropProbeBox::AddFDSample(std::vector<double> *freqs)
 {
 	for (size_t n=0;n<freqs->size();++n)
 		AddFDSample(freqs->at(n));
 }
 
-void CSPropProbeBox::AddFDSample(string freqs)
+void CSPropProbeBox::AddFDSample(std::string freqs)
 {
-	vector<double> v_freqs = SplitString2Double(freqs, ',');
+	std::vector<double> v_freqs = SplitString2Double(freqs, ',');
 	AddFDSample(&v_freqs);
 }
 
@@ -55,7 +55,7 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	if (m_FD_Samples.size())
 	{
-		string fdSamples = CombineVector2String(m_FD_Samples,',');
+		std::string fdSamples = CombineVector2String(m_FD_Samples,',');
 
 		TiXmlElement FDS_Elem("FD_Samples");
 		TiXmlText FDS_Text(fdSamples.c_str());

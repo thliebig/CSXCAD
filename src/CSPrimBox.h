@@ -35,7 +35,7 @@ public:
 
 	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
 	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
-	void SetCoord(int index, string val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
+	void SetCoord(int index, std::string val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
 
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/2); else return 0;}
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/2); else return NULL;}
@@ -46,11 +46,11 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPrimitiveStatus(ostream& stream);
+	virtual void ShowPrimitiveStatus(std::ostream& stream);
 
 protected:
 	//start and stop coords defining the box

@@ -32,7 +32,7 @@ public:
 	virtual ~CSPropResBox();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("ResBox");}
+	virtual const std::string GetTypeXMLString() const {return std::string("ResBox");}
 
 	void SetResFactor(unsigned int val);
 	unsigned int GetResFactor();

@@ -33,7 +33,7 @@ public:
 	virtual ~CSPropProbeBox();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("ProbeBox");}
+	virtual const std::string GetTypeXMLString() const {return std::string("ProbeBox");}
 
 	//! Define a number for this probe property \sa GetNumber
 	void SetNumber(unsigned int val);
@@ -66,11 +66,11 @@ public:
 	double GetStopTime() {return stopTime;}
 
 	size_t CountFDSamples() {return m_FD_Samples.size();}
-	vector<double> *GetFDSamples()	{return &m_FD_Samples;}
+	std::vector<double> *GetFDSamples()	{return &m_FD_Samples;}
 	void ClearFDSamples() {m_FD_Samples.clear();}
 	void AddFDSample(double freq) {m_FD_Samples.push_back(freq);}
-	void AddFDSample(vector<double> *freqs);
-	void AddFDSample(string freqs);
+	void AddFDSample(std::vector<double> *freqs);
+	void AddFDSample(std::string freqs);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
@@ -80,7 +80,7 @@ protected:
 	int m_NormDir;
 	double m_weight;
 	int ProbeType;
-	vector<double> m_FD_Samples;
+	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
 };
 

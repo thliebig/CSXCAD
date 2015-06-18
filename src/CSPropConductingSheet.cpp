@@ -35,15 +35,15 @@ void CSPropConductingSheet::Init()
 }
 
 
-bool CSPropConductingSheet::Update(string *ErrStr)
+bool CSPropConductingSheet::Update(std::string *ErrStr)
 {
 	int EC=Conductivity.Evaluate();
 	bool bOK=true;
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in ConductingSheet-Property Conductivity-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in ConductingSheet-Property Conductivity-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -52,8 +52,8 @@ bool CSPropConductingSheet::Update(string *ErrStr)
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in ConductingSheet-Property Thickness-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in ConductingSheet-Property Thickness-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -81,17 +81,17 @@ bool CSPropConductingSheet::ReadFromXML(TiXmlNode &root)
 	if (prop==NULL) return false;
 
 	if (ReadTerm(Conductivity,*prop,"Conductivity")==false)
-		cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Conductivity. Set to 0." << endl;
+		std::cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Conductivity. Set to 0." << std::endl;
 	if (ReadTerm(Thickness,*prop,"Thickness")==false)
-		cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Thickness. Set to 0." << endl;
+		std::cerr << "CSPropConductingSheet::ReadFromXML: Warning: Failed to read Thickness. Set to 0." << std::endl;
 
 	return true;
 }
 
-void CSPropConductingSheet::ShowPropertyStatus(ostream& stream)
+void CSPropConductingSheet::ShowPropertyStatus(std::ostream& stream)
 {
 	CSPropMetal::ShowPropertyStatus(stream);
-	stream << " --- Conducting Sheet Properties --- " << endl;
-	stream << "  Conductivity: " << Conductivity.GetValueString() << endl;
-	stream << "  Thickness: "   << Thickness.GetValueString() << endl;
+	stream << " --- Conducting Sheet Properties --- " << std::endl;
+	stream << "  Conductivity: " << Conductivity.GetValueString() << std::endl;
+	stream << "  Thickness: "   << Thickness.GetValueString() << std::endl;
 }

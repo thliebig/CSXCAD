@@ -58,7 +58,7 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 	}
 }
 
-bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, double val, const char delimiter)
+bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, std::string attr, double val, const char delimiter)
 {
 	return ReadVectorTerm(PS, elem, attr.c_str(), val, delimiter);
 }
@@ -72,7 +72,7 @@ bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr,
 	const char* values = elem.Attribute(attr);
 	if (values==NULL)
 		return false;
-	std::vector<string> val_list = SplitString2Vector(values, delimiter);
+	std::vector<std::string> val_list = SplitString2Vector(values, delimiter);
 	if (val_list.size()>3)
 		return false;
 
@@ -80,7 +80,7 @@ bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr,
 		PS[n].SetValue(val);
 	for (int n=0;n<(int)val_list.size();++n)
 	{
-		string sHelp=val_list.at(n);
+		std::string sHelp=val_list.at(n);
 		bool ok;
 		double val = String2Double(sHelp, ok);
 		if (ok)
@@ -91,22 +91,22 @@ bool ReadVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr,
 	return true;
 }
 
-void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, string attr, bool mode, bool scientific, const char delimiter)
+void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, std::string attr, bool mode, bool scientific, const char delimiter)
 {
 	WriteVectorTerm(PS, elem, attr.c_str(), mode, scientific, delimiter);
 }
 
 void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr, bool mode, bool sci, const char delimiter)
 {
-	stringstream ss;
+	std::stringstream ss;
 	if (sci)
-		ss << scientific;
+		ss << std::scientific;
 	for (int i=0;i<3;++i)
 	{
 		if (PS[i].GetMode() && mode)
 			ss << PS[i].GetString();
 		else if (PS[i].GetValue()==NAN)
-			ss << "NAN" << endl;
+			ss << "NAN" << std::endl;
 		else
 			ss << PS[i].GetValue();
 		if (i<2)
@@ -124,7 +124,7 @@ Parameter::Parameter()
 //	Set=NULL;
 }
 
-Parameter::Parameter(const string Paraname, double val)
+Parameter::Parameter(const std::string Paraname, double val)
 {
 	sName=Paraname;
 	SetValue(val);
@@ -176,8 +176,8 @@ bool Parameter::ReadFromXML(TiXmlNode &root)
 	SetValue(val);
 
 	const char* att=elem->Attribute("name");
-	if (att==NULL) sName=string();
-	else sName=string(att);
+	if (att==NULL) sName=std::string();
+	else sName=std::string(att);
 
 	return true;
 }
@@ -193,7 +193,7 @@ LinearParameter::LinearParameter() : Parameter()
 	dMin=dMax=dStep=0;
 }
 
-LinearParameter::LinearParameter(const string Paraname, double val, double min, double max, double step) : Parameter(Paraname,val)
+LinearParameter::LinearParameter(const std::string Paraname, double val, double min, double max, double step) : Parameter(Paraname,val)
 {
 	//sName=string(Paraname);
 	if (max<min) max=min;
@@ -299,7 +299,7 @@ size_t ParameterSet::LinkParameter(Parameter* newPara)
 size_t ParameterSet::DeleteParameter(size_t index)
 {
 	if (index>=vParameter.size()) return vParameter.size();
-	vector<Parameter*>::iterator pIter=vParameter.begin();
+	std::vector<Parameter*>::iterator pIter=vParameter.begin();
 	vParameter.erase(pIter+index);
 
 	return vParameter.size();
@@ -307,7 +307,7 @@ size_t ParameterSet::DeleteParameter(size_t index)
 
 size_t ParameterSet::DeleteParameter(Parameter* para)
 {
-	vector<Parameter*>::iterator pIter=vParameter.begin();
+	std::vector<Parameter*>::iterator pIter=vParameter.begin();
 	while (pIter!=vParameter.end())
 	{
 		if (*pIter==para)
@@ -443,9 +443,9 @@ bool ParameterSet::NextSweepPos(int SweepMode)
 }
 
 
-const string ParameterSet::GetParameterString(const string spacer)
+const std::string ParameterSet::GetParameterString(const std::string spacer)
 {
-	string ParameterString;
+	std::string ParameterString;
 	for (size_t i=0; i<vParameter.size();++i)
 	{
 		if (i>0) ParameterString+=spacer;
@@ -454,9 +454,9 @@ const string ParameterSet::GetParameterString(const string spacer)
 	return ParameterString;
 }
 
-const string ParameterSet::GetParameterValueString(const string spacer, bool ValuesOnly)
+const std::string ParameterSet::GetParameterValueString(const std::string spacer, bool ValuesOnly)
 {
-	string ParameterValueString;
+	std::string ParameterValueString;
 	for (size_t i=0; i<vParameter.size();++i)
 	{
 		if (i>0) ParameterValueString+=spacer;
@@ -465,7 +465,7 @@ const string ParameterSet::GetParameterValueString(const string spacer, bool Val
 				ParameterValueString+=vParameter.at(i)->GetName();
 				ParameterValueString+="=";
 			}
-		ostringstream os;
+		std::ostringstream os;
 		os << vParameter.at(i)->GetValue();
 		ParameterValueString+=os.str();
 	}
@@ -527,7 +527,7 @@ ParameterScalar::ParameterScalar()
 	dValue=0;
 }
 
-ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const string value)
+ParameterScalar::ParameterScalar(ParameterSet* ParaSet, const std::string value)
 {
 	SetParameterSet(ParaSet);
 	SetValue(value);
@@ -554,7 +554,7 @@ void ParameterScalar::SetParameterSet(ParameterSet *paraSet)
 	clParaSet=paraSet;
 }
 
-int ParameterScalar::SetValue(const string value, bool Eval)
+int ParameterScalar::SetValue(const std::string value, bool Eval)
 {
 	if (value.empty()) return -1;
 
@@ -585,11 +585,11 @@ double ParameterScalar::GetValue() const
 	return dValue;
 }
 
-const string ParameterScalar::GetValueString() const
+const std::string ParameterScalar::GetValueString() const
 {
 	if (ParameterMode)
 		return sValue;
-	stringstream numString;
+	std::stringstream numString;
 	numString << dValue;
 	return numString.str();
 }
@@ -645,18 +645,18 @@ void ParameterScalar::Copy(ParameterScalar* ps)
 	SetParameterSet(ps->clParaSet);
 	bModified=ps->bModified;
 	ParameterMode=ps->ParameterMode;
-	sValue=string(ps->sValue);
+	sValue=std::string(ps->sValue);
 	dValue=ps->dValue;
 }
 
-string PSErrorCode2Msg(int code)
+std::string PSErrorCode2Msg(int code)
 {
-	string msg;
+	std::string msg;
 	PSErrorCode2Msg(code,&msg);
 	return msg;
 }
 
-void PSErrorCode2Msg(int code, string *msg)
+void PSErrorCode2Msg(int code, std::string *msg)
 {
 	switch (code)
 	{

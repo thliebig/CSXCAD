@@ -35,7 +35,7 @@ public:
 
 	virtual size_t AddPoint(double coords[]);
 	virtual void SetCoord(size_t point_index, int nu, double val);
-	virtual void SetCoord(size_t point_index, int nu, string val);
+	virtual void SetCoord(size_t point_index, int nu, std::string val);
 
 	virtual size_t GetNumberOfPoints() {return points.size();}
 	//! Get the point coordinates for the given index in the specified coordinate system
@@ -44,10 +44,10 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	vector<ParameterCoord*> points;
+	std::vector<ParameterCoord*> points;
 };

@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 
 #include "ParameterObjects.h"
 #include "ParameterCoord.h"
@@ -93,7 +92,7 @@ public:
 	//! Get the type of this primitive. \sa PrimitiveType
 	int GetType() {return Type;}
 	
-	string GetTypeName() {return PrimTypeName;}
+	std::string GetTypeName() {return PrimTypeName;}
 
 	//! Create a copy of ths primitive with different property.
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimitives(this,prop);}
@@ -124,7 +123,7 @@ public:
 	int GetPriority() {return iPriority;}
 
 	//! Update this primitive with respect to the parameters set.
-	virtual bool Update(string *ErrStr=NULL) {UNUSED(ErrStr);return true;}
+	virtual bool Update(std::string *ErrStr=NULL) {UNUSED(ErrStr);return true;}
 	//! Write this primitive to a XML-node.
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	//! Read this primitive from a XML-node.
@@ -179,7 +178,7 @@ public:
 	CSTransform* GetTransform() const {return m_Transform;}
 
 	//! Show status of this primitve
-	virtual void ShowPrimitiveStatus(ostream& stream);
+	virtual void ShowPrimitiveStatus(std::ostream& stream);
 
 protected:
 	CSPrimitives(ParameterSet* paraSet, CSProperties* prop);
@@ -197,7 +196,7 @@ protected:
 	ParameterSet* clParaSet;
 	CSProperties* clProperty;
 	CSTransform* m_Transform;
-	string PrimTypeName;
+	std::string PrimTypeName;
 	bool m_Primtive_Used;
 
 	//internal bounding box, updated by Update(), can be used to speedup IsInside

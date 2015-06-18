@@ -23,8 +23,6 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-
 CSBackgroundMaterial::CSBackgroundMaterial()
 {
 	// init material
@@ -43,7 +41,7 @@ void CSBackgroundMaterial::SetEpsilon(double val)
 {
 	if (val<1)
 	{
-		cerr << __func__ << ": Error, a relative electric permittivity smaller 1 is not allowed! Skipping. " << endl;
+		std::cerr << __func__ << ": Error, a relative electric permittivity smaller 1 is not allowed! Skipping. " << std::endl;
 		return;
 	}
 	m_epsR=val;
@@ -53,7 +51,7 @@ void CSBackgroundMaterial::SetMue(double val)
 {
 	if (val<1)
 	{
-		cerr << __func__ << ": Error, a relative magnetic permeability smaller 1 is not allowed! Skipping. " << endl;
+		std::cerr << __func__ << ": Error, a relative magnetic permeability smaller 1 is not allowed! Skipping. " << std::endl;
 		return;
 	}
 	m_mueR=val;
@@ -63,7 +61,7 @@ void CSBackgroundMaterial::SetKappa(double val)
 {
 	if (val<0)
 	{
-		cerr << __func__ << ": Error, a negative electric conductivity is not allowed! Skipping. " << endl;
+		std::cerr << __func__ << ": Error, a negative electric conductivity is not allowed! Skipping. " << std::endl;
 		return;
 	}
 	m_kappa=val;
@@ -73,7 +71,7 @@ void CSBackgroundMaterial::SetSigma(double val)
 {
 	if (val<0)
 	{
-		cerr << __func__ << ": Error, a negative (artificial) magnetic conductivity is not allowed! Skipping. " << endl;
+		std::cerr << __func__ << ": Error, a negative (artificial) magnetic conductivity is not allowed! Skipping. " << std::endl;
 		return;
 	}
 	m_sigma=val;

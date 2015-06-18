@@ -45,14 +45,14 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 			B.add_facet(first, beyond);
 			if (B.error())
 			{
-				cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << endl;
+				std::cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << std::endl;
 				break;
 			}
 			m_polyhedron->m_Faces.at(f).valid=true;
 		}
 		else
 		{
-			cerr << "Polyhedron_Builder::operator(): Face " << f << ": Trying reverse order... ";
+			std::cerr << "Polyhedron_Builder::operator(): Face " << f << ": Trying reverse order... ";
 			int help[m_polyhedron->m_Faces.at(f).numVertex];
 			for (unsigned int n=0;n<m_polyhedron->m_Faces.at(f).numVertex;++n)
 				help[n]=m_polyhedron->m_Faces.at(f).vertices[m_polyhedron->m_Faces.at(f).numVertex-1-n];
@@ -63,15 +63,15 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 				B.add_facet(first, beyond);
 				if (B.error())
 				{
-					cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << endl;
+					std::cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << std::endl;
 					break;
 				}
-				cerr << "success" << endl;
+				std::cerr << "success" << std::endl;
 				m_polyhedron->m_Faces.at(f).valid=true;
 			}
 			else
 			{
-				cerr << "failed" << endl;
+				std::cerr << "failed" << std::endl;
 				++m_polyhedron->m_InvalidFaces;
 			}
 		}
@@ -160,12 +160,12 @@ void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 	m_Faces.push_back(f);
 }
 
-void CSPrimPolyhedron::AddFace(vector<int> vertices)
+void CSPrimPolyhedron::AddFace(std::vector<int> vertices)
 {
 	face f;
 	f.numVertex=vertices.size();
 	if (f.numVertex>3)
-		cerr << __func__ << ": Warning, faces other than triangles are currently not supported for discretization, expect false results!!!" << endl;
+		std::cerr << __func__ << ": Warning, faces other than triangles are currently not supported for discretization, expect false results!!!" << std::endl;
 	f.vertices=new int[f.numVertex];
 	for (unsigned int n=0;n<f.numVertex;++n)
 		f.vertices[n]=vertices.at(n);
@@ -187,7 +187,7 @@ bool CSPrimPolyhedron::BuildTree()
 		if (m_InvalidFaces>0)
 		{
 			m_Dimension = 3;
-			cerr << "CSPrimPolyhedron::BuildTree: Warning, found polyhedron has invalud faces and is not a closed surface, setting to 3D solid anyway!" << endl;
+			std::cerr << "CSPrimPolyhedron::BuildTree: Warning, found polyhedron has invalud faces and is not a closed surface, setting to 3D solid anyway!" << std::endl;
 		}
 	}
 
@@ -227,12 +227,12 @@ bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation
 
 	for (size_t n=0;n<m_Vertices.size();++n)
 	{
-		dBoundBox[0]=min(dBoundBox[0],(double)m_Vertices.at(n).coord[0]);
-		dBoundBox[2]=min(dBoundBox[2],(double)m_Vertices.at(n).coord[1]);
-		dBoundBox[4]=min(dBoundBox[4],(double)m_Vertices.at(n).coord[2]);
-		dBoundBox[1]=max(dBoundBox[1],(double)m_Vertices.at(n).coord[0]);
-		dBoundBox[3]=max(dBoundBox[3],(double)m_Vertices.at(n).coord[1]);
-		dBoundBox[5]=max(dBoundBox[5],(double)m_Vertices.at(n).coord[2]);
+		dBoundBox[0]=std::min(dBoundBox[0],(double)m_Vertices.at(n).coord[0]);
+		dBoundBox[2]=std::min(dBoundBox[2],(double)m_Vertices.at(n).coord[1]);
+		dBoundBox[4]=std::min(dBoundBox[4],(double)m_Vertices.at(n).coord[2]);
+		dBoundBox[1]=std::max(dBoundBox[1],(double)m_Vertices.at(n).coord[0]);
+		dBoundBox[3]=std::max(dBoundBox[3],(double)m_Vertices.at(n).coord[1]);
+		dBoundBox[5]=std::max(dBoundBox[5],(double)m_Vertices.at(n).coord[2]);
 	}
 	return true;
 }
@@ -262,7 +262,7 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 }
 
 
-bool CSPrimPolyhedron::Update(string *ErrStr)
+bool CSPrimPolyhedron::Update(std::string *ErrStr)
 {
 	//update local bounding box
 	m_BoundBoxValid = GetBoundBox(m_BoundBox);
@@ -298,7 +298,7 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 	TiXmlText* Text=NULL;
 
 	// read vertices
-	vector<double> coords;
+	std::vector<double> coords;
 	TiXmlElement* vertex = root.FirstChildElement("Vertex");
 	while (vertex)
 	{
@@ -308,7 +308,7 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 		{
 			Text = FN->ToText();
 			if (Text!=NULL)
-				coords = SplitString2Double(string(Text->Value()), ',');
+				coords = SplitString2Double(std::string(Text->Value()), ',');
 			else
 				return false;
 			if (coords.size()!=3)
@@ -321,7 +321,7 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 	}
 
 	// read faces
-	vector<int> vertices;
+	std::vector<int> vertices;
 	TiXmlElement* face = root.FirstChildElement("Face");
 	while (face)
 	{
@@ -331,7 +331,7 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 		{
 			Text = FN->ToText();
 			if (Text!=NULL)
-				vertices = SplitString2Int(string(Text->Value()), ',');
+				vertices = SplitString2Int(std::string(Text->Value()), ',');
 			else
 				return false;
 			AddFace(vertices);
@@ -344,10 +344,10 @@ bool CSPrimPolyhedron::ReadFromXML(TiXmlNode &root)
 }
 
 
-void CSPrimPolyhedron::ShowPrimitiveStatus(ostream& stream)
+void CSPrimPolyhedron::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimitives::ShowPrimitiveStatus(stream);
-	stream << " Number of Vertices: " << m_Vertices.size() << endl;
-	stream << " Number of Faces: " << m_Faces.size() << endl;
-	stream << " Number of invalid Faces: " << m_InvalidFaces << endl;
+	stream << " Number of Vertices: " << m_Vertices.size() << std::endl;
+	stream << " Number of Faces: " << m_Faces.size() << std::endl;
+	stream << " Number of invalid Faces: " << m_InvalidFaces << std::endl;
 }

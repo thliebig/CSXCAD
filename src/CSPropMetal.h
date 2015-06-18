@@ -32,7 +32,7 @@ public:
 	virtual ~CSPropMetal();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Metal");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Metal");}
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);

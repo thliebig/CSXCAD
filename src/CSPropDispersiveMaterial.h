@@ -33,12 +33,12 @@ public:
 	virtual int GetDispersionOrder() {return m_Order;}
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("DispersiveMaterial");}
+	virtual const std::string GetTypeXMLString() const {return std::string("DispersiveMaterial");}
 
 protected:
 	int m_Order;
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);

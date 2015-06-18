@@ -30,7 +30,7 @@ CSPrimPolygon::CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSPropertie
 	Type=POLYGON;
 	m_NormDir = 0;
 	Elevation.SetParameterSet(paraSet);
-	PrimTypeName = string("Polygon");
+	PrimTypeName = std::string("Polygon");
 }
 
 CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : CSPrimitives(primPolygon,prop)
@@ -38,7 +38,7 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 	Type=POLYGON;
 	m_NormDir = primPolygon->m_NormDir;
 	Elevation.Copy(&primPolygon->Elevation);
-	PrimTypeName = string("Polygon");
+	PrimTypeName = std::string("Polygon");
 }
 
 CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -46,7 +46,7 @@ CSPrimPolygon::CSPrimPolygon(ParameterSet* paraSet, CSProperties* prop) : CSPrim
 	Type=POLYGON;
 	m_NormDir = 0;
 	Elevation.SetParameterSet(paraSet);
-	PrimTypeName = string("Polygon");
+	PrimTypeName = std::string("Polygon");
 }
 
 CSPrimPolygon::~CSPrimPolygon()
@@ -58,7 +58,7 @@ void CSPrimPolygon::SetCoord(int index, double val)
 	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
 }
 
-void CSPrimPolygon::SetCoord(int index, const string val)
+void CSPrimPolygon::SetCoord(int index, const std::string val)
 {
 	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
 }
@@ -68,7 +68,7 @@ void CSPrimPolygon::AddCoord(double val)
 	vCoords.push_back(ParameterScalar(clParaSet,val));
 }
 
-void CSPrimPolygon::AddCoord(const string val)
+void CSPrimPolygon::AddCoord(const std::string val)
 {
 	vCoords.push_back(ParameterScalar(clParaSet,val));
 }
@@ -202,13 +202,13 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 }
 
 
-bool CSPrimPolygon::Update(string *ErrStr)
+bool CSPrimPolygon::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
 	if (! ((m_PrimCoordSystem==CARTESIAN) || (m_PrimCoordSystem==UNDEFINED_CS && m_MeshType==CARTESIAN)))
 	{
-		cerr << "CSPrimPolygon::Update: Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected..." << endl;
+		std::cerr << "CSPrimPolygon::Update: Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected..." << std::endl;
 		ErrStr->append("Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected...\n");
 	}
 	for (size_t i=1;i<vCoords.size();++i)
@@ -218,8 +218,8 @@ bool CSPrimPolygon::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in Polygon (ID: " << uiID << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in Polygon (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
@@ -230,8 +230,8 @@ bool CSPrimPolygon::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in Polygon Elevation (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}

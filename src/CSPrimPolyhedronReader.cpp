@@ -57,7 +57,7 @@ CSPrimPolyhedronReader::~CSPrimPolyhedronReader()
 {
 }
 
-bool CSPrimPolyhedronReader::Update(string *ErrStr)
+bool CSPrimPolyhedronReader::Update(std::string *ErrStr)
 {
 	return CSPrimPolyhedron::Update(ErrStr);
 }
@@ -89,13 +89,13 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 	if (elem==NULL) return false;
 	if (elem->QueryStringAttribute("FileName",&m_filename)!=TIXML_SUCCESS)
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read filename!" << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read filename!" << std::endl;
 		return false;
 	}
-	string type;
+	std::string type;
 	if (elem->QueryStringAttribute("FileType",&type)!=TIXML_SUCCESS)
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read file type!" << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read file type!" << std::endl;
 		return false;
 	}
 	if (type.compare("STL")==0)
@@ -107,14 +107,14 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 
 	if (ReadFile(m_filename)==false)
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFromXML: Failed to read file." << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFromXML: Failed to read file." << std::endl;
 		return false;
 	}
 
 	return BuildTree();
 }
 
-bool CSPrimPolyhedronReader::ReadFile(string filename)
+bool CSPrimPolyhedronReader::ReadFile(std::string filename)
 {
 	vtkPolyData *polydata = NULL;
 	switch (m_filetype)
@@ -139,7 +139,7 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 	case UNKNOWN:
 	default:
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFile: unknown filetype, skipping..." << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFile: unknown filetype, skipping..." << std::endl;
 		return false;
 		break;
 	}
@@ -147,13 +147,13 @@ bool CSPrimPolyhedronReader::ReadFile(string filename)
 	//polydata->Update(); // not availabe for vtk 6.x, now done only on reader?
 	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << std::endl;
 		return false;
 	}
 	vtkCellArray *verts = polydata->GetPolys();
 	if (verts->GetNumberOfCells()==0)
 	{
-		cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << endl;
+		std::cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << std::endl;
 		return false;
 	}
 

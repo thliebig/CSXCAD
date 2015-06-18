@@ -57,16 +57,16 @@ bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const 
 	switch (cs_in)
 	{
 	case CYLINDRICAL:
-		if (p[1]<min(start[1],stop[1]))
-			while (p[1]<min(start[1],stop[1]))
+		if (p[1]<std::min(start[1],stop[1]))
+			while (p[1]<std::min(start[1],stop[1]))
 				p[1]+=2*PI;
-		else if (p[1]>max(start[1],stop[1]))
-			while (p[1]>max(start[1],stop[1]))
+		else if (p[1]>std::max(start[1],stop[1]))
+			while (p[1]>std::max(start[1],stop[1]))
 				p[1]-=2*PI;
 	case CARTESIAN:
 	default:
 		for (int n=0;n<3;++n)
-			if ((p[n]<min(start[n],stop[n])) || (p[n]>max(start[n],stop[n])))
+			if ((p[n]<std::min(start[n],stop[n])) || (p[n]>std::max(start[n],stop[n])))
 				return false;
 		return true;
 		break;
@@ -83,7 +83,7 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	clParaSet=paraSet;
 	m_Transform=NULL;
 	iPriority=0;
-	PrimTypeName = string("Base Type");
+	PrimTypeName = std::string("Base Type");
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
@@ -105,7 +105,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 	clParaSet=prim->clParaSet;
 	m_Transform=CSTransform::New(prim->m_Transform);
 	iPriority=prim->iPriority;
-	PrimTypeName = string("Base Type");
+	PrimTypeName = std::string("Base Type");
 	m_Primtive_Used = false;
 	m_MeshType = prim->m_MeshType;
 	m_PrimCoordSystem = prim->m_PrimCoordSystem;
@@ -123,7 +123,7 @@ CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
 	m_Transform=NULL;
 	uiID=g_PrimUniqueIDCounter++;
 	iPriority=0;
-	PrimTypeName = string("Base Type");
+	PrimTypeName = std::string("Base Type");
 	m_Primtive_Used = false;
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
@@ -199,18 +199,18 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimitives::ShowPrimitiveStatus(ostream& stream)
+void CSPrimitives::ShowPrimitiveStatus(std::ostream& stream)
 {
-	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << endl;
-	stream << "  Primary Coord-System: " << m_PrimCoordSystem << " Mesh Coord-System: " << m_MeshType << " Bound-Box Coord-System: " << m_BoundBox_CoordSys << endl;
-	stream << "  Bounding Box (Valid: " << m_BoundBoxValid << "): P1: (" << m_BoundBox[0] << "," << m_BoundBox[2] << "," << m_BoundBox[4] << ") P2: (" << m_BoundBox[1] << "," << m_BoundBox[3] << "," << m_BoundBox[5] << ")" << endl;
+	stream << "  Primitive #" << GetID() << " Type: \"" << GetTypeName() << "\" Priority: " << GetPriority() << std::endl;
+	stream << "  Primary Coord-System: " << m_PrimCoordSystem << " Mesh Coord-System: " << m_MeshType << " Bound-Box Coord-System: " << m_BoundBox_CoordSys << std::endl;
+	stream << "  Bounding Box (Valid: " << m_BoundBoxValid << "): P1: (" << m_BoundBox[0] << "," << m_BoundBox[2] << "," << m_BoundBox[4] << ") P2: (" << m_BoundBox[1] << "," << m_BoundBox[3] << "," << m_BoundBox[5] << ")" << std::endl;
 	if (m_Transform)
 	{
-		stream << "  Transform: " << endl;
+		stream << "  Transform: " << std::endl;
 		m_Transform->PrintTransformations(stream, "\t* ");
 	}
 	else
-		stream << "  Transform: None" << endl;
+		stream << "  Transform: None" << std::endl;
 }
 
 void CSPrimitives::TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const

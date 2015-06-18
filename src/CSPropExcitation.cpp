@@ -36,7 +36,7 @@ void CSPropExcitation::SetExcitation(double val, int Component)
 	Excitation[Component].SetValue(val);
 }
 
-void CSPropExcitation::SetExcitation(const string val, int Component)
+void CSPropExcitation::SetExcitation(const std::string val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	Excitation[Component].SetValue(val);
@@ -48,7 +48,7 @@ double CSPropExcitation::GetExcitation(int Component)
 	return Excitation[Component].GetValue();
 }
 
-const string CSPropExcitation::GetExcitationString(int Comp)
+const std::string CSPropExcitation::GetExcitationString(int Comp)
 {
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return Excitation[Comp].GetString();
@@ -66,14 +66,14 @@ bool CSPropExcitation::GetActiveDir(int Component)
 	return ActiveDir[Component];
 }
 
-int CSPropExcitation::SetWeightFunction(const string fct, int ny)
+int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 {
 	if ((ny>=0) && (ny<3))
 		return WeightFct[ny].SetValue(fct);
 	return 0;
 }
 
-const string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return string();}
+const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
 
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
@@ -107,7 +107,7 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	int EC = WeightFct[ny].Evaluate();
 	if (EC)
 	{
-		cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << endl;
+		std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
 	}
 
 	return WeightFct[ny].GetValue()*GetExcitation(ny);
@@ -115,11 +115,11 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 
 void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
 
-void CSPropExcitation::SetDelay(const string val) {Delay.SetValue(val);}
+void CSPropExcitation::SetDelay(const std::string val) {Delay.SetValue(val);}
 
 double CSPropExcitation::GetDelay(){return Delay.GetValue();}
 
-const string CSPropExcitation::GetDelayString(){return Delay.GetString();}
+const std::string CSPropExcitation::GetDelayString(){return Delay.GetString();}
 
 void CSPropExcitation::Init()
 {
@@ -145,7 +145,7 @@ void CSPropExcitation::SetPropagationDir(double val, int Component)
 	PropagationDir[Component].SetValue(val);
 }
 
-void CSPropExcitation::SetPropagationDir(const string val, int Component)
+void CSPropExcitation::SetPropagationDir(const std::string val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	PropagationDir[Component].SetValue(val);
@@ -157,14 +157,14 @@ double CSPropExcitation::GetPropagationDir(int Component)
 	return PropagationDir[Component].GetValue();
 }
 
-const string CSPropExcitation::GetPropagationDirString(int Comp)
+const std::string CSPropExcitation::GetPropagationDirString(int Comp)
 {
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return PropagationDir[Comp].GetString();
 }
 
 
-bool CSPropExcitation::Update(string *ErrStr)
+bool CSPropExcitation::Update(std::string *ErrStr)
 {
 	bool bOK=true;
 	int EC=0;
@@ -174,8 +174,8 @@ bool CSPropExcitation::Update(string *ErrStr)
 		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
-			stringstream stream;
-			stream << endl << "Error in Excitation-Property Excitaion-Value (ID: " << uiID << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in Excitation-Property Excitaion-Value (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
@@ -183,8 +183,8 @@ bool CSPropExcitation::Update(string *ErrStr)
 		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
-			stringstream stream;
-			stream << endl << "Error in Excitation-Property PropagationDir-Value (ID: " << uiID << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in Excitation-Property PropagationDir-Value (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}
@@ -193,8 +193,8 @@ bool CSPropExcitation::Update(string *ErrStr)
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in Excitation-Property Frequency-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in Excitation-Property Frequency-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -202,8 +202,8 @@ bool CSPropExcitation::Update(string *ErrStr)
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in Excitation-Property Delay-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in Excitation-Property Delay-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -265,14 +265,14 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPropExcitation::ShowPropertyStatus(ostream& stream)
+void CSPropExcitation::ShowPropertyStatus(std::ostream& stream)
 {
 	CSProperties::ShowPropertyStatus(stream);
-	stream << " --- Excitation Properties --- " << endl;
-	stream << "  Type: " << iExcitType << endl;
-	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << endl;
-	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << endl;
-	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << endl;
-	stream << "  Propagation Dir: " << PropagationDir[0].GetValueString() << ", "  << PropagationDir[1].GetValueString() << ", "  << PropagationDir[2].GetValueString()  << endl;
-	stream << "  Delay\t\t: " << Delay.GetValueString() << endl;
+	stream << " --- Excitation Properties --- " << std::endl;
+	stream << "  Type: " << iExcitType << std::endl;
+	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << std::endl;
+	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << std::endl;
+	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << std::endl;
+	stream << "  Propagation Dir: " << PropagationDir[0].GetValueString() << ", "  << PropagationDir[1].GetValueString() << ", "  << PropagationDir[2].GetValueString()  << std::endl;
+	stream << "  Delay\t\t: " << Delay.GetValueString() << std::endl;
 }

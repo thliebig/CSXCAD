@@ -44,11 +44,11 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPrimitiveStatus(ostream& stream);
+	virtual void ShowPrimitiveStatus(std::ostream& stream);
 
 protected:
 	ParameterScalar psShellWidth;

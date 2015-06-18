@@ -28,7 +28,7 @@
 CSPrimMultiBox::CSPrimMultiBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=MULTIBOX;
-	PrimTypeName = string("Multi Box");
+	PrimTypeName = std::string("Multi Box");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : CSPrimitives(multiBox, prop)
@@ -36,13 +36,13 @@ CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : C
 	Type=MULTIBOX;
 	for (size_t i=0;i<multiBox->vCoords.size();++i)
 		vCoords.push_back(new ParameterScalar(multiBox->vCoords.at(i)));
-	PrimTypeName = string("Multi Box");
+	PrimTypeName = std::string("Multi Box");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=MULTIBOX;
-	PrimTypeName = string("Multi Box");
+	PrimTypeName = std::string("Multi Box");
 }
 
 CSPrimMultiBox::~CSPrimMultiBox()
@@ -86,8 +86,8 @@ void CSPrimMultiBox::AddBox(int initBox)
 void CSPrimMultiBox::DeleteBox(size_t box)
 {
 	if ((box+1)*6>vCoords.size()) return;
-	vector<ParameterScalar*>::iterator start=vCoords.begin()+(box*6);
-	vector<ParameterScalar*>::iterator end=vCoords.begin()+(box*6+6);
+	std::vector<ParameterScalar*>::iterator start=vCoords.begin()+(box*6);
+	std::vector<ParameterScalar*>::iterator end=vCoords.begin()+(box*6+6);
 
 	vCoords.erase(start,end);
 }
@@ -204,7 +204,7 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 	return false;
 }
 
-bool CSPrimMultiBox::Update(string *ErrStr)
+bool CSPrimMultiBox::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
@@ -215,8 +215,8 @@ bool CSPrimMultiBox::Update(string *ErrStr)
 		if ((EC!=0)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			stringstream stream;
-			stream << endl << "Error in MultiBox (ID: " << uiID << "): ";
+			std::stringstream stream;
+			stream << std::endl << "Error in MultiBox (ID: " << uiID << "): ";
 			ErrStr->append(stream.str());
 			PSErrorCode2Msg(EC,ErrStr);
 		}

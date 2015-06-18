@@ -32,7 +32,7 @@ public:
 	virtual ~CSPropExcitation();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Excitation");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Excitation");}
 
 	//! Set the number for this excitation
 	void SetNumber(unsigned int val);
@@ -52,55 +52,55 @@ public:
 	//! Set the excitation frequency
 	void SetFrequency(double val) {m_Frequency.SetValue(val);}
 	//! Set the excitation frequency
-	void SetFrequency(const string val) {m_Frequency.SetValue(val);}
+	void SetFrequency(const std::string val) {m_Frequency.SetValue(val);}
 	//! Get the excitation frequency
 	double GetFrequency()  {return m_Frequency.GetValue();}
 	//! Get the excitation frequency as a string
-	const string GetFrequencyString()  {return m_Frequency.GetValueString();}
+	const std::string GetFrequencyString()  {return m_Frequency.GetValueString();}
 
 	//! Set the excitation amplitude for a given component
 	void SetExcitation(double val, int Component=0);
 	//! Set the excitation amplitude for a given component
-	void SetExcitation(const string val, int Component=0);
+	void SetExcitation(const std::string val, int Component=0);
 	//! Get the excitation amplitude for a given component
 	double GetExcitation(int Component=0);
 	//! Get the excitation amplitude as a string for a given component
-	const string GetExcitationString(int Comp=0);
+	const std::string GetExcitationString(int Comp=0);
 
 	//! Set a weighting factor for the given component. This will override the weighting function!
 	void SetWeight(double val, int ny);
 	//! Set a weighting function for the given excitation component
-	int SetWeightFunction(const string fct, int ny);
+	int SetWeightFunction(const std::string fct, int ny);
 	//! Get the weighting function for the given excitation component
-	const string GetWeightFunction(int ny);
+	const std::string GetWeightFunction(int ny);
 
 	double GetWeightedExcitation(int ny, const double* coords);
 
 	//! Set the propagation direction for a given component
 	void SetPropagationDir(double val, int Component=0);
 	//! Set the propagation direction for a given component
-	void SetPropagationDir(const string val, int Component=0);
+	void SetPropagationDir(const std::string val, int Component=0);
 	//! Get the propagation direction for a given component
 	double GetPropagationDir(int Component=0);
 	//! Get the propagation direction as a string for a given component
-	const string GetPropagationDirString(int Comp=0);
+	const std::string GetPropagationDirString(int Comp=0);
 
 	//! Set the excitation delay
 	void SetDelay(double val);
 	//! Set the excitation delay
-	void SetDelay(const string val);
+	void SetDelay(const std::string val);
 	//! Get the excitation delay
 	double GetDelay();
 	//! Get the excitation delay as a string
-	const string GetDelayString();
+	const std::string GetDelayString();
 
 	virtual void Init();
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	unsigned int uiNumber;

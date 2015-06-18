@@ -32,14 +32,14 @@ public:
 	virtual ~CSPropUnknown();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Unknown");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Unknown");}
 
-	void SetProperty(const string val);
-	const string GetProperty();
+	void SetProperty(const std::string val);
+	const std::string GetProperty();
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	string sUnknownProperty;
+	std::string sUnknownProperty;
 };

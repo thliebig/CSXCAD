@@ -35,10 +35,10 @@ public:
 	virtual CSPrimPolygon* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolygon(this,prop);}
 
 	void SetCoord(int index, double val);
-	void SetCoord(int index, const string val);
+	void SetCoord(int index, const std::string val);
 
 	void AddCoord(double val);
-	void AddCoord(const string val);
+	void AddCoord(const std::string val);
 
 	void RemoveCoords(int index);
 	void ClearCoords() {vCoords.clear();}
@@ -62,13 +62,13 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
 	///Vector describing the polygon, x1,y1,x2,y2 ... xn,yn
-	vector<ParameterScalar> vCoords;
+	std::vector<ParameterScalar> vCoords;
 	///The polygon plane normal direction
 	int m_NormDir;
 	///The polygon plane elevation in direction of the normal vector

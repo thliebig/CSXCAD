@@ -76,7 +76,7 @@ void ContinuousStructure::AddProperty(CSProperties* prop)
 
 bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* newProp)
 {
-	vector<CSProperties*>::iterator iter;
+	std::vector<CSProperties*>::iterator iter;
 	for (iter=vProperties.begin();iter<vProperties.end();++iter)
 	{
 		if (*iter==oldProp)
@@ -100,7 +100,7 @@ bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* n
 void ContinuousStructure::DeleteProperty(size_t index)
 {
 	if (index>=vProperties.size()) return;
-	vector<CSProperties*>::iterator iter=vProperties.begin();
+	std::vector<CSProperties*>::iterator iter=vProperties.begin();
 	delete vProperties.at(index);
 	vProperties.erase(iter+index);
 	this->UpdateIDs();
@@ -108,7 +108,7 @@ void ContinuousStructure::DeleteProperty(size_t index)
 
 void ContinuousStructure::DeleteProperty(CSProperties* prop)
 {
-	vector<CSProperties*>::iterator iter;
+	std::vector<CSProperties*>::iterator iter;
 	for (iter=vProperties.begin();iter<vProperties.end();++iter)
 	{
 		if (*iter==prop)
@@ -135,9 +135,9 @@ size_t ContinuousStructure::GetQtyPropertyType(CSProperties::PropertyType type)
 	return count;
 }
 
-vector<CSProperties*>  ContinuousStructure::GetPropertyByType(CSProperties::PropertyType type)
+std::vector<CSProperties*>  ContinuousStructure::GetPropertyByType(CSProperties::PropertyType type)
 {
-	vector<CSProperties*> found;
+	std::vector<CSProperties*> found;
 	for (size_t i=0;i<vProperties.size();++i)
 		if (vProperties.at(i)->GetType() & type)
 			found.push_back(vProperties.at(i));
@@ -158,14 +158,14 @@ bool sortPrimByPrio(CSPrimitives* a, CSPrimitives* b)
 	return a->GetPriority()<b->GetPriority();
 }
 
-vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives(bool sorted, CSProperties::PropertyType type)
+std::vector<CSPrimitives*> ContinuousStructure::GetAllPrimitives(bool sorted, CSProperties::PropertyType type)
 {
-	vector<CSProperties*> props = this->GetPropertyByType(type);
-	vector<CSPrimitives*> vPrim;
+	std::vector<CSProperties*> props = this->GetPropertyByType(type);
+	std::vector<CSPrimitives*> vPrim;
 	vPrim.reserve(GetQtyPrimitives(type));
 	for (size_t i=0;i<props.size();++i)
 	{
-		vector<CSPrimitives*> prop_prims = props.at(i)->GetAllPrimitives();
+		std::vector<CSPrimitives*> prop_prims = props.at(i)->GetAllPrimitives();
 		vPrim.insert(vPrim.end(),prop_prims.begin(),prop_prims.end());
 	}
 	if (sorted)
@@ -187,18 +187,18 @@ void ContinuousStructure::DeletePrimitive(CSPrimitives* prim)
 	delete prim;
 }
 
-vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::PrimitiveType type)
+std::vector<CSPrimitives*> ContinuousStructure::GetPrimitivesByType(CSPrimitives::PrimitiveType type)
 {
 	UNUSED(type);
-	vector<CSPrimitives*> vPrim;
-	cerr << __func__ << ": Error, not yet implemented!" << endl;
+	std::vector<CSPrimitives*> vPrim;
+	std::cerr << __func__ << ": Error, not yet implemented!" << std::endl;
 	return vPrim;
 }
 
-vector<CSPrimitives*>  ContinuousStructure::GetPrimitivesByBoundBox(const double* boundbox, bool sorted, CSProperties::PropertyType type)
+std::vector<CSPrimitives*>  ContinuousStructure::GetPrimitivesByBoundBox(const double* boundbox, bool sorted, CSProperties::PropertyType type)
 {
-	vector<CSPrimitives*> out_list;
-	vector<CSPrimitives*> prims =this->GetAllPrimitives(sorted, type);
+	std::vector<CSPrimitives*> out_list;
+	std::vector<CSPrimitives*> prims =this->GetAllPrimitives(sorted, type);
 	for (size_t j=0;j<prims.size();++j)
 	{
 		// add primitive to list of IsInside reports 0 or 1 (unknown or true)
@@ -214,7 +214,7 @@ bool ContinuousStructure::InsertEdges2Grid(int nu)
 	if (nu>2) return false;
 	double box[6] = {0,0,0,0,0,0};
 	bool accBound=false;
-	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		accBound = vPrimitives.at(i)->GetBoundBox(box);
@@ -230,16 +230,16 @@ bool ContinuousStructure::InsertEdges2Grid(int nu)
 
 CSPrimitives* ContinuousStructure::GetPrimitiveByID(unsigned int ID)
 {
-	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 		if (vPrimitives.at(i)->GetID()==ID)
 			return vPrimitives.at(i);
 	return NULL;
 }
 
-vector<CSProperties*> ContinuousStructure::GetPropertiesByName(string name)
+std::vector<CSProperties*> ContinuousStructure::GetPropertiesByName(std::string name)
 {
-	vector<CSProperties*> vProp;
+	std::vector<CSProperties*> vProp;
 	for (size_t i=0;i<vProperties.size();++i)
 		if (name.compare(vProperties.at(i)->GetName())==0)
 			vProp.push_back(vProperties.at(i));
@@ -291,11 +291,11 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 
 CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(const double* /*coords*/, CSProperties::PropertyType /*type*/, bool /*markFoundAsUsed*/)
 {
-	cerr << "ContinuousStructure::GetPropertiesByCoordsPriority --> This methode has not been implemented yet!!! return NULL" << endl;
+	std::cerr << "ContinuousStructure::GetPropertiesByCoordsPriority --> This methode has not been implemented yet!!! return NULL" << std::endl;
 	return NULL;
 }
 
-CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, vector<CSPrimitives*> primList, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, std::vector<CSPrimitives*> primList, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
 {
 	CSProperties* prop = NULL;
 	// search in all given primitives if coordinate given is inside
@@ -313,7 +313,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 	return prop;
 }
 
-void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::PropertyType type)
+void ContinuousStructure::WarnUnusedPrimitves(std::ostream& stream, CSProperties::PropertyType type)
 {
 	for (size_t i=0;i<vProperties.size();++i)
 	{
@@ -324,13 +324,13 @@ void ContinuousStructure::WarnUnusedPrimitves(ostream& stream, CSProperties::Pro
 	}
 }
 
-void ContinuousStructure::ShowPropertyStatus(ostream& stream, CSProperties::PropertyType type)
+void ContinuousStructure::ShowPropertyStatus(std::ostream& stream, CSProperties::PropertyType type)
 {
 	for (size_t i=0;i<vProperties.size();++i)
 	{
 		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
 		{
-			stream << "-----------------------------------------" << endl;
+			stream << "-----------------------------------------" << std::endl;
 			vProperties.at(i)->ShowPropertyStatus(stream);
 		}
 	}
@@ -353,7 +353,7 @@ bool ContinuousStructure::isGeometryValid()
 	if (clGrid.GetQtyLines(1)<=1) return false;
 	if (clGrid.GetQtyLines(2)<=0) return false;
 
-	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		if (vPrimitives.at(i)->Update()==false)
@@ -377,7 +377,7 @@ double* ContinuousStructure::GetObjectArea()
 {
 	CSPrimitives* prim=NULL;
 	bool AccBound;
-	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		prim=vPrimitives.at(i);
@@ -406,7 +406,7 @@ const char* ContinuousStructure::Update()
 	for (size_t i=0;i<vProperties.size();++i)
 		vProperties.at(i)->Update(&ErrString);
 
-	vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
 	for (size_t i=0;i<vPrimitives.size();++i)
 		vPrimitives.at(i)->Update(&ErrString);
 
@@ -525,7 +525,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"DumpBox")==0) newProp = new CSPropDumpBox(clParaSet);
 		else
 		{
-			cerr << "ContinuousStructure::ReadFromXML: Property with type: " << cProp << " is unknown... " << endl;
+			std::cerr << "ContinuousStructure::ReadFromXML: Property with type: " << cProp << " is unknown... " << std::endl;
 			newProp=NULL;
 		}
 		if (newProp)
@@ -592,7 +592,7 @@ bool ContinuousStructure::ReadPropertyPrimitives(TiXmlElement* PropNode, CSPrope
 		else if (strcmp(cPrim,"Point")==0) newPrim = new CSPrimPoint(clParaSet,prop);
 		else
 		{
-			cerr << "ContinuousStructure::ReadFromXML: Primitive with type: " << cPrim << " is unknown... " << endl;
+			std::cerr << "ContinuousStructure::ReadFromXML: Primitive with type: " << cPrim << " is unknown... " << std::endl;
 			newPrim=NULL;
 		}
 		if (newPrim)
@@ -632,21 +632,21 @@ void ContinuousStructure::UpdateIDs()
 		vProperties.at(i)->SetID((unsigned int)i);
 }
 
-string ContinuousStructure::GetInfoLine(bool shortInfo)
+std::string ContinuousStructure::GetInfoLine(bool shortInfo)
 {
 	if (shortInfo)
 	{
-		string InfoLine = string(_CSXCAD_LIB_NAME_SHORT_)
-						  +string(" -- Version: ") + string(_CSXCAD_VERSION_);
+		std::string InfoLine = std::string(_CSXCAD_LIB_NAME_SHORT_)
+						  +std::string(" -- Version: ") + std::string(_CSXCAD_VERSION_);
 		return InfoLine;
 	}
 
-	string InfoLine = string(_CSXCAD_LIB_NAME_)
-					  +string("\nAuthor: ") + string(_CSXCAD_AUTHOR_)
-					  +string("\nMail: ") +string(_CSXCAD_AUTHOR_MAIL_)
-					  +string("\nVersion: ") + string(_CSXCAD_VERSION_)
-					  +string("\tBuild: ") + string(__DATE__) + string(" ") + string(__TIME__)
-					  +string("\nLicense: ") + string(_CSXCAD_LICENSE_);
+	std::string InfoLine = std::string(_CSXCAD_LIB_NAME_)
+					  +std::string("\nAuthor: ") + std::string(_CSXCAD_AUTHOR_)
+					  +std::string("\nMail: ") +std::string(_CSXCAD_AUTHOR_MAIL_)
+					  +std::string("\nVersion: ") + std::string(_CSXCAD_VERSION_)
+					  +std::string("\tBuild: ") + std::string(__DATE__) + std::string(" ") + std::string(__TIME__)
+					  +std::string("\nLicense: ") + std::string(_CSXCAD_LICENSE_);
 	return InfoLine;
 }
 

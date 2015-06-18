@@ -127,17 +127,17 @@ void CSTransform::SetMatrix(const double matrix[16], bool concatenate)
 	AppendList(MATRIX,matrix,16);
 }
 
-bool CSTransform::SetMatrix(string matrix, bool concatenate)
+bool CSTransform::SetMatrix(std::string matrix, bool concatenate)
 {
-	vector<string> mat_vec = SplitString2Vector(matrix, ',');
+	std::vector<std::string> mat_vec = SplitString2Vector(matrix, ',');
 	ParameterScalar ps_matrix[16];
 
 	double d_matrix[16];
 	if (mat_vec.size()>16)
-		cerr << "CSTransform::SetMatrix: Warning: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is larger than expected, skipping unneeded! " << endl;
+		std::cerr << "CSTransform::SetMatrix: Warning: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is larger than expected, skipping unneeded! " << std::endl;
 	else if (mat_vec.size()<16)
 	{
-		cerr << "CSTransform::SetMatrix: Error: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is invalid! Skipping" << endl;
+		std::cerr << "CSTransform::SetMatrix: Error: Number of arguments for operation: \"Matrix\" with arguments: \"" << matrix << "\" is invalid! Skipping" << std::endl;
 		return false;
 	}
 
@@ -176,18 +176,18 @@ void CSTransform::Translate(const double translate[3], bool concatenate)
 	AppendList(TRANSLATE,translate,3);
 }
 
-bool CSTransform::Translate(string translate, bool concatenate)
+bool CSTransform::Translate(std::string translate, bool concatenate)
 {
 	double matrix[16];
 
-	vector<string> tl_vec = SplitString2Vector(translate, ',');
+	std::vector<std::string> tl_vec = SplitString2Vector(translate, ',');
 	ParameterScalar ps_translate[3];
 	double tl_double_vec[3];
 	if (tl_vec.size()>3)
-		cerr << "CSTransform::Translate: Warning: Number of arguments for operation: \"Translate\" with arguments: \"" << translate << "\" is larger than expected, skipping unneeded! " << endl;
+		std::cerr << "CSTransform::Translate: Warning: Number of arguments for operation: \"Translate\" with arguments: \"" << translate << "\" is larger than expected, skipping unneeded! " << std::endl;
 	else if (tl_vec.size()<3)
 	{
-		cerr << "CSTransform::Translate: Error: Number of arguments for operation: \"Translate\" with arguments: \"" << translate << "\" is invalid! Skipping" << endl;
+		std::cerr << "CSTransform::Translate: Error: Number of arguments for operation: \"Translate\" with arguments: \"" << translate << "\" is invalid! Skipping" << std::endl;
 		return false;
 	}
 
@@ -214,7 +214,7 @@ bool CSTransform::RotateOriginMatrix(double matrix[16], const double XYZ_A[4])
 	double length = sqrt(XYZ_A[0]*XYZ_A[0]+XYZ_A[1]*XYZ_A[1]+XYZ_A[2]*XYZ_A[2]);
 	if (length==0)
 	{
-		cerr << "CSTransform::RotateOriginVector: Warning: vector length is zero! skipping" << endl;
+		std::cerr << "CSTransform::RotateOriginVector: Warning: vector length is zero! skipping" << std::endl;
 		return false;
 	}
 
@@ -255,18 +255,18 @@ void CSTransform::RotateOrigin(const double vector[3], double angle, bool concat
 	AppendList(ROTATE_ORIGIN,XYZ_A,4);
 }
 
-bool CSTransform::RotateOrigin(string XYZ_A, bool concatenate)
+bool CSTransform::RotateOrigin(std::string XYZ_A, bool concatenate)
 {
 	double matrix[16];
 
-	vector<string> rot_vec = SplitString2Vector(XYZ_A, ',');
+	std::vector<std::string> rot_vec = SplitString2Vector(XYZ_A, ',');
 	ParameterScalar ps_rotate[4];
 	double rot_double_vec[4];
 	if (rot_vec.size()>4)
-		cerr << "CSTransform::RotateOrigin: Warning: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is larger than expected, skipping unneeded! " << endl;
+		std::cerr << "CSTransform::RotateOrigin: Warning: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is larger than expected, skipping unneeded! " << std::endl;
 	else if (rot_vec.size()<4)
 	{
-		cerr << "CSTransform::RotateOrigin: Error: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is invalid! Skipping" << endl;
+		std::cerr << "CSTransform::RotateOrigin: Error: Number of arguments for operation: \"RotateOrigin\" with arguments: \"" << XYZ_A << "\" is invalid! Skipping" << std::endl;
 		return false;
 	}
 
@@ -305,7 +305,7 @@ void CSTransform::RotateXYZ(int dir, double angle, bool concatenate)
 	AppendList(type,&angle,1);
 }
 
-bool CSTransform::RotateXYZ(int dir, string angle, bool concatenate)
+bool CSTransform::RotateXYZ(int dir, std::string angle, bool concatenate)
 {
 	if ((dir<0) || (dir>3))
 		return false;
@@ -332,7 +332,7 @@ void CSTransform::RotateX(double angle, bool concatenate)
 	return RotateXYZ(0,angle,concatenate);
 }
 
-bool CSTransform::RotateX(string angle, bool concatenate)
+bool CSTransform::RotateX(std::string angle, bool concatenate)
 {
 	return RotateXYZ(0,angle,concatenate);
 }
@@ -342,7 +342,7 @@ void CSTransform::RotateY(double angle, bool concatenate)
 	return RotateXYZ(1,angle,concatenate);
 }
 
-bool CSTransform::RotateY(string angle, bool concatenate)
+bool CSTransform::RotateY(std::string angle, bool concatenate)
 {
 	return RotateXYZ(1,angle,concatenate);
 }
@@ -352,7 +352,7 @@ void CSTransform::RotateZ(double angle, bool concatenate)
 	return RotateXYZ(2,angle,concatenate);
 }
 
-bool CSTransform::RotateZ(string angle, bool concatenate)
+bool CSTransform::RotateZ(std::string angle, bool concatenate)
 {
 	return RotateXYZ(2,angle,concatenate);
 }
@@ -395,17 +395,17 @@ void CSTransform::Scale(const double scale[3], bool concatenate)
 	AppendList(SCALE3,scale,3);
 }
 
-bool CSTransform::Scale(string scale, bool concatenate)
+bool CSTransform::Scale(std::string scale, bool concatenate)
 {
 	double matrix[16];
 
-	vector<string> scale_vec = SplitString2Vector(scale, ',');
+	std::vector<std::string> scale_vec = SplitString2Vector(scale, ',');
 
 	if ((scale_vec.size()>1) && (scale_vec.size()!=3))
-		cerr << "CSTransform::Scale: Warning: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is larger than expected, skipping unneeded! " << endl;
+		std::cerr << "CSTransform::Scale: Warning: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is larger than expected, skipping unneeded! " << std::endl;
 	else if (scale_vec.size()<1)
 	{
-		cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << endl;
+		std::cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << std::endl;
 		return false;
 	}
 
@@ -446,7 +446,7 @@ bool CSTransform::Scale(string scale, bool concatenate)
 		return true;
 	}
 
-	cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << endl;
+	std::cerr << "CSTransform::Scale: Error: Number of arguments for operation: \"Scale\" with arguments: \"" << scale << "\" is invalid! Skipping" << std::endl;
 	return false;
 }
 
@@ -479,21 +479,21 @@ void CSTransform::ApplyMatrix(const double matrix[16], bool concatenate)
 	UpdateInverse();
 }
 
-bool CSTransform::TransformByString(string operation, string argument, bool concatenate)
+bool CSTransform::TransformByString(std::string operation, std::string argument, bool concatenate)
 {
 	unsigned int numArgs;
 	int type = GetTypeByName(operation, numArgs);
 
 	if (type<0)
 	{
-		cerr << "CSTransform::TransformByString: Error, unknown transformation: \"" << operation << "\"" << endl;
+		std::cerr << "CSTransform::TransformByString: Error, unknown transformation: \"" << operation << "\"" << std::endl;
 		return false;
 	}
 
 	return TransformByType((TransformType)type, argument, concatenate);
 }
 
-void CSTransform::TransformByType(TransformType type, vector<double> args, bool concatenate)
+void CSTransform::TransformByType(TransformType type, std::vector<double> args, bool concatenate)
 {
 	unsigned int numArgs = args.size();
 	double arguments[numArgs];
@@ -502,7 +502,7 @@ void CSTransform::TransformByType(TransformType type, vector<double> args, bool 
 	return TransformByType(type, arguments, concatenate);
 }
 
-bool CSTransform::TransformByType(TransformType type, string args, bool concatenate)
+bool CSTransform::TransformByType(TransformType type, std::string args, bool concatenate)
 {
 	//Keep this in sync with GetTypeByName and TransformType!!!
 	switch (type)
@@ -553,13 +553,13 @@ void CSTransform::TransformByType(TransformType type, const double* args, bool c
 	}
 }
 
-string CSTransform::GetNameByType(TransformType type) const
+std::string CSTransform::GetNameByType(TransformType type) const
 {
 	unsigned int numArgs;
 	return GetNameByType(type, numArgs);
 }
 
-string CSTransform::GetNameByType(TransformType type, unsigned int &numArgs) const
+std::string CSTransform::GetNameByType(TransformType type, unsigned int &numArgs) const
 {
 	//Keep this in sync with GetTypeByName and TransformByType and TransformType!!!
 	switch (type)
@@ -594,7 +594,7 @@ string CSTransform::GetNameByType(TransformType type, unsigned int &numArgs) con
 	}
 }
 
-int CSTransform::GetTypeByName(string name, unsigned int &numArgs) const
+int CSTransform::GetTypeByName(std::string name, unsigned int &numArgs) const
 {
 	//Keep this in sync with GetNameByType and TransformByType and TransformType!!!
 	if (name.compare("Scale")==0)
@@ -645,11 +645,11 @@ void CSTransform::PrintMatrix(ostream& stream)
 {
 	for (int m=0;m<4;++m)
 	{
-		stream << m_TMatrix[4*m+0] << "\t" << m_TMatrix[4*m+1] << "\t" << m_TMatrix[4*m+2] << "\t" << m_TMatrix[4*m+3] << endl;
+		stream << m_TMatrix[4*m+0] << "\t" << m_TMatrix[4*m+1] << "\t" << m_TMatrix[4*m+2] << "\t" << m_TMatrix[4*m+3] << std::endl;
 	}
 }
 
-void CSTransform::PrintTransformations(ostream& stream, string prefix)
+void CSTransform::PrintTransformations(ostream& stream, std::string prefix)
 {
 	for (size_t n=0;n<m_TransformList.size();++n)
 	{
@@ -660,14 +660,14 @@ void CSTransform::PrintTransformations(ostream& stream, string prefix)
 			if (a<m_TransformArguments.at(n).size()-1)
 				stream << ",";
 		}
-		stream << ")" << endl;
+		stream << ")" << std::endl;
 	}
 }
 
 void CSTransform::AppendList(TransformType type, const double* args, size_t numArgs )
 {
 	m_TransformList.push_back(type);
-	vector<ParameterScalar> argument;
+	std::vector<ParameterScalar> argument;
 	for (size_t n=0;n<numArgs;++n)
 		argument.push_back(ParameterScalar(m_ParaSet,args[n]));
 	m_TransformArguments.push_back(argument);
@@ -676,7 +676,7 @@ void CSTransform::AppendList(TransformType type, const double* args, size_t numA
 void CSTransform::AppendList(TransformType type, const ParameterScalar* args, size_t numArgs )
 {
 	m_TransformList.push_back(type);
-	vector<ParameterScalar> argument;
+	std::vector<ParameterScalar> argument;
 	for (size_t n=0;n<numArgs;++n)
 		argument.push_back(args[n]);
 	m_TransformArguments.push_back(argument);
@@ -706,7 +706,7 @@ bool CSTransform::Write2XML(TiXmlNode* root, bool parameterised, bool sparse)
 	{
 		TiXmlElement newTransform(GetNameByType(m_TransformList.at(n)).c_str());
 
-		string args;
+		std::string args;
 		for (size_t a=0;a<m_TransformArguments.at(n).size();++a)
 		{
 			args.append(m_TransformArguments.at(n).at(a).GetValueString());
@@ -729,9 +729,9 @@ bool CSTransform::ReadFromXML(TiXmlNode* root)
 	TiXmlElement* PropNode = prop->FirstChildElement();
 	while (PropNode!=NULL)
 	{
-		string argument(PropNode->Attribute("Argument"));
+		std::string argument(PropNode->Attribute("Argument"));
 		if (TransformByString(PropNode->Value(),argument,true)==false)
-			cerr << "CSTransform::ReadFromXML: Warning: Reading of \"" << PropNode->Value() << "\" with arguments: \""  << argument << "\" failed." << endl;
+			std::cerr << "CSTransform::ReadFromXML: Warning: Reading of \"" << PropNode->Value() << "\" with arguments: \""  << argument << "\" failed." << std::endl;
 		PropNode=PropNode->NextSiblingElement();
 	}
 	return true;

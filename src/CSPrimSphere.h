@@ -38,13 +38,13 @@ public:
 	//! Set the center point coordinate as paramater string
 	void SetCoord(int index, const char* val) {m_Center.SetValue(index,val);}
 	//! Set the center point coordinate as paramater string
-	void SetCoord(int index, string val) {m_Center.SetValue(index,val);}
+	void SetCoord(int index, std::string val) {m_Center.SetValue(index,val);}
 
 	void SetCenter(double x1, double x2, double x3);
 	void SetCenter(double x[3]);
 
-	void SetCenter(string x1, string x2, string x3);
-	void SetCenter(string x[3]);
+	void SetCenter(std::string x1, std::string x2, std::string x3);
+	void SetCenter(std::string x[3]);
 
 	double GetCoord(int index) {return m_Center.GetValue(index);}
 	ParameterScalar* GetCoordPS(int index) {return m_Center.GetCoordPS(index);}
@@ -59,11 +59,11 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPrimitiveStatus(ostream& stream);
+	virtual void ShowPrimitiveStatus(std::ostream& stream);
 
 protected:
 	ParameterCoord m_Center;

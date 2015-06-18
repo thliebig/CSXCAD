@@ -31,7 +31,7 @@ CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSPropert
 	m_AxisCoords[0].SetParameterSet(paraSet);
 	m_AxisCoords[1].SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
-	PrimTypeName = string("Cylinder");
+	PrimTypeName = std::string("Cylinder");
 }
 
 CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : CSPrimitives(cylinder,prop)
@@ -40,7 +40,7 @@ CSPrimCylinder::CSPrimCylinder(CSPrimCylinder* cylinder, CSProperties *prop) : C
 	m_AxisCoords[0].Copy(&cylinder->m_AxisCoords[0]);
 	m_AxisCoords[1].Copy(&cylinder->m_AxisCoords[1]);
 	psRadius.Copy(&cylinder->psRadius);
-	PrimTypeName = string("Cylinder");
+	PrimTypeName = std::string("Cylinder");
 }
 
 CSPrimCylinder::CSPrimCylinder(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -49,7 +49,7 @@ CSPrimCylinder::CSPrimCylinder(ParameterSet* paraSet, CSProperties* prop) : CSPr
 	m_AxisCoords[0].SetParameterSet(paraSet);
 	m_AxisCoords[1].SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
-	PrimTypeName = string("Cylinder");
+	PrimTypeName = std::string("Cylinder");
 }
 
 
@@ -59,7 +59,7 @@ CSPrimCylinder::~CSPrimCylinder()
 
 bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-//	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
 	bool accurate=false;
 	int Direction=0;
@@ -138,14 +138,14 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 	return true;
 }
 
-bool CSPrimCylinder::Update(string *ErrStr)
+bool CSPrimCylinder::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=m_AxisCoords[0].Evaluate(ErrStr) && m_AxisCoords[1].Evaluate(ErrStr);
 	if (bOK==false)
 	{
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 	}
 	m_AxisCoords[0].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
@@ -157,8 +157,8 @@ bool CSPrimCylinder::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -200,11 +200,11 @@ bool CSPrimCylinder::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimCylinder::ShowPrimitiveStatus(ostream& stream)
+void CSPrimCylinder::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimitives::ShowPrimitiveStatus(stream);
-	stream << "  Axis-Start: " << m_AxisCoords[0].GetValueString(0) << "," << m_AxisCoords[0].GetValueString(1) << "," << m_AxisCoords[0].GetValueString(2) << endl;
-	stream << "  Axis-Stop : " << m_AxisCoords[1].GetValueString(0) << "," << m_AxisCoords[1].GetValueString(1) << "," << m_AxisCoords[1].GetValueString(2) << endl;
-	stream << "  Radius: " << psRadius.GetValueString() << endl;
+	stream << "  Axis-Start: " << m_AxisCoords[0].GetValueString(0) << "," << m_AxisCoords[0].GetValueString(1) << "," << m_AxisCoords[0].GetValueString(2) << std::endl;
+	stream << "  Axis-Stop : " << m_AxisCoords[1].GetValueString(0) << "," << m_AxisCoords[1].GetValueString(1) << "," << m_AxisCoords[1].GetValueString(2) << std::endl;
+	stream << "  Radius: " << psRadius.GetValueString() << std::endl;
 }
 

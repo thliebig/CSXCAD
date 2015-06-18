@@ -38,8 +38,6 @@
 #include <fstream>
 #include <sstream>
 
-using namespace std;
-
 class CSPrimitives;
 
 class CSPropUnknown;
@@ -86,10 +84,10 @@ public:
 	//! Get PropertyType \sa PropertyType
 	int GetType();
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Any");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Any");}
 
 	//! Get Property Type as a string. (default is the xml element name)
-	virtual const string GetTypeString() const {return GetTypeXMLString();}
+	virtual const std::string GetTypeString() const {return GetTypeXMLString();}
 
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
 	bool GetMaterial() {return bMaterial;}
@@ -104,16 +102,16 @@ public:
 	void SetUniqueID(unsigned int uID);
 
 	//! Set Name for this Property. \sa GetName
-	void SetName(const string name);
+	void SetName(const std::string name);
 	//! Get Name for this Property. \sa SetName
-	const string GetName();
+	const std::string GetName();
 
 	//! Check if given attribute exists
-	bool ExistAttribute(string name);
+	bool ExistAttribute(std::string name);
 	//! Get the value of a given attribute
-	string GetAttributeValue(string name);
+	std::string GetAttributeValue(std::string name);
 	//! Add a new attribute
-	void AddAttribute(string name, string value);
+	void AddAttribute(std::string name, std::string value);
 
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
@@ -136,7 +134,7 @@ public:
 	CSPrimitives* GetPrimitive(size_t index);
 
 	//! Get all Primitives \sa GetPrimitive
-	vector<CSPrimitives*> GetAllPrimitives() {return vPrimitives;}
+	std::vector<CSPrimitives*> GetAllPrimitives() {return vPrimitives;}
 	
 	//! Set a fill-color for this property. \sa GetFillColor
 	void SetFillColor(RGBa color);
@@ -177,7 +175,7 @@ public:
 	CSPropDumpBox* ToDumpBox();
 
 	//! Update all parameters. Nothing to do in this base class. \param ErrStr Methode writes error messages to this string! \return Update success
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	//! Write this property to a xml-node. \param parameterised Use false if parameters should be written as values. Parameters are lost!
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
@@ -190,10 +188,10 @@ public:
 	int GetCoordInputType() const {return coordInputType;}
 
 	//! Check and warn for unused primitives
-	void WarnUnusedPrimitves(ostream& stream);
+	void WarnUnusedPrimitves(std::ostream& stream);
 
 	//! Show status of this property, incl. all primitives
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	CSProperties(ParameterSet* paraSet);
@@ -208,17 +206,17 @@ protected:
 	bool bMaterial;
 	unsigned int uiID;
 	unsigned int UniqueID;
-	string sName;
-	string sType;
+	std::string sName;
+	std::string sType;
 	RGBa FillColor;
 	RGBa EdgeColor;
 
 	bool bVisisble;
 
-	vector<CSPrimitives*> vPrimitives;
+	std::vector<CSPrimitives*> vPrimitives;
 
 	//! List of additional attribute names
-	vector<string> m_Attribute_Name;
+	std::vector<std::string> m_Attribute_Name;
 	//! List of additional attribute values
-	vector<string> m_Attribute_Value;
+	std::vector<std::string> m_Attribute_Value;
 };

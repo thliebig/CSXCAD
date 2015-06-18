@@ -34,32 +34,32 @@ public:
 	virtual void Init();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("ConductingSheet");}
+	virtual const std::string GetTypeXMLString() const {return std::string("ConductingSheet");}
 
 	//! Set the Conductivity
 	void SetConductivity(double val) {Conductivity.SetValue(val);}
 	//! Set the Conductivity
-	int  SetConductivity(const string val)  {return Conductivity.SetValue(val);}
+	int  SetConductivity(const std::string val)  {return Conductivity.SetValue(val);}
 	//! Get the Conductivity
 	double GetConductivity() {return Conductivity.GetValue();}
 	//! Get the Conductivity as a string
-	const string GetConductivityTerm() {return Conductivity.GetString();}
+	const std::string GetConductivityTerm() {return Conductivity.GetString();}
 
 	//! Set the Thickness
 	void SetThickness(double val) {Thickness.SetValue(val);}
 	//! Set the Thickness
-	int  SetThickness(const string val)  {return Thickness.SetValue(val);}
+	int  SetThickness(const std::string val)  {return Thickness.SetValue(val);}
 	//! Get the Thickness
 	double GetThickness() {return Thickness.GetValue();}
 	//! Get the Thickness as a string
-	const string GetThicknessTerm() {return Thickness.GetString();}
+	const std::string GetThicknessTerm() {return Thickness.GetString();}
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	ParameterScalar Conductivity;

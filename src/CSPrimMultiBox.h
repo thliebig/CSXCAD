@@ -54,11 +54,11 @@ public:
 
 	unsigned int GetQtyBoxes() {return (unsigned int) vCoords.size()/6;}
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 protected:
-	vector<ParameterScalar*> vCoords;
+	std::vector<ParameterScalar*> vCoords;
 };
 

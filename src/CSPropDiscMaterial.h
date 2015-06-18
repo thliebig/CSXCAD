@@ -36,7 +36,7 @@ public:
 	CSPropDiscMaterial(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropDiscMaterial();
 
-	virtual const string GetTypeXMLString() const {return string("Discrete-Material");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Discrete-Material");}
 
 	virtual double GetEpsilonWeighted(int ny, const double* coords);
 	virtual double GetMueWeighted(int ny, const double* coords);
@@ -57,9 +57,9 @@ public:
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	bool ReadHDF5(string filename);
+	bool ReadHDF5(std::string filename);
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 	//! Create a vtkPolyData surface that separates the discrete material from background material
 	virtual vtkPolyData* CreatePolyDataModel() const;
@@ -69,7 +69,7 @@ protected:
 	int GetDBPos(const double* coords);
 
 	int m_FileType;
-	string m_Filename;
+	std::string m_Filename;
 	unsigned int m_Size[3];
 	unsigned int m_DB_size;
 	uint8* m_Disc_Ind;
@@ -83,6 +83,6 @@ protected:
 	bool m_DB_Background;
 	CSTransform* m_Transform;
 
-	void* ReadDataSet(string filename, string d_name, int type_id, int &rank, unsigned int &size, bool debug=false);
+	void* ReadDataSet(std::string filename, std::string d_name, int type_id, int &rank, unsigned int &size, bool debug=false);
 };
 

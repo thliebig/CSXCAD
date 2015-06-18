@@ -33,40 +33,40 @@ void CSPropLumpedElement::Init()
 	m_L.SetValue(NAN);
 }
 
-bool CSPropLumpedElement::Update(string *ErrStr)
+bool CSPropLumpedElement::Update(std::string *ErrStr)
 {
 	int EC=m_R.Evaluate();
 	bool bOK=true;
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in LumpedElement-Property Resistance-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in LumpedElement-Property Resistance-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
-		//cout << EC << endl;
+		//cout << EC << std::endl;
 	}
 
 	EC=m_C.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in LumpedElement-Property Capacitor-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in LumpedElement-Property Capacitor-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
-		//cout << EC << endl;
+		//cout << EC << std::endl;
 	}
 
 	EC=m_L.Evaluate();
 	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
-		stringstream stream;
-		stream << endl << "Error in LumpedElement-Property Inductance-Value";
+		std::stringstream stream;
+		stream << std::endl << "Error in LumpedElement-Property Inductance-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
-		//cout << EC << endl;
+		//cout << EC << std::endl;
 	}
 
 	return bOK & CSProperties::Update(ErrStr);
@@ -117,12 +117,12 @@ bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPropLumpedElement::ShowPropertyStatus(ostream& stream)
+void CSPropLumpedElement::ShowPropertyStatus(std::ostream& stream)
 {
 	CSProperties::ShowPropertyStatus(stream);
-	stream << " --- Lumped Element Properties --- " << endl;
-	stream << "  Direction: " << m_ny << endl;
-	stream << "  Resistance: " << m_R.GetValueString() << endl;
-	stream << "  Capacity: "   << m_C.GetValueString() << endl;
-	stream << "  Inductance: " << m_L.GetValueString() << endl;
+	stream << " --- Lumped Element Properties --- " << std::endl;
+	stream << "  Direction: " << m_ny << std::endl;
+	stream << "  Resistance: " << m_R.GetValueString() << std::endl;
+	stream << "  Capacity: "   << m_C.GetValueString() << std::endl;
+	stream << "  Inductance: " << m_L.GetValueString() << std::endl;
 }

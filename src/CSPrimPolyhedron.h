@@ -56,7 +56,7 @@ public:
 
 	virtual void AddFace(face f);
 	virtual void AddFace(int numVertex, int* vertices);
-	virtual void AddFace(vector<int> vertices);
+	virtual void AddFace(std::vector<int> vertices);
 
 	virtual bool BuildTree();
 
@@ -69,15 +69,15 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPrimitiveStatus(ostream& stream);
+	virtual void ShowPrimitiveStatus(std::ostream& stream);
 
 protected:
 	unsigned int m_InvalidFaces;
-	vector<vertex> m_Vertices;
-	vector<face> m_Faces;
+	std::vector<vertex> m_Vertices;
+	std::vector<face> m_Faces;
 	CSPrimPolyhedronPrivate *d_ptr; //!< pointer to private data structure, to hide the CGAL dependency from applications
 };

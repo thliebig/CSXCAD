@@ -30,32 +30,32 @@ CSPrimUserDefined::CSPrimUserDefined(unsigned int ID, ParameterSet* paraSet, CSP
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser();
-	stFunction = string();
+	stFunction = std::string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i) {dPosShift[i].SetParameterSet(paraSet);}
-	PrimTypeName = string("User-Defined");
+	PrimTypeName = std::string("User-Defined");
 }
 
 CSPrimUserDefined::CSPrimUserDefined(CSPrimUserDefined* primUDef, CSProperties *prop) : CSPrimitives(primUDef,prop)
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser(*primUDef->fParse);
-	stFunction = string(primUDef->stFunction);
+	stFunction = std::string(primUDef->stFunction);
 	CoordSystem = primUDef->CoordSystem;
 	for (int i=0;i<3;++i)
 		dPosShift[i].Copy(&primUDef->dPosShift[i]);
-	PrimTypeName = string("User-Defined");
+	PrimTypeName = std::string("User-Defined");
 }
 
 CSPrimUserDefined::CSPrimUserDefined(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=USERDEFINED;
 	fParse = new CSFunctionParser();
-	stFunction = string();
+	stFunction = std::string();
 	CoordSystem=CARESIAN_SYSTEM;
 	for (int i=0;i<3;++i)
 		dPosShift[i].SetParameterSet(paraSet);
-	PrimTypeName = string("User-Defined");
+	PrimTypeName = std::string("User-Defined");
 }
 
 
@@ -72,7 +72,7 @@ void CSPrimUserDefined::SetCoordSystem(UserDefinedCoordSystem newSystem)
 void CSPrimUserDefined::SetFunction(const char* func)
 {
 	if (func==NULL) return;
-	stFunction = string(func);
+	stFunction = std::string(func);
 }
 
 bool CSPrimUserDefined::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
@@ -125,7 +125,7 @@ bool CSPrimUserDefined::IsInside(const double* Coord, double /*tol*/)
 		vars[NrPara+3]=sqrt(x*x+y*y+z*z);
 		vars[NrPara+4]=atan2(y,x);
 		vars[NrPara+5]=asin(1)-atan(z/rxy);
-		//cout << "x::" << x << "y::" << y << "z::" << z << "r::" << vars[NrPara] << "a::" << vars[NrPara+1] << "t::" << vars[NrPara+2] << endl;
+		//cout << "x::" << x << "y::" << y << "z::" << z << "r::" << vars[NrPara] << "a::" << vars[NrPara+1] << "t::" << vars[NrPara+2] << std::endl;
 		break;
 	default:
 		//unknown System
@@ -144,21 +144,21 @@ bool CSPrimUserDefined::IsInside(const double* Coord, double /*tol*/)
 }
 
 
-bool CSPrimUserDefined::Update(string *ErrStr)
+bool CSPrimUserDefined::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
-	string vars;
+	std::string vars;
 	switch (CoordSystem)
 	{
 	case CARESIAN_SYSTEM:
-		vars=string("x,y,z");
+		vars=std::string("x,y,z");
 		break;
 	case CYLINDER_SYSTEM:
-		vars=string("x,y,z,r,a");
+		vars=std::string("x,y,z,r,a");
 		break;
 	case SPHERE_SYSTEM:
-		vars=string("x,y,z,r,a,t");
+		vars=std::string("x,y,z,r,a,t");
 		break;
 	default:
 		//unknown System
@@ -168,7 +168,7 @@ bool CSPrimUserDefined::Update(string *ErrStr)
 	iQtyParameter=clParaSet->GetQtyParameter();
 	if (iQtyParameter>0)
 	{
-		fParameter=string(clParaSet->GetParameterString());
+		fParameter=std::string(clParaSet->GetParameterString());
 		vars = fParameter + "," + vars;
 	}
 
@@ -181,7 +181,7 @@ bool CSPrimUserDefined::Update(string *ErrStr)
 
 	if ((EC!=FunctionParser::FP_NO_ERROR)  && (ErrStr!=NULL))
 	{
-		ostringstream oss;
+		std::ostringstream oss;
 		oss << "\nError in User Defined Primitive Function (ID: " << uiID << "): " << fParse->ErrorMsg();
 		ErrStr->append(oss.str());
 		bOK=false;
@@ -194,7 +194,7 @@ bool CSPrimUserDefined::Update(string *ErrStr)
 		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
-			ostringstream oss;
+			std::ostringstream oss;
 			oss << "\nError in User Defined Primitive Coord (ID: " << uiID << "): ";
 			ErrStr->append(oss.str());
 			PSErrorCode2Msg(EC,ErrStr);

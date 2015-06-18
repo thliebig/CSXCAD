@@ -10,19 +10,17 @@ class CSDebug;
 #include <string>
 #include <iostream>
 
-using namespace std;
+std::string CSXCAD_EXPORT ConvertInt(int number);
+int CSXCAD_EXPORT String2Int(std::string number);
+double CSXCAD_EXPORT String2Double(std::string number, bool &ok, int accurarcy=15);
+std::vector<double> CSXCAD_EXPORT SplitString2Double(std::string str, const char delimiter);
+std::vector<std::string> CSXCAD_EXPORT SplitString2Vector(std::string str, const char delimiter);
+std::string CSXCAD_EXPORT CombineVector2String(std::vector<double> values, const char delimiter, int accurarcy=15);
+std::string CSXCAD_EXPORT CombineArray2String(double* values, unsigned int numVal, const char delimiter, int accurarcy=15);
+std::string CSXCAD_EXPORT CombineArray2String(float* values, unsigned int numVal, const char delimiter, int accurarcy=15);
+std::string CSXCAD_EXPORT CombineArray2String(int* values, unsigned int numVal, const char delimiter, int accurarcy=15);
 
-string CSXCAD_EXPORT ConvertInt(int number);
-int CSXCAD_EXPORT String2Int(string number);
-double CSXCAD_EXPORT String2Double(string number, bool &ok, int accurarcy=15);
-vector<double> CSXCAD_EXPORT SplitString2Double(string str, const char delimiter);
-vector<string> CSXCAD_EXPORT SplitString2Vector(string str, const char delimiter);
-string CSXCAD_EXPORT CombineVector2String(vector<double> values, const char delimiter, int accurarcy=15);
-string CSXCAD_EXPORT CombineArray2String(double* values, unsigned int numVal, const char delimiter, int accurarcy=15);
-string CSXCAD_EXPORT CombineArray2String(float* values, unsigned int numVal, const char delimiter, int accurarcy=15);
-string CSXCAD_EXPORT CombineArray2String(int* values, unsigned int numVal, const char delimiter, int accurarcy=15);
-
-vector<int> CSXCAD_EXPORT SplitString2Int(string str, const char delimiter);
+std::vector<int> CSXCAD_EXPORT SplitString2Int(std::string str, const char delimiter);
 
 class CSXCAD_EXPORT CSDebug
 {
@@ -32,7 +30,7 @@ public:
 	void SetLevel(int level) {m_level=level;}
 
 	void Debug(int on_level, const char* message);
-	void Debug(int on_level, string message);
+	void Debug(int on_level, std::string message);
 
 protected:
 	int m_level;

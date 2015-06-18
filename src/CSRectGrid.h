@@ -48,7 +48,7 @@ public:
 	//! Add a disc-line in the given direction.
 	void AddDiscLine(int direct, double val);
 	void AddDiscLines(int direct, int numLines, double* vals);
-	string AddDiscLines(int direct, int numLines, double* vals, string DistFunction);
+	std::string AddDiscLines(int direct, int numLines, double* vals, std::string DistFunction);
 
 	//! Remove the disc-line at certain index and direction.
 	bool RemoveDiscLine(int direct, int index);
@@ -81,7 +81,7 @@ public:
 	//! Get a disc-line in a certain direction an at given index.
 	double GetLine(int direct, size_t Index);
 	//! Get disc-lines as a comma-seperated string for given direction
-	string GetLinesAsString(int direct);
+	std::string GetLinesAsString(int direct);
 
 	//! Snap a given value to a grid line for the given direction
 	unsigned int Snap2LineNumber(int ny, double value, bool &inside) const;
@@ -113,7 +113,7 @@ public:
 	bool isValid();
 
 protected:
-	vector<double> Lines[3];
+	std::vector<double> Lines[3];
 	double dDeltaUnit;
 	double SimBox[6];
 	CoordinateSystem m_meshType;

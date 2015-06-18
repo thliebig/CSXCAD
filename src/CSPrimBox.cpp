@@ -30,7 +30,7 @@ CSPrimBox::CSPrimBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 	Type=BOX;
 	m_Coords[0].SetParameterSet(paraSet);
 	m_Coords[1].SetParameterSet(paraSet);
-	PrimTypeName = string("Box");
+	PrimTypeName = std::string("Box");
 }
 
 CSPrimBox::CSPrimBox(CSPrimBox* primBox, CSProperties *prop) : CSPrimitives(primBox,prop)
@@ -38,7 +38,7 @@ CSPrimBox::CSPrimBox(CSPrimBox* primBox, CSProperties *prop) : CSPrimitives(prim
 	Type=BOX;
 	m_Coords[0].Copy(&primBox->m_Coords[0]);
 	m_Coords[1].Copy(&primBox->m_Coords[1]);
-	PrimTypeName = string("Box");
+	PrimTypeName = std::string("Box");
 }
 
 CSPrimBox::CSPrimBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -46,7 +46,7 @@ CSPrimBox::CSPrimBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(p
 	Type=BOX;
 	m_Coords[0].SetParameterSet(paraSet);
 	m_Coords[1].SetParameterSet(paraSet);
-	PrimTypeName = string("Box");
+	PrimTypeName = std::string("Box");
 }
 
 
@@ -57,7 +57,7 @@ CSPrimBox::~CSPrimBox()
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 //	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
-//		cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << endl;
+//		std::cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
 
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop = m_Coords[1].GetCoords(m_MeshType);
@@ -103,13 +103,13 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 }
 
 
-bool CSPrimBox::Update(string *ErrStr)
+bool CSPrimBox::Update(std::string *ErrStr)
 {
 	bool bOK=m_Coords[0].Evaluate(ErrStr) && m_Coords[1].Evaluate(ErrStr);
 	if (bOK==false)
 	{
-		stringstream stream;
-		stream << endl << "Error in Box (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in Box (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 	}
 	m_Coords[0].SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
@@ -141,9 +141,9 @@ bool CSPrimBox::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimBox::ShowPrimitiveStatus(ostream& stream)
+void CSPrimBox::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimitives::ShowPrimitiveStatus(stream);
-	stream << "  Start: " << m_Coords[0].GetValueString(0) << "," << m_Coords[0].GetValueString(1) << "," << m_Coords[0].GetValueString(2) << endl;
-	stream << "  Stop : " << m_Coords[1].GetValueString(0) << "," << m_Coords[1].GetValueString(1) << "," << m_Coords[1].GetValueString(2) << endl;
+	stream << "  Start: " << m_Coords[0].GetValueString(0) << "," << m_Coords[0].GetValueString(1) << "," << m_Coords[0].GetValueString(2) << std::endl;
+	stream << "  Stop : " << m_Coords[1].GetValueString(0) << "," << m_Coords[1].GetValueString(1) << "," << m_Coords[1].GetValueString(2) << std::endl;
 }

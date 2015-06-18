@@ -30,21 +30,21 @@ CSPrimRotPoly::CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=0;
-	PrimTypeName = string("RotPoly");
+	PrimTypeName = std::string("RotPoly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(CSPrimRotPoly* primRotPoly, CSProperties *prop) : CSPrimPolygon(primRotPoly,prop)
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=primRotPoly->m_RotAxisDir;
-	PrimTypeName = string("RotPoly");
+	PrimTypeName = std::string("RotPoly");
 }
 
 CSPrimRotPoly::CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrimPolygon(paraSet,prop)
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=0;
-	PrimTypeName = string("RotPoly");
+	PrimTypeName = std::string("RotPoly");
 }
 
 CSPrimRotPoly::~CSPrimRotPoly()
@@ -104,7 +104,7 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 }
 
 
-bool CSPrimRotPoly::Update(string *ErrStr)
+bool CSPrimRotPoly::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK = CSPrimPolygon::Update(ErrStr);
@@ -114,8 +114,8 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in RotPoly Start Angle (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in RotPoly Start Angle (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -125,8 +125,8 @@ bool CSPrimRotPoly::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in RotPoly Stop Angle (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in RotPoly Stop Angle (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -171,7 +171,7 @@ bool CSPrimRotPoly::ReadFromXML(TiXmlNode &root)
 	if (CSPrimPolygon::ReadFromXML(root)==false) return false;
 
 	if (Elevation.GetValue()!=0)
-		cerr << __func__ << ": Warning: An elevation for a rotational poly is not supported! Skipping!" << endl;
+		std::cerr << __func__ << ": Warning: An elevation for a rotational poly is not supported! Skipping!" << std::endl;
 	Elevation.SetValue(0);
 
 	TiXmlElement *elem = root.ToElement();

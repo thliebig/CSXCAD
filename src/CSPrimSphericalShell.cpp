@@ -28,21 +28,21 @@
 CSPrimSphericalShell::CSPrimSphericalShell(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(ID,paraSet,prop)
 {
 	Type=SPHERICALSHELL;
-	PrimTypeName = string("SphericalShell");
+	PrimTypeName = std::string("SphericalShell");
 	psShellWidth.SetParameterSet(paraSet);
 }
 
 CSPrimSphericalShell::CSPrimSphericalShell(CSPrimSphericalShell* sphere, CSProperties *prop) : CSPrimSphere(sphere,prop)
 {
 	Type=SPHERICALSHELL;
-	PrimTypeName = string("SphericalShell");
+	PrimTypeName = std::string("SphericalShell");
 	psShellWidth.Copy(&sphere->psShellWidth);
 }
 
 CSPrimSphericalShell::CSPrimSphericalShell(ParameterSet* paraSet, CSProperties* prop) : CSPrimSphere(paraSet,prop)
 {
 	Type=SPHERICALSHELL;
-	PrimTypeName = string("SphericalShell");
+	PrimTypeName = std::string("SphericalShell");
 	psShellWidth.SetParameterSet(paraSet);
 }
 
@@ -86,7 +86,7 @@ bool CSPrimSphericalShell::IsInside(const double* Coord, double /*tol*/)
 	return false;
 }
 
-bool CSPrimSphericalShell::Update(string *ErrStr)
+bool CSPrimSphericalShell::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=CSPrimSphere::Update(ErrStr);
@@ -96,8 +96,8 @@ bool CSPrimSphericalShell::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " shell-width (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -127,8 +127,8 @@ bool CSPrimSphericalShell::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimSphericalShell::ShowPrimitiveStatus(ostream& stream)
+void CSPrimSphericalShell::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimSphere::ShowPrimitiveStatus(stream);
-	stream << "  Shell width: " << psShellWidth.GetValueString() << endl;
+	stream << "  Shell width: " << psShellWidth.GetValueString() << std::endl;
 }

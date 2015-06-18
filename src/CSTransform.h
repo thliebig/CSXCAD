@@ -27,8 +27,6 @@
 
 #include "ParameterObjects.h"
 
-using namespace std;
-
 class CSXCAD_EXPORT CSTransform
 {
 public:
@@ -53,37 +51,37 @@ public:
 
 	//! Apply a matrix directly
 	void SetMatrix(const double matrix[16], bool concatenate=true);
-	bool SetMatrix(string matrix, bool concatenate=true);
+	bool SetMatrix(std::string matrix, bool concatenate=true);
 
 	//! Create and apply a translation matrix
 	void Translate(const double translate[3], bool concatenate=true);
-	bool Translate(string translate, bool concatenate=true);
+	bool Translate(std::string translate, bool concatenate=true);
 
 	//! Create and apply a rotation matrix around the given vector and angle
 	void RotateOrigin(const double vector[3], double angle, bool concatenate=true);
-	bool RotateOrigin(string XYZ_A, bool concatenate=true);
+	bool RotateOrigin(std::string XYZ_A, bool concatenate=true);
 
 	void RotateX(double angle, bool concatenate=true);
-	bool RotateX(string angle, bool concatenate=true);
+	bool RotateX(std::string angle, bool concatenate=true);
 
 	void RotateY(double angle, bool concatenate=true);
-	bool RotateY(string angle, bool concatenate=true);
+	bool RotateY(std::string angle, bool concatenate=true);
 
 	void RotateZ(double angle, bool concatenate=true);
-	bool RotateZ(string angle, bool concatenate=true);
+	bool RotateZ(std::string angle, bool concatenate=true);
 
 	void RotateXYZ(int dir, double angle, bool concatenate=true);
-	bool RotateXYZ(int dir, string angle, bool concatenate=true);
+	bool RotateXYZ(int dir, std::string angle, bool concatenate=true);
 
 	void Scale(double scale, bool concatenate=true);
 	void Scale(const double scale[3], bool concatenate=true);
-	bool Scale(string scale, bool concatenate=true);
+	bool Scale(std::string scale, bool concatenate=true);
 
-	bool TransformByString(string operation, string argument, bool concatenate=true);
+	bool TransformByString(std::string operation, std::string argument, bool concatenate=true);
 
-	void TransformByType(TransformType type, vector<double> args, bool concatenate=true);
+	void TransformByType(TransformType type, std::vector<double> args, bool concatenate=true);
 	void TransformByType(TransformType type, const double* args, bool concatenate=true);
-	bool TransformByType(TransformType type, string args, bool concatenate=true);
+	bool TransformByType(TransformType type, std::string args, bool concatenate=true);
 
 	void Reset();
 
@@ -97,13 +95,13 @@ public:
 
 	double* MakeUnitMatrix(double matrix[16]) const;
 
-	string GetNameByType(TransformType type) const;
-	string GetNameByType(TransformType type, unsigned int &numArgs) const;
-	int GetTypeByName(string name, unsigned int &numArgs) const;
+	std::string GetNameByType(TransformType type) const;
+	std::string GetNameByType(TransformType type, unsigned int &numArgs) const;
+	int GetTypeByName(std::string name, unsigned int &numArgs) const;
 
-	void PrintMatrix(ostream& stream);
+	void PrintMatrix(std::ostream& stream);
 
-	void PrintTransformations(ostream& stream, string prefix="");
+	void PrintTransformations(std::ostream& stream, std::string prefix="");
 
 	//! Write this transformations to a xml-node. \param parameterised Use false if parameters should be written as values. Parameters are lost!
 	virtual bool Write2XML(TiXmlNode* root, bool parameterised=true, bool sparse=false);
@@ -135,8 +133,8 @@ protected:
 
 	void AppendList(TransformType type, const double* args, size_t numArgs );
 	void AppendList(TransformType type, const ParameterScalar* args, size_t numArgs );
-	vector<TransformType> m_TransformList;
-	vector<vector <ParameterScalar> > m_TransformArguments;
+	std::vector<TransformType> m_TransformList;
+	std::vector<std::vector <ParameterScalar> > m_TransformArguments;
 };
 
 #endif // CSTRANSFORM_H

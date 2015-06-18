@@ -21,25 +21,25 @@
 #include <sstream>
 #include <iostream>
 
-string ConvertInt(int number)
+std::string ConvertInt(int number)
 {
-   stringstream ss;
+   std::stringstream ss;
    ss << number;
    return ss.str();
 }
 
-int String2Int(string number)
+int String2Int(std::string number)
 {
 	int val;
-	stringstream ss(number);
+	std::stringstream ss(number);
 	ss >> val;
 	return val;
 }
 
-double String2Double(string number, bool &ok, int accurarcy)
+double String2Double(std::string number, bool &ok, int accurarcy)
 {
 	double val;
-	stringstream ss(number);
+	std::stringstream ss(number);
 	ss.precision(accurarcy);
 	ss >> val;
 	ok = ss.eof() && !ss.fail();
@@ -69,11 +69,11 @@ std::vector<double> SplitString2Double(std::string str, const char delimiter)
 	return values;
 }
 
-std::vector<string> SplitString2Vector(std::string str, const char delimiter)
+std::vector<std::string> SplitString2Vector(std::string str, const char delimiter)
 {
 	size_t pos=0;
 	std::string sub;
-	std::vector<string> values;
+	std::vector<std::string> values;
 	do
 	{
 		pos=str.find_first_of(delimiter);
@@ -94,9 +94,9 @@ std::vector<string> SplitString2Vector(std::string str, const char delimiter)
 }
 
 
-string CombineVector2String(vector<double> values, const char delimiter, int accurarcy)
+std::string CombineVector2String(std::vector<double> values, const char delimiter, int accurarcy)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss.precision( accurarcy );
 	for (size_t i=0;i<values.size();++i)
 	{
@@ -106,9 +106,9 @@ string CombineVector2String(vector<double> values, const char delimiter, int acc
 	return ss.str();
 }
 
-string CombineArray2String(double* values, unsigned int numVal, const char delimiter, int accurarcy)
+std::string CombineArray2String(double* values, unsigned int numVal, const char delimiter, int accurarcy)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss.precision( accurarcy );
 	for (unsigned int i=0;i<numVal;++i)
 	{
@@ -118,9 +118,9 @@ string CombineArray2String(double* values, unsigned int numVal, const char delim
 	return ss.str();
 }
 
-string CombineArray2String(float* values, unsigned int numVal, const char delimiter, int accurarcy)
+std::string CombineArray2String(float* values, unsigned int numVal, const char delimiter, int accurarcy)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss.precision( accurarcy );
 	for (unsigned int i=0;i<numVal;++i)
 	{
@@ -130,9 +130,9 @@ string CombineArray2String(float* values, unsigned int numVal, const char delimi
 	return ss.str();
 }
 
-string CombineArray2String(int* values, unsigned int numVal, const char delimiter, int accurarcy)
+std::string CombineArray2String(int* values, unsigned int numVal, const char delimiter, int accurarcy)
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss.precision( accurarcy );
 	for (unsigned int i=0;i<numVal;++i)
 	{
@@ -166,13 +166,13 @@ CSDebug::CSDebug()
 
 void CSDebug::Debug(int on_level, const char* message)
 {
-	Debug(on_level,string(message));
+	Debug(on_level,std::string(message));
 }
 
-void CSDebug::Debug(int on_level, string message)
+void CSDebug::Debug(int on_level, std::string message)
 {
 	if (on_level<=0) return; //no debug message for debug level smaller or equal zero
 	if (on_level>=m_level)
-		cerr << message << endl;
+		std::cerr << message << std::endl;
 }
 

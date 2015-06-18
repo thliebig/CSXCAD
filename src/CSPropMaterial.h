@@ -34,69 +34,69 @@ public:
 	virtual ~CSPropMaterial();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const string GetTypeXMLString() const {return string("Material");}
+	virtual const std::string GetTypeXMLString() const {return std::string("Material");}
 
 	void SetEpsilon(double val, int ny=0)		{SetValue(val,Epsilon,ny);}
-	int SetEpsilon(const string val, int ny=0)	{return SetValue(val,Epsilon,ny);}
+	int SetEpsilon(const std::string val, int ny=0)	{return SetValue(val,Epsilon,ny);}
 	double GetEpsilon(int ny=0)					{return GetValue(Epsilon,ny);}
-	const string GetEpsilonTerm(int ny=0)		{return GetTerm(Epsilon,ny);}
+	const std::string GetEpsilonTerm(int ny=0)		{return GetTerm(Epsilon,ny);}
 
-	int SetEpsilonWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightEpsilon,ny);}
-	const string GetEpsilonWeightFunction(int ny)			{return GetTerm(WeightEpsilon,ny);}
+	int SetEpsilonWeightFunction(const std::string fct, int ny)	{return SetValue(fct,WeightEpsilon,ny);}
+	const std::string GetEpsilonWeightFunction(int ny)			{return GetTerm(WeightEpsilon,ny);}
 	virtual double GetEpsilonWeighted(int ny, const double* coords)	{return GetWeight(WeightEpsilon,ny,coords)*GetEpsilon(ny);}
 
 	void SetMue(double val, int ny=0)			{SetValue(val,Mue,ny);}
-	int SetMue(const string val, int ny=0)		{return SetValue(val,Mue,ny);}
+	int SetMue(const std::string val, int ny=0)		{return SetValue(val,Mue,ny);}
 	double GetMue(int ny=0)						{return GetValue(Mue,ny);}
-	const string GetMueTerm(int ny=0)			{return GetTerm(Mue,ny);}
+	const std::string GetMueTerm(int ny=0)			{return GetTerm(Mue,ny);}
 
-	int SetMueWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightMue,ny);}
-	const string GetMueWeightFunction(int ny)			{return GetTerm(WeightMue,ny);}
+	int SetMueWeightFunction(const std::string fct, int ny)	{return SetValue(fct,WeightMue,ny);}
+	const std::string GetMueWeightFunction(int ny)			{return GetTerm(WeightMue,ny);}
 	virtual double GetMueWeighted(int ny, const double* coords)	{return GetWeight(WeightMue,ny,coords)*GetMue(ny);}
 
 	void SetKappa(double val, int ny=0)			{SetValue(val,Kappa,ny);}
-	int SetKappa(const string val, int ny=0)	{return SetValue(val,Kappa,ny);}
+	int SetKappa(const std::string val, int ny=0)	{return SetValue(val,Kappa,ny);}
 	double GetKappa(int ny=0)					{return GetValue(Kappa,ny);}
-	const string GetKappaTerm(int ny=0)			{return GetTerm(Kappa,ny);}
+	const std::string GetKappaTerm(int ny=0)			{return GetTerm(Kappa,ny);}
 
-	int SetKappaWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightKappa,ny);}
-	const string GetKappaWeightFunction(int ny)				{return GetTerm(WeightKappa,ny);}
+	int SetKappaWeightFunction(const std::string fct, int ny)	{return SetValue(fct,WeightKappa,ny);}
+	const std::string GetKappaWeightFunction(int ny)				{return GetTerm(WeightKappa,ny);}
 	virtual double GetKappaWeighted(int ny, const double* coords)	{return GetWeight(WeightKappa,ny,coords)*GetKappa(ny);}
 
 	void SetSigma(double val, int ny=0)			{SetValue(val,Sigma,ny);}
-	int SetSigma(const string val, int ny=0)	{return SetValue(val,Sigma,ny);}
+	int SetSigma(const std::string val, int ny=0)	{return SetValue(val,Sigma,ny);}
 	double GetSigma(int ny=0)					{return GetValue(Sigma,ny);}
-	const string GetSigmaTerm(int ny=0)			{return GetTerm(Sigma,ny);}
+	const std::string GetSigmaTerm(int ny=0)			{return GetTerm(Sigma,ny);}
 
-	int SetSigmaWeightFunction(const string fct, int ny)	{return SetValue(fct,WeightSigma,ny);}
-	const string GetSigmaWeightFunction(int ny)				{return GetTerm(WeightSigma,ny);}
+	int SetSigmaWeightFunction(const std::string fct, int ny)	{return SetValue(fct,WeightSigma,ny);}
+	const std::string GetSigmaWeightFunction(int ny)				{return GetTerm(WeightSigma,ny);}
 	virtual double GetSigmaWeighted(int ny, const double* coords)	{return GetWeight(WeightSigma,ny,coords)*GetSigma(ny);}
 
 	void SetDensity(double val)			{Density.SetValue(val);}
-	int SetDensity(const string val)	{return Density.SetValue(val);}
+	int SetDensity(const std::string val)	{return Density.SetValue(val);}
 	double GetDensity()					{return Density.GetValue();}
-	const string GetDensityTerm()		{return Density.GetString();}
+	const std::string GetDensityTerm()		{return Density.GetString();}
 
-	int SetDensityWeightFunction(const string fct) {return WeightDensity.SetValue(fct);}
-	const string GetDensityWeightFunction() {return WeightDensity.GetString();}
+	int SetDensityWeightFunction(const std::string fct) {return WeightDensity.SetValue(fct);}
+	const std::string GetDensityWeightFunction() {return WeightDensity.GetString();}
 	virtual double GetDensityWeighted(const double* coords)	{return GetWeight(WeightDensity,coords)*GetDensity();}
 
 	void SetIsotropy(bool val) {bIsotropy=val;}
 	bool GetIsotropy() {return bIsotropy;}
 
 	virtual void Init();
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual void ShowPropertyStatus(ostream& stream);
+	virtual void ShowPropertyStatus(std::ostream& stream);
 
 protected:
 	double GetValue(ParameterScalar *ps, int ny);
-	string GetTerm(ParameterScalar *ps, int ny);
+	std::string GetTerm(ParameterScalar *ps, int ny);
 	void SetValue(double val, ParameterScalar *ps, int ny);
-	int SetValue(string val, ParameterScalar *ps, int ny);
+	int SetValue(std::string val, ParameterScalar *ps, int ny);
 
 	//electro-magnetic properties
 	ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];

@@ -28,21 +28,21 @@
 CSPrimWire::CSPrimWire(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimCurve(ID,paraSet,prop)
 {
 	Type=WIRE;
-	PrimTypeName = string("Wire");
+	PrimTypeName = std::string("Wire");
 	wireRadius.SetParameterSet(paraSet);
 }
 
 CSPrimWire::CSPrimWire(CSPrimWire* primCurve, CSProperties *prop) : CSPrimCurve(primCurve,prop)
 {
 	Type=WIRE;
-	PrimTypeName = string("Wire");
+	PrimTypeName = std::string("Wire");
 	wireRadius.Copy(&primCurve->wireRadius);
 }
 
 CSPrimWire::CSPrimWire(ParameterSet* paraSet, CSProperties* prop) : CSPrimCurve(paraSet,prop)
 {
 	Type=WIRE;
-	PrimTypeName = string("Wire");
+	PrimTypeName = std::string("Wire");
 	wireRadius.SetParameterSet(paraSet);
 }
 
@@ -109,7 +109,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	return false;
 }
 
-bool CSPrimWire::Update(string *ErrStr)
+bool CSPrimWire::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=true;
@@ -120,8 +120,8 @@ bool CSPrimWire::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}

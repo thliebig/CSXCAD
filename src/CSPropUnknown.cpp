@@ -24,8 +24,8 @@ CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSPropert
 CSPropUnknown::CSPropUnknown(CSProperties* prop) : CSProperties(prop) {Type=UNKNOWN;bVisisble=false;}
 CSPropUnknown::~CSPropUnknown() {}
 
-void CSPropUnknown::SetProperty(const string val) {sUnknownProperty=string(val);}
-const string CSPropUnknown::GetProperty() {return sUnknownProperty;}
+void CSPropUnknown::SetProperty(const std::string val) {sUnknownProperty=std::string(val);}
+const std::string CSPropUnknown::GetProperty() {return sUnknownProperty;}
 
 
 bool CSPropUnknown::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
@@ -46,7 +46,7 @@ bool CSPropUnknown::ReadFromXML(TiXmlNode &root)
 
 	const char* chProp=prob->Attribute("Property");
 	if (chProp==NULL)
-		sUnknownProperty=string("unknown");
-	else sUnknownProperty=string(chProp);
+		sUnknownProperty=std::string("unknown");
+	else sUnknownProperty=std::string(chProp);
 	return true;
 }

@@ -37,18 +37,18 @@ public:
 
 	virtual CSPrimPolyhedronReader* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolyhedronReader(this,prop);}
 
-	virtual void SetFilename(string name) {m_filename=name;}
-	virtual string GetFilename() const {return m_filename;}
+	virtual void SetFilename(std::string name) {m_filename=name;}
+	virtual std::string GetFilename() const {return m_filename;}
 
 	virtual FileType GetFileType() const {return m_filetype;}
 
-	virtual bool Update(string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual bool ReadFile(string filename);
+	virtual bool ReadFile(std::string filename);
 
 protected:
-	string m_filename;
+	std::string m_filename;
 	FileType m_filetype;
 };

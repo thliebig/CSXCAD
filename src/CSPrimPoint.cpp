@@ -55,7 +55,7 @@ void CSPrimPoint::SetCoord(int index, double val)
 	m_Coords.SetValue(index,val);
 }
 
-void CSPrimPoint::SetCoord(int index, const string val)
+void CSPrimPoint::SetCoord(int index, const std::string val)
 {
 	m_Coords.SetValue(index,val);
 }
@@ -91,13 +91,13 @@ bool CSPrimPoint::IsInside(const double* /*Coord*/, double /*tol*/)
 }
 
 
-bool CSPrimPoint::Update(string *ErrStr)
+bool CSPrimPoint::Update(std::string *ErrStr)
 {
 	bool bOK=m_Coords.Evaluate(ErrStr);
 	if (bOK==false)
 	{
-		stringstream stream;
-		stream << endl << "Error in Point (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in Point (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 	}
 	m_Coords.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
@@ -119,8 +119,8 @@ bool CSPrimPoint::ReadFromXML(TiXmlNode &root)
 }
 
 
-void CSPrimPoint::ShowPrimitiveStatus(ostream& stream)
+void CSPrimPoint::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimitives::ShowPrimitiveStatus(stream);
-	stream << "  Coordinate: " << m_Coords.GetValueString(0) << "," << m_Coords.GetValueString(1) << "," << m_Coords.GetValueString(2) << endl;
+	stream << "  Coordinate: " << m_Coords.GetValueString(0) << "," << m_Coords.GetValueString(1) << "," << m_Coords.GetValueString(2) << std::endl;
 }

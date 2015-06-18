@@ -30,7 +30,7 @@ CSPrimSphere::CSPrimSphere(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	Type=SPHERE;
 	m_Center.SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
-	PrimTypeName = string("Sphere");
+	PrimTypeName = std::string("Sphere");
 }
 
 CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimitives(sphere,prop)
@@ -38,7 +38,7 @@ CSPrimSphere::CSPrimSphere(CSPrimSphere* sphere, CSProperties *prop) : CSPrimiti
 	Type=SPHERE;
 	m_Center.Copy(&sphere->m_Center);
 	psRadius.Copy(&sphere->psRadius);
-	PrimTypeName = string("Sphere");
+	PrimTypeName = std::string("Sphere");
 }
 
 CSPrimSphere::CSPrimSphere(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
@@ -46,7 +46,7 @@ CSPrimSphere::CSPrimSphere(ParameterSet* paraSet, CSProperties* prop) : CSPrimit
 	Type=SPHERE;
 	m_Center.SetParameterSet(paraSet);
 	psRadius.SetParameterSet(paraSet);
-	PrimTypeName = string("Sphere");
+	PrimTypeName = std::string("Sphere");
 }
 
 
@@ -67,14 +67,14 @@ void CSPrimSphere::SetCenter(double x[3])
 		SetCoord(n, x[n]);
 }
 
-void CSPrimSphere::SetCenter(string x1, string x2, string x3)
+void CSPrimSphere::SetCenter(std::string x1, std::string x2, std::string x3)
 {
 	SetCoord(0,x1);
 	SetCoord(1,x2);
 	SetCoord(2,x3);
 }
 
-void CSPrimSphere::SetCenter(string x[3])
+void CSPrimSphere::SetCenter(std::string x[3])
 {
 	for (int n=0;n<3;++n)
 		SetCoord(n, x[n]);
@@ -113,14 +113,14 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 	return false;
 }
 
-bool CSPrimSphere::Update(string *ErrStr)
+bool CSPrimSphere::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=m_Center.Evaluate(ErrStr);
 	if (bOK==false)
 	{
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 	}
 	m_Center.SetCoordinateSystem(m_PrimCoordSystem, m_MeshType);
@@ -130,8 +130,8 @@ bool CSPrimSphere::Update(string *ErrStr)
 	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
-		stringstream stream;
-		stream << endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
+		std::stringstream stream;
+		stream << std::endl << "Error in " << PrimTypeName << " Radius (ID: " << uiID << "): ";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -168,9 +168,9 @@ bool CSPrimSphere::ReadFromXML(TiXmlNode &root)
 	return true;
 }
 
-void CSPrimSphere::ShowPrimitiveStatus(ostream& stream)
+void CSPrimSphere::ShowPrimitiveStatus(std::ostream& stream)
 {
 	CSPrimitives::ShowPrimitiveStatus(stream);
-	stream << "  Center: " << m_Center.GetValueString(0) << "," << m_Center.GetValueString(1) << "," << m_Center.GetValueString(2) << endl;
-	stream << "  Radius: " << psRadius.GetValueString() << endl;
+	stream << "  Center: " << m_Center.GetValueString(0) << "," << m_Center.GetValueString(1) << "," << m_Center.GetValueString(2) << std::endl;
+	stream << "  Radius: " << psRadius.GetValueString() << std::endl;
 }
