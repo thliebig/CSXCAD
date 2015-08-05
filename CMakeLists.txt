@@ -11,7 +11,7 @@ PROJECT(CSXCAD CXX)
 cmake_minimum_required(VERSION 2.8)
 
 # default
-set(VERSION "v0.5.2")
+set(VERSION "v0.6.0-rc1")
 
 IF(EXISTS ${PROJECT_SOURCE_DIR}/localConfig.cmake)
    include(${PROJECT_SOURCE_DIR}/localConfig.cmake)
