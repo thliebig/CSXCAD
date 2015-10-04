@@ -13,11 +13,13 @@ Install instructions for the CSXCAD library:
 2) Build:
   - change directory to CSXCAD
   - build:
-    qmake PREFIX=<path/to/install/> CSXCAD.pro
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=<path/to/install/> -DFPARSER_ROOT_DIR=<path/to/fparser>
     make
     make install (may require root)
 
     Note:
-      - all path informations may be stored in a localPathes.pri
+      - all path informations may be stored in a localConfig.cmake
       - the default "prefix" is /usr/local
 
