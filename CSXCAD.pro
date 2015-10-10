@@ -21,7 +21,7 @@ TEMPLATE = lib
 INCLUDEPATH += .
 OBJECTS_DIR = obj
 
-VERSION = 0.5.2
+VERSION = 0.6.0
 
 # add git revision
 GITREV = $$system(git describe --tags)
@@ -50,6 +50,8 @@ unix:!macx {
         /usr/include/vtk-5.10 \
         /usr/include/vtk-6.0 \
         /usr/include/vtk-6.1 \
+        /usr/include/vtk-6.2 \
+        /usr/include/vtk-6.3 \
         /usr/include/vtk
     } else {
         INCLUDEPATH += $$VTK_INCLUDEPATH
