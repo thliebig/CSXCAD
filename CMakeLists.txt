@@ -94,7 +94,7 @@ INCLUDE_DIRECTORIES (${CGAL_INCLUDE_DIR})
 
 # cgal needs, fail o Linux otherwise
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-frounding-math" )
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math" )
 endif()
 
 # TODO what are the needed libs?
