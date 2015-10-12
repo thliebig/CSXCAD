@@ -118,16 +118,30 @@ message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
 include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
 if("${VTK_MAJOR_VERSION}" EQUAL 6)
-    set( vtk_LIBS
-        vtkCommonCore
-        vtkCommonDataModel
-        vtkIOLegacy
-        vtkIOXML
-        vtkIOGeometry
-        vtkIOPLY
-        vtksys
-        vtkIOCore
+    if("${VTK_MINOR_VERSION}" GREATER 2)
+        set( vtk_LIBS
+            vtkCommonCore
+            vtkCommonDataModel
+            vtkIOLegacy
+            vtkIOXML
+            vtkIOGeometry
+            vtkIOPLY
+            vtkIOMPIParallel
+            vtksys
+            vtkIOCore
+        )
+    else()
+        set( vtk_LIBS
+            vtkCommonCore
+            vtkCommonDataModel
+            vtkIOLegacy
+            vtkIOXML
+            vtkIOGeometry
+            vtkIOPLY
+            vtksys
+            vtkIOCore
     )
+    endif()
 else()
     set( vtk_LIBS
         vtkCommon
