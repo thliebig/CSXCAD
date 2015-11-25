@@ -67,14 +67,24 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CSXCAD_SOURCE_DIR}/cmake/Modules/"
 
 # fparser
 # $ cmake -D FPARSER_ROOT_DIR=~/opt/openEMS .
+IF(NOT EXISTS ${FPARSER_ROOT_DIR})
+    SET(FPARSER_ROOT_DIR /usr)
+ENDIF()
+message(STATUS "FPARSER_ROOT_DIR: ${FPARSER_ROOT_DIR}" )
 find_library(fparser_LIBRARIES 
   NAMES fparser
-  HINTS  ${FPARSER_ROOT_DIR}/lib${LIB_SUFFIX}
+  HINTS ${FPARSER_ROOT_DIR}/lib${LIB_SUFFIX}
   NO_CMAKE_FIND_ROOT_PATH
 )
-message(STATUS "fparser: ${fparser_LIBRARIES}" )
+message(STATUS "fparser_LIBRARIES: ${fparser_LIBRARIES}" )
+find_path(fparser_INCLUDE_DIR 
+  NAMES fparser.hh
+  HINTS ${FPARSER_ROOT_DIR}/include ${FPARSER_ROOT_DIR}/include/fparser
+  NO_CMAKE_FIND_ROOT_PATH
+)
+message(STATUS "fparser_INCLUDE_DIR: ${fparser_INCLUDE_DIR}" )
 #TODO test if fparser was found
-INCLUDE_DIRECTORIES( ${FPARSER_ROOT_DIR}/include ) 
+INCLUDE_DIRECTORIES( ${fparser_INCLUDE_DIR} ) 
 
 # TinyXML module from https://github.com/ros/cmake_modules
 find_package(TinyXML REQUIRED)
