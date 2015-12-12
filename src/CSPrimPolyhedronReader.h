@@ -40,13 +40,14 @@ public:
 	virtual void SetFilename(std::string name) {m_filename=name;}
 	virtual std::string GetFilename() const {return m_filename;}
 
+	virtual void SetFileType(FileType ft) {m_filetype=ft;}
 	virtual FileType GetFileType() const {return m_filetype;}
 
 	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	virtual bool ReadFile(std::string filename);
+	virtual bool ReadFile();
 
 protected:
 	std::string m_filename;

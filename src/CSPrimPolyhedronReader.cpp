@@ -35,6 +35,7 @@ CSPrimPolyhedronReader::CSPrimPolyhedronReader(ParameterSet* paraSet, CSProperti
 	Type = POLYHEDRONREADER;
 	PrimTypeName = "PolyhedronReader";
 	m_filetype = UNKNOWN;
+	m_filename = std::string();
 }
 
 CSPrimPolyhedronReader::CSPrimPolyhedronReader(CSPrimPolyhedronReader* primPHReader, CSProperties *prop) : CSPrimPolyhedron(primPHReader, prop)
@@ -51,6 +52,7 @@ CSPrimPolyhedronReader::CSPrimPolyhedronReader(unsigned int ID, ParameterSet* pa
 	Type = POLYHEDRONREADER;
 	PrimTypeName = "PolyhedronReader";
 	m_filetype = UNKNOWN;
+	m_filename = std::string();
 }
 
 CSPrimPolyhedronReader::~CSPrimPolyhedronReader()
@@ -105,7 +107,7 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 	else
 		m_filetype=UNKNOWN;
 
-	if (ReadFile(m_filename)==false)
+	if (ReadFile()==false)
 	{
 		std::cerr << "CSPrimPolyhedronReader::ReadFromXML: Failed to read file." << std::endl;
 		return false;
@@ -114,7 +116,7 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 	return BuildTree();
 }
 
-bool CSPrimPolyhedronReader::ReadFile(std::string filename)
+bool CSPrimPolyhedronReader::ReadFile()
 {
 	vtkPolyData *polydata = NULL;
 	switch (m_filetype)
@@ -122,7 +124,7 @@ bool CSPrimPolyhedronReader::ReadFile(std::string filename)
 	case STL_FILE:
 	{
 		vtkSTLReader* reader = vtkSTLReader::New();
-		reader->SetFileName(filename.c_str());
+		reader->SetFileName(m_filename.c_str());
 		reader->SetMerging(1);
 		polydata = reader->GetOutput(0);
 		reader->Update();
@@ -131,7 +133,7 @@ bool CSPrimPolyhedronReader::ReadFile(std::string filename)
 	case PLY_FILE:
 	{
 		vtkPLYReader* reader = vtkPLYReader::New();
-		reader->SetFileName(filename.c_str());
+		reader->SetFileName(m_filename.c_str());
 		polydata = reader->GetOutput(0);
 		reader->Update();
 		break;
