@@ -177,6 +177,7 @@ public:
 	 \param parameterised Include full parameters (default) or parameter-values only.
 	 */
 	virtual bool Write2XML(const char* file, bool parameterised=true, bool sparse=false);
+	virtual bool Write2XML(std::string file, bool parameterised=true, bool sparse=false);
 
 	//! Read a structure from file.
 	/*!

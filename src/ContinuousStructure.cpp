@@ -461,6 +461,11 @@ bool ContinuousStructure::Write2XML(TiXmlNode* rootNode, bool parameterised, boo
 
 bool ContinuousStructure::Write2XML(const char* file, bool parameterised, bool sparse)
 {
+	return this->Write2XML(std::string(file), parameterised, sparse);
+}
+
+bool ContinuousStructure::Write2XML(std::string file, bool parameterised, bool sparse)
+{
 	TiXmlDocument doc(file);
 	doc.InsertEndChild(TiXmlDeclaration("1.0","ISO-8859-1","yes"));
 
