@@ -71,6 +71,15 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, std::string val)
 	points.at(point_index)->SetValue(nu,val);
 }
 
+bool CSPrimCurve::GetPoint(size_t point_index, double point[3])
+{
+	if (point_index>=GetNumberOfPoints()) return false;
+	point[0] = points.at(point_index)->GetValue(0);
+	point[1] = points.at(point_index)->GetValue(1);
+	point[2] = points.at(point_index)->GetValue(2);
+	return true;
+}
+
 bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c_system, bool transform)
 {
 	if (point_index>=GetNumberOfPoints()) return false;
@@ -80,6 +89,11 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c
 	if (transform)
 		TransformCoords(point, false, c_system);
 	return true;
+}
+
+void CSPrimCurve::ClearPoints()
+{
+	points.clear();
 }
 
 bool CSPrimCurve::GetBoundBox(double dBoundBox[6], bool /*PreserveOrientation*/)

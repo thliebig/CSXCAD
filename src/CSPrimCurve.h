@@ -38,8 +38,11 @@ public:
 	virtual void SetCoord(size_t point_index, int nu, std::string val);
 
 	virtual size_t GetNumberOfPoints() {return points.size();}
+	virtual bool GetPoint(size_t point_index, double point[3]);
 	//! Get the point coordinates for the given index in the specified coordinate system
 	virtual bool GetPoint(size_t point_index, double* point, CoordinateSystem c_system, bool transform=true);
+
+	virtual void ClearPoints();
 
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
