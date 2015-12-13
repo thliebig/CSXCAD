@@ -18,6 +18,13 @@ Thumbs.db
 *.pro.user
 *.user.*
 localPaths.pri
+tmp_*
+**/temp.*/*
+
+#python
+python/tests/*.xml
+*.pyc
+python/**/*.cpp
 
 #cmake
 **CMakeFiles
