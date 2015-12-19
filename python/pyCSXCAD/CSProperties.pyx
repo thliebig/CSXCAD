@@ -272,3 +272,63 @@ cdef class CSPropExcitation(CSProperties):
 
     def GetDelay(self):
         return self.excptr.GetDelay()
+
+###############################################################################
+cdef class CSPropProbeBox(CSProperties):
+    def __init__(self, ParameterSet pset, *args, **kw):
+        if not self.thisptr:
+            self.thisptr = <_CSPropProbeBox*> new _CSPropProbeBox(pset.thisptr)
+        super(CSPropProbeBox, self).__init__(pset, *args, **kw)
+        self.probeptr = <_CSPropProbeBox*>self.thisptr
+
+        if 'p_type' in kw:
+            self.SetProbeType(kw['p_type'])
+        if 'weight' in kw:
+            self.SetWeighting(kw['weight'])
+        if 'norm_dir' in kw:
+            self.SetNormalDir(kw['norm_dir'])
+
+    def SetProbeType(self, val):
+        self.probeptr.SetProbeType(val)
+    def GetProbeType(self):
+        return self.probeptr.GetProbeType()
+
+    def SetWeighting(self, val):
+        self.probeptr.SetWeighting(val)
+    def GetWeighting(self):
+        return self.probeptr.GetWeighting()
+
+    def SetNormalDir(self, val):
+        self.probeptr.SetNormalDir(val)
+    def GetNormalDir(self):
+        return self.probeptr.GetNormalDir()
+
+###############################################################################
+cdef class CSPropDumpBox(CSPropProbeBox):
+    def __init__(self, ParameterSet pset, *args, **kw):
+        if not self.thisptr:
+            self.thisptr = <_CSPropDumpBox*> new _CSPropDumpBox(pset.thisptr)
+        super(CSPropDumpBox, self).__init__(pset, *args, **kw)
+        self.dbptr = <_CSPropDumpBox*>self.thisptr
+
+        if 'dump_type' in kw:
+            self.SetDumpType(kw['dump_type'])
+        if 'dump_mode' in kw:
+            self.SetDumpMode(kw['dump_mode'])
+        if 'file_type' in kw:
+            self.SetFileType(kw['file_type'])
+
+    def SetDumpType(self, val):
+        self.dbptr.SetDumpType(val)
+    def GetDumpType(self):
+        return self.dbptr.GetDumpType()
+
+    def SetDumpMode(self, val):
+        self.dbptr.SetDumpMode(val)
+    def GetDumpMode(self):
+        return self.dbptr.GetDumpMode()
+
+    def SetFileType(self, val):
+        self.dbptr.SetFileType(val)
+    def GetFileType(self):
+        return self.dbptr.GetFileType()

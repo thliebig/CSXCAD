@@ -138,3 +138,36 @@ cdef extern from "CSPropExcitation.h":
 cdef class CSPropExcitation(CSProperties):
     cdef _CSPropExcitation* excptr
 
+##############################################################################
+cdef extern from "CSPropProbeBox.h":
+    cdef cppclass _CSPropProbeBox "CSPropProbeBox" (_CSProperties):
+            _CSPropProbeBox(_ParameterSet*) except +
+            void SetProbeType(int type)
+            int GetProbeType()
+
+            void SetWeighting(double weight)
+            double GetWeighting()
+
+            void SetNormalDir(unsigned int ndir)
+            int GetNormalDir()
+
+cdef class CSPropProbeBox(CSProperties):
+    cdef _CSPropProbeBox* probeptr
+
+
+##############################################################################
+cdef extern from "CSPropDumpBox.h":
+    cdef cppclass _CSPropDumpBox "CSPropDumpBox" (_CSPropProbeBox):
+            _CSPropDumpBox(_ParameterSet*) except +
+            void SetDumpType(int _type)
+            int GetDumpType()
+
+            void SetDumpMode(int mode)
+            int GetDumpMode()
+
+            void SetFileType(int ftype)
+            int GetFileType()
+
+
+cdef class CSPropDumpBox(CSPropProbeBox):
+    cdef _CSPropDumpBox* dbptr
