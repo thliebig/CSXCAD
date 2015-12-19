@@ -24,7 +24,7 @@ Created on Sat Dec  5 13:26:56 2015
 from libcpp.string cimport string
 from libcpp cimport bool
 
-#from ParameterObjects cimport _ParameterSet
+cimport ParameterObjects
 
 cdef class ParameterSet:
     def __cinit__(self, no_init=False):
