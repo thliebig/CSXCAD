@@ -72,6 +72,8 @@ class CSXCAD_EXPORT CSPrimitives
 public:
 	virtual ~CSPrimitives();
 
+	virtual void Init();
+
 	//! Primitive type definitions.
 	enum PrimitiveType
 	{
