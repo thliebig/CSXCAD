@@ -239,6 +239,13 @@ cdef class CSPropExcitation(CSProperties):
         super(CSPropExcitation, self).__init__(pset, *args, **kw)
         self.excptr = <_CSPropExcitation*>self.thisptr
 
+        if 'exc_type' in kw:
+            self.SetExcitType(kw['exc_type'])
+        if 'exc_val' in kw:
+            self.SetExcitation(kw['exc_val'])
+        if 'delay' in kw:
+            self.SetDelay(kw['delay'])
+
     def SetExcitType(self, val):
         self.excptr.SetExcitType(val)
 
