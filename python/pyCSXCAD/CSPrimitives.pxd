@@ -36,6 +36,7 @@ cdef extern from "CSPrimitives.h":
 
             void SetPriority(int val)
             int GetPriority()
+            bool Update(string *ErrStr)
 
             bool GetBoundBox(double dBoundBox[6])
 

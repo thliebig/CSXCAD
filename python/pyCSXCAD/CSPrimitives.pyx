@@ -58,6 +58,12 @@ cdef class CSPrimitives:
             bb[1,n] = _bb[2*n+1]
         return bb
 
+    def Update(self):
+        cdef string s
+        succ = self.thisptr.Update(&s)
+        return succ, str(s)
+
+
 ###############################################################################
 cdef class CSPrimPoint(CSPrimitives):
     def __init__(self, ParameterSet pset, CSProperties prop):
