@@ -42,7 +42,7 @@ assert LE.GetCaps()==False
 assert LE.GetDirection()==0
 
 # Test ConductingSheet
-CS = CSX.AddConductingSheet('sheet', 56e6, 35e-6)
+CS = CSX.AddConductingSheet('sheet', conductivity=56e6, thickness=35e-6)
 assert CS.GetConductivity()==56e6
 assert CS.GetThickness()==35e-6
 

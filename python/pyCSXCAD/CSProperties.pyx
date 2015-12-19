@@ -215,11 +215,11 @@ cdef class CSPropConductingSheet(CSPropMetal):
             self.thisptr = <_CSProperties*> new _CSPropConductingSheet(pset.thisptr)
         super(CSPropConductingSheet, self).__init__(pset, *args, **kw)
         self.CSptr   = <_CSPropConductingSheet*> self.thisptr
-        assert len(args)<=2
-        if len(args)>0:
-            self.SetConductivity(args[0])
-        if len(args)>1:
-            self.SetThickness(args[1])
+
+        if 'conductivity' in kw:
+            self.SetConductivity(kw['conductivity'])
+        if 'thickness' in kw:
+            self.SetThickness(kw['thickness'])
 
     def SetConductivity(self, val):
         self.CSptr.SetConductivity(val)
