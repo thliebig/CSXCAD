@@ -77,11 +77,40 @@ bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const 
 /*********************CSPrimitives********************************************************************/
 CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop)
 {
-	clProperty=NULL;
+	this->Init();
 	SetProperty(prop);
 	uiID=ID;
 	clParaSet=paraSet;
+}
+
+CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
+{
+	this->Init();
+	if (prop==NULL)
+		SetProperty(prim->clProperty);
+	else
+		SetProperty(prop);
+	clParaSet=prim->clParaSet;
+	m_Transform=CSTransform::New(prim->m_Transform);
+	iPriority=prim->iPriority;
+	m_MeshType = prim->m_MeshType;
+	m_PrimCoordSystem = prim->m_PrimCoordSystem;
+	m_Dimension = prim->m_Dimension;
+}
+
+CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
+{
+	this->Init();
+	SetProperty(prop);
+	clParaSet=paraSet;
+}
+
+void CSPrimitives::Init()
+{
+	clProperty=NULL;
+	clParaSet=NULL;
 	m_Transform=NULL;
+	uiID=g_PrimUniqueIDCounter++;
 	iPriority=0;
 	PrimTypeName = std::string("Base Type");
 	m_Primtive_Used = false;
@@ -92,44 +121,6 @@ CSPrimitives::CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties*
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
 	m_BoundBoxValid = false;
-}
-
-CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
-{
-	clProperty=NULL;
-	if (prop==NULL)
-		SetProperty(prim->clProperty);
-	else
-		SetProperty(prop);
-	uiID=g_PrimUniqueIDCounter++;
-	clParaSet=prim->clParaSet;
-	m_Transform=CSTransform::New(prim->m_Transform);
-	iPriority=prim->iPriority;
-	PrimTypeName = std::string("Base Type");
-	m_Primtive_Used = false;
-	m_MeshType = prim->m_MeshType;
-	m_PrimCoordSystem = prim->m_PrimCoordSystem;
-	m_Dimension = prim->m_Dimension;
-	for (int n=0;n<6;++n)
-		m_BoundBox[n]=0;
-}
-
-
-CSPrimitives::CSPrimitives(ParameterSet* paraSet, CSProperties* prop)
-{
-	clProperty=NULL;
-	SetProperty(prop);
-	clParaSet=paraSet;
-	m_Transform=NULL;
-	uiID=g_PrimUniqueIDCounter++;
-	iPriority=0;
-	PrimTypeName = std::string("Base Type");
-	m_Primtive_Used = false;
-	m_MeshType = CARTESIAN;
-	m_PrimCoordSystem = UNDEFINED_CS;
-	m_Dimension = 0;
-	for (int n=0;n<6;++n)
-		m_BoundBox[n]=0;
 }
 
 void CSPrimitives::SetProperty(CSProperties *prop)
