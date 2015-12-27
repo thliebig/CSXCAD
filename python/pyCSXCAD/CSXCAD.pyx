@@ -33,6 +33,8 @@ from CSPrimitives import CSPrimCurve, CSPrimWire
 from CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
 from ParameterObjects import ParameterSet
 
+from SmoothMeshLines import SmoothMeshLines
+
 cdef class ContinuousStructure:
     def __cinit__(self):
         self.thisptr = new _ContinuousStructure()
@@ -55,6 +57,19 @@ cdef class ContinuousStructure:
 
     def GetGrid(self):
         return self.grid
+
+    def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
+        grid = self.GetGrid()
+        grid.Clear()
+        if smooth_mesh_res is not None:
+            for k in mesh:
+                mesh[k] = SmoothMeshLines(mesh[k], smooth_mesh_res)
+
+        for k in mesh:
+            grid.SetLines(k, mesh[k])
+
+        grid.SetDeltaUnit(unit)
+        return grid
 
     def AddMaterial(self, name, **kw):
         return self.CreateProperty('Material', name, **kw)
