@@ -151,6 +151,10 @@ cdef extern from "CSPropProbeBox.h":
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()
 
+            size_t CountFDSamples()
+            void ClearFDSamples()
+            void AddFDSample(double freq)
+
 cdef class CSPropProbeBox(CSProperties):
     cdef _CSPropProbeBox* probeptr
 

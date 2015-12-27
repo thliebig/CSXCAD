@@ -294,6 +294,8 @@ cdef class CSPropProbeBox(CSProperties):
             self.SetWeighting(kw['weight'])
         if 'norm_dir' in kw:
             self.SetNormalDir(kw['norm_dir'])
+        if 'frequency' in kw:
+            self.SetFrequencies(kw['frequency'])
 
     def SetProbeType(self, val):
         self.probeptr.SetProbeType(val)
@@ -309,6 +311,11 @@ cdef class CSPropProbeBox(CSProperties):
         self.probeptr.SetNormalDir(val)
     def GetNormalDir(self):
         return self.probeptr.GetNormalDir()
+
+    def SetFrequency(self, freq):
+        self.probeptr.ClearFDSamples()
+        for f in freq:
+            self.probeptr.AddFDSample(f)
 
 ###############################################################################
 cdef class CSPropDumpBox(CSPropProbeBox):
