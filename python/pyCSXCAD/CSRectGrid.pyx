@@ -24,6 +24,7 @@ Created on Sat Dec 12 21:55:40 2015
 import numpy as np
 cimport CSRectGrid
 from Utilities import CheckNyDir
+from SmoothMeshLines import SmoothMeshLines
 
 cdef class CSRectGrid:
     def __cinit__(self, *args, no_init=False, **kw):
@@ -72,6 +73,15 @@ cdef class CSRectGrid:
     def ClearLines(self, ny):
         ny = CheckNyDir(ny)
         self.thisptr.ClearLines(ny)
+
+    def SmoothMeshLines(self, ny, max_res, ratio=1.5):
+        if ny=='all':
+            for n in range(3):
+                self.SmoothMeshLines(n, max_res, ratio)
+        else:
+            lines = self.GetLines(ny)
+            lines = SmoothMeshLines(lines, max_res, ratio)
+            self.SetLines(ny, lines)
 
     def Clear(self):
         self.thisptr.clear()
