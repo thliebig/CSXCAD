@@ -399,7 +399,7 @@ double* ContinuousStructure::GetObjectArea()
 	return ObjArea;
 }
 
-const char* ContinuousStructure::Update()
+std::string ContinuousStructure::Update()
 {
 	ErrString.clear();
 
@@ -410,7 +410,7 @@ const char* ContinuousStructure::Update()
 	for (size_t i=0;i<vPrimitives.size();++i)
 		vPrimitives.at(i)->Update(&ErrString);
 
-	return ErrString.c_str();
+	return std::string(ErrString);
 }
 
 void ContinuousStructure::clear()
