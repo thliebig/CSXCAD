@@ -31,6 +31,8 @@ cdef class CSProperties:
         assert self.thisptr, "Error, cannot create CSProperties (protected)"
         self.CSX = None
 
+        assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
+
     def __dealloc__(self):
         # only delete if this property is not owned by a CSX object
         if self.CSX is None:
@@ -48,14 +50,25 @@ cdef class CSProperties:
     def GetName(self):
         return self.thisptr.GetName().decode('UTF-8')
 
+    def ExistAttribute(self, name):
+        return self.thisptr.ExistAttribute(name.encode('UTF-8'))
+    def GetAttributeValue(self, name):
+        return self.thisptr.GetAttributeValue(name.encode('UTF-8')).decode('UTF-8')
+    def AddAttribute(self, name, val):
+        self.thisptr.AddAttribute(name.encode('UTF-8'), val.encode('UTF-8'))
+
 ###############################################################################
 cdef class CSPropMaterial(CSProperties):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMaterial(pset.thisptr)
-        super(CSPropMaterial, self).__init__(pset, *args, **kw)
         self.matptr  = <_CSPropMaterial*>self.thisptr
         self.SetMaterialProperty(**kw)
+        for k in ['Epsilon', 'Mue', 'Kappa', 'Sigma', 'Density']:
+            if k in kw:
+                del kw[k]
+
+        super(CSPropMaterial, self).__init__(pset, *args, **kw)
 
     def SetMaterialProperty(self, **kw):
         for prop_name in kw:
@@ -158,7 +171,6 @@ cdef class CSPropLumpedElement(CSProperties):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropLumpedElement(pset.thisptr)
-        super(CSPropLumpedElement, self).__init__(pset, *args, **kw)
         self.LEptr   = <_CSPropLumpedElement*> self.thisptr
 
         for k in kw:
@@ -172,8 +184,11 @@ cdef class CSPropLumpedElement(CSProperties):
                 self.SetDirection(kw[k])
             elif k.lower()=='caps':
                 self.SetCaps(kw[k])
-            else:
-                raise Exception('CSPropLumpedElement: Error, unknown key word')
+        for k in ['R', 'L', 'C', 'ny', 'caps']:
+            if k in kw:
+                del kw[k]
+
+        super(CSPropLumpedElement, self).__init__(pset, *args, **kw)
 
     def SetResistance(self, val):
         self.LEptr.SetResistance(val)
@@ -213,13 +228,15 @@ cdef class CSPropConductingSheet(CSPropMetal):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropConductingSheet(pset.thisptr)
-        super(CSPropConductingSheet, self).__init__(pset, *args, **kw)
         self.CSptr   = <_CSPropConductingSheet*> self.thisptr
 
         if 'conductivity' in kw:
             self.SetConductivity(kw['conductivity'])
+            del kw['conductivity']
         if 'thickness' in kw:
             self.SetThickness(kw['thickness'])
+            del kw['thickness']
+        super(CSPropConductingSheet, self).__init__(pset, *args, **kw)
 
     def SetConductivity(self, val):
         self.CSptr.SetConductivity(val)
@@ -236,15 +253,18 @@ cdef class CSPropExcitation(CSProperties):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropExcitation(pset.thisptr)
-        super(CSPropExcitation, self).__init__(pset, *args, **kw)
         self.excptr = <_CSPropExcitation*>self.thisptr
 
         if 'exc_type' in kw:
             self.SetExcitType(kw['exc_type'])
+            del kw['exc_type']
         if 'exc_val' in kw:
             self.SetExcitation(kw['exc_val'])
+            del kw['exc_val']
         if 'delay' in kw:
             self.SetDelay(kw['delay'])
+            del kw['delay']
+        super(CSPropExcitation, self).__init__(pset, *args, **kw)
 
     def SetExcitType(self, val):
         self.excptr.SetExcitType(val)
@@ -285,17 +305,24 @@ cdef class CSPropProbeBox(CSProperties):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSPropProbeBox*> new _CSPropProbeBox(pset.thisptr)
-        super(CSPropProbeBox, self).__init__(pset, *args, **kw)
         self.probeptr = <_CSPropProbeBox*>self.thisptr
 
         if 'p_type' in kw:
             self.SetProbeType(kw['p_type'])
+            del kw['p_type']
         if 'weight' in kw:
             self.SetWeighting(kw['weight'])
+            del kw['weight']
         if 'norm_dir' in kw:
             self.SetNormalDir(kw['norm_dir'])
+            del kw['norm_dir']
         if 'frequency' in kw:
             self.SetFrequencies(kw['frequency'])
+            del kw['frequency']
+        if 'mode_function' in kw:
+            self.SetModeFunction(kw['mode_function'])
+            del kw['mode_function']
+        super(CSPropProbeBox, self).__init__(pset, *args, **kw)
 
     def SetProbeType(self, val):
         self.probeptr.SetProbeType(val)
@@ -317,20 +344,35 @@ cdef class CSPropProbeBox(CSProperties):
         for f in freq:
             self.probeptr.AddFDSample(f)
 
+    def SetModeFunction(self, mode_fun):
+        assert len(mode_fun)==3
+        self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
+        self.AddAttribute('ModeFunctionY', str(mode_fun[1]))
+        self.AddAttribute('ModeFunctionZ', str(mode_fun[2]))
+
 ###############################################################################
 cdef class CSPropDumpBox(CSPropProbeBox):
     def __init__(self, ParameterSet pset, *args, **kw):
         if not self.thisptr:
             self.thisptr = <_CSPropDumpBox*> new _CSPropDumpBox(pset.thisptr)
-        super(CSPropDumpBox, self).__init__(pset, *args, **kw)
         self.dbptr = <_CSPropDumpBox*>self.thisptr
 
         if 'dump_type' in kw:
             self.SetDumpType(kw['dump_type'])
+            del kw['dump_type']
         if 'dump_mode' in kw:
             self.SetDumpMode(kw['dump_mode'])
+            del kw['dump_mode']
         if 'file_type' in kw:
             self.SetFileType(kw['file_type'])
+            del kw['file_type']
+        if 'opt_resolution' in kw:
+            self.SetOptResolution(kw['opt_resolution'])
+            del kw['opt_resolution']
+        if 'sub_sampling' in kw:
+            self.SetSubSampling(kw['sub_sampling'])
+            del kw['sub_sampling']
+        super(CSPropDumpBox, self).__init__(pset, *args, **kw)
 
     def SetDumpType(self, val):
         self.dbptr.SetDumpType(val)
@@ -346,3 +388,23 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         self.dbptr.SetFileType(val)
     def GetFileType(self):
         return self.dbptr.GetFileType()
+
+    def SetOptResolution(self, val):
+        assert len(val)==3
+        for n in range(3):
+            self.dbptr.SetOptResolution(n, val[n])
+    def GetOptResolution(self):
+        val = np.zeros(3)
+        for n in range(3):
+            val[n] = self.dbptr.GetOptResolution(n)
+        return val
+
+    def SetSubSampling(self, val):
+        assert len(val)==3
+        for n in range(3):
+            self.dbptr.SetSubSampling(n, val[n])
+    def GetSubSampling(self):
+        val = np.zeros(3)
+        for n in range(3):
+            val[n] = self.dbptr.GetSubSampling(n)
+        return val

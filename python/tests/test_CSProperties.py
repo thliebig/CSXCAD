@@ -46,6 +46,12 @@ CS = CSX.AddConductingSheet('sheet', conductivity=56e6, thickness=35e-6)
 assert CS.GetConductivity()==56e6
 assert CS.GetThickness()==35e-6
 
+# Test CSPropExcitation
+Exc = CSX.AddExcitation('excite', exc_type=1, exc_val=[-1.0, 0, 1.0], delay=1e-9)
+assert Exc.GetExcitType()==1
+assert (Exc.GetExcitation()==[-1.0, 0, 1.0]).all()
+assert Exc.GetDelay()==1e-9
+
 CSX.Write2XML('prop_test.xml')
 
 print("all ok!")

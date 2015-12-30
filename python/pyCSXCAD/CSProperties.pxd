@@ -37,6 +37,10 @@ cdef extern from "CSProperties.h":
 
             int GetQtyPrimitives()
 
+            bool ExistAttribute(string name)
+            string GetAttributeValue(string name)
+            void AddAttribute(string name, string value)
+
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
     cdef readonly ContinuousStructure CSX
@@ -172,6 +176,11 @@ cdef extern from "CSPropDumpBox.h":
             void SetFileType(int ftype)
             int GetFileType()
 
+            void SetOptResolution(int ny, double val)
+            double GetOptResolution(int ny)
+
+            void SetSubSampling(int ny, unsigned int val)
+            unsigned int GetSubSampling(int ny)
 
 cdef class CSPropDumpBox(CSPropProbeBox):
     cdef _CSPropDumpBox* dbptr
