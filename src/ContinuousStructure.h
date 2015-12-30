@@ -157,7 +157,7 @@ public:
 	//! Check whether the structure is valid.
 	virtual bool isGeometryValid();
 	//! Update all primitives and properties e.g. with respect to changed parameter settings. \return Gives an error message in case of a found error.
-	const char* Update();
+	std::string Update();
 
 	//! Get an array containing the absolute size of the current structure.
 	double* GetObjectArea();
