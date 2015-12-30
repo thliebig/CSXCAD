@@ -128,7 +128,7 @@ cdef class ContinuousStructure:
     def AddBox(self, prop, start, stop, **kw):
         return self.CreatePrimitive('Box', prop, start=start, stop=stop, **kw)
 
-    def AddClinder(self, prop, start, stop, radius, **kw):
+    def AddCylinder(self, prop, start, stop, radius, **kw):
         return self.CreatePrimitive('Cylinder', prop, start=start, stop=stop, radius=radius, **kw)
 
     def AddCylindricalShell(self, prop, start, stop, radius, shell_width, **kw):
@@ -168,7 +168,7 @@ cdef class ContinuousStructure:
             prim = CSPrimPoint(pset, prop, **kw)
         elif type_str=='Box':
             prim = CSPrimBox(pset, prop, **kw)
-        elif type_str=='Clinder':
+        elif type_str=='Cylinder':
             prim = CSPrimCylinder(pset, prop, **kw)
         elif type_str=='CylindricalShell':
             prim = CSPrimCylindricalShell(pset, prop, **kw)
