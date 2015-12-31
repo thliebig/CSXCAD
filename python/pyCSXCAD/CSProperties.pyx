@@ -294,6 +294,12 @@ cdef class CSPropExcitation(CSProperties):
             val[n] = self.excptr.GetPropagationDir(n)
         return val
 
+    def SetFrequency(self, val):
+        self.excptr.SetFrequency(val)
+
+    def GetFrequency(self):
+        return self.excptr.GetFrequency()
+
     def SetDelay(self, val):
         self.excptr.SetDelay(val)
 

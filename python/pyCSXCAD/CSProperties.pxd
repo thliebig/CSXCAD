@@ -136,6 +136,9 @@ cdef extern from "CSPropExcitation.h":
             void SetPropagationDir(double val, int Component)
             double GetPropagationDir(int Component)
 
+            void SetFrequency(double val)
+            double GetFrequency()
+
             void SetDelay(double val)
             double GetDelay()
 
