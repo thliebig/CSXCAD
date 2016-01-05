@@ -467,7 +467,7 @@ bool ContinuousStructure::Write2XML(const char* file, bool parameterised, bool s
 bool ContinuousStructure::Write2XML(std::string file, bool parameterised, bool sparse)
 {
 	TiXmlDocument doc(file);
-	doc.InsertEndChild(TiXmlDeclaration("1.0","ISO-8859-1","yes"));
+	doc.InsertEndChild(TiXmlDeclaration("1.0","UTF-8","yes"));
 
 	if (Write2XML(&doc,parameterised,sparse)==false) return false;
 
@@ -626,7 +626,7 @@ const char* ContinuousStructure::ReadFromXML(const char* file)
 	ErrString.clear();
 
 	TiXmlDocument doc(file);
-	if (!doc.LoadFile()) { ErrString.append("Error: File-Loading failed!!! File: ");ErrString.append(file); return ErrString.c_str();}
+	if (!doc.LoadFile(TIXML_ENCODING_UTF8)) { ErrString.append("Error: File-Loading failed!!! File: ");ErrString.append(file); return ErrString.c_str();}
 
 	return ReadFromXML(&doc);
 }
