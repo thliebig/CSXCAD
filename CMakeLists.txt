@@ -121,7 +121,7 @@ if (WIN32)
     find_package(VTK 6.1 REQUIRED)
 else()
     # prefer >=6.1, fallback to >=5.4
-    find_package(VTK 6.1 COMPONENTS vtkIOGeometry NO_MODULE)
+    find_package(VTK 6.1 COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
     IF (NOT ${VTK_FOUND})
         find_package(VTK REQUIRED)
     endif()
