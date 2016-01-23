@@ -7,10 +7,14 @@ VERSION = '0.6.0'
 VTK_LIBS = '''vtkCommon vtkFiltering vtkImaging vtkGraphics vtkGenericFiltering vtkIO vtkRendering vtkVolumeRendering vtkHybrid vtkWidgets
 vtkParallel vtkInfovis vtkGeovis vtkViews vtkCharts'''.split()
 
+import os
+
+ROOT_DIR = os.path.dirname(__file__)
+
 extensions = [
-    Extension("*", ["CSXCAD/*.pyx"],
+    Extension("*", [os.path.join(ROOT_DIR, "CSXCAD/*.pyx")],
         language="c++",             # generate C++ code
-        include_dirs = ['.', '../src/', ],
+        include_dirs = [os.path.join(ROOT_DIR, '../src'), ],
         libraries = ['CSXCAD',] + VTK_LIBS),
 ]
 
