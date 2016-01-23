@@ -5,13 +5,11 @@ Created on Sun Dec 13 14:49:46 2015
 @author: thorsten
 """
 
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 import numpy as np
 
-from pyCSXCAD import ParameterObjects
-from pyCSXCAD import CSProperties
-from pyCSXCAD import CSPrimitives
+from CSXCAD import ParameterObjects
+from CSXCAD import CSProperties
+from CSXCAD import CSPrimitives
 
 pset = ParameterObjects.ParameterSet()
 metal = CSProperties.CSPropMetal(pset)

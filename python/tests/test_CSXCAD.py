@@ -5,14 +5,11 @@ Created on Fri Dec  4 16:24:49 2015
 @author: thorsten
 """
 
-import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 import numpy as np
 
-from pyCSXCAD import CSXCAD
-from pyCSXCAD import CSProperties
-from pyCSXCAD import CSPrimitives
+from CSXCAD import CSXCAD
+from CSXCAD import CSProperties
+from CSXCAD import CSPrimitives
 
 csx = CSXCAD.ContinuousStructure()
 pset = csx.GetParameterSet()
