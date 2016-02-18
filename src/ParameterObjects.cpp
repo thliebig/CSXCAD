@@ -27,15 +27,10 @@ bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double 
 	double dHelp;
 
 	PS.SetValue(val); // set default value
-	if (elem.QueryDoubleAttribute(attr,&dHelp)==TIXML_SUCCESS)
-		PS.SetValue(dHelp); // set double value if found
-	else
-	{
-		const char* chHelp=elem.Attribute(attr);
-		if (chHelp==NULL)
-			return false;
-		PS.SetValue(chHelp); // set string value if found
-	}
+	const char* chHelp=elem.Attribute(attr);
+	if (chHelp==NULL)
+		return false;
+	PS.SetValue(chHelp); // set string value if found
 	return true;
 }
 
