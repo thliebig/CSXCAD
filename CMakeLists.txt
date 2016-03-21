@@ -130,7 +130,7 @@ endif()
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
 include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
-if("${VTK_MAJOR_VERSION}" EQUAL 6)
+if("${VTK_MAJOR_VERSION}" GREATER 5)
     set( vtk_LIBS ${VTK_LIBRARIES} )
 else()
     set( vtk_LIBS
