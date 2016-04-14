@@ -6,8 +6,7 @@
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/AABB_tree.h>
 #include <CGAL/AABB_traits.h>
-#include <CGAL/AABB_polyhedron_triangle_primitive.h>
-#include <CGAL/AABB_polyhedron_segment_primitive.h>
+#include <CGAL/AABB_face_graph_triangle_primitive.h>
 
 
 typedef CGAL::Simple_cartesian<double>     Kernel;
@@ -25,7 +24,7 @@ protected:
 };
 
 typedef Kernel::Point_3                                             Point;
-typedef CGAL::AABB_polyhedron_triangle_primitive<Kernel,Polyhedron> Primitive;
+typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron>        Primitive;
 typedef CGAL::AABB_traits<Kernel, Primitive>                        Traits;
 typedef CGAL::Simple_cartesian<double>::Ray_3                       Ray;
 typedef Kernel::Segment_3                                           Segment;
