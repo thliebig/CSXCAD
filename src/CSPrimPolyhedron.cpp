@@ -193,7 +193,11 @@ bool CSPrimPolyhedron::BuildTree()
 
 	//build tree
 	delete d_ptr->m_PolyhedronTree;
-	d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(d_ptr->m_Polyhedron.facets_begin(),d_ptr->m_Polyhedron.facets_end());
+#if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(4,6,0)
+    d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(faces(d_ptr->m_Polyhedron).first,faces(d_ptr->m_Polyhedron).second,d_ptr->m_Polyhedron);
+#else
+    d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(d_ptr->m_Polyhedron.facets_begin(),d_ptr->m_Polyhedron.facets_end());
+#endif
 
 	//update local bounding box
 	GetBoundBox(m_BoundBox);
