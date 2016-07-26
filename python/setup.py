@@ -2,10 +2,7 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
-VERSION = '0.6.0'
-
-VTK_LIBS = '''vtkCommon vtkFiltering vtkImaging vtkGraphics vtkGenericFiltering vtkIO vtkRendering vtkVolumeRendering vtkHybrid vtkWidgets
-vtkParallel vtkInfovis vtkGeovis vtkViews vtkCharts'''.split()
+VERSION = '0.6.1'
 
 import os
 
@@ -15,7 +12,7 @@ extensions = [
     Extension("*", [os.path.join(ROOT_DIR, "CSXCAD/*.pyx")],
         language="c++",             # generate C++ code
         include_dirs = [os.path.join(ROOT_DIR, '../src'), ],
-        libraries = ['CSXCAD',] + VTK_LIBS),
+        libraries = ['CSXCAD',]),
 ]
 
 setup(
