@@ -27,7 +27,7 @@ from libcpp cimport bool
 from ParameterObjects cimport _ParameterSet
 from CSXCAD cimport ContinuousStructure
 
-cdef extern from "CSProperties.h":
+cdef extern from "CSXCAD/CSProperties.h":
     cdef cppclass _CSProperties "CSProperties":
             _CSProperties(_ParameterSet*) except +
             int GetType()
@@ -46,7 +46,7 @@ cdef class CSProperties:
     cdef readonly ContinuousStructure CSX
 
 ##############################################################################
-cdef extern from "CSPropMaterial.h":
+cdef extern from "CSXCAD/CSPropMaterial.h":
     cdef cppclass _CSPropMaterial "CSPropMaterial" (_CSProperties):
             _CSPropMaterial(_ParameterSet*) except +
             void SetEpsilon(double val, int ny)
@@ -81,7 +81,7 @@ cdef class CSPropMaterial(CSProperties):
     cdef _CSPropMaterial* matptr
 
 ##############################################################################
-cdef extern from "CSPropLumpedElement.h":
+cdef extern from "CSXCAD/CSPropLumpedElement.h":
     cdef cppclass _CSPropLumpedElement "CSPropLumpedElement" (_CSProperties):
             _CSPropLumpedElement(_ParameterSet*) except +
             void SetResistance(double val)
@@ -103,7 +103,7 @@ cdef class CSPropLumpedElement(CSProperties):
     cdef _CSPropLumpedElement* LEptr
 
 ##############################################################################
-cdef extern from "CSPropMetal.h":
+cdef extern from "CSXCAD/CSPropMetal.h":
     cdef cppclass _CSPropMetal "CSPropMetal" (_CSProperties):
             _CSPropMetal(_ParameterSet*) except +
 
@@ -111,7 +111,7 @@ cdef class CSPropMetal(CSProperties):
     pass
 
 ##############################################################################
-cdef extern from "CSPropConductingSheet.h":
+cdef extern from "CSXCAD/CSPropConductingSheet.h":
     cdef cppclass _CSPropConductingSheet "CSPropConductingSheet" (_CSPropMetal):
             _CSPropConductingSheet(_ParameterSet*) except +
             void SetConductivity(double val)
@@ -124,7 +124,7 @@ cdef class CSPropConductingSheet(CSPropMetal):
     cdef _CSPropConductingSheet* CSptr
 
 ##############################################################################
-cdef extern from "CSPropExcitation.h":
+cdef extern from "CSXCAD/CSPropExcitation.h":
     cdef cppclass _CSPropExcitation "CSPropExcitation" (_CSProperties):
             _CSPropExcitation(_ParameterSet*) except +
             void SetExcitType(int val)
@@ -146,7 +146,7 @@ cdef class CSPropExcitation(CSProperties):
     cdef _CSPropExcitation* excptr
 
 ##############################################################################
-cdef extern from "CSPropProbeBox.h":
+cdef extern from "CSXCAD/CSPropProbeBox.h":
     cdef cppclass _CSPropProbeBox "CSPropProbeBox" (_CSProperties):
             _CSPropProbeBox(_ParameterSet*) except +
             void SetProbeType(int type)
@@ -167,7 +167,7 @@ cdef class CSPropProbeBox(CSProperties):
 
 
 ##############################################################################
-cdef extern from "CSPropDumpBox.h":
+cdef extern from "CSXCAD/CSPropDumpBox.h":
     cdef cppclass _CSPropDumpBox "CSPropDumpBox" (_CSPropProbeBox):
             _CSPropDumpBox(_ParameterSet*) except +
             void SetDumpType(int _type)

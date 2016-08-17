@@ -32,7 +32,7 @@ from ParameterObjects cimport _ParameterSet, ParameterSet
 from CSProperties cimport _CSProperties, CSProperties
 from CSRectGrid cimport _CSRectGrid, CSRectGrid
 
-cdef extern from "ContinuousStructure.h":
+cdef extern from "CSXCAD/ContinuousStructure.h":
     cdef cppclass _ContinuousStructure "ContinuousStructure":
             _ContinuousStructure() except +
             bool Write2XML(string)

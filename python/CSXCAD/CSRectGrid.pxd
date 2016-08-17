@@ -24,13 +24,13 @@ Created on Sat Dec 12 21:56:38 2015
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cdef extern from "CSXCAD_Global.h":
+cdef extern from "CSXCAD/CSXCAD_Global.h":
     ctypedef enum CoordinateSystem "CoordinateSystem":
         CARTESIAN    "CARTESIAN"
         CYLINDRICAL  "CYLINDRICAL"
         UNDEFINED_CS "UNDEFINED_CS"
 
-cdef extern from "CSRectGrid.h":
+cdef extern from "CSXCAD/CSRectGrid.h":
         cdef cppclass _CSRectGrid "CSRectGrid":
             _CSRectGrid() except +
             void AddDiscLine(int direct, double val)

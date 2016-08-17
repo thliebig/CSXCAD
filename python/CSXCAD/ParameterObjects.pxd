@@ -23,7 +23,7 @@ Created on Sat Dec  5 13:56:36 2015
 
 from libcpp cimport bool
 
-cdef extern from "ParameterObjects.h":
+cdef extern from "CSXCAD/ParameterObjects.h":
     cdef cppclass _ParameterSet "ParameterSet":
             _ParameterSet() except +
             void PrintSelf()

@@ -2,22 +2,17 @@ from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Build import cythonize
 
-VERSION = '0.6.1'
-
 import os
 
-ROOT_DIR = os.path.dirname(__file__)
-
 extensions = [
-    Extension("*", [os.path.join(ROOT_DIR, "CSXCAD/*.pyx")],
+    Extension("*", [os.path.join(os.path.dirname(__file__), "CSXCAD","*.pyx")],
         language="c++",             # generate C++ code
-        include_dirs = [os.path.join(ROOT_DIR, '../src'), ],
         libraries = ['CSXCAD',]),
 ]
 
 setup(
   name="CSXCAD",
-  version = VERSION,
+  version = '0.6.1',
   description = "Python interface for the CSXCAD library",
   classifiers = [
       'Development Status :: 3 - Alpha',
