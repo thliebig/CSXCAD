@@ -7,16 +7,16 @@ Created on Fri Dec  4 16:24:49 2015
 
 import numpy as np
 
-from CSXCAD import CSXCAD
-from CSXCAD import CSProperties
+from CSXCAD.CSXCAD import ContinuousStructure
+from CSXCAD.CSProperties import CSPropMetal
 from CSXCAD import CSPrimitives
 
-csx = CSXCAD.ContinuousStructure()
+csx = ContinuousStructure()
 pset = csx.GetParameterSet()
 grid = csx.GetGrid()
 
 ##### Test Metal Prop
-metal = CSProperties.CSPropMetal(pset)
+metal = CSPropMetal(pset)
 assert metal.GetQtyPrimitives() == 0
 assert metal.GetTypeString()=='Metal'
 
@@ -34,9 +34,8 @@ assert exc.GetName()=='excite'
 assert exc.GetExcitType() == 0
 assert (exc.GetExcitation()==exc_val).all()
 
-
 csx.Write2XML('test_CSXCAD.xml')
 
 del metal
 
-print("all done")
+print("all ok")
