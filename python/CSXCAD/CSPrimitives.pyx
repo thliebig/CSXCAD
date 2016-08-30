@@ -484,9 +484,9 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
     def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
         if not self.thisptr:
             self.thisptr = new _CSPrimPolyhedronReader(pset.thisptr, prop.thisptr)
-        if 'SetFilename' in kw:
-            self.SetWireRadius(kw['filename'])
-            del kw['SetFilename']
+        if 'filename' in kw:
+            self.SetFilename(kw['filename'])
+            del kw['filename']
         super(CSPrimPolyhedronReader, self).__init__(pset, prop, *args, **kw)
 
     def SetFilename(self, fn):
