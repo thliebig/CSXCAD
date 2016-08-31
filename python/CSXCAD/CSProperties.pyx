@@ -65,6 +65,12 @@ cdef class CSPropMaterial(CSProperties):
 
         super(CSPropMaterial, self).__init__(pset, *args, **kw)
 
+    def SetIsotropy(self, val):
+        self.matptr.SetIsotropy(val)
+
+    def GetIsotropy(self):
+        return self.matptr.GetIsotropy()
+
     def SetMaterialProperty(self, **kw):
         for prop_name in kw:
             val = kw[prop_name]

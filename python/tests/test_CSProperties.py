@@ -17,14 +17,18 @@ mat = CSX.AddMaterial('mat1', epsilon = 5.0)
 assert mat.GetMaterialProperty('epsilon')==5.0
 assert mat.GetMaterialProperty('mue')==1.0
 
-mat.SetMaterialProperty(epsilon=1.0, mue=2.0)
+mat.SetMaterialProperty(epsilon=[1.0, 2.0, 3.0], mue=2.0)
 assert mat.GetMaterialProperty('epsilon')==1.0
 assert mat.GetMaterialProperty('mue')==2.0
 
-mat.SetMaterialWeight(epsilon='sin(x)', mue='cos(y)', density='z*z')
+mat.SetMaterialWeight(epsilon=['sin(x)', 'y', 'z'],  mue='cos(y)', density='z*z')
 assert mat.GetMaterialWeight('epsilon')=='sin(x)'
 assert mat.GetMaterialWeight('mue')=='cos(y)'
 assert mat.GetMaterialWeight('density')=='z*z'
+
+mat.SetIsotropy(False)
+assert mat.GetIsotropy()==False
+assert (mat.GetMaterialProperty('epsilon')==[1.0, 2.0, 3.0]).all()
 
 # Test LumpedElement
 LE = CSX.AddLumpedElement('LE', R = 50, C=1e-12, caps=True, ny='x')
