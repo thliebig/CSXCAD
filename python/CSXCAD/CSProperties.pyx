@@ -59,8 +59,8 @@ cdef class CSPropMaterial(CSProperties):
             self.thisptr = <_CSProperties*> new _CSPropMaterial(pset.thisptr)
         self.matptr  = <_CSPropMaterial*>self.thisptr
         self.SetMaterialProperty(**kw)
-        for k in ['Epsilon', 'Mue', 'Kappa', 'Sigma', 'Density']:
-            if k in kw:
+        for k in list(kw.keys()):
+            if k in ['epsilon', 'mue', 'kappa', 'sigma', 'density']:
                 del kw[k]
 
         super(CSPropMaterial, self).__init__(pset, *args, **kw)
@@ -68,7 +68,7 @@ cdef class CSPropMaterial(CSProperties):
     def SetMaterialProperty(self, **kw):
         for prop_name in kw:
             val = kw[prop_name]
-            if prop_name == 'Density':
+            if prop_name == 'density':
                 self.matptr.SetDensity(val)
                 continue
             if type(val)==float or type(val)==int:
@@ -79,13 +79,13 @@ cdef class CSPropMaterial(CSProperties):
                 self.SetMaterialPropertyDir(prop_name, n, val[n])
 
     def SetMaterialPropertyDir(self, prop_name, ny, val):
-        if prop_name=='Epsilon':
+        if prop_name=='epsilon':
             return self.matptr.SetEpsilon(val, ny)
-        elif prop_name=='Mue':
+        elif prop_name=='mue':
             return self.matptr.SetMue(val, ny)
-        elif prop_name=='Kappa':
+        elif prop_name=='kappa':
             return self.matptr.SetKappa(val, ny)
-        elif prop_name=='Sigma':
+        elif prop_name=='sigma':
             return self.matptr.SetSigma(val, ny)
         else:
             raise Exception('SetMaterialPropertyDir: Error, unknown material property')
@@ -93,7 +93,7 @@ cdef class CSPropMaterial(CSProperties):
     def SetMaterialWeight(self, **kw):
         for prop_name in kw:
             val = kw[prop_name]
-            if prop_name == 'Density':
+            if prop_name == 'density':
                 self.matptr.SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
             if type(val)==str:
@@ -105,19 +105,19 @@ cdef class CSPropMaterial(CSProperties):
 
     def SetMaterialWeightDir(self, prop_name, ny, val):
         val = val.encode('UTF-8')
-        if prop_name=='Epsilon':
+        if prop_name=='epsilon':
             return self.matptr.SetEpsilonWeightFunction(val, ny)
-        elif prop_name=='Mue':
+        elif prop_name=='mue':
             return self.matptr.SetMueWeightFunction(val, ny)
-        elif prop_name=='Kappa':
+        elif prop_name=='kappa':
             return self.matptr.SetKappaWeightFunction(val, ny)
-        elif prop_name=='Sigma':
+        elif prop_name=='sigma':
             return self.matptr.SetSigmaWeightFunction(val, ny)
         else:
             raise Exception('SetMaterialWeightDir: Error, unknown material property')
 
     def GetMaterialProperty(self, prop_name):
-        if prop_name == 'Density':
+        if prop_name == 'density':
             return self.matptr.GetDensity()
         if self.matptr.GetIsotropy():
             return self.GetMaterialPropertyDir(prop_name, 0)
@@ -127,19 +127,19 @@ cdef class CSPropMaterial(CSProperties):
         return val
 
     def GetMaterialPropertyDir(self, prop_name, ny):
-        if prop_name=='Epsilon':
+        if prop_name=='epsilon':
             return self.matptr.GetEpsilon(ny)
-        elif prop_name=='Mue':
+        elif prop_name=='mue':
             return self.matptr.GetMue(ny)
-        elif prop_name=='Kappa':
+        elif prop_name=='kappa':
             return self.matptr.GetKappa(ny)
-        elif prop_name=='Sigma':
+        elif prop_name=='sigma':
             return self.matptr.GetSigma(ny)
         else:
             raise Exception('GetMaterialPropertyDir: Error, unknown material property')
 
     def GetMaterialWeight(self, prop_name):
-        if prop_name == 'Density':
+        if prop_name == 'density':
             return self.matptr.GetDensityWeightFunction().decode('UTF-8')
         if self.matptr.GetIsotropy():
             return self.GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
@@ -149,13 +149,13 @@ cdef class CSPropMaterial(CSProperties):
         return val
 
     def GetMaterialWeightDir(self, prop_name, ny):
-        if prop_name=='Epsilon':
+        if prop_name=='epsilon':
             return self.matptr.GetEpsilonWeightFunction(ny)
-        elif prop_name=='Mue':
+        elif prop_name=='mue':
             return self.matptr.GetMueWeightFunction(ny)
-        elif prop_name=='Kappa':
+        elif prop_name=='kappa':
             return self.matptr.GetKappaWeightFunction(ny)
-        elif prop_name=='Sigma':
+        elif prop_name=='sigma':
             return self.matptr.GetSigmaWeightFunction(ny)
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
@@ -177,7 +177,7 @@ cdef class CSPropLumpedElement(CSProperties):
                 self.SetCapacity(kw[k])
             elif k=='ny':
                 self.SetDirection(kw[k])
-            elif k.lower()=='caps':
+            elif k=='caps':
                 self.SetCaps(kw[k])
         for k in ['R', 'L', 'C', 'ny', 'caps']:
             if k in kw:

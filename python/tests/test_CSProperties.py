@@ -13,18 +13,18 @@ from CSXCAD import CSProperties
 CSX = CSXCAD.ContinuousStructure()
 
 # Test Material
-mat = CSX.AddMaterial('mat1', Epsilon = 5.0)
-assert mat.GetMaterialProperty('Epsilon')==5.0
-assert mat.GetMaterialProperty('Mue')==1.0
+mat = CSX.AddMaterial('mat1', epsilon = 5.0)
+assert mat.GetMaterialProperty('epsilon')==5.0
+assert mat.GetMaterialProperty('mue')==1.0
 
-mat.SetMaterialProperty(Epsilon=1.0, Mue=2.0)
-assert mat.GetMaterialProperty('Epsilon')==1.0
-assert mat.GetMaterialProperty('Mue')==2.0
+mat.SetMaterialProperty(epsilon=1.0, mue=2.0)
+assert mat.GetMaterialProperty('epsilon')==1.0
+assert mat.GetMaterialProperty('mue')==2.0
 
-mat.SetMaterialWeight(Epsilon='sin(x)', Mue='cos(y)', Density='z*z')
-assert mat.GetMaterialWeight('Epsilon')=='sin(x)'
-assert mat.GetMaterialWeight('Mue')=='cos(y)'
-assert mat.GetMaterialWeight('Density')=='z*z'
+mat.SetMaterialWeight(epsilon='sin(x)', mue='cos(y)', density='z*z')
+assert mat.GetMaterialWeight('epsilon')=='sin(x)'
+assert mat.GetMaterialWeight('mue')=='cos(y)'
+assert mat.GetMaterialWeight('density')=='z*z'
 
 # Test LumpedElement
 LE = CSX.AddLumpedElement('LE', R = 50, C=1e-12, caps=True, ny='x')
