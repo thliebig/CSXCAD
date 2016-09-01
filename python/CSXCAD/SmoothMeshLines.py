@@ -20,6 +20,9 @@ import numpy as np
 import pylab as plt
 
 def MeshLinesSymmetric(l, rel_tol=1e-6):
+    """
+    Internal function, do not use.
+    """
     l = np.array(l)
     N = len(l)
     rng = l[-1]-l[0]
@@ -35,6 +38,9 @@ def MeshLinesSymmetric(l, rel_tol=1e-6):
     return True
 
 def Unique(l, tol=1e-7):
+    """
+    Internal function, do not use.
+    """
     l = np.unique(l)
     dl = np.diff(l)
     idx = np.where(dl<np.mean(dl)*tol)[0]
@@ -44,6 +50,9 @@ def Unique(l, tol=1e-7):
     return l
 
 def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
+    """
+    Internal function, do not use.
+    """
     assert ratio>1
     rng = (stop-start)
 
@@ -149,6 +158,19 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 
 
 def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
+    """This is the form of a docstring.
+
+    Parameters
+    ----------
+
+    lines : list
+        List of mesh lines to be smoothed
+    max_res : float
+        Maximum allowed resolution, resulting mesh will always stay below that value
+    ratio : float
+        Ratio of increase or decrease of neighboring mesh lines
+
+    """
     out_l = Unique(lines)
     dl = np.diff(out_l)
 

@@ -17,6 +17,14 @@
 #
 
 def CheckNyDir(ny):
+    """ CheckNyDir(ny)
+
+    Translate directions like 'x'/'y' or 'z' into 0/1 or 2.
+    Raise an assertion error otherwise.
+
+    :param ny: int or str
+    :returns: int -- direction as 0/1/2
+    """
     assert (ny==0 or ny==1 or ny==2 or ny=='x' or ny=='y' or ny=='z')
     if type(ny)==str:
         return ['x','y','z'].index(ny)
