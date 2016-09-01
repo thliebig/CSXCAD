@@ -87,9 +87,13 @@ cdef class CSRectGrid:
     def GetDeltaUnit(self):
         return self.thisptr.GetDeltaUnit()
 
-    def Sort(self, ny):
-        ny = CheckNyDir(ny)
-        self.thisptr.Sort(ny)
+    def Sort(self, ny='all'):
+        if ny=='all':
+            for n in range(3):
+                self.thisptr.Sort(n)
+        else:
+            ny = CheckNyDir(ny)
+            self.thisptr.Sort(ny)
 
     def Snap2LineNumber(self, ny, value):
         ny = CheckNyDir(ny)
