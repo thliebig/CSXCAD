@@ -24,14 +24,13 @@ from Utilities import CheckNyDir
 cdef class CSProperties:
     def __init__(self, ParameterSet pset, *args, **kw):
         assert self.thisptr, "Error, cannot create CSProperties (protected)"
-        self.CSX = None
+        self.__CSX = None
 
         assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
 
     def __dealloc__(self):
         # only delete if this property is not owned by a CSX object
-        if self.CSX is None:
-            print("del prop")
+        if self.__CSX is None:
             del self.thisptr
 
     def GetQtyPrimitives(self):
@@ -78,13 +77,13 @@ cdef class CSPropMaterial(CSProperties):
                 self.matptr.SetDensity(val)
                 continue
             if type(val)==float or type(val)==int:
-                self.SetMaterialPropertyDir(prop_name, 0, val)
+                self.__SetMaterialPropertyDir(prop_name, 0, val)
                 continue
             assert len(val)==3
             for n in range(3):
-                self.SetMaterialPropertyDir(prop_name, n, val[n])
+                self.__SetMaterialPropertyDir(prop_name, n, val[n])
 
-    def SetMaterialPropertyDir(self, prop_name, ny, val):
+    def __SetMaterialPropertyDir(self, prop_name, ny, val):
         if prop_name=='epsilon':
             return self.matptr.SetEpsilon(val, ny)
         elif prop_name=='mue':
@@ -103,13 +102,13 @@ cdef class CSPropMaterial(CSProperties):
                 self.matptr.SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
             if type(val)==str:
-                self.SetMaterialWeightDir(prop_name, 0, val)
+                self.__SetMaterialWeightDir(prop_name, 0, val)
                 continue
             assert len(val)==3
             for n in range(3):
-                self.SetMaterialWeightDir(prop_name, n, val[n])
+                self.__SetMaterialWeightDir(prop_name, n, val[n])
 
-    def SetMaterialWeightDir(self, prop_name, ny, val):
+    def __SetMaterialWeightDir(self, prop_name, ny, val):
         val = val.encode('UTF-8')
         if prop_name=='epsilon':
             return self.matptr.SetEpsilonWeightFunction(val, ny)
@@ -126,13 +125,13 @@ cdef class CSPropMaterial(CSProperties):
         if prop_name == 'density':
             return self.matptr.GetDensity()
         if self.matptr.GetIsotropy():
-            return self.GetMaterialPropertyDir(prop_name, 0)
+            return self.__GetMaterialPropertyDir(prop_name, 0)
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.GetMaterialPropertyDir(prop_name, n)
+            val[n] = self.__GetMaterialPropertyDir(prop_name, n)
         return val
 
-    def GetMaterialPropertyDir(self, prop_name, ny):
+    def __GetMaterialPropertyDir(self, prop_name, ny):
         if prop_name=='epsilon':
             return self.matptr.GetEpsilon(ny)
         elif prop_name=='mue':
@@ -148,13 +147,13 @@ cdef class CSPropMaterial(CSProperties):
         if prop_name == 'density':
             return self.matptr.GetDensityWeightFunction().decode('UTF-8')
         if self.matptr.GetIsotropy():
-            return self.GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
-        val = np.zeros(3)
+            return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
+        val = ['', '', '']
         for n in range(3):
-            val[n] = self.GetMaterialWeightDir(prop_name, n).decode('UTF-8')
+            val[n] = self.__GetMaterialWeightDir(prop_name, n).decode('UTF-8')
         return val
 
-    def GetMaterialWeightDir(self, prop_name, ny):
+    def __GetMaterialWeightDir(self, prop_name, ny):
         if prop_name=='epsilon':
             return self.matptr.GetEpsilonWeightFunction(ny)
         elif prop_name=='mue':

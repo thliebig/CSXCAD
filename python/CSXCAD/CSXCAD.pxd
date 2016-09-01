@@ -37,6 +37,6 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping
-    cdef readonly ParameterSet paraset
-    cdef readonly CSRectGrid   grid
+    cdef readonly ParameterSet __paraset
+    cdef readonly CSRectGrid   __grid
     cdef _AddProperty(self, CSProperties prop)

@@ -33,25 +33,25 @@ from SmoothMeshLines import SmoothMeshLines
 cdef class ContinuousStructure:
     def __cinit__(self):
         self.thisptr = new _ContinuousStructure()
-        self.paraset = ParameterSet(no_init=True)
-        self.paraset.thisptr = self.thisptr.GetParameterSet()
+        self.__paraset = ParameterSet(no_init=True)
+        self.__paraset.thisptr = self.thisptr.GetParameterSet()
 
-        self.grid         = CSRectGrid(no_init=True)
-        self.grid.thisptr = self.thisptr.GetGrid()
+        self.__grid         = CSRectGrid(no_init=True)
+        self.__grid.thisptr = self.thisptr.GetGrid()
 
     def __dealloc__(self):
-        self.grid.thisptr = NULL
-        self.paraset.thisptr = NULL
+        self.__grid.thisptr = NULL
+        self.__paraset.thisptr = NULL
         del self.thisptr
 
     def Write2XML(self, fn):
         self.thisptr.Write2XML(fn.encode('UTF-8'))
 
     def GetParameterSet(self):
-        return self.paraset
+        return self.__paraset
 
     def GetGrid(self):
-        return self.grid
+        return self.__grid
 
     def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
         grid = self.GetGrid()
@@ -67,43 +67,43 @@ cdef class ContinuousStructure:
         return grid
 
     def AddMaterial(self, name, **kw):
-        return self.CreateProperty('Material', name, **kw)
+        return self.__CreateProperty('Material', name, **kw)
 
     def AddLumpedElement(self, name, **kw):
-        return self.CreateProperty('LumpedElement', name, **kw)
+        return self.__CreateProperty('LumpedElement', name, **kw)
 
     def AddMetal(self, name):
-        return self.CreateProperty('Metal', name)
+        return self.__CreateProperty('Metal', name)
 
     def AddConductingSheet(self, name, **kw):
-        return self.CreateProperty('ConductingSheet', name, **kw)
+        return self.__CreateProperty('ConductingSheet', name, **kw)
 
     def AddExcitation(self, name, exc_type, exc_val, **kw):
-        return self.CreateProperty('Excitation', name, exc_type=exc_type, exc_val=exc_val, **kw)
+        return self.__CreateProperty('Excitation', name, exc_type=exc_type, exc_val=exc_val, **kw)
 
     def AddProbe(self, name, p_type, **kw):
-        return self.CreateProperty('Probe', name, p_type=p_type, **kw)
+        return self.__CreateProperty('Probe', name, p_type=p_type, **kw)
 
     def AddDump(self, name, **kw):
-        return self.CreateProperty('Dump', name, **kw)
+        return self.__CreateProperty('Dump', name, **kw)
 
-    def CreateProperty(self, type_str, name, *args, **kw):
+    def __CreateProperty(self, type_str, name, *args, **kw):
         assert len(args)==0, 'CreateProperty does not support additional arguments'
         if type_str=='Material':
-            prop = CSPropMaterial(self.paraset, **kw)
+            prop = CSPropMaterial(self.__paraset, **kw)
         elif type_str=='LumpedElement':
-            prop = CSPropLumpedElement(self.paraset, **kw)
+            prop = CSPropLumpedElement(self.__paraset, **kw)
         elif type_str=='Metal':
             assert len(kw)==0, 'CreateProperty: Metal does not support additional key words'
-            prop = CSPropMetal(self.paraset)
+            prop = CSPropMetal(self.__paraset)
         elif type_str=='ConductingSheet':
-            prop = CSPropConductingSheet(self.paraset, **kw)
+            prop = CSPropConductingSheet(self.__paraset, **kw)
         elif type_str=='Excitation':
-            prop = CSPropExcitation(self.paraset, **kw)
+            prop = CSPropExcitation(self.__paraset, **kw)
         elif type_str=='Probe':
-            prop = CSPropProbeBox(self.paraset, **kw)
+            prop = CSPropProbeBox(self.__paraset, **kw)
         elif type_str=='Dump':
-            prop = CSPropDumpBox(self.paraset, **kw)
+            prop = CSPropDumpBox(self.__paraset, **kw)
         else:
             raise Exception('CreateProperty: Unknown property type requested: {}'.format(type_str))
         prop.SetName(name)
@@ -114,49 +114,47 @@ cdef class ContinuousStructure:
         self._AddProperty(prop)
 
     cdef _AddProperty(self, CSProperties prop):
-        prop.CSX = self
+        prop.__CSX = self
         self.thisptr.AddProperty(prop.thisptr)
 
     def AddPoint(self, prop, coord, **kw):
-        return self.CreatePrimitive('Point', prop, coord=coord, **kw)
+        return self.__CreatePrimitive('Point', prop, coord=coord, **kw)
 
     def AddBox(self, prop, start, stop, **kw):
-        return self.CreatePrimitive('Box', prop, start=start, stop=stop, **kw)
+        return self.__CreatePrimitive('Box', prop, start=start, stop=stop, **kw)
 
     def AddCylinder(self, prop, start, stop, radius, **kw):
-        return self.CreatePrimitive('Cylinder', prop, start=start, stop=stop, radius=radius, **kw)
+        return self.__CreatePrimitive('Cylinder', prop, start=start, stop=stop, radius=radius, **kw)
 
     def AddCylindricalShell(self, prop, start, stop, radius, shell_width, **kw):
-        return self.CreatePrimitive('CylindricalShell', prop, start=start, stop=stop, radius=radius, shell_width=shell_width, **kw)
+        return self.__CreatePrimitive('CylindricalShell', prop, start=start, stop=stop, radius=radius, shell_width=shell_width, **kw)
 
     def AddSphere(self, prop, center, radius, **kw):
-        return self.CreatePrimitive('Sphere', prop, center=center, radius=radius, **kw)
+        return self.__CreatePrimitive('Sphere', prop, center=center, radius=radius, **kw)
 
     def AddSphericalShell(self, prop, center, radius, shell_width, **kw):
-        return self.CreatePrimitive('SphericalShell', prop, center=center, radius=radius, shell_width=shell_width, **kw)
+        return self.__CreatePrimitive('SphericalShell', prop, center=center, radius=radius, shell_width=shell_width, **kw)
 
     def AddPolygon(self, prop, points, norm_dir, elevation, **kw):
-        return self.CreatePrimitive('Polygon', prop, points=points, norm_dir=norm_dir, elevation=elevation, **kw)
+        return self.__CreatePrimitive('Polygon', prop, points=points, norm_dir=norm_dir, elevation=elevation, **kw)
 
     def AddLinPoly(self, prop, points, norm_dir, elevation, length, **kw):
-        return self.CreatePrimitive('LinPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, length=length, **kw)
+
+        return self.__CreatePrimitive('LinPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, length=length, **kw)
 
     def AddRotPoly(self, prop, points, norm_dir, elevation, rot_axis, angle, **kw):
-        return self.CreatePrimitive('RotPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
-
-    def AddRotPoly(self, prop, points, norm_dir, elevation, rot_axis, angle, **kw):
-        return self.CreatePrimitive('RotPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
+        return self.__CreatePrimitive('RotPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
 
     def AddCurve(self, prop, points, **kw):
-        return self.CreatePrimitive('Curve', prop, points=points, **kw)
+        return self.__CreatePrimitive('Curve', prop, points=points, **kw)
 
     def AddWire(self, prop, points, radius, **kw):
-        return self.CreatePrimitive('Wire', prop, points=points, radius=radius, **kw)
+        return self.__CreatePrimitive('Wire', prop, points=points, radius=radius, **kw)
 
     def AddPolyhedronReader(self, prop, filename, **kw):
-        return self.CreatePrimitive('PolyhedronReader', prop, filename=filename, **kw)
+        return self.__CreatePrimitive('PolyhedronReader', prop, filename=filename, **kw)
 
-    def CreatePrimitive(self, type_str, prop, *args, **kw):
+    def __CreatePrimitive(self, type_str, prop, *args, **kw):
         pset = self.GetParameterSet()
         assert len(args)==0, 'CreatePrimitive: Box does not support additional arguments'
         if type_str=='Point':

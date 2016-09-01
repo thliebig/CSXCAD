@@ -38,7 +38,7 @@ cdef extern from "CSXCAD/CSProperties.h":
 
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
-    cdef readonly ContinuousStructure CSX
+    cdef readonly ContinuousStructure __CSX
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropMaterial.h":
