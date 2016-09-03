@@ -73,6 +73,11 @@ void CSTransform::Reset()
 	MakeUnitMatrix(m_Inv_TMatrix);
 }
 
+bool CSTransform::HasTransform()
+{
+	return (m_TransformList.size()>0);
+}
+
 void CSTransform::Invert()
 {
 	//make sure the inverse matrix is up to date...

@@ -85,6 +85,9 @@ public:
 
 	void Reset();
 
+	//! Check if this CSTransform has any transformations
+	bool HasTransform();
+
 	//! All subsequent operations will be occur before the previous operations (not the default).
 	void SetPreMultiply() {m_PostMultiply=false;}
 	//! All subsequent operations will be after the previous operations (default).

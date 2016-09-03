@@ -123,6 +123,13 @@ void CSPrimitives::Init()
 	m_BoundBoxValid = false;
 }
 
+CSTransform* CSPrimitives::GetTransform()
+{
+	if (m_Transform==NULL)
+		m_Transform = new CSTransform(clParaSet);
+	return m_Transform;
+}
+
 void CSPrimitives::SetProperty(CSProperties *prop)
 {
 	if ((clProperty!=NULL) && (clProperty!=prop))
@@ -146,8 +153,9 @@ int CSPrimitives::IsInsideBox(const double *boundbox)
 		return 0;  // unable to decide with an invalid bounding box
 	if ((this->GetBoundBoxCoordSystem()!=UNDEFINED_CS) && (this->GetBoundBoxCoordSystem()!=this->GetCoordInputType()))
 		return 0;  // unable to decide if coordinate system do not match
-	if (this->GetTransform()!=NULL)
-		return 0;  // unable to decide if a transformation is used
+	if (m_Transform!=NULL)
+		if (m_Transform->HasTransform())
+			return 0;  // unable to decide if a transformation is used
 
 	for (int i=0;i<3;++i)
 	{
