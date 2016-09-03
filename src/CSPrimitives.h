@@ -177,7 +177,8 @@ public:
 	//! Read the coordinate system for this primitive (may be different to the input mesh type) \sa GetCoordInputType
 	CoordinateSystem GetCoordinateSystem() const {return m_PrimCoordSystem;}
 
-	CSTransform* GetTransform() const {return m_Transform;}
+	//! Get the CSTransform if it exists already or create a new one
+	CSTransform* GetTransform();
 
 	//! Show status of this primitve
 	virtual void ShowPrimitiveStatus(std::ostream& stream);
