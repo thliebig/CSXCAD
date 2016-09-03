@@ -29,6 +29,13 @@ box.AddTransform('Translate', [0,1,2])
 assert tr.HasTransform()
 tr.Scale(1)
 
+assert box.GetCoordinateSystem()==None
+box.SetCoordinateSystem(1)
+assert box.GetCoordinateSystem()==1
+
+box.SetCoordinateSystem(None)
+assert box.GetCoordinateSystem()==None
+
 start = np.array([0,10,0])
 box.SetStart(start)
 assert (box.GetStart()==np.array([0,10,0])).all()

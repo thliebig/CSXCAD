@@ -30,15 +30,38 @@ cdef class CSRectGrid:
     Rectilinear Grid Class for CSXCAD. The grid can be defined e.g. as a Cartesian
     or cylindrical mesh and can hold mesh lines in the 3 fundamental directions.
     E.g. x,y and z for the Cartesian and rho, a and z for the cylindrical mesh.
+
+    :param CoordSystem: define the coordinate system (default 0 : Cartesian)
     """
     def __cinit__(self, *args, no_init=False, **kw):
         if no_init==False:
             self.thisptr = new _CSRectGrid()
+            if 'CoordSystem' in kw:
+                self.SetMeshType(kw['CoordSystem'])
+                del kw['CoordSystem']
+            elif 'cs_type' in kw:
+                self.SetMeshType(kw['cs_type'])
+                del kw['cs_type']
         else:
             self.thisptr = NULL
 
+        assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
+
     def __dealloc__(self):
         del self.thisptr
+
+    def SetMeshType(self, cs_type):
+        """ SetMeshType(cs_type)
+
+        Set the coordinate system type (Cartesian or cylindrical) for this mesh.
+
+        :param cs_type: coordinate system (0 : Cartesian, 1 : Cylindrical)
+        """
+        assert cs_type in [CARTESIAN, CYLINDRICAL], 'Unknown coordinate system: {}'.format(cs_type)
+        self.thisptr.SetMeshType(cs_type)
+
+    def GetMeshType(self):
+        return self.thisptr.GetMeshType()
 
     def SetLines(self, ny, lines):
         """ SetLines(ny, lines)

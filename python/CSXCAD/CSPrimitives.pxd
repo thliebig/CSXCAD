@@ -22,6 +22,7 @@ from libcpp cimport bool
 from ParameterObjects cimport _ParameterSet, ParameterSet
 from CSProperties cimport _CSProperties, CSProperties
 from CSTransform cimport _CSTransform, CSTransform
+from CSRectGrid cimport CoordinateSystem
 
 cdef extern from "CSXCAD/CSPrimitives.h":
     cdef cppclass _CSPrimitives "CSPrimitives":
@@ -35,6 +36,9 @@ cdef extern from "CSXCAD/CSPrimitives.h":
             bool Update(string *ErrStr)
 
             bool GetBoundBox(double dBoundBox[6])
+
+            void SetCoordinateSystem(CoordinateSystem cs_type)
+            CoordinateSystem GetCoordinateSystem()
 
             _CSTransform* GetTransform()
 

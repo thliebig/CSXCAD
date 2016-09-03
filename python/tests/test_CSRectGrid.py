@@ -7,9 +7,14 @@ Created on Sat Dec 12 22:04:58 2015
 
 import numpy as np
 
-from pyCSXCAD import CSRectGrid
+from CSXCAD import CSRectGrid
 
-grid = CSRectGrid.CSRectGrid()
+grid = CSRectGrid.CSRectGrid(CoordSystem=0)
+
+assert grid.GetMeshType()==0
+
+grid.SetMeshType(1)
+assert grid.GetMeshType()==1
 
 grid.SetLines('x', [0, 1, 2])
 grid.SetLines('y', [-2,0, 1])

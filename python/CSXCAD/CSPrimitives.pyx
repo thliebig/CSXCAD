@@ -40,7 +40,7 @@ from libcpp cimport bool
 
 cimport CSPrimitives
 from Utilities import CheckNyDir
-
+cimport CSRectGrid
 
 cdef class CSPrimitives:
     """
@@ -135,6 +135,34 @@ cdef class CSPrimitives:
         """
         tr = self.GetTransform()
         tr.AddTransform(transform, *args, **kw)
+
+    def SetCoordinateSystem(self, cs_type):
+        """ SetCoordinateSystem(cs_type)
+
+        Set the coordinate system type (Cartesian or cylindrical) for this primitive.
+        If set to None, the mesh type of the assigned rect grid will be used.
+
+        :param cs_type: coordinate system (0 : Cartesian, 1 : Cylindrical) or None
+
+        See Also
+        --------
+        CSXCAD.CSRectGrid.CSRectGrid.SetMeshType
+
+        """
+        assert cs_type in [CSRectGrid.CARTESIAN, CSRectGrid.CYLINDRICAL, None], 'Unknown coordinate system: {}'.format(cs_type)
+        if cs_type is None:
+            cs_type = CSRectGrid.UNDEFINED_CS
+        self.thisptr.SetCoordinateSystem(cs_type)
+
+    def GetCoordinateSystem(self):
+        """ GetCoordinateSystem
+
+        :returns: coordinate system (0 : Cartesian, 1 : Cylindrical) or None
+        """
+        cs_type = self.thisptr.GetCoordinateSystem()
+        if cs_type == CSRectGrid.UNDEFINED_CS:
+            return None
+        return cs_type
 
     def Update(self):
         """ Trigger an internal update and report success and error message

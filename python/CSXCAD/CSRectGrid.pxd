@@ -44,7 +44,7 @@ cdef extern from "CSXCAD/CSRectGrid.h":
             unsigned int Snap2LineNumber(int ny, double value, bool &inside)
 
             int GetDimension()
-            void SetMeshType(CoordinateSystem type)
+            void SetMeshType(CoordinateSystem cs_type)
             CoordinateSystem GetMeshType()
 
             void IncreaseResolution(int nu, int factor)
