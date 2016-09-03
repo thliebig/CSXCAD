@@ -21,6 +21,7 @@ from libcpp cimport bool
 
 from ParameterObjects cimport _ParameterSet, ParameterSet
 from CSProperties cimport _CSProperties, CSProperties
+from CSTransform cimport _CSTransform, CSTransform
 
 cdef extern from "CSXCAD/CSPrimitives.h":
     cdef cppclass _CSPrimitives "CSPrimitives":
@@ -35,8 +36,11 @@ cdef extern from "CSXCAD/CSPrimitives.h":
 
             bool GetBoundBox(double dBoundBox[6])
 
+            _CSTransform* GetTransform()
+
 cdef class CSPrimitives:
     cdef _CSPrimitives *thisptr
+    cdef readonly CSTransform __transform
 
 ###############################################################################
 cdef extern from "CSXCAD/CSPrimPoint.h":

@@ -17,12 +17,18 @@ metal = CSProperties.CSPropMetal(pset)
 # TEST Point
 pid = 0
 point = CSPrimitives.CSPrimPoint(pset, metal, coord=[0,0.1,0.2])
-print(point.GetCoord().shape)
 assert point.GetID()==pid
 
 # TEST BOX
 pid += 1
 box = CSPrimitives.CSPrimBox(pset, metal)
+tr = box.GetTransform()
+assert tr.HasTransform()==False
+box.AddTransform('Translate', [0,1,2])
+
+assert tr.HasTransform()
+tr.Scale(1)
+
 start = np.array([0,10,0])
 box.SetStart(start)
 assert (box.GetStart()==np.array([0,10,0])).all()
@@ -38,8 +44,6 @@ assert box.GetTypeName()=='Box'
 assert box.GetPriority()==0
 box.SetPriority(10)
 assert box.GetPriority()==10
-
-print(box.GetBoundBox())
 
 # TEST Cylinder
 pid += 1

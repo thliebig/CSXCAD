@@ -53,6 +53,7 @@ cdef class CSPrimitives:
         if 'priority' in kw:
             self.SetPriority(kw['priority'])
             del kw['priority']
+        self.__transform = None
 
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
@@ -116,6 +117,24 @@ cdef class CSPrimitives:
             bb[0,n] = _bb[2*n]
             bb[1,n] = _bb[2*n+1]
         return bb
+
+    def GetTransform(self):
+        if self.__transform is None:
+            self.__transform         = CSTransform(no_init=True)
+            self.__transform.thisptr = self.thisptr.GetTransform()
+        return self.__transform
+
+    def AddTransform(self, transform, *args, **kw):
+        """ AddTransform(transform, *args, **kw)
+
+        Add a transformation to this primitive.
+
+        See Also
+        --------
+        CSTransform.CSTransform.AddTransform
+        """
+        tr = self.GetTransform()
+        tr.AddTransform(transform, *args, **kw)
 
     def Update(self):
         """ Trigger an internal update and report success and error message
