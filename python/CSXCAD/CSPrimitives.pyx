@@ -568,7 +568,7 @@ cdef class CSPrimPolygon(CSPrimitives):
         if not self.thisptr:
             self.thisptr = new _CSPrimPolygon(pset.thisptr, prop.thisptr)
         if 'points' in kw:
-            assert len(kw['points'])==2
+            assert len(kw['points'])==2, 'points must be a list of length 2'
             self.SetCoords(kw['points'][0], kw['points'][1])
             del kw['points']
         if 'norm_dir' in kw:
@@ -586,8 +586,8 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :param x0, x1: (N,), (N,) Two arrays for x0/x1 of the polygon coordinates.
         """
-        assert len(x0)==len(x1)
-        assert len(x0)>0
+        assert len(x0)==len(x1), 'SetCoords: x0/x1 do not have the same length'
+        assert len(x0)>0, 'SetCoords: empty coordinates'
 
         ptr = <_CSPrimPolygon*>self.thisptr
         ptr.ClearCoords()
@@ -742,7 +742,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
             self.SetRotAxisDir(kw['rot_axis'])
             del kw['rot_axis']
         if 'angle' in kw:
-            assert len(kw['angle'])==2
+            assert len(kw['angle'])==2, 'angle must be a list/array of length 2'
             self.SetRotAxisDir(kw['angle'][0],kw['angle'][1])
             del kw['angle']
         super(CSPrimRotPoly, self).__init__(pset, prop, *args, **kw)
@@ -811,7 +811,7 @@ cdef class CSPrimCurve(CSPrimitives):
         if not self.thisptr:
             self.thisptr = new _CSPrimCurve(pset.thisptr, prop.thisptr)
         if 'points' in kw:
-            assert len(kw['points'])==3
+            assert len(kw['points'])==3, 'points list not of length 3'
             self.SetPoints(kw['points'][0], kw['points'][1], kw['points'][2])
             del kw['points']
         super(CSPrimCurve, self).__init__(pset, prop, *args, **kw)
@@ -837,8 +837,8 @@ cdef class CSPrimCurve(CSPrimitives):
 
         :param x,y,z: each (N,) array -- Array of 3D point components
         """
-        assert len(x)==len(y)==len(z)
-        assert len(x)>0
+        assert len(x)==len(y)==len(z), 'SetPoints: each component must be of equal length'
+        assert len(x)>0, 'SetPoints: empty list!'
         ptr = <_CSPrimCurve*>self.thisptr
         ptr.ClearPoints()
         cdef double dp[3]
@@ -858,7 +858,7 @@ cdef class CSPrimCurve(CSPrimitives):
         """
         ptr = <_CSPrimCurve*>self.thisptr
         cdef double dp[3]
-        assert ptr.GetPoint(idx, dp)
+        assert ptr.GetPoint(idx, dp), 'GetPoint: invalid index'
         point = np.zeros(3)
         for n in range(3):
             point[n] = dp[n]

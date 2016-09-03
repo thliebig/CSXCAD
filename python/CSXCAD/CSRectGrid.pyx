@@ -74,7 +74,7 @@ cdef class CSRectGrid:
         """
         ny = CheckNyDir(ny)
 
-        assert len(lines)>0
+        assert len(lines)>0, 'SetLines: "lines" must be an array or list'
         self.thisptr.ClearLines(ny)
         for n in range(len(lines)):
             self.thisptr.AddDiscLine(ny, lines[n])
@@ -91,7 +91,7 @@ cdef class CSRectGrid:
         ny = CheckNyDir(ny)
         if type(line) in [float, int]:
             return self.thisptr.AddDiscLine(ny, line)
-        assert len(line)>0
+        assert len(line)>0, 'AddLine: "lines" must be a float, array or list'
         for n in range(len(line)):
             self.thisptr.AddDiscLine(ny, line[n])
 

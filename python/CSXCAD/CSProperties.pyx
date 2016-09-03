@@ -184,7 +184,7 @@ cdef class CSPropMaterial(CSProperties):
             if type(val)==float or type(val)==int:
                 self.__SetMaterialPropertyDir(prop_name, 0, val)
                 continue
-            assert len(val)==3
+            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self.__SetMaterialPropertyDir(prop_name, n, val[n])
 
@@ -229,7 +229,7 @@ cdef class CSPropMaterial(CSProperties):
             if type(val)==str:
                 self.__SetMaterialWeightDir(prop_name, 0, val)
                 continue
-            assert len(val)==3
+            assert len(val)==3, 'SetMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self.__SetMaterialWeightDir(prop_name, n, val[n])
 
@@ -617,7 +617,7 @@ cdef class CSPropProbeBox(CSProperties):
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
         """
-        assert len(mode_fun)==3
+        assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
         self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
         self.AddAttribute('ModeFunctionY', str(mode_fun[1]))
         self.AddAttribute('ModeFunctionZ', str(mode_fun[2]))
@@ -733,7 +733,7 @@ cdef class CSPropDumpBox(CSPropProbeBox):
     def SetOptResolution(self, val):
         """ SetOptResolution(val)
         """
-        assert len(val)==3
+        assert len(val)==3, 'SetOptResolution: value must be list or array of length 3'
         for n in range(3):
             self.dbptr.SetOptResolution(n, val[n])
 
@@ -746,7 +746,7 @@ cdef class CSPropDumpBox(CSPropProbeBox):
     def SetSubSampling(self, val):
         """ SetSubSampling(val)
         """
-        assert len(val)==3
+        assert len(val)==3, "SetSubSampling: 'val' must be a list or array of length 3"
         for n in range(3):
             self.dbptr.SetSubSampling(n, val[n])
 

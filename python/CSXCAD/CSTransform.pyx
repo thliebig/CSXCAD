@@ -123,7 +123,7 @@ cdef class CSTransform:
 
         :param transform: str -- transformation name or keyword.
         """
-        assert type(transform)==str
+        assert type(transform)==str, 'AddTransform, transform name must be a string'
         if transform == 'RotateAxis':
             self.RotateAxis(*args, **kw)
         elif transform == 'RotateOrigin':
@@ -144,7 +144,7 @@ cdef class CSTransform:
 
         :param vec: (3,) array -- translation vector
         """
-        assert len(vec)==3
+        assert len(vec)==3, 'Translate vector must be a list or array of length 3'
         cdef double[3] d_vec;
         for n in range(3):
             d_vec[n] = vec[n]
@@ -159,7 +159,7 @@ cdef class CSTransform:
         :param mat: (3,) array -- translation vector
         """
         mat = np.array(mat)
-        assert  mat.shape == (4,4)
+        assert  mat.shape == (4,4), 'SetMatrix: matrix must be of shape (4,4)'
         cdef double[16] d_mat;
         for n in range(4):
             for m in range(4):
@@ -175,7 +175,7 @@ cdef class CSTransform:
         :param angle: float -- rotation angle (default in degrees)
         :param deg: bool -- set degree or radiant for angle (default True)
         """
-        assert  len(vec)==3
+        assert  len(vec)==3, 'RotateOrigin: axis vector must be a list or array of length 3'
         cdef double[3] d_vec;
         for n in range(3):
             d_vec[n] = vec[n]
@@ -210,7 +210,7 @@ cdef class CSTransform:
             self.thisptr.Scale(d_scale[0], concatenate)
             return
 
-        assert len(scale)==3
+        assert len(scale)==3, 'Scale: scale must be a float or array of length 3'
         for n in range(3):
             d_scale[n] = scale[n]
         self.thisptr.Scale(d_scale, concatenate)
