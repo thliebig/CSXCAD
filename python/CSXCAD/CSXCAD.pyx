@@ -69,13 +69,22 @@ cdef class ContinuousStructure:
     >>> stop  = [1,2,1]
     >>> box   = CSX.AddBox(metal, start, stop) # Assign a box to propety "metal"
     """
-    def __cinit__(self):
+    def __cinit__(self, **kw):
         self.thisptr = new _ContinuousStructure()
         self.__paraset = ParameterSet(no_init=True)
         self.__paraset.thisptr = self.thisptr.GetParameterSet()
 
         self.__grid         = CSRectGrid(no_init=True)
         self.__grid.thisptr = self.thisptr.GetGrid()
+
+        if 'CoordSystem' in kw:
+            self.SetMeshType(kw['CoordSystem'])
+            del kw['CoordSystem']
+        elif 'cs_type' in kw:
+            self.SetMeshType(kw['cs_type'])
+            del kw['cs_type']
+
+        assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
     def __dealloc__(self):
         self.__grid.thisptr = NULL
@@ -106,6 +115,10 @@ cdef class ContinuousStructure:
         CSXCAD.CSRectGrid, DefineGrid
         """
         return self.__grid
+
+    def SetMeshType(self, cs_type):
+        self.__grid.SetMeshType(cs_type)
+        self.thisptr.SetCoordInputType(cs_type)
 
     def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
         """ DefineGrid(mesh, unit, smooth_mesh_res=None)

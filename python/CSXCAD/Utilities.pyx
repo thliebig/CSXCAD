@@ -25,8 +25,11 @@ def CheckNyDir(ny):
     :param ny: int or str
     :returns: int -- direction as 0/1/2
     """
-    assert (ny==0 or ny==1 or ny==2 or ny=='x' or ny=='y' or ny=='z')
-    if type(ny)==str:
-        return ['x','y','z'].index(ny)
-    else:
+    if ny in [0, 1, 2]:
         return ny
+    elif ny in ['x','y','z']:
+        return ['x','y','z'].index(ny)
+    elif ny in ['r','a','z']:
+        return ['r','a','z'].index(ny)
+    else:
+        raise Exception('CheckNyDir: invalid direction: "{}"'.format(ny))

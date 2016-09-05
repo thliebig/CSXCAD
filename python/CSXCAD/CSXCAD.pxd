@@ -25,7 +25,7 @@ cimport CSProperties
 from CSPrimitives cimport _CSPrimitives, CSPrimitives
 from ParameterObjects cimport _ParameterSet, ParameterSet
 from CSProperties cimport _CSProperties, CSProperties
-from CSRectGrid cimport _CSRectGrid, CSRectGrid
+from CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
 
 cdef extern from "CSXCAD/ContinuousStructure.h":
     cdef cppclass _ContinuousStructure "ContinuousStructure":
@@ -34,6 +34,8 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             _ParameterSet* GetParameterSet()
             void AddProperty(_CSProperties* prop)
             _CSRectGrid* GetGrid()
+
+            void SetCoordInputType(CoordinateSystem cs_type)
 
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping
