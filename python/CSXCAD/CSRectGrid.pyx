@@ -80,7 +80,7 @@ cdef class CSRectGrid:
             self.thisptr.AddDiscLine(ny, lines[n])
 
     def AddLine(self, ny, line):
-        """ SetLines(ny, lines)
+        """ AddLine(ny, lines)
 
         Add an array of lines. This will *not* clear the previous defined lines in
         the given direction.
@@ -89,7 +89,7 @@ cdef class CSRectGrid:
         :param lines: array -- list of lines to be added in the given direction
         """
         ny = CheckNyDir(ny)
-        if type(line) in [float, int]:
+        if np.isscalar(line):
             return self.thisptr.AddDiscLine(ny, line)
         assert len(line)>0, 'AddLine: "lines" must be a float, array or list'
         for n in range(len(line)):
