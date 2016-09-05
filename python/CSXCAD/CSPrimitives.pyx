@@ -57,12 +57,6 @@ cdef class CSPrimitives:
 
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
-    def __dealloc__(self):
-        pass
-#        print("del")
-#        del self.thisptr
-#        print("del done")
-
     def GetID(self):
         """
         Get the ID for this primitive

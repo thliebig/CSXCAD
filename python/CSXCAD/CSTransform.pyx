@@ -41,10 +41,6 @@ cdef class CSTransform:
         else:
             self.thisptr = NULL
 
-    def __dealloc__(self):
-        if self.thisptr:
-            del self.thisptr
-
     def Reset(self):
         """
         Reset all transformations.

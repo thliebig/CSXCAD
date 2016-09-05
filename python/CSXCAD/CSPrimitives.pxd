@@ -44,7 +44,8 @@ cdef extern from "CSXCAD/CSPrimitives.h":
 
 cdef class CSPrimitives:
     cdef _CSPrimitives *thisptr
-    cdef readonly CSTransform __transform
+    cdef readonly CSTransform  __transform
+    cdef readonly CSProperties __prop
 
 ###############################################################################
 cdef extern from "CSXCAD/CSPrimPoint.h":
