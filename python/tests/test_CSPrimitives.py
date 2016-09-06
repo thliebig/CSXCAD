@@ -11,275 +11,254 @@ from CSXCAD import ParameterObjects
 from CSXCAD import CSProperties
 from CSXCAD import CSPrimitives
 
-pset  = ParameterObjects.ParameterSet()
-metal = CSProperties.CSPropMetal(pset)
+import unittest
 
-# TEST Point
-pid = 0
-point = CSPrimitives.CSPrimPoint(pset, metal, coord=[0,0.1,0.2])
-assert point.GetID()==pid
+class Test_CSPrimMethods(unittest.TestCase):
+    def setUp(self):
+        self.pset  = ParameterObjects.ParameterSet()
+        self.metal = CSProperties.CSPropMetal(self.pset)
 
-# TEST BOX
-pid += 1
-box = CSPrimitives.CSPrimBox(pset, metal)
-tr = box.GetTransform()
-assert tr.HasTransform()==False
-box.AddTransform('Translate', [0,1,2])
+    def test_general(self):
+        box = CSPrimitives.CSPrimBox(self.pset, self.metal)
 
-assert tr.HasTransform()
-tr.Scale(1)
+        self.assertEqual(box.GetType(), 1)
+        self.assertEqual(box.GetTypeName(), 'Box')
+        self.assertEqual(box.GetPriority(), 0)
 
-assert box.GetCoordinateSystem()==None
-box.SetCoordinateSystem(1)
-assert box.GetCoordinateSystem()==1
+        box.SetPriority(10)
+        self.assertEqual(box.GetPriority(), 10)
 
-box.SetCoordinateSystem(None)
-assert box.GetCoordinateSystem()==None
+        box.SetPriority(-10)
+        self.assertEqual(box.GetPriority(), -10)
 
-start = np.array([0,10,0])
-box.SetStart(start)
-assert (box.GetStart()==np.array([0,10,0])).all()
+        box.SetStart([0,0,0])
+        box.SetStop([1,2,3])
+        self.assertTrue( (box.GetBoundBox() == np.array([[0,0,0],[1,2,3]])).all())
+        self.assertTrue( (box.GetStart()    == np.array([0,0,0])).all())
+        self.assertTrue( (box.GetStop()     == np.array([1,2,3])).all())
 
-stop = np.array([10,0,10])
-box.SetStop(stop)
-assert (box.GetStop()==stop).all()
+        tr = box.GetTransform()
+        self.assertFalse(tr.HasTransform())
 
-assert box.GetID()==pid
-assert box.GetType()==1
-assert box.GetTypeName()=='Box'
+        box.AddTransform('Translate', [0, 1, 0])
+        self.assertTrue(tr.HasTransform())
 
-assert box.GetPriority()==0
-box.SetPriority(10)
-assert box.GetPriority()==10
+        self.assertEqual(box.GetCoordinateSystem(), None)
 
-# TEST Cylinder
-pid += 1
-cyl = CSPrimitives.CSPrimCylinder(pset, metal)
-cyl.SetStart(start)
-assert (cyl.GetStart()==start).all()
+        box.SetCoordinateSystem(0)
+        self.assertEqual(box.GetCoordinateSystem(), 0)
 
-cyl.SetStop(stop)
-assert (cyl.GetStop()==stop).all()
+    def test_point(self):
+        coord = [0,0.1,0.2]
+        point = CSPrimitives.CSPrimPoint(self.pset, self.metal, coord=coord)
+        self.assertTrue( (point.GetCoord() == coord).all())
 
-assert cyl.GetID()==pid
-assert cyl.GetType()==5
-assert cyl.GetTypeName()=='Cylinder'
+        coord = np.array(coord)*2
+        point.SetCoord(coord)
+        self.assertTrue( (point.GetCoord() == coord).all())
 
-assert cyl.GetPriority()==0
+    def test_box(self):
+        box = CSPrimitives.CSPrimBox(self.pset, self.metal)
+        tr = box.GetTransform()
+        self.assertFalse(tr.HasTransform())
 
-cyl.SetRadius(5)
-assert cyl.GetRadius()==5.0
 
-print(cyl.GetBoundBox())
-
-# TEST Cylinder-Shell
-pid += 1
-cyl_shell = CSPrimitives.CSPrimCylindricalShell(pset, metal)
-cyl_shell.SetStart(start)
-assert (cyl_shell.GetStart()==start).all()
-
-cyl_shell.SetStop(stop)
-assert (cyl_shell.GetStop()==stop).all()
-
-assert cyl_shell.GetID()==pid
-assert cyl_shell.GetType()==6
-assert cyl_shell.GetTypeName()=='CylindricalShell'
-
-assert cyl_shell.GetPriority()==0
-
-cyl_shell.SetRadius(5)
-assert cyl_shell.GetRadius()==5.0
-
-cyl_shell.SetShellWidth(1.5)
-assert cyl_shell.GetShellWidth()==1.5
-
-print(cyl_shell.GetBoundBox())
-
-# TEST Sphere
-pid += 1
-sphere = CSPrimitives.CSPrimSphere(pset, metal)
-center = np.array([1.1,2.2,3.3])
-sphere.SetCenter(center)
-assert (sphere.GetCenter()==center).all()
-
-assert sphere.GetID()==pid
-assert sphere.GetType()==3
-assert sphere.GetTypeName()=='Sphere'
-
-assert sphere.GetPriority()==0
-
-sphere.SetRadius(5)
-assert sphere.GetRadius()==5.0
-
-print(sphere.GetBoundBox())
-
-# TEST Sphere-Shell
-pid += 1
-sphere_shell = CSPrimitives.CSPrimSphericalShell(pset, metal)
-sphere_shell.SetCenter(center)
-assert (sphere_shell.GetCenter()==center).all()
-
-assert sphere_shell.GetID()==pid
-assert sphere_shell.GetType()==4
-assert sphere_shell.GetTypeName()=='SphericalShell'
-
-assert sphere_shell.GetPriority()==0
-
-sphere_shell.SetRadius(5)
-assert sphere_shell.GetRadius()==5.0
-
-sphere_shell.SetShellWidth(1.5)
-assert sphere_shell.GetShellWidth()==1.5
-
-print(sphere_shell.GetBoundBox())
-
-# TEST Point
-pid += 1
-point = CSPrimitives.CSPrimPoint(pset, metal)
-point.SetCoord(start)
-assert (point.GetCoord()==start).all()
-
-assert point.GetID()==pid
-assert point.GetType()==0
-assert point.GetTypeName()=='Point'
-
-print(point.GetBoundBox())
-
-# Test polygon
-pid += 1
-poly = CSPrimitives.CSPrimPolygon(pset, metal)
-x0 = np.array([0, 0, 1, 1])
-x1 = np.array([0, 1, 1, 0])
-poly.SetCoords(x0, x1)
-o0, o1 = poly.GetCoords()
-assert (o0==x0).all()
-assert (o1==x1).all()
-
-assert poly.GetQtyCoords()==4
-assert poly.GetNormDir()==0
-poly.SetNormDir('y')
-assert poly.GetNormDir()==1
-poly.SetNormDir(2)
-assert poly.GetNormDir()==2
-
-poly.SetElevation(0.123)
-assert poly.GetElevation()==0.123
-
-print(poly.GetBoundBox())
-
-# Test Lin-Polygon
-pid += 1
-linpoly = CSPrimitives.CSPrimLinPoly(pset, metal)
-linpoly.SetCoords(x0, x1)
-o0, o1 = linpoly.GetCoords()
-assert (o0==x0).all()
-assert (o1==x1).all()
-
-assert linpoly.GetQtyCoords()==4
-assert linpoly.GetNormDir()==0
-linpoly.SetNormDir('y')
-assert linpoly.GetNormDir()==1
-linpoly.SetNormDir(2)
-assert linpoly.GetNormDir()==2
-
-linpoly.SetElevation(0.123)
-assert linpoly.GetElevation()==0.123
-
-linpoly.SetLength(11.23)
-assert linpoly.GetLength()==11.23
-
-print(linpoly.GetBoundBox())
-
-# Test Rot-Polygon
-pid += 1
-rotpoly = CSPrimitives.CSPrimRotPoly(pset, metal)
-x0 = np.array([0, 0, 1, 1]) + 1.5
-x1 = np.array([0, 1, 1, 0]) + 2.5
-rotpoly.SetCoords(x0, x1)
-o0, o1 = rotpoly.GetCoords()
-assert (o0==x0).all()
-assert (o1==x1).all()
-
-assert rotpoly.GetQtyCoords()==4
-assert rotpoly.GetNormDir()==0
-rotpoly.SetNormDir('y')
-assert rotpoly.GetNormDir()==1
-rotpoly.SetNormDir(0)
-assert rotpoly.GetNormDir()==0
-
-rotpoly.SetRotAxisDir('z')
-assert rotpoly.GetRotAxisDir()==2
-
-rotpoly.SetAngle(0, 2*np.pi)
-print(rotpoly.GetAngle())
-
-print(rotpoly.GetBoundBox())
-
-# Test Curve
-pid += 1
-x = np.array([0, 0, 1, 1]) + 1.5
-y = np.array([0, 1, 1, 0]) + 2.5
-z = np.array([0, 1, 3, 4])
-curve = CSPrimitives.CSPrimCurve(pset, metal)#, points=[x,y,z])
-curve.SetPoints(x, y, z)
-
-assert (curve.GetPoint(0)==np.array([1.5,2.5,0])).all()
-assert curve.GetNumberOfPoints()==4
-
-curve.AddPoint([10, 10, 10.5])
-assert curve.GetNumberOfPoints()==5
-
-print(curve.GetBoundBox())
-
-curve.ClearPoints()
-assert curve.GetNumberOfPoints()==0
-
-# Test Wire
-pid += 1
-wire = CSPrimitives.CSPrimWire(pset, metal)
-x = np.array([0, 0, 1, 1]) - 1.5
-y = np.array([0, 1, 1, 0]) - 2.5
-z = np.array([0, 1, 3, 4])
-wire.SetPoints(x, y, z)
-
-assert (wire.GetPoint(0)==np.array([-1.5,-2.5,0])).all()
-assert wire.GetNumberOfPoints()==4
-
-wire.AddPoint([10, -10, 10.5])
-assert wire.GetNumberOfPoints()==5
-
-wire.SetWireRadius(1.5)
-assert wire.GetWireRadius()==1.5
-
-print(wire.GetBoundBox())
-
-# Test CSPrimPolyhedron
-pid += 1
-ph = CSPrimitives.CSPrimPolyhedron(pset, metal)
-assert ph.GetNumVertices()==0
-assert ph.GetNumFaces()==0
-
-ph.AddVertex(0,0,0)
-ph.AddVertex(0,1,0)
-ph.AddVertex(1,0,0)
-assert ph.GetNumVertices()==3
-assert (ph.GetVertex(0)==np.array([0,0,0])).all()
-
-ph.AddFace([0,1,2])
-assert ph.GetNumFaces()==1
-assert (ph.GetFace(0)==np.array([0,1,2])).all()
-
-print(ph.GetBoundBox())
-
-## Test CSPrimPolyhedronReader
-pid += 1
-phr = CSPrimitives.CSPrimPolyhedronReader(pset, metal)
-phr.SetFilename('sphere.stl')
-assert phr.ReadFile()
-print(phr.GetNumVertices())
-print(phr.GetNumFaces())
-print(phr.GetBoundBox())
-
-print("metal.GetQtyPrimitives()", metal.GetQtyPrimitives())
-
-print("all passed")
+    def test_cylinder(self):
+        # TEST Cylinder
+        cyl = CSPrimitives.CSPrimCylinder(self.pset, self.metal)
+        start = [1,2,3]
+        cyl.SetStart(start)
+        self.assertTrue( (cyl.GetStart()==start).all() )
+
+        stop = np.array([5,6,7])
+        cyl.SetStop(stop)
+        self.assertTrue( (cyl.GetStop()==stop).all() )
+
+        self.assertTrue( cyl.GetType()==5 )
+        self.assertTrue( cyl.GetTypeName()=='Cylinder' )
+
+        self.assertTrue( cyl.GetPriority()==0 )
+
+        cyl.SetRadius(5)
+        self.assertTrue( cyl.GetRadius()==5.0 )
+
+    def test_cylinder_shell(self):
+        # TEST Cylinder-Shell
+        cyl_shell = CSPrimitives.CSPrimCylindricalShell(self.pset, self.metal)
+        start = [1,2,3]
+        cyl_shell.SetStart(start)
+        self.assertTrue( (cyl_shell.GetStart()==start).all() )
+
+        stop = np.array([5,6,7])
+        cyl_shell.SetStop(stop)
+        self.assertTrue( (cyl_shell.GetStop()==stop).all() )
+
+        self.assertTrue( cyl_shell.GetType()==6 )
+        self.assertTrue( cyl_shell.GetTypeName()=='CylindricalShell' )
+
+        self.assertTrue( cyl_shell.GetPriority()==0 )
+
+        cyl_shell.SetRadius(5)
+        self.assertTrue( cyl_shell.GetRadius()==5.0 )
+
+        cyl_shell.SetShellWidth(1.5)
+        self.assertTrue( cyl_shell.GetShellWidth()==1.5 )
+
+    def test_sphere(self):
+        # TEST Sphere
+        sphere = CSPrimitives.CSPrimSphere(self.pset, self.metal)
+        center = np.array([1.1,2.2,3.3])
+        sphere.SetCenter(center)
+        self.assertTrue( (sphere.GetCenter()==center).all() )
+
+        self.assertTrue( sphere.GetType()==3 )
+        self.assertTrue( sphere.GetTypeName()=='Sphere' )
+
+        self.assertTrue( sphere.GetPriority()==0 )
+
+        sphere.SetRadius(5)
+        self.assertTrue( sphere.GetRadius()==5.0 )
+
+    def test_sphere_shell(self):
+        # TEST Sphere-Shell
+        sphere_shell = CSPrimitives.CSPrimSphericalShell(self.pset, self.metal)
+        center = np.array([1.1,2.2,3.3])
+        sphere_shell.SetCenter(center)
+        self.assertTrue( (sphere_shell.GetCenter()==center).all() )
+
+        self.assertTrue( sphere_shell.GetType()==4 )
+        self.assertTrue( sphere_shell.GetTypeName()=='SphericalShell' )
+
+        self.assertTrue( sphere_shell.GetPriority()==0 )
+
+        sphere_shell.SetRadius(5)
+        self.assertTrue( sphere_shell.GetRadius()==5.0 )
+
+        sphere_shell.SetShellWidth(1.5)
+        self.assertTrue( sphere_shell.GetShellWidth()==1.5 )
+
+    def test_polygon(self):
+        # Test polygon
+        poly = CSPrimitives.CSPrimPolygon(self.pset, self.metal)
+        x0 = np.array([0, 0, 1, 1])
+        x1 = np.array([0, 1, 1, 0])
+        poly.SetCoords(x0, x1)
+        o0, o1 = poly.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
+        self.assertTrue( poly.GetQtyCoords()==4 )
+        self.assertTrue( poly.GetNormDir()==0 )
+        poly.SetNormDir('y')
+        self.assertTrue( poly.GetNormDir()==1 )
+        poly.SetNormDir(2)
+        self.assertTrue( poly.GetNormDir()==2 )
+
+        poly.SetElevation(0.123)
+        self.assertTrue( poly.GetElevation()==0.123 )
+
+    def test_lin_poly(self):
+        # Test Lin-Polygon
+        linpoly = CSPrimitives.CSPrimLinPoly(self.pset, self.metal)
+        x0 = np.array([0, 0, 1, 1])
+        x1 = np.array([0, 1, 1, 0])
+        linpoly.SetCoords(x0, x1)
+        o0, o1 = linpoly.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
+        self.assertTrue( linpoly.GetQtyCoords()==4 )
+        self.assertTrue( linpoly.GetNormDir()==0 )
+        linpoly.SetNormDir('y')
+        self.assertTrue( linpoly.GetNormDir()==1 )
+        linpoly.SetNormDir(2)
+        self.assertTrue( linpoly.GetNormDir()==2 )
+
+        linpoly.SetElevation(0.123)
+        self.assertTrue( linpoly.GetElevation()==0.123 )
+
+        linpoly.SetLength(11.23)
+        self.assertTrue( linpoly.GetLength()==11.23 )
+
+    def test_rot_poly(self):
+        # Test Rot-Polygon
+        rotpoly = CSPrimitives.CSPrimRotPoly(self.pset, self.metal)
+        x0 = np.array([0, 0, 1, 1]) + 1.5
+        x1 = np.array([0, 1, 1, 0]) + 2.5
+        rotpoly.SetCoords(x0, x1)
+        o0, o1 = rotpoly.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
+        self.assertTrue( rotpoly.GetQtyCoords()==4 )
+        self.assertTrue( rotpoly.GetNormDir()==0 )
+        rotpoly.SetNormDir('y')
+        self.assertTrue( rotpoly.GetNormDir()==1 )
+        rotpoly.SetNormDir(0)
+        self.assertTrue( rotpoly.GetNormDir()==0 )
+
+        rotpoly.SetRotAxisDir('z')
+        self.assertTrue( rotpoly.GetRotAxisDir()==2 )
+
+        rotpoly.SetAngle(0, 2*np.pi)
+        self.assertTrue( (rotpoly.GetAngle() == np.array([0, 2*np.pi])).all() )
+
+    def test_curve(self):
+        # Test Curve
+        x = np.array([0, 0, 1, 1]) + 1.5
+        y = np.array([0, 1, 1, 0]) + 2.5
+        z = np.array([0, 1, 3, 4])
+        curve = CSPrimitives.CSPrimCurve(self.pset, self.metal)#, points=[x,y,z])
+        curve.SetPoints(x, y, z)
+
+        self.assertTrue( (curve.GetPoint(0)==np.array([1.5,2.5,0])).all() )
+        self.assertTrue( curve.GetNumberOfPoints()==4 )
+
+        curve.AddPoint([10, 10, 10.5])
+        self.assertTrue( curve.GetNumberOfPoints()==5 )
+
+        curve.ClearPoints()
+        self.assertTrue( curve.GetNumberOfPoints()==0 )
+
+    def test_wire(self):
+        # Test Wire
+        wire = CSPrimitives.CSPrimWire(self.pset, self.metal)
+        x = np.array([0, 0, 1, 1]) - 1.5
+        y = np.array([0, 1, 1, 0]) - 2.5
+        z = np.array([0, 1, 3, 4])
+        wire.SetPoints(x, y, z)
+
+        self.assertTrue( (wire.GetPoint(0)==np.array([-1.5,-2.5,0])).all() )
+        self.assertTrue( wire.GetNumberOfPoints()==4 )
+
+        wire.AddPoint([10, -10, 10.5])
+        self.assertTrue( wire.GetNumberOfPoints()==5 )
+
+        wire.SetWireRadius(1.5)
+        self.assertTrue( wire.GetWireRadius()==1.5 )
+
+        # Test CSPrimPolyhedron
+        ph = CSPrimitives.CSPrimPolyhedron(self.pset, self.metal)
+        self.assertTrue( ph.GetNumVertices()==0 )
+        self.assertTrue( ph.GetNumFaces()==0 )
+
+        ph.AddVertex(0,0,0)
+        ph.AddVertex(0,1,0)
+        ph.AddVertex(1,0,0)
+        self.assertTrue( ph.GetNumVertices()==3 )
+        self.assertTrue( (ph.GetVertex(0)==np.array([0,0,0])).all() )
+
+        ph.AddFace([0,1,2])
+        self.assertTrue( ph.GetNumFaces()==1 )
+        self.assertTrue( (ph.GetFace(0)==np.array([0,1,2])).all() )
+
+    def test_polyhedron_reader(self):
+        ## Test CSPrimPolyhedronReader
+        phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)
+        phr.SetFilename('sphere.stl')
+        self.assertTrue( phr.ReadFile() )
+        self.assertEqual(phr.GetNumVertices(), 50)
+        self.assertEqual(phr.GetNumFaces(), 96)
+
+if __name__ == '__main__':
+    unittest.main()

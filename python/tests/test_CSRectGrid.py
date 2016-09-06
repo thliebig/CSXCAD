@@ -9,60 +9,65 @@ import numpy as np
 
 from CSXCAD import CSRectGrid
 
-grid = CSRectGrid.CSRectGrid(CoordSystem=0)
+import unittest
 
-assert grid.GetMeshType()==0
+class Test_CSRectGrid(unittest.TestCase):
+    def test_rect_grid(self):
 
-grid.SetMeshType(1)
-assert grid.GetMeshType()==1
+        grid = CSRectGrid.CSRectGrid(CoordSystem=0)
 
-grid.SetLines('x', [0, 1, 2])
-grid.SetLines('y', [-2,0, 1])
-assert grid.GetQtyLines('y')==3
-grid.AddLine('y',4)
-assert grid.GetQtyLines('y')==4
-grid.AddLine('y',[4, 2, 5])
-assert grid.GetQtyLines('y')==7
-assert (grid.GetLines('y')==np.array([-2.,  0.,  1.,  4.,  4., 2.,  5.])).all()  # check unsorted lines
-grid.Sort('y')
-assert (grid.GetLines('y')==np.array([-2.,  0.,  1.,  2.,  4.,  5.])).all()
-assert grid.GetQtyLines('y')==6
+        self.assertEqual( grid.GetMeshType(), 0 )
 
-grid.SetLines('z', [10, 11, 12])
+        grid.SetMeshType(1)
+        self.assertEqual( grid.GetMeshType(), 1 )
 
-assert grid.GetLine('y', 1) == 0.0
+        grid.SetLines('x', [0, 1, 2])
+        grid.SetLines('y', [-2,0, 1])
+        self.assertEqual( grid.GetQtyLines('y'), 3 )
+        grid.AddLine('y',4)
+        self.assertEqual( grid.GetQtyLines('y'), 4 )
+        grid.AddLine('y',[4, 2, 5])
+        self.assertEqual( grid.GetQtyLines('y'), 7 )
+        self.assertTrue( (grid.GetLines('y')==np.array([-2.,  0.,  1.,  4.,  4., 2.,  5.])).all() )  # check unsorted lines
+        grid.Sort('y')
+        self.assertTrue( (grid.GetLines('y')==np.array([-2.,  0.,  1.,  2.,  4.,  5.])).all() )
+        self.assertEqual( grid.GetQtyLines('y'), 6 )
 
-assert grid.GetQtyLines('x')==3
+        grid.SetLines('z', [10, 11, 12])
 
-grid.SetDeltaUnit(1e-3)
-assert grid.GetDeltaUnit()==1e-3
+        self.assertEqual( grid.GetLine('y', 1), 0.0 )
 
-assert grid.IsValid()
+        self.assertEqual( grid.GetQtyLines('x'), 3 )
 
-# check grid snapping
-assert grid.Snap2LineNumber('y', 1)==(2,True)
-assert grid.Snap2LineNumber('y', 1.1)==(2,True)
-assert grid.Snap2LineNumber('y', 1.5)==(3,True)
-assert grid.Snap2LineNumber('y', 1.6)==(3,True)
-assert grid.Snap2LineNumber('y', 5.0)==(5,True)
-assert grid.Snap2LineNumber('y', 5.01)==(5,False)
+        grid.SetDeltaUnit(1e-3)
+        self.assertEqual( grid.GetDeltaUnit(), 1e-3 )
 
-assert grid.Snap2LineNumber('y', -2.0)==(0,True)
-assert grid.Snap2LineNumber('y', -2.01)==(0,False)
+        self.assertTrue( grid.IsValid() )
 
-print(grid.GetSimArea())
+        # check grid snapping
+        self.assertEqual(  grid.Snap2LineNumber('y', 1), (2,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', 1.1), (2,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', 1.5), (3,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', 1.6), (3,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', 5.0), (5,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', 5.01), (5,False) )
 
-grid.ClearLines('x')
-assert grid.GetQtyLines('x')==0
-assert grid.GetQtyLines('y')==6
-assert grid.GetQtyLines('z')==3
+        self.assertEqual(  grid.Snap2LineNumber('y', -2.0), (0,True) )
+        self.assertEqual(  grid.Snap2LineNumber('y', -2.01), (0,False) )
 
-assert grid.IsValid()==False
+        self.assertTrue( (grid.GetSimArea() == np.array([[0, -2, 10],[2, 5, 12]])).all() )
 
-grid.Clear()
-assert grid.GetQtyLines('y')==0
+        grid.ClearLines('x')
+        self.assertEqual( grid.GetQtyLines('x'), 0 )
+        self.assertEqual( grid.GetQtyLines('y'), 6 )
+        self.assertEqual( grid.GetQtyLines('z'), 3 )
 
-assert grid.IsValid()==False
+        self.assertFalse( grid.IsValid() )
 
+        grid.Clear()
+        self.assertEqual( grid.GetQtyLines('y'), 0 )
 
-print("all ok")
+        self.assertFalse( grid.IsValid() )
+
+if __name__ == '__main__':
+    unittest.main()

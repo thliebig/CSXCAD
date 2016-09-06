@@ -8,59 +8,74 @@ Created on Fri Sep  2 21:42:50 2016
 from CSXCAD import CSTransform
 import numpy as np
 
+import unittest
+
 def compare_coords(c1, c2):
     c1 = np.array(c1)
     c2 = np.array(c2)
     return np.sum(np.abs(c1-c2))<1e-6
 
-tr = CSTransform.CSTransform()
 
-identity = np.identity(4)
+class Test_CSTransform(unittest.TestCase):
+    def setUp(self):
+        self.tr = CSTransform.CSTransform()
 
-assert tr.HasTransform() == False
-assert (tr.GetMatrix()==identity).all()
+    def test_basics(self):
+        identity = np.identity(4)
 
-test_pnt = np.array([1,1,1])/np.sqrt(3)
+        self.assertFalse( self.tr.HasTransform() )
+        self.assertTrue( (self.tr.GetMatrix()==identity).all() )
 
+        self.tr.Translate([1,2,1])
+        self.assertTrue( self.tr.HasTransform() )
+        self.assertFalse((self.tr.GetMatrix()==identity).all() )
 
-tr.Translate([1,2,1])
-translate = identity.copy()
-translate[:3,3] = [1,2,1]
-assert (tr.GetMatrix()==translate).all()
+        self.tr.Reset()
+        self.assertFalse( self.tr.HasTransform() )
+        self.assertTrue( (self.tr.GetMatrix()==identity).all() )
 
-assert compare_coords(tr.Transform(test_pnt), [ 1.57735027,  2.57735027,  1.57735027])
+    def test_translate(self):
+        test_pnt = np.array([1,1,1])/np.sqrt(3)
 
-tr.Reset()
-assert tr.HasTransform()==False
-assert (tr.GetMatrix()==identity).all()
+        self.tr.Translate([1,2,1])
+        translate = np.identity(4)
+        translate[:3,3] = [1,2,1]
+        self.assertTrue( (self.tr.GetMatrix()==translate).all() )
 
+        self.assertTrue( compare_coords(self.tr.Transform(test_pnt), [ 1.57735027,  2.57735027,  1.57735027]) )
 
-tr.RotateAxis('x', 45)
-assert compare_coords(tr.Transform([0,np.sqrt(2),0]), [0, 1, 1])
+    def test_rotate(self):
+        self.tr.RotateAxis('x', 45)
+        self.assertTrue( compare_coords(self.tr.Transform([0,np.sqrt(2),0]), [0, 1, 1]) )
 
-tr.Reset()
-tr.RotateAxis('x', -45)
-assert compare_coords(tr.Transform([0,np.sqrt(2),0]), [0, 1, -1])
+        self.tr.Reset()
+        self.tr.RotateAxis('x', -45)
+        self.assertTrue( compare_coords(self.tr.Transform([0,np.sqrt(2),0]), [0, 1, -1]) )
 
-tr.Reset()
-tr.RotateAxis('z', -90)
-assert compare_coords(tr.Transform([1,0,0]), [0, -1, 0])
-tr.RotateOrigin([0,0,1], 90)
-assert compare_coords(tr.Transform([1,0,0]), [1, 0, 0])
+        self.tr.Reset()
+        self.tr.RotateAxis('z', -90)
+        self.assertTrue( compare_coords(self.tr.Transform([1,0,0]), [0, -1, 0]) )
+        self.tr.RotateOrigin([0,0,1], 90)
+        self.assertTrue( compare_coords(self.tr.Transform([1,0,0]), [1, 0, 0]) )
 
-tr.Scale(3)
-assert compare_coords(tr.Transform([1,0,0]), [3, 0, 0])
+        self.tr.Reset()
+        self.tr.RotateOrigin([0,1,1], 90)
+        self.assertTrue( compare_coords(self.tr.Transform([1,0,0]), [0, 1/np.sqrt(2), -1/np.sqrt(2)]) )
 
-tr.Reset()
-tr.Scale([1,2,3])
-assert compare_coords(tr.Transform([1,1,1]), [1, 2, 3])
+    def test_scale(self):
+        self.tr.Scale(3)
+        self.assertTrue( compare_coords(self.tr.Transform([1,0,0]), [3, 0, 0]) )
 
-tr.Reset()
-tr.RotateOrigin([1,1,1], 90)
-mat = tr.GetMatrix()
+        self.tr.Reset()
+        self.tr.Scale([1,2,3])
+        self.assertTrue( compare_coords(self.tr.Transform([1,1,1]), [1, 2, 3]) )
 
-tr.Reset()
-tr.SetMatrix(mat)
-assert (tr.GetMatrix()==mat).all()
+    def test_matrix(self):
+        self.tr.RotateOrigin([1,1,1], 90)
+        mat = self.tr.GetMatrix()
+        self.tr.Reset()
+        self.tr.SetMatrix(mat)
+        self.assertTrue( (self.tr.GetMatrix()==mat).all() )
 
-print('all tests passed')
+if __name__ == '__main__':
+    unittest.main()
