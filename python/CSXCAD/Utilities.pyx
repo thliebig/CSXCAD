@@ -33,3 +33,21 @@ def CheckNyDir(ny):
         return ['r','a','z'].index(ny)
     else:
         raise Exception('CheckNyDir: invalid direction: "{}"'.format(ny))
+
+def GetMultiDirs(dirs):
+    assert type(dirs)==str, 'GetMultiDirs: dirs must be of type str'
+    dirs = ''.join(sorted(dirs))
+    if dirs == 'all' or dirs == 'xyz' or dirs == 'raz':
+        return [0, 1, 2]
+    elif dirs == 'x' or dirs == 'r':
+        return [0,]
+    elif dirs == 'y' or dirs == 'a':
+        return [1,]
+    elif dirs == 'z':
+        return [2,]
+    elif dirs == 'xy' or dirs == 'ra':
+        return [0, 1]
+    elif dirs == 'yz' or dirs == 'az':
+        return [1, 2]
+    elif dirs == 'xz' or dirs == 'rz':
+        return [0, 2]

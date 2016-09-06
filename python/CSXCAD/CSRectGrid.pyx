@@ -90,7 +90,8 @@ cdef class CSRectGrid:
         """
         ny = CheckNyDir(ny)
         if np.isscalar(line):
-            return self.thisptr.AddDiscLine(ny, line)
+            self.thisptr.AddDiscLine(ny, line)
+            return
         assert len(line)>0, 'AddLine: "lines" must be a float, array or list'
         for n in range(len(line)):
             self.thisptr.AddDiscLine(ny, line[n])

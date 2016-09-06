@@ -35,11 +35,12 @@ Create a metal box:
 """
 
 import numpy as np
+import sys
 from libcpp.string cimport string
 from libcpp cimport bool
 
 cimport CSPrimitives
-from Utilities import CheckNyDir
+from Utilities import CheckNyDir, GetMultiDirs
 cimport CSRectGrid
 
 cdef class CSPrimitives:
@@ -49,10 +50,15 @@ cdef class CSPrimitives:
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
         assert self.thisptr, 'Error, object cannot be created (protected)'
+        self.__prop = prop
 
         if 'priority' in kw:
             self.SetPriority(kw['priority'])
             del kw['priority']
+        if 'edges2grid' in kw:
+            if kw['edges2grid'] is not None:
+                self.AddEdges2Grid(kw['edges2grid'])
+            del kw['edges2grid']
         self.__transform = None
 
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
@@ -112,6 +118,20 @@ cdef class CSPrimitives:
             bb[1,n] = _bb[2*n+1]
         return bb
 
+    def __GetCSX(self):
+        if self.__prop is None:
+            return None
+        return self.__prop.__CSX
+
+    def AddEdges2Grid(self, dirs, **kw):
+        """ AddEdges2Grid(dirs)
+
+        Allow primitves supporting this feature to add their edges to the grid.
+
+        :param dirs: str - 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
+        """
+        raise Exception('AddEdges2Grid not possible or implemented for this primtive type!')
+
     def GetTransform(self):
         if self.__transform is None:
             self.__transform         = CSTransform(no_init=True)
@@ -129,6 +149,17 @@ cdef class CSPrimitives:
         """
         tr = self.GetTransform()
         tr.AddTransform(transform, *args, **kw)
+
+    def HasTransform(self):
+        """
+        Check if this primitive has a transformation attached.
+        It will not create one if it does not.
+
+        :returns: bool
+        """
+        if self.__transform is None:
+            return False
+        return self.__transform.HasTransform()
 
     def SetCoordinateSystem(self, cs_type):
         """ SetCoordinateSystem(cs_type)
@@ -213,6 +244,18 @@ cdef class CSPrimPoint(CSPrimitives):
             coord[n] = ptr.GetCoord(n)
         return coord
 
+    def AddEdges2Grid(self, dirs):
+        csx = self.__GetCSX()
+        if csx is None:
+            raise Exception('AddEdges2Grid: Unable to access CSX!')
+        if self.HasTransform():
+            sys.stderr.write('AddEdges2Grid: Warning, cannot add edges to grid with transformations enabled\n')
+            return
+        grid = csx.GetGrid()
+        coord = self.GetCoord()
+        for ny in GetMultiDirs(dirs):
+            grid.AddLine(ny, coord[ny])
+
 ###############################################################################
 cdef class CSPrimBox(CSPrimitives):
     """ Box Primitive
@@ -288,6 +331,39 @@ cdef class CSPrimBox(CSPrimitives):
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n+1)
         return coord
+
+    def AddEdges2Grid(self, dirs, metal_edge_res=None):
+        """ AddEdges2Grid(dirs, metal_edge_res=None)
+
+        Allow the edges of this box to the grid.
+        Allow an optional 2D metal edge res
+
+        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
+        :param metal_edge_res: float -- 2D flat edge resolution
+        """
+        if metal_edge_res is None:
+            mer = 0
+        else:
+            mer = np.array([-1.0, 2.0])/3 * metal_edge_res
+        csx = self.__GetCSX()
+        if csx is None:
+            raise Exception('AddEdges2Grid: Unable to access CSX!')
+        if self.HasTransform():
+            sys.stderr.write('AddEdges2Grid: Warning, cannot add edges to grid with transformations enabled\n')
+            return
+        grid = csx.GetGrid()
+        start = np.fmin(self.GetStart(), self.GetStop())
+        stop  = np.fmax(self.GetStart(), self.GetStop())
+        for ny in GetMultiDirs(dirs):
+            if metal_edge_res is not None and stop[ny]-start[ny]>metal_edge_res:
+                grid.AddLine(ny, start[ny]-mer)
+                grid.AddLine(ny, stop[ny] +mer)
+            elif stop[ny]-start[ny]:
+                grid.AddLine(ny, start[ny])
+                grid.AddLine(ny, stop[ny])
+            else:
+                grid.AddLine(ny, start[ny])
+
 
 ###############################################################################
 cdef class CSPrimCylinder(CSPrimitives):
