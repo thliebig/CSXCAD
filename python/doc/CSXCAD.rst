@@ -4,10 +4,9 @@ CSXCAD Python Interface
 CSXCAD
 ------
 
-.. automodule:: CSXCAD.CSXCAD
-    :members:
+.. automodule:: CSXCAD
+    :members: ContinuousStructure
     :undoc-members:
-    :show-inheritance:
 
 .. CSXCAD.ParameterObjects
 .. -----------------------
