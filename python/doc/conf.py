@@ -21,11 +21,6 @@ import os
 import sys
 import sphinx_rtd_theme
 
-
-autodoc_member_order = 'groupwise'
-
-sys.path.insert(0, os.path.abspath(os.path.join('..', 'CSXCAD')))
-
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -36,8 +31,12 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', 'CSXCAD')))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc', 'numpydoc',
-    'sphinx.ext.todo', 'sphinx.ext.autosummary',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
+    'sphinx.ext.mathjax',
+    'numpydoc',
+    'sphinx.ext.autosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

@@ -11,7 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 4
 
-   CSXCAD
+   CSXCAD_PY/CSXCAD_PY
 
 
 Indices and tables
