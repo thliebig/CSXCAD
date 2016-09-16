@@ -37,6 +37,13 @@ cdef extern from "CSXCAD/CSPrimitives.h":
 
             bool GetBoundBox(double dBoundBox[6])
 
+            int GetDimension()
+
+            bool IsInside(double* Coord, double tol)
+
+            bool GetPrimitiveUsed()
+            void SetPrimitiveUsed(bool val)
+
             void SetCoordinateSystem(CoordinateSystem cs_type)
             CoordinateSystem GetCoordinateSystem()
 

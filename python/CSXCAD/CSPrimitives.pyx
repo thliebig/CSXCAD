@@ -118,6 +118,41 @@ cdef class CSPrimitives:
             bb[1,n] = _bb[2*n+1]
         return bb
 
+    def GetDimension(self):
+        """
+        Get the dimension of this primitive
+
+        :returns: int -- dimension 0..3
+        """
+        return self.thisptr.GetDimension()
+
+    def IsInside(self, coord, tol=0):
+        """ IsInside(coord, tol=0)
+
+        Check if a given coordinate is inside this primitive.
+
+        :param coord: (3,) array -- coordinate
+        :returns: bool
+        """
+        cdef double c_coord[3]
+        for n in range(3):
+            c_coord[n] = coord[n]
+
+        return self.thisptr.IsInside(c_coord, tol)
+
+    def GetPrimitiveUsed(self):
+        """
+        Get if this primitive has been used (used flag set)
+        """
+        return self.thisptr.GetPrimitiveUsed()
+
+    def SetPrimitiveUsed(self, val):
+        """ SetPrimitiveUsed(val)
+
+        Set used flag.
+        """
+        self.thisptr.SetPrimitiveUsed(val)
+
     def __GetCSX(self):
         if self.__prop is None:
             return None
