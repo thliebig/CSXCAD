@@ -43,6 +43,10 @@ from CSPrimitives import CSPrimSphere, CSPrimSphericalShell
 from CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
 from CSPrimitives import CSPrimCurve, CSPrimWire
 from CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
+cimport CSPrimitives
+cimport CSProperties as c_CSProperties
+cimport CSRectGrid   as c_CSRectGrid
+from CSProperties import CreateFromType
 from ParameterObjects import ParameterSet
 
 from SmoothMeshLines import SmoothMeshLines
@@ -90,6 +94,9 @@ cdef class ContinuousStructure:
         self.__grid.thisptr = NULL
         self.__paraset.thisptr = NULL
         del self.thisptr
+
+    def Update(self):
+        return self.thisptr.Update().decode('UTF-8')
 
     def Write2XML(self, fn):
         """ Write2XML(fn)
@@ -145,6 +152,12 @@ cdef class ContinuousStructure:
 
         grid.SetDeltaUnit(unit)
         return grid
+
+    def GetQtyProperties(self):
+        return self.thisptr.GetQtyProperties()
+
+    def GetQtyPrimitives(self, prop_type=c_CSProperties.ANY):
+        return self.thisptr.GetQtyPrimitives(prop_type)
 
     def AddMaterial(self, name, **kw):
         """ AddMaterial(name, **kw)
@@ -260,6 +273,27 @@ cdef class ContinuousStructure:
     cdef _AddProperty(self, CSProperties prop):
         prop.__CSX = self
         self.thisptr.AddProperty(prop.thisptr)
+
+    def GetPropertyByCoordPriority(self, coord, prop_type=c_CSProperties.ANY, markFoundAsUsed=False):
+        cdef double _coord[3]
+        for n in range(3):
+            _coord[n] = coord[n]
+        return self.__GetPropertyByCoordPriority(_coord, prop_type, markFoundAsUsed)
+
+    cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed):
+        """ GetPropertyByCoordPriority(coord, prop_type=None, markFoundAsUsed=False)
+        """
+
+        cdef _CSPrimitives *prim
+        cdef _CSProperties *_prop = self.thisptr.GetPropertyByCoordPriority(coord, prop_type, markFoundAsUsed, &prim)
+
+        cdef CSProperties prop
+        if _prop==NULL:
+            return None
+        else:
+            prop = CreateFromType(_prop.GetType(), pset=None, no_init=True)
+            prop.thisptr = _prop
+            return prop
 
     def AddPoint(self, prop, coord, **kw):
         """ AddPoint(prop, coord, **kw)

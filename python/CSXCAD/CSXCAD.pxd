@@ -24,7 +24,7 @@ cimport CSProperties
 
 from CSPrimitives cimport _CSPrimitives, CSPrimitives
 from ParameterObjects cimport _ParameterSet, ParameterSet
-from CSProperties cimport _CSProperties, CSProperties
+from CSProperties cimport _CSProperties, CSProperties, PropertyType
 from CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
 
 cdef extern from "CSXCAD/ContinuousStructure.h":
@@ -37,8 +37,16 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
             void SetCoordInputType(CoordinateSystem cs_type)
 
+            int GetQtyPrimitives(PropertyType prop_type)
+            int  GetQtyProperties()
+
+            _CSProperties* GetPropertyByCoordPriority(const double* coord, PropertyType prop_type, bool markFoundAsUsed, _CSPrimitives** foundPrimitive)
+
+            string Update()
+
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping
     cdef readonly ParameterSet __paraset
     cdef readonly CSRectGrid   __grid
     cdef _AddProperty(self, CSProperties prop)
+    cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed)
