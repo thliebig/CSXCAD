@@ -20,7 +20,7 @@ from libcpp.string cimport string
 from libcpp cimport bool
 
 cdef extern from "CSXCAD/CSXCAD_Global.h":
-    ctypedef enum CoordinateSystem "CoordinateSystem":
+    cpdef enum CoordinateSystem "CoordinateSystem":
         CARTESIAN    "CARTESIAN"
         CYLINDRICAL  "CYLINDRICAL"
         UNDEFINED_CS "UNDEFINED_CS"
