@@ -23,6 +23,23 @@ from ParameterObjects cimport _ParameterSet
 from CSXCAD cimport ContinuousStructure
 
 cdef extern from "CSXCAD/CSProperties.h":
+    cpdef enum PropertyType "CSProperties::PropertyType":
+        ANY                "CSProperties::ANY"
+        UNKNOWN            "CSProperties::UNKNOWN"
+        MATERIAL           "CSProperties::MATERIAL"
+        METAL              "CSProperties::METAL"
+        EXCITATION         "CSProperties::EXCITATION"
+        PROBEBOX           "CSProperties::PROBEBOX"
+        RESBOX             "CSProperties::RESBOX"
+        DUMPBOX            "CSProperties::DUMPBOX"
+        DISPERSIVEMATERIAL "CSProperties::DISPERSIVEMATERIAL"
+        LORENTZMATERIAL    "CSProperties::LORENTZMATERIAL"
+        DEBYEMATERIAL      "CSProperties::DEBYEMATERIAL"
+        DISCRETE_MATERIAL  "CSProperties::DISCRETE_MATERIAL"
+        LUMPED_ELEMENT     "CSProperties::LUMPED_ELEMENT"
+        CONDUCTINGSHEET    "CSProperties::CONDUCTINGSHEET"
+
+cdef extern from "CSXCAD/CSProperties.h":
     cdef cppclass _CSProperties "CSProperties":
             _CSProperties(_ParameterSet*) except +
             int GetType()
@@ -38,6 +55,7 @@ cdef extern from "CSXCAD/CSProperties.h":
 
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
+    cdef __SetPtr(self, _CSProperties *ptr)
     cdef readonly ContinuousStructure __CSX
 
 ##############################################################################
@@ -73,7 +91,7 @@ cdef extern from "CSXCAD/CSPropMaterial.h":
             bool GetIsotropy()
 
 cdef class CSPropMaterial(CSProperties):
-    cdef _CSPropMaterial* matptr
+    pass
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropLumpedElement.h":
@@ -95,7 +113,7 @@ cdef extern from "CSXCAD/CSPropLumpedElement.h":
             int GetCaps()
 
 cdef class CSPropLumpedElement(CSProperties):
-    cdef _CSPropLumpedElement* LEptr
+    pass
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropMetal.h":
@@ -116,7 +134,7 @@ cdef extern from "CSXCAD/CSPropConductingSheet.h":
             double GetThickness()
 
 cdef class CSPropConductingSheet(CSPropMetal):
-    cdef _CSPropConductingSheet* CSptr
+    pass
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropExcitation.h":
@@ -138,7 +156,7 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             double GetDelay()
 
 cdef class CSPropExcitation(CSProperties):
-    cdef _CSPropExcitation* excptr
+    pass
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropProbeBox.h":
@@ -158,7 +176,7 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             void AddFDSample(double freq)
 
 cdef class CSPropProbeBox(CSProperties):
-    cdef _CSPropProbeBox* probeptr
+    pass
 
 
 ##############################################################################
@@ -181,4 +199,4 @@ cdef extern from "CSXCAD/CSPropDumpBox.h":
             unsigned int GetSubSampling(int ny)
 
 cdef class CSPropDumpBox(CSPropProbeBox):
-    cdef _CSPropDumpBox* dbptr
+    pass

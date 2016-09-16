@@ -39,21 +39,48 @@ from ParameterObjects cimport _ParameterSet, ParameterSet
 cimport CSProperties
 from Utilities import CheckNyDir
 
+def CreateFromType(p_type, pset, no_init=False, **kw):
+    prop = None
+    if p_type == CONDUCTINGSHEET + METAL:
+        prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+    elif p_type == METAL:
+        prop = CSPropMetal(pset, no_init=no_init, **kw)
+    elif p_type == MATERIAL:
+        prop = CSPropMaterial(pset, no_init=no_init, **kw)
+    elif p_type == LUMPED_ELEMENT:
+        prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
+    elif p_type == EXCITATION:
+        prop = CSPropExcitation(pset, no_init=no_init, **kw)
+    elif p_type == PROBEBOX:
+        prop = CSPropProbeBox(pset, no_init=no_init, **kw)
+    elif p_type == DUMPBOX:
+        prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+
+    return prop
+
+
 cdef class CSProperties:
     """
     Virtual base class for all properties, cannot be created!
 
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
-        assert self.thisptr, "Error, cannot create CSProperties (protected)"
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         self.__CSX = None
+        if no_init:
+            self.thisptr = NULL
+            return
+        assert self.thisptr, "Error, cannot create CSProperties (protected)"
 
         assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
 
     def __dealloc__(self):
+        pass
         # only delete if this property is not owned by a CSX object
-        if self.__CSX is None:
-            del self.thisptr
+#        if self.__CSX is None:
+#            del self.thisptr
+
+    cdef __SetPtr(self, _CSProperties *ptr):
+        self.thisptr = ptr
 
     def GetQtyPrimitives(self):
         """
@@ -138,10 +165,13 @@ cdef class CSPropMaterial(CSProperties):
     :params sigma:   scalar or vector - magnetic conductivity
     :params density: float            - Density
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMaterial(pset.thisptr)
-        self.matptr  = <_CSPropMaterial*>self.thisptr
+
         self.SetMaterialProperty(**kw)
         for k in list(kw.keys()):
             if k in ['epsilon', 'mue', 'kappa', 'sigma', 'density']:
@@ -156,7 +186,7 @@ cdef class CSPropMaterial(CSProperties):
 
         :param val: bool -- enable/disable isotropy
         """
-        self.matptr.SetIsotropy(val)
+        (<_CSPropMaterial*>self.thisptr).SetIsotropy(val)
 
     def GetIsotropy(self):
         """
@@ -164,7 +194,7 @@ cdef class CSPropMaterial(CSProperties):
 
         :returns: bool -- isotropy status
         """
-        return self.matptr.GetIsotropy()
+        return (<_CSPropMaterial*>self.thisptr).GetIsotropy()
 
     def SetMaterialProperty(self, **kw):
         """ SetMaterialProperty(**kw)
@@ -179,7 +209,7 @@ cdef class CSPropMaterial(CSProperties):
         for prop_name in kw:
             val = kw[prop_name]
             if prop_name == 'density':
-                self.matptr.SetDensity(val)
+                (<_CSPropMaterial*>self.thisptr).SetDensity(val)
                 continue
             if type(val)==float or type(val)==int:
                 self.__SetMaterialPropertyDir(prop_name, 0, val)
@@ -190,13 +220,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def __SetMaterialPropertyDir(self, prop_name, ny, val):
         if prop_name=='epsilon':
-            return self.matptr.SetEpsilon(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetEpsilon(val, ny)
         elif prop_name=='mue':
-            return self.matptr.SetMue(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetMue(val, ny)
         elif prop_name=='kappa':
-            return self.matptr.SetKappa(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetKappa(val, ny)
         elif prop_name=='sigma':
-            return self.matptr.SetSigma(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetSigma(val, ny)
         else:
             raise Exception('SetMaterialPropertyDir: Error, unknown material property')
 
@@ -224,7 +254,7 @@ cdef class CSPropMaterial(CSProperties):
         for prop_name in kw:
             val = kw[prop_name]
             if prop_name == 'density':
-                self.matptr.SetDensityWeightFunction(val.encode('UTF-8'))
+                (<_CSPropMaterial*>self.thisptr).SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
             if type(val)==str:
                 self.__SetMaterialWeightDir(prop_name, 0, val)
@@ -236,13 +266,13 @@ cdef class CSPropMaterial(CSProperties):
     def __SetMaterialWeightDir(self, prop_name, ny, val):
         val = val.encode('UTF-8')
         if prop_name=='epsilon':
-            return self.matptr.SetEpsilonWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetEpsilonWeightFunction(val, ny)
         elif prop_name=='mue':
-            return self.matptr.SetMueWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetMueWeightFunction(val, ny)
         elif prop_name=='kappa':
-            return self.matptr.SetKappaWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetKappaWeightFunction(val, ny)
         elif prop_name=='sigma':
-            return self.matptr.SetSigmaWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self.thisptr).SetSigmaWeightFunction(val, ny)
         else:
             raise Exception('SetMaterialWeightDir: Error, unknown material property')
 
@@ -254,8 +284,8 @@ cdef class CSPropMaterial(CSProperties):
         :returns: float for isotropic material and `density` or else (3,) array
         """
         if prop_name == 'density':
-            return self.matptr.GetDensity()
-        if self.matptr.GetIsotropy():
+            return (<_CSPropMaterial*>self.thisptr).GetDensity()
+        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
             return self.__GetMaterialPropertyDir(prop_name, 0)
         val = np.zeros(3)
         for n in range(3):
@@ -264,13 +294,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def __GetMaterialPropertyDir(self, prop_name, ny):
         if prop_name=='epsilon':
-            return self.matptr.GetEpsilon(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetEpsilon(ny)
         elif prop_name=='mue':
-            return self.matptr.GetMue(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetMue(ny)
         elif prop_name=='kappa':
-            return self.matptr.GetKappa(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetKappa(ny)
         elif prop_name=='sigma':
-            return self.matptr.GetSigma(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetSigma(ny)
         else:
             raise Exception('GetMaterialPropertyDir: Error, unknown material property')
 
@@ -282,8 +312,8 @@ cdef class CSPropMaterial(CSProperties):
         :returns: str for isotropic material and `density` or else str array
         """
         if prop_name == 'density':
-            return self.matptr.GetDensityWeightFunction().decode('UTF-8')
-        if self.matptr.GetIsotropy():
+            return (<_CSPropMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
+        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
             return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
         val = ['', '', '']
         for n in range(3):
@@ -292,13 +322,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def __GetMaterialWeightDir(self, prop_name, ny):
         if prop_name=='epsilon':
-            return self.matptr.GetEpsilonWeightFunction(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetEpsilonWeightFunction(ny)
         elif prop_name=='mue':
-            return self.matptr.GetMueWeightFunction(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetMueWeightFunction(ny)
         elif prop_name=='kappa':
-            return self.matptr.GetKappaWeightFunction(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetKappaWeightFunction(ny)
         elif prop_name=='sigma':
-            return self.matptr.GetSigmaWeightFunction(ny)
+            return (<_CSPropMaterial*>self.thisptr).GetSigmaWeightFunction(ny)
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
@@ -320,10 +350,12 @@ cdef class CSPropLumpedElement(CSProperties):
     :param L:  float      -- lumped inductance value
     """
 
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropLumpedElement(pset.thisptr)
-        self.LEptr   = <_CSPropLumpedElement*> self.thisptr
 
         for k in kw:
             if k=='R':
@@ -345,42 +377,42 @@ cdef class CSPropLumpedElement(CSProperties):
     def SetResistance(self, val):
         """ SetResistance(val)
         """
-        self.LEptr.SetResistance(val)
+        (<_CSPropLumpedElement*>self.thisptr).SetResistance(val)
 
     def GetResistance(self):
-        return self.LEptr.GetResistance()
+        return (<_CSPropLumpedElement*>self.thisptr).GetResistance()
 
     def SetCapacity(self, val):
         """ SetCapacity(val)
         """
-        self.LEptr.SetCapacity(val)
+        (<_CSPropLumpedElement*>self.thisptr).SetCapacity(val)
 
     def GetCapacity(self):
-        return self.LEptr.GetCapacity()
+        return (<_CSPropLumpedElement*>self.thisptr).GetCapacity()
 
     def SetInductance(self, val):
         """ SetInductance(val)
         """
-        self.LEptr.SetInductance(val)
+        (<_CSPropLumpedElement*>self.thisptr).SetInductance(val)
 
     def GetInductance(self):
-        return self.LEptr.GetInductance()
+        return (<_CSPropLumpedElement*>self.thisptr).GetInductance()
 
     def SetDirection(self, ny):
         """ SetDirection(ny)
         """
-        self.LEptr.SetDirection(CheckNyDir(ny))
+        (<_CSPropLumpedElement*>self.thisptr).SetDirection(CheckNyDir(ny))
 
     def GetDirection(self):
-        return self.LEptr.GetDirection()
+        return (<_CSPropLumpedElement*>self.thisptr).GetDirection()
 
     def SetCaps(self, val):
         """ SetCaps(val)
         """
-        self.LEptr.SetCaps(val)
+        (<_CSPropLumpedElement*>self.thisptr).SetCaps(val)
 
     def GetCaps(self):
-        return self.LEptr.GetCaps()==1
+        return (<_CSPropLumpedElement*>self.thisptr).GetCaps()==1
 
 
 ###############################################################################
@@ -394,7 +426,10 @@ cdef class CSPropMetal(CSProperties):
     --------
     CSPropConductingSheet : For all lossy conductor model with a finite conductivity
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMetal(pset.thisptr)
         super(CSPropMetal, self).__init__(pset, *args, **kw)
@@ -412,10 +447,12 @@ cdef class CSPropConductingSheet(CSPropMetal):
     :param conductivity: float -- finite conductivity e.g. 56e6 (S/m)
     :param thickness:    float -- finite modeled thickness (e.g. 18e-6)
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropConductingSheet(pset.thisptr)
-        self.CSptr   = <_CSPropConductingSheet*> self.thisptr
 
         if 'conductivity' in kw:
             self.SetConductivity(kw['conductivity'])
@@ -428,18 +465,18 @@ cdef class CSPropConductingSheet(CSPropMetal):
     def SetConductivity(self, val):
         """ SetConductivity(val)
         """
-        self.CSptr.SetConductivity(val)
+        (<_CSPropConductingSheet*>self.thisptr).SetConductivity(val)
 
     def GetConductivity(self):
-        return self.CSptr.GetConductivity()
+        return (<_CSPropConductingSheet*>self.thisptr).GetConductivity()
 
     def SetThickness(self, val):
         """ SetThickness(val)
         """
-        self.CSptr.SetThickness(val)
+        (<_CSPropConductingSheet*>self.thisptr).SetThickness(val)
 
     def GetThickness(self):
-        return self.CSptr.GetThickness()
+        return (<_CSPropConductingSheet*>self.thisptr).GetThickness()
 
 ###############################################################################
 cdef class CSPropExcitation(CSProperties):
@@ -460,10 +497,12 @@ cdef class CSPropExcitation(CSProperties):
 
     :param exc_type: int -- excitation type (see above)
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropExcitation(pset.thisptr)
-        self.excptr = <_CSPropExcitation*>self.thisptr
 
         if 'exc_type' in kw:
             self.SetExcitType(kw['exc_type'])
@@ -479,10 +518,10 @@ cdef class CSPropExcitation(CSProperties):
     def SetExcitType(self, val):
         """ SetExcitType(val)
         """
-        self.excptr.SetExcitType(val)
+        (<_CSPropExcitation*>self.thisptr).SetExcitType(val)
 
     def GetExcitType(self):
-        return self.excptr.GetExcitType()
+        return (<_CSPropExcitation*>self.thisptr).GetExcitType()
 
     def SetExcitation(self, val):
         """ SetExcitation(val)
@@ -491,12 +530,16 @@ cdef class CSPropExcitation(CSProperties):
         """
         assert len(val)==3, "Error, excitation vector must be of dimension 3"
         for n in range(3):
-            self.excptr.SetExcitation(val[n], n)
+            (<_CSPropExcitation*>self.thisptr).SetExcitation(val[n], n)
 
     def GetExcitation(self):
+        """ GetExcitation()
+
+        :returns: (3,) array -- excitation vector
+        """
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.excptr.GetExcitation(n)
+            val[n] = (<_CSPropExcitation*>self.thisptr).GetExcitation(n)
         return val
 
     def SetPropagationDir(self, val):
@@ -506,12 +549,12 @@ cdef class CSPropExcitation(CSProperties):
         """
         assert len(val)==3, "Error, excitation vector must be of dimension 3"
         for n in range(3):
-            self.excptr.SetPropagationDir(val[n], n)
+            (<_CSPropExcitation*>self.thisptr).SetPropagationDir(val[n], n)
 
     def GetPropagationDir(self):
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.excptr.GetPropagationDir(n)
+            val[n] = (<_CSPropExcitation*>self.thisptr).GetPropagationDir(n)
         return val
 
     def SetFrequency(self, val):
@@ -521,10 +564,10 @@ cdef class CSPropExcitation(CSProperties):
 
         :param val: float -- Frequency
         """
-        self.excptr.SetFrequency(val)
+        (<_CSPropExcitation*>self.thisptr).SetFrequency(val)
 
     def GetFrequency(self):
-        return self.excptr.GetFrequency()
+        return (<_CSPropExcitation*>self.thisptr).GetFrequency()
 
     def SetDelay(self, val):
         """ SetDelay(val)
@@ -533,10 +576,10 @@ cdef class CSPropExcitation(CSProperties):
 
         :param val: float -- Signal delay
         """
-        self.excptr.SetDelay(val)
+        (<_CSPropExcitation*>self.thisptr).SetDelay(val)
 
     def GetDelay(self):
-        return self.excptr.GetDelay()
+        return (<_CSPropExcitation*>self.thisptr).GetDelay()
 
 ###############################################################################
 cdef class CSPropProbeBox(CSProperties):
@@ -561,10 +604,12 @@ cdef class CSPropProbeBox(CSProperties):
     :param mode_function: A mode function (used only with type 3/4 in openEMS)
     :param norm_dir:     necessary for current probing box with dimension not 2
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
-            self.thisptr = <_CSPropProbeBox*> new _CSPropProbeBox(pset.thisptr)
-        self.probeptr = <_CSPropProbeBox*>self.thisptr
+            self.thisptr = <_CSProperties*> new _CSPropProbeBox(pset.thisptr)
 
         if 'p_type' in kw:
             self.SetProbeType(kw['p_type'])
@@ -586,33 +631,33 @@ cdef class CSPropProbeBox(CSProperties):
     def SetProbeType(self, val):
         """ SetProbeType(val)
         """
-        self.probeptr.SetProbeType(val)
+        (<_CSPropProbeBox*>self.thisptr).SetProbeType(val)
 
     def GetProbeType(self):
-        return self.probeptr.GetProbeType()
+        return (<_CSPropProbeBox*>self.thisptr).GetProbeType()
 
     def SetWeighting(self, val):
         """ SetWeighting(val)
         """
-        self.probeptr.SetWeighting(val)
+        (<_CSPropProbeBox*>self.thisptr).SetWeighting(val)
 
     def GetWeighting(self):
-        return self.probeptr.GetWeighting()
+        return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
 
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """
-        self.probeptr.SetNormalDir(val)
+        (<_CSPropProbeBox*>self.thisptr).SetNormalDir(val)
 
     def GetNormalDir(self):
-        return self.probeptr.GetNormalDir()
+        return (<_CSPropProbeBox*>self.thisptr).GetNormalDir()
 
     def SetFrequency(self, freq):
         """ SetFrequency(freq)
         """
-        self.probeptr.ClearFDSamples()
+        (<_CSPropProbeBox*>self.thisptr).ClearFDSamples()
         for f in freq:
-            self.probeptr.AddFDSample(f)
+            (<_CSPropProbeBox*>self.thisptr).AddFDSample(f)
 
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
@@ -684,10 +729,12 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         forward/backward interpolation in case of (strong) changes in material
         permeability --> use no- or node-interpolation
     """
-    def __init__(self, ParameterSet pset, *args, **kw):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
-            self.thisptr = <_CSPropDumpBox*> new _CSPropDumpBox(pset.thisptr)
-        self.dbptr = <_CSPropDumpBox*>self.thisptr
+            self.thisptr = <_CSProperties*> new _CSPropDumpBox(pset.thisptr)
 
         if 'dump_type' in kw:
             self.SetDumpType(kw['dump_type'])
@@ -709,38 +756,38 @@ cdef class CSPropDumpBox(CSPropProbeBox):
     def SetDumpType(self, val):
         """ SetDumpType(val)
         """
-        self.dbptr.SetDumpType(val)
+        (<_CSPropDumpBox*>self.thisptr).SetDumpType(val)
 
     def GetDumpType(self):
-        return self.dbptr.GetDumpType()
+        return (<_CSPropDumpBox*>self.thisptr).GetDumpType()
 
     def SetDumpMode(self, val):
         """ SetDumpMode(val)
         """
-        self.dbptr.SetDumpMode(val)
+        (<_CSPropDumpBox*>self.thisptr).SetDumpMode(val)
 
     def GetDumpMode(self):
-        return self.dbptr.GetDumpMode()
+        return (<_CSPropDumpBox*>self.thisptr).GetDumpMode()
 
     def SetFileType(self, val):
         """ SetFileType(val)
         """
-        self.dbptr.SetFileType(val)
+        (<_CSPropDumpBox*>self.thisptr).SetFileType(val)
 
     def GetFileType(self):
-        return self.dbptr.GetFileType()
+        return (<_CSPropDumpBox*>self.thisptr).GetFileType()
 
     def SetOptResolution(self, val):
         """ SetOptResolution(val)
         """
         assert len(val)==3, 'SetOptResolution: value must be list or array of length 3'
         for n in range(3):
-            self.dbptr.SetOptResolution(n, val[n])
+            (<_CSPropDumpBox*>self.thisptr).SetOptResolution(n, val[n])
 
     def GetOptResolution(self):
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.dbptr.GetOptResolution(n)
+            val[n] = (<_CSPropDumpBox*>self.thisptr).GetOptResolution(n)
         return val
 
     def SetSubSampling(self, val):
@@ -748,10 +795,10 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         """
         assert len(val)==3, "SetSubSampling: 'val' must be a list or array of length 3"
         for n in range(3):
-            self.dbptr.SetSubSampling(n, val[n])
+            (<_CSPropDumpBox*>self.thisptr).SetSubSampling(n, val[n])
 
     def GetSubSampling(self):
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.dbptr.GetSubSampling(n)
+            val[n] = (<_CSPropDumpBox*>self.thisptr).GetSubSampling(n)
         return val
