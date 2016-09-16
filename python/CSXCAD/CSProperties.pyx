@@ -349,7 +349,6 @@ cdef class CSPropLumpedElement(CSProperties):
     :param C:  float      -- lumped capacitance value
     :param L:  float      -- lumped inductance value
     """
-
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
             self.thisptr = NULL
@@ -380,6 +379,8 @@ cdef class CSPropLumpedElement(CSProperties):
         (<_CSPropLumpedElement*>self.thisptr).SetResistance(val)
 
     def GetResistance(self):
+        """ GetResistance()
+        """
         return (<_CSPropLumpedElement*>self.thisptr).GetResistance()
 
     def SetCapacity(self, val):
@@ -388,6 +389,8 @@ cdef class CSPropLumpedElement(CSProperties):
         (<_CSPropLumpedElement*>self.thisptr).SetCapacity(val)
 
     def GetCapacity(self):
+        """ GetCapacity()
+        """
         return (<_CSPropLumpedElement*>self.thisptr).GetCapacity()
 
     def SetInductance(self, val):
@@ -396,6 +399,8 @@ cdef class CSPropLumpedElement(CSProperties):
         (<_CSPropLumpedElement*>self.thisptr).SetInductance(val)
 
     def GetInductance(self):
+        """ GetInductance()
+        """
         return (<_CSPropLumpedElement*>self.thisptr).GetInductance()
 
     def SetDirection(self, ny):
@@ -404,6 +409,8 @@ cdef class CSPropLumpedElement(CSProperties):
         (<_CSPropLumpedElement*>self.thisptr).SetDirection(CheckNyDir(ny))
 
     def GetDirection(self):
+        """ GetDirection()
+        """
         return (<_CSPropLumpedElement*>self.thisptr).GetDirection()
 
     def SetCaps(self, val):
@@ -412,6 +419,8 @@ cdef class CSPropLumpedElement(CSProperties):
         (<_CSPropLumpedElement*>self.thisptr).SetCaps(val)
 
     def GetCaps(self):
+        """ GetCaps()
+        """
         return (<_CSPropLumpedElement*>self.thisptr).GetCaps()==1
 
 
@@ -468,6 +477,8 @@ cdef class CSPropConductingSheet(CSPropMetal):
         (<_CSPropConductingSheet*>self.thisptr).SetConductivity(val)
 
     def GetConductivity(self):
+        """ GetConductivity()
+        """
         return (<_CSPropConductingSheet*>self.thisptr).GetConductivity()
 
     def SetThickness(self, val):
@@ -476,6 +487,8 @@ cdef class CSPropConductingSheet(CSPropMetal):
         (<_CSPropConductingSheet*>self.thisptr).SetThickness(val)
 
     def GetThickness(self):
+        """ GetThickness()
+        """
         return (<_CSPropConductingSheet*>self.thisptr).GetThickness()
 
 ###############################################################################
@@ -487,15 +500,9 @@ cdef class CSPropExcitation(CSProperties):
     Depending on the EM modeling tool there exist different excitation types
     with different meanings.
 
-    openEMS excitation types:
-
-    * 0 : E-field soft excitation
-    * 1 : E-field hard excitation
-    * 2 : H-field soft excitation
-    * 3 : H-field hard excitation
-    * 10 : plane wave excitation
-
-    :param exc_type: int -- excitation type (see above)
+    :param exc_type: int -- excitation type (see SetExcitation)
+    :param exc_val: (3,) array like -- set the excitation vector
+    :param delay: float -- excitation delay in seconds
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -517,14 +524,29 @@ cdef class CSPropExcitation(CSProperties):
 
     def SetExcitType(self, val):
         """ SetExcitType(val)
+
+        :param val: int -- excitation type (see above)
         """
         (<_CSPropExcitation*>self.thisptr).SetExcitType(val)
 
     def GetExcitType(self):
+        """ GetExcitType()
+        Get the excitation type.
+
+        :return: int -- excitation type (see above)
+        """
         return (<_CSPropExcitation*>self.thisptr).GetExcitType()
 
     def SetExcitation(self, val):
         """ SetExcitation(val)
+
+        openEMS excitation types:
+
+        * 0 : E-field soft excitation
+        * 1 : E-field hard excitation
+        * 2 : H-field soft excitation
+        * 3 : H-field hard excitation
+        * 10 : plane wave excitation
 
         :param val: (3,) array -- excitation vector
         """
@@ -545,6 +567,8 @@ cdef class CSPropExcitation(CSProperties):
     def SetPropagationDir(self, val):
         """ SetPropagationDir(val)
 
+        Set the propagation direction, e.g. for a plane wave excitation
+
         :param val: (3,) array -- propagation vector
         """
         assert len(val)==3, "Error, excitation vector must be of dimension 3"
@@ -552,6 +576,12 @@ cdef class CSPropExcitation(CSProperties):
             (<_CSPropExcitation*>self.thisptr).SetPropagationDir(val[n], n)
 
     def GetPropagationDir(self):
+        """ GetPropagationDir()
+
+        Get the propagation direction, e.g. of a plane wave excitation
+
+        :returns: (3,) array -- propagation vector
+        """
         val = np.zeros(3)
         for n in range(3):
             val[n] = (<_CSPropExcitation*>self.thisptr).GetPropagationDir(n)
@@ -567,6 +597,8 @@ cdef class CSPropExcitation(CSProperties):
         (<_CSPropExcitation*>self.thisptr).SetFrequency(val)
 
     def GetFrequency(self):
+        """ GetFrequency()
+        """
         return (<_CSPropExcitation*>self.thisptr).GetFrequency()
 
     def SetDelay(self, val):
@@ -579,6 +611,8 @@ cdef class CSPropExcitation(CSProperties):
         (<_CSPropExcitation*>self.thisptr).SetDelay(val)
 
     def GetDelay(self):
+        """ GetDelay()
+        """
         return (<_CSPropExcitation*>self.thisptr).GetDelay()
 
 ###############################################################################
@@ -634,6 +668,8 @@ cdef class CSPropProbeBox(CSProperties):
         (<_CSPropProbeBox*>self.thisptr).SetProbeType(val)
 
     def GetProbeType(self):
+        """ GetProbeType()
+        """
         return (<_CSPropProbeBox*>self.thisptr).GetProbeType()
 
     def SetWeighting(self, val):
@@ -642,6 +678,8 @@ cdef class CSPropProbeBox(CSProperties):
         (<_CSPropProbeBox*>self.thisptr).SetWeighting(val)
 
     def GetWeighting(self):
+        """ GetWeighting()
+        """
         return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
 
     def SetNormalDir(self, val):
@@ -650,6 +688,8 @@ cdef class CSPropProbeBox(CSProperties):
         (<_CSPropProbeBox*>self.thisptr).SetNormalDir(val)
 
     def GetNormalDir(self):
+        """ GetNormalDir()
+        """
         return (<_CSPropProbeBox*>self.thisptr).GetNormalDir()
 
     def SetFrequency(self, freq):
@@ -759,6 +799,8 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         (<_CSPropDumpBox*>self.thisptr).SetDumpType(val)
 
     def GetDumpType(self):
+        """ GetDumpType()
+        """
         return (<_CSPropDumpBox*>self.thisptr).GetDumpType()
 
     def SetDumpMode(self, val):
@@ -767,6 +809,8 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         (<_CSPropDumpBox*>self.thisptr).SetDumpMode(val)
 
     def GetDumpMode(self):
+        """ GetDumpMode()
+        """
         return (<_CSPropDumpBox*>self.thisptr).GetDumpMode()
 
     def SetFileType(self, val):
@@ -775,6 +819,8 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         (<_CSPropDumpBox*>self.thisptr).SetFileType(val)
 
     def GetFileType(self):
+        """ GetFileType()
+        """
         return (<_CSPropDumpBox*>self.thisptr).GetFileType()
 
     def SetOptResolution(self, val):
@@ -785,6 +831,8 @@ cdef class CSPropDumpBox(CSPropProbeBox):
             (<_CSPropDumpBox*>self.thisptr).SetOptResolution(n, val[n])
 
     def GetOptResolution(self):
+        """ GetOptResolution()
+        """
         val = np.zeros(3)
         for n in range(3):
             val[n] = (<_CSPropDumpBox*>self.thisptr).GetOptResolution(n)
@@ -798,6 +846,8 @@ cdef class CSPropDumpBox(CSPropProbeBox):
             (<_CSPropDumpBox*>self.thisptr).SetSubSampling(n, val[n])
 
     def GetSubSampling(self):
+        """ GetSubSampling()
+        """
         val = np.zeros(3)
         for n in range(3):
             val[n] = (<_CSPropDumpBox*>self.thisptr).GetSubSampling(n)

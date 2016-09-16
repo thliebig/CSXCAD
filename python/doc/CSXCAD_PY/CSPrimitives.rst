@@ -5,86 +5,22 @@ CSPrimitives
 
 .. automodule:: CSXCAD.CSPrimitives
 
-    CSPrimitives
-    ------------
-    .. autoclass:: CSPrimitives
-        :members:
-        :show-inheritance:
+**List of Primitives:**
 
-    CSPrimPoint
-    -----------
-    .. autoclass:: CSPrimPoint
-        :members:
-        :show-inheritance:
+.. toctree::
 
-    CSPrimBox
-    ---------
-    .. autoclass:: CSPrimBox
-        :members:
-        :show-inheritance:
+    CSPrimitives/CSPrimitives
+    CSPrimitives/CSPrimPoint
+    CSPrimitives/CSPrimBox
+    CSPrimitives/CSPrimCylinder
+    CSPrimitives/CSPrimCylindricalShell
+    CSPrimitives/CSPrimSphere
+    CSPrimitives/CSPrimSphericalShell
+    CSPrimitives/CSPrimPolygon
+    CSPrimitives/CSPrimLinPoly
+    CSPrimitives/CSPrimRotPoly
+    CSPrimitives/CSPrimCurve
+    CSPrimitives/CSPrimWire
+    CSPrimitives/CSPrimPolyhedron
+    CSPrimitives/CSPrimPolyhedronReader
 
-    CSPrimCylinder
-    --------------
-    .. autoclass:: CSPrimCylinder
-        :members:
-        :show-inheritance:
-
-    CSPrimCylindricalShell
-    ----------------------
-    .. autoclass:: CSPrimCylindricalShell
-        :members:
-        :show-inheritance:
-
-    CSPrimSphere
-    ------------
-    .. autoclass:: CSPrimSphere
-        :members:
-        :show-inheritance:
-
-    CSPrimSphericalShell
-    --------------------
-    .. autoclass:: CSPrimSphericalShell
-        :members:
-        :show-inheritance:
-
-    CSPrimPolygon
-    -------------
-    .. autoclass:: CSPrimPolygon
-        :members:
-        :show-inheritance:
-
-    CSPrimLinPoly
-    -------------
-    .. autoclass:: CSPrimLinPoly
-        :members:
-        :show-inheritance:
-
-    CSPrimRotPoly
-    -------------
-    .. autoclass:: CSPrimRotPoly
-        :members:
-        :show-inheritance:
-
-    CSPrimCurve
-    -----------
-    .. autoclass:: CSPrimCurve
-        :members:
-        :show-inheritance:
-
-    CSPrimWire
-    ----------
-    .. autoclass:: CSPrimWire
-        :members:
-        :show-inheritance:
-
-    CSPrimPolyhedron
-    ----------------
-    .. autoclass:: CSPrimPolyhedron
-        :members:
-        :show-inheritance:
-
-    CSPrimPolyhedronReader
-    ----------------------
-    .. autoclass:: CSPrimPolyhedronReader
-        :members:
-        :show-inheritance:

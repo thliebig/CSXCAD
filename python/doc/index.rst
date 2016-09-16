@@ -9,8 +9,9 @@ Welcome to CSXCAD's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
+   about
    CSXCAD_PY/CSXCAD_PY
 
 
