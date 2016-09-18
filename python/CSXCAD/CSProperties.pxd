@@ -19,7 +19,7 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
-from ParameterObjects cimport _ParameterSet
+from ParameterObjects cimport _ParameterSet, ParameterSet
 from CSXCAD cimport ContinuousStructure
 
 cdef extern from "CSXCAD/CSProperties.h":
@@ -44,6 +44,9 @@ cdef extern from "CSXCAD/CSProperties.h":
             _CSProperties(_ParameterSet*) except +
             int GetType()
             string GetTypeString()
+
+            _ParameterSet* GetParameterSet()
+
             void SetName(string name)
             string GetName()
 
@@ -57,6 +60,7 @@ cdef class CSProperties:
     cdef  _CSProperties *thisptr
     cdef __SetPtr(self, _CSProperties *ptr)
     cdef readonly ContinuousStructure __CSX
+    cdef readonly ParameterSet __paraset
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropMaterial.h":

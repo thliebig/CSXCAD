@@ -37,9 +37,11 @@ Create a metal property:
 import numpy as np
 from ParameterObjects cimport _ParameterSet, ParameterSet
 cimport CSProperties
+cimport CSPrimitives as c_CSPrimitives
+from CSPrimitives import PrimitiveFromType
 from Utilities import CheckNyDir
 
-def CreateFromType(p_type, pset, no_init=False, **kw):
+def PropertyFromType(p_type, pset, no_init=False, **kw):
     prop = None
     if p_type == CONDUCTINGSHEET + METAL:
         prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
@@ -58,6 +60,23 @@ def CreateFromType(p_type, pset, no_init=False, **kw):
 
     return prop
 
+def PropertyFromTypeName(type_str, pset, no_init=False, **kw):
+    prop = None
+    if type_str=='Material':
+        prop = CSPropMaterial(pset, no_init=no_init, **kw)
+    elif type_str=='LumpedElement':
+        prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
+    elif type_str=='Metal':
+        prop = CSPropMetal(pset, no_init=no_init, **kw)
+    elif type_str=='ConductingSheet':
+        prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+    elif type_str=='Excitation':
+        prop = CSPropExcitation(pset, no_init=no_init, **kw)
+    elif type_str=='ProbeBox':
+        prop = CSPropProbeBox(pset, no_init=no_init, **kw)
+    elif type_str=='DumpBox':
+        prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+    return prop
 
 cdef class CSProperties:
     """
@@ -71,13 +90,10 @@ cdef class CSProperties:
             return
         assert self.thisptr, "Error, cannot create CSProperties (protected)"
 
-        assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
+        self.__paraset = ParameterSet(no_init=True)
+        self.__paraset.thisptr = self.thisptr.GetParameterSet()
 
-    def __dealloc__(self):
-        pass
-        # only delete if this property is not owned by a CSX object
-#        if self.__CSX is None:
-#            del self.thisptr
+        assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
 
     cdef __SetPtr(self, _CSProperties *ptr):
         self.thisptr = ptr
@@ -103,6 +119,12 @@ cdef class CSProperties:
         :returns: str -- Type name of this property type
         """
         return self.thisptr.GetTypeString().decode('UTF-8')
+
+    def GetParameterSet(self):
+        """
+        Get the parameter set assigned to this class
+        """
+        return self.__paraset
 
     def SetName(self, name):
         """ SetName(name)
@@ -150,6 +172,145 @@ cdef class CSProperties:
         :param val: str -- Attribute value
         """
         self.thisptr.AddAttribute(name.encode('UTF-8'), val.encode('UTF-8'))
+
+    def AddPoint(self, coord, **kw):
+        """ AddPoint(coord, **kw)
+
+        Add a point and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimPoint : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.POINT, coord=coord, **kw)
+
+    def AddBox(self, start, stop, **kw):
+        """ AddBox(prop, start, stop, **kw)
+
+        Add a box and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimBox : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.BOX, start=start, stop=stop, **kw)
+
+    def AddCylinder(self, start, stop, radius, **kw):
+        """ AddCylinder(prop, start, stop, radius, **kw)
+
+        Add a cylinder and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimCylinder : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.CYLINDER, start=start, stop=stop, radius=radius, **kw)
+
+    def AddCylindricalShell(self, start, stop, radius, shell_width, **kw):
+        """ AddCylindricalShell(prop, start, stop, radius, shell_width, **kw)
+
+        Add a cylindrical shell and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimCylindricalShell : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.CYLINDRICALSHELL, start=start, stop=stop, radius=radius, shell_width=shell_width, **kw)
+
+    def AddSphere(self, center, radius, **kw):
+        """ AddSphere(prop, center, radius, **kw)
+
+        Add a sphere and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimSphere : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.SPHERE, center=center, radius=radius, **kw)
+
+    def AddSphericalShell(self, center, radius, shell_width, **kw):
+        """ AddSphericalShell(prop, center, radius, shell_width, **kw)
+
+        Add a spherical shell and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimSphericalShell : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.SPHERICALSHELL, center=center, radius=radius, shell_width=shell_width, **kw)
+
+    def AddPolygon(self, points, norm_dir, elevation, **kw):
+        """ AddPolygon(prop, points, norm_dir, elevation, **kw)
+
+        Add a polygon and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimPolygon : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.POLYGON, points=points, norm_dir=norm_dir, elevation=elevation, **kw)
+
+    def AddLinPoly(self, points, norm_dir, elevation, length, **kw):
+        """ AddLinPoly(prop, points, norm_dir, elevation, length, **kw)
+
+        Add a linear extruded polygon and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimLinPoly : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.LINPOLY, points=points, norm_dir=norm_dir, elevation=elevation, length=length, **kw)
+
+    def AddRotPoly(self, points, norm_dir, elevation, rot_axis, angle, **kw):
+        """ AddRotPoly(prop, points, norm_dir, elevation, rot_axis, angle, **kw)
+
+        Add a rotated polygon and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimRotPoly : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.ROTPOLY, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
+
+    def AddCurve(self, points, **kw):
+        """ AddCurve(prop, points, **kw)
+
+        Add a curve and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimCurve : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.CURVE, points=points, **kw)
+
+    def AddWire(self, points, radius, **kw):
+        """ AddWire(prop, points, radius, **kw)
+
+        Add a wire and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimWire : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.WIRE, points=points, radius=radius, **kw)
+
+    def AddPolyhedronReader(self, filename, **kw):
+        """ AddPolyhedronReader(prop, filename, **kw)
+
+        Add a polyhedron from file and assign it to the given property `prop`.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=filename, **kw)
+
+    def __CreatePrimitive(self, prim_type, **kw):
+        pset = self.GetParameterSet()
+        prim = PrimitiveFromType(prim_type, pset, self, **kw)
+        if prim is None:
+            raise Exception('CreatePrimitive: Unknown primitive type requested!')
+        return prim
 
 ###############################################################################
 cdef class CSPropMaterial(CSProperties):

@@ -27,6 +27,7 @@ cdef class ParameterSet:
             self.thisptr = NULL
         else:
             self.thisptr = new _ParameterSet()
-    def __dealloc__(self):
-        del self.thisptr
-        self.thisptr = NULL
+
+#    def __dealloc__(self):
+#        del self.thisptr
+#        self.thisptr = NULL

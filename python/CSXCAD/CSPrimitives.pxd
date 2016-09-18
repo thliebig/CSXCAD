@@ -25,6 +25,25 @@ from CSTransform cimport _CSTransform, CSTransform
 from CSRectGrid cimport CoordinateSystem
 
 cdef extern from "CSXCAD/CSPrimitives.h":
+    cpdef enum PrimitiveType "CSPrimitives::PrimitiveType":
+        POINT             "CSPrimitives::POINT"
+        BOX               "CSPrimitives::BOX"
+        MULTIBOX          "CSPrimitives::MULTIBOX"
+        SPHERE            "CSPrimitives::SPHERE"
+        SPHERICALSHELL    "CSPrimitives::SPHERICALSHELL"
+        CYLINDER          "CSPrimitives::CYLINDER"
+        CYLINDRICALSHELL  "CSPrimitives::CYLINDRICALSHELL"
+        POLYGON           "CSPrimitives::POLYGON"
+        LINPOLY           "CSPrimitives::LINPOLY"
+        ROTPOLY           "CSPrimitives::ROTPOLY"
+        POLYHEDRON        "CSPrimitives::POLYHEDRON"
+        CURVE             "CSPrimitives::CURVE"
+        WIRE              "CSPrimitives::WIRE"
+        USERDEFINED       "CSPrimitives::USERDEFINED"
+        POLYHEDRONREADER  "CSPrimitives::POLYHEDRONREADER"
+
+
+cdef extern from "CSXCAD/CSPrimitives.h":
     cdef cppclass _CSPrimitives "CSPrimitives":
             _CSPrimitives(_ParameterSet*, _CSProperties*) except +
             unsigned int GetID()

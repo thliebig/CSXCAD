@@ -43,12 +43,56 @@ cimport CSPrimitives
 from Utilities import CheckNyDir, GetMultiDirs
 cimport CSRectGrid
 
+
+def PrimitiveFromType(prim_type, pset, prop, no_init=False, **kw):
+    prim = None
+    if prim_type == POINT:
+        prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
+    elif prim_type == POINT:
+        prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
+    elif prim_type == BOX:
+        prim = CSPrimBox(pset, prop, no_init=no_init, **kw)
+    elif prim_type == MULTIBOX:
+        raise Exception('Primitive type "MULTIBOX" not yet implemented!')
+    elif prim_type == SPHERE:
+        prim = CSPrimSphere(pset, prop, no_init=no_init, **kw)
+    elif prim_type == SPHERICALSHELL:
+        prim = CSPrimSphericalShell(pset, prop, no_init=no_init, **kw)
+    elif prim_type == CYLINDER:
+        prim = CSPrimCylinder(pset, prop, no_init=no_init, **kw)
+    elif prim_type == CYLINDRICALSHELL:
+        prim = CSPrimCylindricalShell(pset, prop, no_init=no_init, **kw)
+    elif prim_type == POLYGON:
+        prim = CSPrimPolygon(pset, prop, no_init=no_init, **kw)
+    elif prim_type == LINPOLY:
+        prim = CSPrimLinPoly(pset, prop, no_init=no_init, **kw)
+    elif prim_type == ROTPOLY:
+        prim = CSPrimRotPoly(pset, prop, no_init=no_init, **kw)
+    elif prim_type == POLYHEDRON:
+        prim = CSPrimPolyhedron(pset, prop, no_init=no_init, **kw)
+    elif prim_type == CURVE:
+        prim = CSPrimCurve(pset, prop, no_init=no_init, **kw)
+    elif prim_type == WIRE:
+        prim = CSPrimWire(pset, prop, no_init=no_init, **kw)
+    elif prim_type == USERDEFINED:
+        raise Exception('Primitive type "USERDEFINED" not yet implemented!')
+    elif prim_type == POLYHEDRONREADER:
+        prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
+    return prim
+
+
 cdef class CSPrimitives:
     """
     Virtual base class for all primives, cannot be created!
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        self.__transform = None
+        self.__prop      = None
+        if no_init:
+            self.thisptr = NULL
+            return
+
         assert self.thisptr, 'Error, object cannot be created (protected)'
         self.__prop = prop
 
@@ -59,7 +103,8 @@ cdef class CSPrimitives:
             if kw['edges2grid'] is not None:
                 self.AddEdges2Grid(kw['edges2grid'])
             del kw['edges2grid']
-        self.__transform = None
+        if 'no_init' in kw:
+            del kw['no_init']
 
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
@@ -173,7 +218,7 @@ cdef class CSPrimitives:
             self.__transform.thisptr = self.thisptr.GetTransform()
         return self.__transform
 
-    def AddTransform(self, transform, *args, **kw):
+    def AddTransform(self, transform, *args, no_init=False, **kw):
         """ AddTransform(transform, *args, **kw)
 
         Add a transformation to this primitive.
@@ -246,7 +291,10 @@ cdef class CSPrimPoint(CSPrimitives):
         Coordinate vector (3,) array
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr   = new _CSPrimPoint(pset.thisptr, prop.thisptr)
 
@@ -308,7 +356,10 @@ cdef class CSPrimBox(CSPrimitives):
         Stop point vector (3,) array
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr   = new _CSPrimBox(pset.thisptr, prop.thisptr)
         if 'start' in kw:
@@ -417,7 +468,10 @@ cdef class CSPrimCylinder(CSPrimitives):
         The cylinder radius
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr   = new _CSPrimCylinder(pset.thisptr, prop.thisptr)
         if 'start' in kw:
@@ -510,7 +564,10 @@ cdef class CSPrimCylindricalShell(CSPrimCylinder):
         Width of the cylindrical shell
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimCylindricalShell(pset.thisptr, prop.thisptr)
         if 'shell_width' in kw:
@@ -552,7 +609,10 @@ cdef class CSPrimSphere(CSPrimitives):
         The sphere radius
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr   = new _CSPrimSphere(pset.thisptr, prop.thisptr)
         if 'center' in kw:
@@ -617,7 +677,10 @@ cdef class CSPrimSphericalShell(CSPrimSphere):
         Width of the spherical shell
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimSphericalShell(pset.thisptr, prop.thisptr)
         if 'shell_width' in kw:
@@ -669,7 +732,10 @@ cdef class CSPrimPolygon(CSPrimitives):
     >>> ang     = np.linspace(0, np.pi, 21)
     >>> polygon.SetCoords(5*np.cos(ang), 5*np.sin(ang))
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolygon(pset.thisptr, prop.thisptr)
         if 'points' in kw:
@@ -790,7 +856,10 @@ cdef class CSPrimLinPoly(CSPrimPolygon):
     >>> linpoly.SetCoords(5*np.cos(ang), 5*np.sin(ang))
     >>> linpoly.SetLength(1.0)
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimLinPoly(pset.thisptr, prop.thisptr)
         if 'length' in kw:
@@ -840,7 +909,10 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
     >>> rotpoly.SetCoords(5*np.cos(ang), 5*np.sin(ang))
     >>> rotpoly.SetRotAxisDir('x')
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimRotPoly(pset.thisptr, prop.thisptr)
         if 'rot_axis' in kw:
@@ -912,7 +984,10 @@ cdef class CSPrimCurve(CSPrimitives):
     >>> curve = CSPrimitives.CSPrimCurve(pset, metal, points=[x,y,z])
     >>> curve.AddPoint([2, 0, 5])
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimCurve(pset.thisptr, prop.thisptr)
         if 'points' in kw:
@@ -997,7 +1072,10 @@ cdef class CSPrimWire(CSPrimCurve):
     radius : float
         Wire radius
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimWire(pset.thisptr, prop.thisptr)
         if 'radius' in kw:
@@ -1032,7 +1110,10 @@ cdef class CSPrimPolyhedron(CSPrimitives):
     A polyhedron is a 3D solid with flat polygonal faces (currently only triangles).
 
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolyhedron(pset.thisptr, prop.thisptr)
         super(CSPrimPolyhedron, self).__init__(pset, prop, *args, **kw)
@@ -1136,7 +1217,10 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
     filename : str
         File name to read
     """
-    def __init__(self, ParameterSet pset, CSProperties prop, *args, **kw):
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolyhedronReader(pset.thisptr, prop.thisptr)
         if 'filename' in kw:

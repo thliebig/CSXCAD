@@ -43,10 +43,10 @@ from CSPrimitives import CSPrimSphere, CSPrimSphericalShell
 from CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
 from CSPrimitives import CSPrimCurve, CSPrimWire
 from CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
-cimport CSPrimitives
 cimport CSProperties as c_CSProperties
 cimport CSRectGrid   as c_CSRectGrid
-from CSProperties import CreateFromType
+from CSProperties import PropertyFromType
+from CSProperties import PropertyFromTypeName
 from ParameterObjects import ParameterSet
 
 from SmoothMeshLines import SmoothMeshLines
@@ -223,7 +223,7 @@ cdef class ContinuousStructure:
         --------
         CSXCAD.CSProperties.CSPropProbeBox
         """
-        return self.__CreateProperty('Probe', name, p_type=p_type, **kw)
+        return self.__CreateProperty('ProbeBox', name, p_type=p_type, **kw)
 
     def AddDump(self, name, **kw):
         """ AddDump(name, **kw)
@@ -234,26 +234,12 @@ cdef class ContinuousStructure:
         --------
         CSXCAD.CSProperties.CSPropDumpBox
         """
-        return self.__CreateProperty('Dump', name, **kw)
+        return self.__CreateProperty('DumpBox', name, **kw)
 
     def __CreateProperty(self, type_str, name, *args, **kw):
         assert len(args)==0, 'CreateProperty does not support additional arguments'
-        if type_str=='Material':
-            prop = CSPropMaterial(self.__paraset, **kw)
-        elif type_str=='LumpedElement':
-            prop = CSPropLumpedElement(self.__paraset, **kw)
-        elif type_str=='Metal':
-            assert len(kw)==0, 'CreateProperty: Metal does not support additional key words'
-            prop = CSPropMetal(self.__paraset)
-        elif type_str=='ConductingSheet':
-            prop = CSPropConductingSheet(self.__paraset, **kw)
-        elif type_str=='Excitation':
-            prop = CSPropExcitation(self.__paraset, **kw)
-        elif type_str=='Probe':
-            prop = CSPropProbeBox(self.__paraset, **kw)
-        elif type_str=='Dump':
-            prop = CSPropDumpBox(self.__paraset, **kw)
-        else:
+        prop = PropertyFromTypeName(type_str, self.__paraset, **kw)
+        if prop is None:
             raise Exception('CreateProperty: Unknown property type requested: {}'.format(type_str))
         prop.SetName(name)
         self.AddProperty(prop)
@@ -291,172 +277,6 @@ cdef class ContinuousStructure:
         if _prop==NULL:
             return None
         else:
-            prop = CreateFromType(_prop.GetType(), pset=None, no_init=True)
+            prop = PropertyFromType(_prop.GetType(), pset=None, no_init=True)
             prop.thisptr = _prop
             return prop
-
-    def AddPoint(self, prop, coord, **kw):
-        """ AddPoint(prop, coord, **kw)
-
-        Add a point and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimPoint : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Point', prop, coord=coord, **kw)
-
-    def AddBox(self, prop, start, stop, **kw):
-        """ AddBox(prop, start, stop, **kw)
-
-        Add a box and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimBox : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Box', prop, start=start, stop=stop, **kw)
-
-    def AddCylinder(self, prop, start, stop, radius, **kw):
-        """ AddCylinder(prop, start, stop, radius, **kw)
-
-        Add a cylinder and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimCylinder : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Cylinder', prop, start=start, stop=stop, radius=radius, **kw)
-
-    def AddCylindricalShell(self, prop, start, stop, radius, shell_width, **kw):
-        """ AddCylindricalShell(prop, start, stop, radius, shell_width, **kw)
-
-        Add a cylindrical shell and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimCylindricalShell : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('CylindricalShell', prop, start=start, stop=stop, radius=radius, shell_width=shell_width, **kw)
-
-    def AddSphere(self, prop, center, radius, **kw):
-        """ AddSphere(prop, center, radius, **kw)
-
-        Add a sphere and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimSphere : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Sphere', prop, center=center, radius=radius, **kw)
-
-    def AddSphericalShell(self, prop, center, radius, shell_width, **kw):
-        """ AddSphericalShell(prop, center, radius, shell_width, **kw)
-
-        Add a spherical shell and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimSphericalShell : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('SphericalShell', prop, center=center, radius=radius, shell_width=shell_width, **kw)
-
-    def AddPolygon(self, prop, points, norm_dir, elevation, **kw):
-        """ AddPolygon(prop, points, norm_dir, elevation, **kw)
-
-        Add a polygon and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimPolygon : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Polygon', prop, points=points, norm_dir=norm_dir, elevation=elevation, **kw)
-
-    def AddLinPoly(self, prop, points, norm_dir, elevation, length, **kw):
-        """ AddLinPoly(prop, points, norm_dir, elevation, length, **kw)
-
-        Add a linear extruded polygon and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimLinPoly : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('LinPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, length=length, **kw)
-
-    def AddRotPoly(self, prop, points, norm_dir, elevation, rot_axis, angle, **kw):
-        """ AddRotPoly(prop, points, norm_dir, elevation, rot_axis, angle, **kw)
-
-        Add a rotated polygon and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimRotPoly : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('RotPoly', prop, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
-
-    def AddCurve(self, prop, points, **kw):
-        """ AddCurve(prop, points, **kw)
-
-        Add a curve and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimCurve : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Curve', prop, points=points, **kw)
-
-    def AddWire(self, prop, points, radius, **kw):
-        """ AddWire(prop, points, radius, **kw)
-
-        Add a wire and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimWire : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('Wire', prop, points=points, radius=radius, **kw)
-
-    def AddPolyhedronReader(self, prop, filename, **kw):
-        """ AddPolyhedronReader(prop, filename, **kw)
-
-        Add a polyhedron from file and assign it to the given property `prop`.
-
-        See Also
-        --------
-        CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
-        """
-        return self.__CreatePrimitive('PolyhedronReader', prop, filename=filename, **kw)
-
-    def __CreatePrimitive(self, type_str, prop, *args, **kw):
-        pset = self.GetParameterSet()
-        assert len(args)==0, 'CreatePrimitive: Box does not support additional arguments'
-        if type_str=='Point':
-            prim = CSPrimPoint(pset, prop, **kw)
-        elif type_str=='Box':
-            prim = CSPrimBox(pset, prop, **kw)
-        elif type_str=='Cylinder':
-            prim = CSPrimCylinder(pset, prop, **kw)
-        elif type_str=='CylindricalShell':
-            prim = CSPrimCylindricalShell(pset, prop, **kw)
-        elif type_str=='Sphere':
-            prim = CSPrimSphere(pset, prop, **kw)
-        elif type_str=='SphericalShell':
-            prim = CSPrimSphericalShell(pset, prop, **kw)
-        elif type_str=='Polygon':
-            prim = CSPrimPolygon(pset, prop, **kw)
-        elif type_str=='LinPoly':
-            prim = CSPrimLinPoly(pset, prop, **kw)
-        elif type_str=='RotPoly':
-            prim = CSPrimRotPoly(pset, prop, **kw)
-        elif type_str=='Curve':
-            prim = CSPrimCurve(pset, prop, **kw)
-        elif type_str=='Wire':
-            prim = CSPrimWire(pset, prop, **kw)
-        elif type_str=='Polyhedron':
-            prim = CSPrimPolyhedron(pset, prop, **kw)
-        elif type_str=='PolyhedronReader':
-            prim = CSPrimPolyhedronReader(pset, prop, **kw)
-        else:
-            raise Exception('CreatePrimitive: Unknown primitive type requested: {}'.format(type_str))
-        return prim
-
