@@ -89,6 +89,8 @@ public:
 	//! Get Property Type as a string. (default is the xml element name)
 	virtual const std::string GetTypeString() const {return GetTypeXMLString();}
 
+	ParameterSet* GetParameterSet() {return clParaSet;}
+
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
 	bool GetMaterial() {return bMaterial;}
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
