@@ -33,9 +33,16 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         box.SetStart([0,0,0])
         box.SetStop([1,2,3])
+        self.assertTrue(box.Update())
+
         self.assertTrue( (box.GetBoundBox() == np.array([[0,0,0],[1,2,3]])).all())
         self.assertTrue( (box.GetStart()    == np.array([0,0,0])).all())
         self.assertTrue( (box.GetStop()     == np.array([1,2,3])).all())
+
+        self.assertEqual(box.GetDimension(), 3)
+        self.assertTrue(box.IsInside([0,0,0]))
+        self.assertTrue(box.IsInside([0.5,0.5,0.5]))
+        self.assertFalse(box.IsInside([-0.5,0.5,0.5]))
 
         tr = box.GetTransform()
         self.assertFalse(tr.HasTransform())

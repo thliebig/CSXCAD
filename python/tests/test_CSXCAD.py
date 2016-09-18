@@ -8,9 +8,10 @@ Created on Fri Dec  4 16:24:49 2015
 import numpy as np
 
 from CSXCAD.CSXCAD import ContinuousStructure
+from CSXCAD import CSProperties
+
 from CSXCAD.CSProperties import CSPropMetal
 from CSXCAD import CSPrimitives
-
 csx = ContinuousStructure()
 pset = csx.GetParameterSet()
 grid = csx.GetGrid()
@@ -23,7 +24,14 @@ assert metal.GetTypeString()=='Metal'
 metal.SetName('metal')
 assert metal.GetName()=='metal'
 
+
+print(csx.GetQtyPrimitives(0))
+metal.AddBox([0,0,0], [1,1,1])
+
 ans = csx.AddProperty(metal)
+
+print(csx.GetQtyPrimitives(CSProperties.ANY))
+print(csx.GetQtyPrimitives(CSProperties.METAL))
 metal2 = csx.AddMetal('test')
 assert metal2.GetName()=='test'
 
