@@ -38,51 +38,70 @@ import numpy as np
 from ParameterObjects cimport _ParameterSet, ParameterSet
 cimport CSProperties
 cimport CSPrimitives as c_CSPrimitives
-from CSPrimitives import PrimitiveFromType
+from CSPrimitives import CSPrimitives
 from Utilities import CheckNyDir
-
-def PropertyFromType(p_type, pset, no_init=False, **kw):
-    prop = None
-    if p_type == CONDUCTINGSHEET + METAL:
-        prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
-    elif p_type == METAL:
-        prop = CSPropMetal(pset, no_init=no_init, **kw)
-    elif p_type == MATERIAL:
-        prop = CSPropMaterial(pset, no_init=no_init, **kw)
-    elif p_type == LUMPED_ELEMENT:
-        prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
-    elif p_type == EXCITATION:
-        prop = CSPropExcitation(pset, no_init=no_init, **kw)
-    elif p_type == PROBEBOX:
-        prop = CSPropProbeBox(pset, no_init=no_init, **kw)
-    elif p_type == DUMPBOX:
-        prop = CSPropDumpBox(pset, no_init=no_init, **kw)
-
-    return prop
-
-def PropertyFromTypeName(type_str, pset, no_init=False, **kw):
-    prop = None
-    if type_str=='Material':
-        prop = CSPropMaterial(pset, no_init=no_init, **kw)
-    elif type_str=='LumpedElement':
-        prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
-    elif type_str=='Metal':
-        prop = CSPropMetal(pset, no_init=no_init, **kw)
-    elif type_str=='ConductingSheet':
-        prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
-    elif type_str=='Excitation':
-        prop = CSPropExcitation(pset, no_init=no_init, **kw)
-    elif type_str=='ProbeBox':
-        prop = CSPropProbeBox(pset, no_init=no_init, **kw)
-    elif type_str=='DumpBox':
-        prop = CSPropDumpBox(pset, no_init=no_init, **kw)
-    return prop
 
 cdef class CSProperties:
     """
     Virtual base class for all properties, cannot be created!
 
     """
+
+    @staticmethod
+    def fromType(p_type, pset, no_init=False, **kw):
+        """ fromType(p_type, pset, no_init=False, **kw)
+
+        Create a property specified by the `p_type`
+
+        :param p_type: Property type
+        :param pset: ParameterSet to assign to the new primitive
+        :param no_init: do not create an actual C++ instance
+        """
+        prop = None
+        if p_type == CONDUCTINGSHEET + METAL:
+            prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+        elif p_type == METAL:
+            prop = CSPropMetal(pset, no_init=no_init, **kw)
+        elif p_type == MATERIAL:
+            prop = CSPropMaterial(pset, no_init=no_init, **kw)
+        elif p_type == LUMPED_ELEMENT:
+            prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
+        elif p_type == EXCITATION:
+            prop = CSPropExcitation(pset, no_init=no_init, **kw)
+        elif p_type == PROBEBOX:
+            prop = CSPropProbeBox(pset, no_init=no_init, **kw)
+        elif p_type == DUMPBOX:
+            prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+
+        return prop
+
+    @staticmethod
+    def fromTypeName(type_str, pset, no_init=False, **kw):
+        """ fromTypeName(type_str, pset, no_init=False, **kw)
+
+        Create a property specified by the `type_str`
+
+        :param type_str: Property type name string
+        :param pset: ParameterSet to assign to the new primitive
+        :param no_init: do not create an actual C++ instance
+        """
+        prop = None
+        if type_str=='Material':
+            prop = CSPropMaterial(pset, no_init=no_init, **kw)
+        elif type_str=='LumpedElement':
+            prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
+        elif type_str=='Metal':
+            prop = CSPropMetal(pset, no_init=no_init, **kw)
+        elif type_str=='ConductingSheet':
+            prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+        elif type_str=='Excitation':
+            prop = CSPropExcitation(pset, no_init=no_init, **kw)
+        elif type_str=='ProbeBox':
+            prop = CSPropProbeBox(pset, no_init=no_init, **kw)
+        elif type_str=='DumpBox':
+            prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        return prop
+
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         self.__CSX = None
         if no_init:
@@ -307,7 +326,7 @@ cdef class CSProperties:
 
     def __CreatePrimitive(self, prim_type, **kw):
         pset = self.GetParameterSet()
-        prim = PrimitiveFromType(prim_type, pset, self, **kw)
+        prim = CSPrimitives.fromType(prim_type, pset, self, **kw)
         if prim is None:
             raise Exception('CreatePrimitive: Unknown primitive type requested!')
         return prim

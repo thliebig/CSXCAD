@@ -43,49 +43,56 @@ cimport CSPrimitives
 from Utilities import CheckNyDir, GetMultiDirs
 cimport CSRectGrid
 
-
-def PrimitiveFromType(prim_type, pset, prop, no_init=False, **kw):
-    prim = None
-    if prim_type == POINT:
-        prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
-    elif prim_type == POINT:
-        prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
-    elif prim_type == BOX:
-        prim = CSPrimBox(pset, prop, no_init=no_init, **kw)
-    elif prim_type == MULTIBOX:
-        raise Exception('Primitive type "MULTIBOX" not yet implemented!')
-    elif prim_type == SPHERE:
-        prim = CSPrimSphere(pset, prop, no_init=no_init, **kw)
-    elif prim_type == SPHERICALSHELL:
-        prim = CSPrimSphericalShell(pset, prop, no_init=no_init, **kw)
-    elif prim_type == CYLINDER:
-        prim = CSPrimCylinder(pset, prop, no_init=no_init, **kw)
-    elif prim_type == CYLINDRICALSHELL:
-        prim = CSPrimCylindricalShell(pset, prop, no_init=no_init, **kw)
-    elif prim_type == POLYGON:
-        prim = CSPrimPolygon(pset, prop, no_init=no_init, **kw)
-    elif prim_type == LINPOLY:
-        prim = CSPrimLinPoly(pset, prop, no_init=no_init, **kw)
-    elif prim_type == ROTPOLY:
-        prim = CSPrimRotPoly(pset, prop, no_init=no_init, **kw)
-    elif prim_type == POLYHEDRON:
-        prim = CSPrimPolyhedron(pset, prop, no_init=no_init, **kw)
-    elif prim_type == CURVE:
-        prim = CSPrimCurve(pset, prop, no_init=no_init, **kw)
-    elif prim_type == WIRE:
-        prim = CSPrimWire(pset, prop, no_init=no_init, **kw)
-    elif prim_type == USERDEFINED:
-        raise Exception('Primitive type "USERDEFINED" not yet implemented!')
-    elif prim_type == POLYHEDRONREADER:
-        prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
-    return prim
-
-
 cdef class CSPrimitives:
     """
     Virtual base class for all primives, cannot be created!
 
     """
+    @staticmethod
+    def fromType(prim_type, pset, prop, no_init=False, **kw):
+        """ fromType(prim_type, pset, prop, no_init=False, **kw)
+
+        Create a primtive specified by the `prim_type`
+
+        :param prim_type: Primitive type
+        :param pset: ParameterSet to assign to the new primitive
+        :param prop: CSProperty to assign to the new primitive
+        :param no_init: do not create an actual C++ instance
+        """
+        prim = None
+        if prim_type == POINT:
+            prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
+        elif prim_type == POINT:
+            prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
+        elif prim_type == BOX:
+            prim = CSPrimBox(pset, prop, no_init=no_init, **kw)
+        elif prim_type == MULTIBOX:
+            raise Exception('Primitive type "MULTIBOX" not yet implemented!')
+        elif prim_type == SPHERE:
+            prim = CSPrimSphere(pset, prop, no_init=no_init, **kw)
+        elif prim_type == SPHERICALSHELL:
+            prim = CSPrimSphericalShell(pset, prop, no_init=no_init, **kw)
+        elif prim_type == CYLINDER:
+            prim = CSPrimCylinder(pset, prop, no_init=no_init, **kw)
+        elif prim_type == CYLINDRICALSHELL:
+            prim = CSPrimCylindricalShell(pset, prop, no_init=no_init, **kw)
+        elif prim_type == POLYGON:
+            prim = CSPrimPolygon(pset, prop, no_init=no_init, **kw)
+        elif prim_type == LINPOLY:
+            prim = CSPrimLinPoly(pset, prop, no_init=no_init, **kw)
+        elif prim_type == ROTPOLY:
+            prim = CSPrimRotPoly(pset, prop, no_init=no_init, **kw)
+        elif prim_type == POLYHEDRON:
+            prim = CSPrimPolyhedron(pset, prop, no_init=no_init, **kw)
+        elif prim_type == CURVE:
+            prim = CSPrimCurve(pset, prop, no_init=no_init, **kw)
+        elif prim_type == WIRE:
+            prim = CSPrimWire(pset, prop, no_init=no_init, **kw)
+        elif prim_type == USERDEFINED:
+            raise Exception('Primitive type "USERDEFINED" not yet implemented!')
+        elif prim_type == POLYHEDRONREADER:
+            prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
+        return prim
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         self.__transform = None
         self.__prop      = None
@@ -213,6 +220,17 @@ cdef class CSPrimitives:
         raise Exception('AddEdges2Grid not possible or implemented for this primtive type!')
 
     def GetTransform(self):
+        """ GetTransform()
+
+        Get the transformation class assigned to this primitive.
+        If this primitve does not have any, it will be created.
+
+        :return: CSTransform class
+
+        See Also
+        --------
+        CSXCAD.CSTransform.CSTransform
+        """
         if self.__transform is None:
             self.__transform         = CSTransform(no_init=True)
             self.__transform.thisptr = self.thisptr.GetTransform()
@@ -225,7 +243,7 @@ cdef class CSPrimitives:
 
         See Also
         --------
-        CSTransform.CSTransform.AddTransform
+        CSXCAD.CSTransform.CSTransform.AddTransform
         """
         tr = self.GetTransform()
         tr.AddTransform(transform, *args, **kw)
@@ -328,6 +346,10 @@ cdef class CSPrimPoint(CSPrimitives):
         return coord
 
     def AddEdges2Grid(self, dirs):
+        """ AddEdges2Grid(dirs)
+
+        Add the coordinates of the point to the grid.
+        """
         csx = self.__GetCSX()
         if csx is None:
             raise Exception('AddEdges2Grid: Unable to access CSX!')
@@ -421,7 +443,7 @@ cdef class CSPrimBox(CSPrimitives):
     def AddEdges2Grid(self, dirs, metal_edge_res=None):
         """ AddEdges2Grid(dirs, metal_edge_res=None)
 
-        Allow the edges of this box to the grid.
+        Add the edges of this box to the grid.
         Allow an optional 2D metal edge res
 
         :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'

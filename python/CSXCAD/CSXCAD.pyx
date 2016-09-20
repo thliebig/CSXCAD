@@ -45,8 +45,7 @@ from CSPrimitives import CSPrimCurve, CSPrimWire
 from CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
 cimport CSProperties as c_CSProperties
 cimport CSRectGrid   as c_CSRectGrid
-from CSProperties import PropertyFromType
-from CSProperties import PropertyFromTypeName
+from CSProperties import CSProperties
 from ParameterObjects import ParameterSet
 
 from SmoothMeshLines import SmoothMeshLines
@@ -238,7 +237,7 @@ cdef class ContinuousStructure:
 
     def __CreateProperty(self, type_str, name, *args, **kw):
         assert len(args)==0, 'CreateProperty does not support additional arguments'
-        prop = PropertyFromTypeName(type_str, self.__paraset, **kw)
+        prop = CSProperties.fromTypeName(type_str, self.__paraset, **kw)
         if prop is None:
             raise Exception('CreateProperty: Unknown property type requested: {}'.format(type_str))
         prop.SetName(name)
@@ -277,6 +276,6 @@ cdef class ContinuousStructure:
         if _prop==NULL:
             return None
         else:
-            prop = PropertyFromType(_prop.GetType(), pset=None, no_init=True)
+            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
             prop.thisptr = _prop
             return prop
