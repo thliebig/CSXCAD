@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    about
+   install
    CSXCAD_PY/CSXCAD_PY
 
 
