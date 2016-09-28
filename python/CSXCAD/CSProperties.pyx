@@ -195,7 +195,7 @@ cdef class CSProperties:
     def AddPoint(self, coord, **kw):
         """ AddPoint(coord, **kw)
 
-        Add a point and assign it to the given property `prop`.
+        Add a point to this property.
 
         See Also
         --------
@@ -204,9 +204,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.POINT, coord=coord, **kw)
 
     def AddBox(self, start, stop, **kw):
-        """ AddBox(prop, start, stop, **kw)
+        """ AddBox(start, stop, **kw)
 
-        Add a box and assign it to the given property `prop`.
+        Add a box to this property.
 
         See Also
         --------
@@ -215,9 +215,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.BOX, start=start, stop=stop, **kw)
 
     def AddCylinder(self, start, stop, radius, **kw):
-        """ AddCylinder(prop, start, stop, radius, **kw)
+        """ AddCylinder(start, stop, radius, **kw)
 
-        Add a cylinder and assign it to the given property `prop`.
+        Add a cylinder to this property.
 
         See Also
         --------
@@ -226,9 +226,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.CYLINDER, start=start, stop=stop, radius=radius, **kw)
 
     def AddCylindricalShell(self, start, stop, radius, shell_width, **kw):
-        """ AddCylindricalShell(prop, start, stop, radius, shell_width, **kw)
+        """ AddCylindricalShell(start, stop, radius, shell_width, **kw)
 
-        Add a cylindrical shell and assign it to the given property `prop`.
+        Add a cylindrical shell to this property.
 
         See Also
         --------
@@ -237,9 +237,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.CYLINDRICALSHELL, start=start, stop=stop, radius=radius, shell_width=shell_width, **kw)
 
     def AddSphere(self, center, radius, **kw):
-        """ AddSphere(prop, center, radius, **kw)
+        """ AddSphere(center, radius, **kw)
 
-        Add a sphere and assign it to the given property `prop`.
+        Add a sphere to this property.
 
         See Also
         --------
@@ -248,9 +248,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.SPHERE, center=center, radius=radius, **kw)
 
     def AddSphericalShell(self, center, radius, shell_width, **kw):
-        """ AddSphericalShell(prop, center, radius, shell_width, **kw)
+        """ AddSphericalShell(center, radius, shell_width, **kw)
 
-        Add a spherical shell and assign it to the given property `prop`.
+        Add a spherical shell to this property.
 
         See Also
         --------
@@ -259,9 +259,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.SPHERICALSHELL, center=center, radius=radius, shell_width=shell_width, **kw)
 
     def AddPolygon(self, points, norm_dir, elevation, **kw):
-        """ AddPolygon(prop, points, norm_dir, elevation, **kw)
+        """ AddPolygon(points, norm_dir, elevation, **kw)
 
-        Add a polygon and assign it to the given property `prop`.
+        Add a polygon to this property.
 
         See Also
         --------
@@ -270,9 +270,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.POLYGON, points=points, norm_dir=norm_dir, elevation=elevation, **kw)
 
     def AddLinPoly(self, points, norm_dir, elevation, length, **kw):
-        """ AddLinPoly(prop, points, norm_dir, elevation, length, **kw)
+        """ AddLinPoly(points, norm_dir, elevation, length, **kw)
 
-        Add a linear extruded polygon and assign it to the given property `prop`.
+        Add a linear extruded polygon to this property.
 
         See Also
         --------
@@ -281,9 +281,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.LINPOLY, points=points, norm_dir=norm_dir, elevation=elevation, length=length, **kw)
 
     def AddRotPoly(self, points, norm_dir, elevation, rot_axis, angle, **kw):
-        """ AddRotPoly(prop, points, norm_dir, elevation, rot_axis, angle, **kw)
+        """ AddRotPoly(points, norm_dir, elevation, rot_axis, angle, **kw)
 
-        Add a rotated polygon and assign it to the given property `prop`.
+        Add a rotated polygon to this property.
 
         See Also
         --------
@@ -292,9 +292,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.ROTPOLY, points=points, norm_dir=norm_dir, elevation=elevation, rot_axis=rot_axis, angle=angle, **kw)
 
     def AddCurve(self, points, **kw):
-        """ AddCurve(prop, points, **kw)
+        """ AddCurve(points, **kw)
 
-        Add a curve and assign it to the given property `prop`.
+        Add a curve to this property.
 
         See Also
         --------
@@ -303,9 +303,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.CURVE, points=points, **kw)
 
     def AddWire(self, points, radius, **kw):
-        """ AddWire(prop, points, radius, **kw)
+        """ AddWire(points, radius, **kw)
 
-        Add a wire and assign it to the given property `prop`.
+        Add a wire to this property.
 
         See Also
         --------
@@ -314,9 +314,9 @@ cdef class CSProperties:
         return self.__CreatePrimitive(c_CSPrimitives.WIRE, points=points, radius=radius, **kw)
 
     def AddPolyhedronReader(self, filename, **kw):
-        """ AddPolyhedronReader(prop, filename, **kw)
+        """ AddPolyhedronReader(filename, **kw)
 
-        Add a polyhedron from file and assign it to the given property `prop`.
+        Add a polyhedron from file to this property.
 
         See Also
         --------
