@@ -93,6 +93,7 @@ cdef class CSPrimitives:
         elif prim_type == POLYHEDRONREADER:
             prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
         return prim
+
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         self.__transform = None
         self.__prop      = None
@@ -210,14 +211,32 @@ cdef class CSPrimitives:
             return None
         return self.__prop.__CSX
 
-    def AddEdges2Grid(self, dirs, **kw):
-        """ AddEdges2Grid(dirs)
 
-        Allow primitves supporting this feature to add their edges to the grid.
+    def AddEdges2Grid(self, dirs, **kw):
+        """ AddEdges2Grid(dirs, **kw)
+
+        Add the edges of this primitive to the grid.
+
+        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
+        """
+        csx = self.__GetCSX()
+        if csx is None:
+            raise Exception('AddEdges2Grid: Unable to access CSX!')
+        grid = csx.GetGrid()
+        hint = self.GetGridHint(dirs, **kw)
+        for n in range(3):
+            if hint[n] is None:
+                continue
+            grid.AddLine(n, hint[n])
+
+    def GetGridHint(self, dirs, **kw):
+        """ GetGridHint(dirs)
+
+        Allow primitves supporting this feature to create a grid hint
 
         :param dirs: str - 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
         """
-        raise Exception('AddEdges2Grid not possible or implemented for this primtive type!')
+        raise Exception('GetGridHint not possible or not (yet) implemented for this primtive type!')
 
     def GetTransform(self):
         """ GetTransform()
@@ -345,21 +364,19 @@ cdef class CSPrimPoint(CSPrimitives):
             coord[n] = ptr.GetCoord(n)
         return coord
 
-    def AddEdges2Grid(self, dirs):
-        """ AddEdges2Grid(dirs)
+    def GetGridHint(self, dirs):
+        """ GetGridHint(dirs)
 
-        Add the coordinates of the point to the grid.
+        Get a grid hint for the coordinates of the point.
+
+        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
+        :returns: (3,) list of mesh hints
         """
-        csx = self.__GetCSX()
-        if csx is None:
-            raise Exception('AddEdges2Grid: Unable to access CSX!')
-        if self.HasTransform():
-            sys.stderr.write('AddEdges2Grid: Warning, cannot add edges to grid with transformations enabled\n')
-            return
-        grid = csx.GetGrid()
+        hint = [None, None, None]
         coord = self.GetCoord()
         for ny in GetMultiDirs(dirs):
-            grid.AddLine(ny, coord[ny])
+            hint[ny] = [coord[ny],]
+        return hint
 
 ###############################################################################
 cdef class CSPrimBox(CSPrimitives):
@@ -440,37 +457,43 @@ cdef class CSPrimBox(CSPrimitives):
             coord[n] = ptr.GetCoord(2*n+1)
         return coord
 
-    def AddEdges2Grid(self, dirs, metal_edge_res=None):
-        """ AddEdges2Grid(dirs, metal_edge_res=None)
+    def GetGridHint(self, dirs, metal_edge_res=None, up_dir=True, down_dir=True):
+        """ GetGridHint(dirs, metal_edge_res=None)
 
-        Add the edges of this box to the grid.
-        Allow an optional 2D metal edge res
+        Get a grid hint for the edges of this box with an an optional 2D metal
+        edge resolution.
 
         :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
         :param metal_edge_res: float -- 2D flat edge resolution
+        :returns: (3,) list of mesh hints
         """
         if metal_edge_res is None:
             mer = 0
         else:
             mer = np.array([-1.0, 2.0])/3 * metal_edge_res
-        csx = self.__GetCSX()
-        if csx is None:
-            raise Exception('AddEdges2Grid: Unable to access CSX!')
         if self.HasTransform():
             sys.stderr.write('AddEdges2Grid: Warning, cannot add edges to grid with transformations enabled\n')
             return
-        grid = csx.GetGrid()
+        hint = [None, None, None]
         start = np.fmin(self.GetStart(), self.GetStop())
         stop  = np.fmax(self.GetStart(), self.GetStop())
         for ny in GetMultiDirs(dirs):
+            hint[ny] = []
             if metal_edge_res is not None and stop[ny]-start[ny]>metal_edge_res:
-                grid.AddLine(ny, start[ny]-mer)
-                grid.AddLine(ny, stop[ny] +mer)
+                if down_dir:
+                    hint[ny].append(start[ny]-mer[0])
+                    hint[ny].append(start[ny]-mer[1])
+                if up_dir:
+                    hint[ny].append(stop[ny]+mer[0])
+                    hint[ny].append(stop[ny]+mer[1])
             elif stop[ny]-start[ny]:
-                grid.AddLine(ny, start[ny])
-                grid.AddLine(ny, stop[ny])
+                if down_dir:
+                    hint[ny].append(start[ny])
+                if up_dir:
+                    hint[ny].append(stop[ny])
             else:
-                grid.AddLine(ny, start[ny])
+                hint[ny].append(start[ny])
+        return hint
 
 
 ###############################################################################
