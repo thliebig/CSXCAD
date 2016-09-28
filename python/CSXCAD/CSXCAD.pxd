@@ -18,6 +18,7 @@
 
 from libcpp.string cimport string
 from libcpp cimport bool
+from libcpp.vector cimport vector
 
 cimport CSPrimitives
 cimport CSProperties
@@ -42,6 +43,8 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
             _CSProperties* GetPropertyByCoordPriority(const double* coord, PropertyType prop_type, bool markFoundAsUsed, _CSPrimitives** foundPrimitive)
 
+            vector[_CSProperties*] GetPropertiesByName(string name)
+
             string Update()
 
 cdef class ContinuousStructure:
@@ -50,3 +53,4 @@ cdef class ContinuousStructure:
     cdef readonly CSRectGrid   __grid
     cdef _AddProperty(self, CSProperties prop)
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed)
+    cdef __GetPropertiesByName(self, string name)

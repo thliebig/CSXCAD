@@ -259,6 +259,24 @@ cdef class ContinuousStructure:
         prop.__CSX = self
         self.thisptr.AddProperty(prop.thisptr)
 
+    def GetPropertiesByName(self, name):
+        return self.__GetPropertiesByName(name.encode('UTF-8'))
+
+    cdef __GetPropertiesByName(self, string name):
+        cdef vector[_CSProperties*] vprop
+        vprop = self.thisptr.GetPropertiesByName(name)
+
+        cdef _CSProperties* _prop
+        cdef CSProperties prop
+        props = []
+        for n in range(vprop.size()):
+            _prop = vprop.at(n)
+            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
+            prop.thisptr = _prop
+            props.append(prop)
+
+        return props
+
     def GetPropertyByCoordPriority(self, coord, prop_type=c_CSProperties.ANY, markFoundAsUsed=False):
         cdef double _coord[3]
         for n in range(3):

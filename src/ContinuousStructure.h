@@ -78,7 +78,7 @@ public:
 	//! Get a primitive by its unique ID.
 	CSPrimitives* GetPrimitiveByID(unsigned int ID);
 
-	//! Get all primitives with the given name
+	//! Get all properties with the given name
 	std::vector<CSProperties*> GetPropertiesByName(std::string name);
 
 	//! Get a property by its internal index number. \sa GetQtyProperties
