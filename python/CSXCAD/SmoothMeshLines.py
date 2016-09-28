@@ -145,7 +145,12 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
     l = [0]
     r = [0]
     while l[-1]+r[-1]<rng:
-        if start_res<stop_res:
+        if start_res==stop_res:
+            start_res *= ratio
+            l.append(l[-1]+start_res)
+            stop_res  *= ratio
+            r.append(r[-1]+start_res)
+        elif start_res<stop_res:
             start_res *= ratio
             l.append(l[-1]+start_res)
         else:
@@ -156,6 +161,24 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
     c = Unique(np.r_[np.array(l), length-np.array(r)])
     return start + c *rng/length
 
+def CheckSymmetry(lines):
+    tolerance = 1e-10
+    NP = len(lines)
+    line_range = lines[-1]-lines[0]
+    center = 0.5*(lines[-1]+lines[0])
+
+    # check all lines for symmetry
+    for n in range(int(NP/2)):
+        if (abs((center-lines[n])-(lines[-n-1]-center)) > line_range*tolerance):
+            return 0
+
+    # check central point to be symmetry-center
+    if NP%2==1:
+        if (abs(lines[int(NP/2)]-center) > line_range*tolerance):
+            return 0
+
+    # if all checks pass, return true
+    return 2 if NP%2==0 else 1
 
 def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
     """This is the form of a docstring.
@@ -172,6 +195,14 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
 
     """
     out_l = Unique(lines)
+    sym = CheckSymmetry(out_l)
+    if sym==1:
+        center = 0.5*(out_l[-1]+out_l[0])
+        out_l = out_l[:int(len(out_l)/2)+1]
+    elif sym==2:
+        center = 0.5*(out_l[-1]+out_l[0])
+        out_l = out_l[:int(len(out_l)/2)]
+
     dl = np.diff(out_l)
 
     while len(np.where(dl>max_res)[0])>0:
@@ -179,8 +210,6 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
         dl[dl<=max_res] = np.max(dl)*2
         idx = np.argmin(dl)
         dl = np.diff(out_l)
-#        print("dl", dl)
-#        print(idx)
         if idx>0:
             start_res = dl[idx-1]
         else:
@@ -189,7 +218,6 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
             stop_res = dl[idx+1]
         else:
             stop_res = max_res
-#        print(out_l[idx], out_l[idx+1], start_res, stop_res, max_res, ratio)
         l = SmoothRange(out_l[idx], out_l[idx+1], start_res, stop_res, max_res, ratio)
         out_l = Unique(np.r_[out_l, l])
         dl = np.diff(out_l)
@@ -197,6 +225,11 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
         if len(out_l)==N:
             break
 
+    if sym==1:
+        return Unique(np.r_[out_l, 2*center-out_l[:-1]])
+    elif sym==2:
+        l = SmoothRange(out_l[-1], 2*center-out_l[-1], dl[-1], dl[-1], max_res, ratio)
+        return Unique(np.r_[out_l, l, 2*center-out_l])
     return Unique(out_l)
 
 
