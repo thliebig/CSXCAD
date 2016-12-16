@@ -164,6 +164,8 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 def CheckSymmetry(lines):
     tolerance = 1e-10
     NP = len(lines)
+    if NP<=2:
+        return 0
     line_range = lines[-1]-lines[0]
     center = 0.5*(lines[-1]+lines[0])
 
