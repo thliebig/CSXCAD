@@ -354,6 +354,17 @@ cdef class CSProperties:
         """
         return self.__CreatePrimitive(c_CSPrimitives.WIRE, points=points, radius=radius, **kw)
 
+    def AddPolyhedron(self, **kw):
+        """ AddPolyhedron(**kw)
+
+        Add a polyhedron to this property.
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimPolyhedron : See here for details on primitive arguments
+        """
+        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRON, **kw)
+
     def AddPolyhedronReader(self, filename, **kw):
         """ AddPolyhedronReader(filename, **kw)
 

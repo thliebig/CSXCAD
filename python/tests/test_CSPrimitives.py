@@ -259,6 +259,37 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( ph.GetNumFaces()==1 )
         self.assertTrue( (ph.GetFace(0)==np.array([0,1,2])).all() )
 
+    def test_polyhedron(self):
+        ## Test CSPrimPolyhedron
+        ph = CSPrimitives.CSPrimPolyhedron(self.pset, self.metal)
+
+        # create pyramid
+        x0 = 0
+        y0 = 0
+        z0 = 0
+        width  = 50
+        height = 150
+        ph.AddVertex(x0        , y0        , z0)  #0
+        ph.AddVertex(x0+width  , y0        , z0)  #1
+        ph.AddVertex(x0+width  , y0+width  , z0)  #2
+        ph.AddVertex(x0        , y0+width  , z0)  #3
+        ph.AddVertex(x0+width/2, y0+width/2, z0+height)  #4 (tip)
+
+        ph.AddFace([0,1,2])
+        ph.AddFace([0,2,3])
+        ph.AddFace([1,0,4])
+        ph.AddFace([0,3,4])
+        ph.AddFace([3,2,4])
+        ph.AddFace([2,1,4])
+
+        self.assertTrue((ph.GetFace(1)==np.array([0,2,3])).all())
+        self.assertEqual(ph.GetNumVertices(), 5)
+        self.assertEqual(ph.GetNumFaces()   , 6)
+
+        ph.Update()
+        self.assertTrue (ph.IsInside([x0+width/4, y0+width/4, z0+height/2]))
+        self.assertFalse(ph.IsInside([x0        , y0        , z0+height/2]))
+
     def test_polyhedron_reader(self):
         ## Test CSPrimPolyhedronReader
         phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)
