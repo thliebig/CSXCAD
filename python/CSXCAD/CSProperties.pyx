@@ -41,6 +41,14 @@ cimport CSPrimitives as c_CSPrimitives
 from CSPrimitives import CSPrimitives
 from Utilities import CheckNyDir
 
+def hex2color(color):
+    if color.startswith('#'):
+        color = color.lstrip('#')
+        rgb = tuple(int(color[i:i+2], 16) for i in (0, 2 ,4))
+        return rgb
+    else:
+        return None
+
 cdef class CSProperties:
     """
     Virtual base class for all properties, cannot be created!
@@ -161,6 +169,39 @@ cdef class CSProperties:
         :returns: str -- Name for this property
         """
         return self.thisptr.GetName().decode('UTF-8')
+
+    def SetColor(self, color, alpha=255):
+        """ SetColor(color, alpha=255)
+
+        Set the fill and edge color for this property.
+
+        :param color: hex color value
+        :param alpha: transparency value
+        """
+        self.SetFillColor(color, alpha)
+        self.SetEdgeColor(color, alpha)
+
+    def SetFillColor(self, color, alpha=255):
+        """ SetFillColor(color, alpha=255)
+
+        Set the fill color for this property.
+
+        :param color: hex color value
+        :param alpha: transparency value
+        """
+        rgb = hex2color(color)
+        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
+
+    def SetEdgeColor(self, color, alpha=255):
+        """ SetColor(color, alpha=255)
+
+        Set the edge color for this property.
+
+        :param color: hex color value
+        :param alpha: transparency value
+        """
+        rgb = hex2color(color)
+        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
 
     def ExistAttribute(self, name):
         """ ExistAttribute(name)

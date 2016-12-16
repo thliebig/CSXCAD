@@ -164,10 +164,12 @@ void CSProperties::AddAttribute(std::string name, std::string value)
 size_t CSProperties::GetQtyPrimitives() {return vPrimitives.size();}
 CSPrimitives* CSProperties::GetPrimitive(size_t index) {if (index<vPrimitives.size()) return vPrimitives.at(index); else return NULL;}
 void CSProperties::SetFillColor(RGBa color) {FillColor.R=color.R;FillColor.G=color.G;FillColor.B=color.B;FillColor.a=color.a;}
+void CSProperties::SetFillColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a) {FillColor.R=R;FillColor.G=G;FillColor.B=B;FillColor.a=a;}
 RGBa CSProperties::GetFillColor() {return FillColor;}
 
 RGBa CSProperties::GetEdgeColor() {return EdgeColor;}
 void CSProperties::SetEdgeColor(RGBa color) {EdgeColor.R=color.R;EdgeColor.G=color.G;EdgeColor.B=color.B;EdgeColor.a=color.a;}
+void CSProperties::SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a) {EdgeColor.R=R;EdgeColor.G=G;EdgeColor.B=B;EdgeColor.a=a;}
 
 bool CSProperties::GetVisibility() {return bVisisble;}
 void CSProperties::SetVisibility(bool val) {bVisisble=val;}

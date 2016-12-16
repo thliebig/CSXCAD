@@ -56,6 +56,9 @@ cdef extern from "CSXCAD/CSProperties.h":
             string GetAttributeValue(string name)
             void AddAttribute(string name, string value)
 
+            void SetFillColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)
+            void SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)
+
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
     cdef __SetPtr(self, _CSProperties *ptr)
