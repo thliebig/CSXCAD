@@ -156,6 +156,9 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             void SetPropagationDir(double val, int Component)
             double GetPropagationDir(int Component)
 
+            int SetWeightFunction(string fct, int ny)
+            string GetWeightFunction(int ny)
+
             void SetFrequency(double val)
             double GetFrequency()
 

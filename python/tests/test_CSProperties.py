@@ -81,6 +81,9 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( (prop.GetExcitation()==[-1.0, 0, 1.0]).all() )
         self.assertEqual( prop.GetDelay(),1e-9)
 
+        prop.SetWeightFunction(['y','x','z'])
+        self.assertEqual(prop.GetWeightFunction(), ['y','x','z'])
+
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset)
 

@@ -808,6 +808,31 @@ cdef class CSPropExcitation(CSProperties):
             val[n] = (<_CSPropExcitation*>self.thisptr).GetPropagationDir(n)
         return val
 
+    def SetWeightFunction(self, func):
+        """SetWeightFunction(func)
+
+        Set the weigthing function for the excitation.
+
+        """
+
+        assert len(func)==3, 'Error, excitation weighting function must be an array of length 3'
+        for n in range(3):
+            assert type(func[n]) is str, 'Error, excitation weighting function must be a string'
+            (<_CSPropExcitation*>self.thisptr).SetWeightFunction(func[n].encode('UTF-8'), n)
+
+    def GetWeightFunction(self):
+        """GetWeightFunction()
+
+        Get the weigthing function for the excitation.
+
+        :returns: 3 element list of strings
+        """
+
+        func = [None]*3
+        for n in range(3):
+            func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
+        return func
+
     def SetFrequency(self, val):
         """ SetFrequency(val)
 
