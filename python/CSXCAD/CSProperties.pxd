@@ -17,6 +17,7 @@
 #
 
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 from libcpp cimport bool
 
 from ParameterObjects cimport _ParameterSet, ParameterSet
@@ -182,6 +183,7 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             int GetNormalDir()
 
             size_t CountFDSamples()
+            vector[double]* GetFDSamples()
             void ClearFDSamples()
             void AddFDSample(double freq)
 

@@ -85,10 +85,18 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetWeightFunction(), ['y','x','z'])
 
     def test_probe(self):
-        prop = CSProperties.CSPropProbeBox(self.pset)
+        prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
 
         self.assertEqual( prop.GetType(), CSProperties.PROBEBOX)
         self.assertEqual( prop.GetTypeString(), 'ProbeBox')
+
+        self.assertEqual(prop.GetFrequencyCount(), 2)
+        prop.AddFrequency(5e9)
+        self.assertEqual(prop.GetFrequencyCount(), 3)
+        self.assertTrue((prop.GetFrequency() == [1e9, 2.4e9, 5e9]).all())
+
+        prop.ClearFrequency()
+        self.assertEqual(prop.GetFrequencyCount(), 0)
 
     def test_dump(self):
         prop = CSProperties.CSPropDumpBox(self.pset)

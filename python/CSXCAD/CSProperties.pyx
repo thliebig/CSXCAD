@@ -912,7 +912,7 @@ cdef class CSPropProbeBox(CSProperties):
             self.SetNormalDir(kw['norm_dir'])
             del kw['norm_dir']
         if 'frequency' in kw:
-            self.SetFrequencies(kw['frequency'])
+            self.SetFrequency(kw['frequency'])
             del kw['frequency']
         if 'mode_function' in kw:
             self.SetModeFunction(kw['mode_function'])
@@ -949,12 +949,40 @@ cdef class CSPropProbeBox(CSProperties):
         """
         return (<_CSPropProbeBox*>self.thisptr).GetNormalDir()
 
+    def AddFrequency(self, freq):
+        """ AddFrequency(freq)
+        """
+        if np.isscalar(freq):
+            (<_CSPropProbeBox*>self.thisptr).AddFDSample(freq)
+        else:
+            for f in freq:
+                (<_CSPropProbeBox*>self.thisptr).AddFDSample(f)
+
+    def ClearFrequency(self):
+        """ ClearFrequency()
+        """
+        (<_CSPropProbeBox*>self.thisptr).ClearFDSamples()
+
     def SetFrequency(self, freq):
         """ SetFrequency(freq)
         """
-        (<_CSPropProbeBox*>self.thisptr).ClearFDSamples()
-        for f in freq:
-            (<_CSPropProbeBox*>self.thisptr).AddFDSample(f)
+        self.ClearFrequency()
+        self.AddFrequency(freq)
+
+    def GetFrequency(self):
+        """ GetFrequency
+        """
+        cdef vector[double]* _freq = (<_CSPropProbeBox*>self.thisptr).GetFDSamples()
+        Nf = _freq.size()
+        freq = np.zeros(Nf)
+        for n in range(Nf):
+            freq[n] = _freq.at(n)
+        return freq
+
+    def GetFrequencyCount(self):
+        """ GetFrequencyCount()
+        """
+        return (<_CSPropProbeBox*>self.thisptr).CountFDSamples()
 
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
