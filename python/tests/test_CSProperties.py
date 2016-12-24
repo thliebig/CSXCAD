@@ -98,6 +98,9 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop.ClearFrequency()
         self.assertEqual(prop.GetFrequencyCount(), 0)
 
+        prop.SetFrequency(np.linspace(1e9,2e9,11))
+        self.assertEqual(prop.GetFrequencyCount(), 11)
+
     def test_dump(self):
         prop = CSProperties.CSPropDumpBox(self.pset)
 
