@@ -56,9 +56,6 @@ CSPrimBox::~CSPrimBox()
 
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-//	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
-//		std::cerr << "GetBoundBox::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
-
 	const double* start = m_Coords[0].GetCoords(m_MeshType);
 	const double* stop = m_Coords[1].GetCoords(m_MeshType);
 
@@ -81,6 +78,9 @@ bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 			dBoundBox[2*i]=dBoundBox[2*i+1];
 			dBoundBox[2*i+1]=help;
 		}
+	if ( (m_MeshType!=m_PrimCoordSystem) &&  (m_PrimCoordSystem!=UNDEFINED_CS))
+		// if the box is defined in a coordinate system other than the expected one, this BB is invalid
+		return false;
 	return true;
 }
 
