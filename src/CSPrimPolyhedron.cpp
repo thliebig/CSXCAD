@@ -268,6 +268,7 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 
 bool CSPrimPolyhedron::Update(std::string *ErrStr)
 {
+	BuildTree();
 	//update local bounding box
 	m_BoundBoxValid = GetBoundBox(m_BoundBox);
 	return CSPrimitives::Update(ErrStr);

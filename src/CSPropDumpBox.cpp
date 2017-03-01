@@ -44,6 +44,7 @@ void CSPropDumpBox::SetSubSampling(int ny, unsigned int val)
 {
 	if ((ny<0) || (ny>2)) return;
 	if (val<1) return;
+	m_SubSampling=true;
 	SubSampling[ny] = val;
 }
 
@@ -56,7 +57,6 @@ void CSPropDumpBox::SetSubSampling(unsigned int val[])
 void CSPropDumpBox::SetSubSampling(const char* vals)
 {
 	if (vals==NULL) return;
-	m_SubSampling=true;
 	std::vector<int> values = SplitString2Int(std::string(vals),',');
 	for (int ny=0;ny<3 && ny<(int)values.size();++ny)
 		SetSubSampling(ny,values.at(ny));
@@ -72,6 +72,7 @@ void CSPropDumpBox::SetOptResolution(int ny, double val)
 {
 	if ((ny<0) || (ny>2)) return;
 	if (val<0) return;
+	m_OptResolution=true;
 	OptResolution[ny] = val;
 }
 
@@ -84,7 +85,6 @@ void CSPropDumpBox::SetOptResolution(double val[])
 void CSPropDumpBox::SetOptResolution(const char* vals)
 {
 	if (vals==NULL) return;
-	m_OptResolution=true;
 	std::vector<double> values = SplitString2Double(std::string(vals),',');
 	if (values.size()==1) //allow one resolution for all directions
 	{

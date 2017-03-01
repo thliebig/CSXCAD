@@ -89,6 +89,8 @@ public:
 	//! Get Property Type as a string. (default is the xml element name)
 	virtual const std::string GetTypeString() const {return GetTypeXMLString();}
 
+	ParameterSet* GetParameterSet() {return clParaSet;}
+
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
 	bool GetMaterial() {return bMaterial;}
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
@@ -138,11 +140,13 @@ public:
 	
 	//! Set a fill-color for this property. \sa GetFillColor
 	void SetFillColor(RGBa color);
+	void SetFillColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a);
 	//! Get a fill-color for this property. \sa SetFillColor \return RGBa color object.
 	RGBa GetFillColor();
 
 	//! Set a edge-color for this property. \sa SetEdgeColor
 	void SetEdgeColor(RGBa color);
+	void SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a);
 	//! Get a fill-color for this property. \sa GetEdgeColor \return RGBa color object.
 	RGBa GetEdgeColor();
 

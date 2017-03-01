@@ -255,6 +255,7 @@ bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 	TiXmlElement grid("RectilinearGrid");
 
 	grid.SetDoubleAttribute("DeltaUnit",dDeltaUnit);
+	grid.SetAttribute("CoordSystem",(int)this->GetMeshType());
 
 	TiXmlElement XLines("XLines");
 	XLines.SetAttribute("Qty",(int)Lines[0].size());

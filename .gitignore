@@ -1,16 +1,16 @@
 release/
 debug/
-doc/
 obj/
 share/
 lib/
 include/
+build/
 .cproject
 .project
 .directory
 .cdt*
 .settings/
-Makefile*
+Makefile
 *~
 *.so*
 *.a
@@ -18,6 +18,18 @@ Thumbs.db
 *.pro.user
 *.user.*
 localPaths.pri
+tmp_*
+**/temp.*/*
+*.kate-swp
+
+#python
+python/tests/*.xml
+*.pyc
+python/**/*.cpp
+python/build/*
+CMakeLists.txt.user
+python/doc/_build
+!python/doc/Makefile
 
 #cmake
 **CMakeFiles
