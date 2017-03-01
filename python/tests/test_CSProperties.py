@@ -8,13 +8,42 @@ Created on Thu Dec 10 21:47:29 2015
 import numpy as np
 
 from CSXCAD import ParameterObjects
-from CSXCAD import CSProperties
+from CSXCAD import CSProperties, CSPrimitives
 
 import unittest
 
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
         self.pset  = ParameterObjects.ParameterSet()
+
+    def test_add_primitives(self):
+        prop = CSProperties.CSPropMetal(self.pset)
+        box = prop.AddBox(start= [0,0,0] , stop=[1,1,1])
+
+        self.assertEqual( prop.GetQtyPrimitives(), 1)
+        self.assertEqual( id(prop.GetPrimitive(0)), id(box))
+
+        self.assertEqual( prop.GetPrimitive(0).GetType(), CSPrimitives.BOX)
+        self.assertEqual( len(prop.GetAllPrimitives()), 1)
+        self.assertEqual( prop.GetAllPrimitives(), [box,])
+
+        prim = prop.AddCylinder(start= [0,0,0] , stop=[1,1,1], radius=0.5)
+        self.assertEqual( prop.GetQtyPrimitives(), 2)
+        self.assertEqual( prop.GetPrimitive(1).GetType(), CSPrimitives.CYLINDER)
+
+        prim = prop.AddCylindricalShell(start= [0,0,0] , stop=[1,1,1], radius=0.5, shell_width=0.1)
+        self.assertEqual( prop.GetQtyPrimitives(), 3)
+        self.assertEqual( prop.GetPrimitive(2).GetType(), CSPrimitives.CYLINDRICALSHELL)
+
+        prim = prop.AddSphere(center=[1,1,1], radius=0.5)
+        self.assertEqual( prop.GetQtyPrimitives(), 4)
+        self.assertEqual( prop.GetPrimitive(3).GetType(), CSPrimitives.SPHERE)
+
+        prim = prop.AddSphericalShell(center=[1,1,1], radius=0.5, shell_width=0.1)
+        self.assertEqual( prop.GetQtyPrimitives(), 5)
+        self.assertEqual( prop.GetPrimitive(4).GetType(), CSPrimitives.SPHERICALSHELL)
+
+        self.assertEqual( len(prop.GetAllPrimitives()), 5)
 
     def test_metal(self):
         prop = CSProperties.CSPropMetal(self.pset)

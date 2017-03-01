@@ -96,7 +96,7 @@ cdef class CSPrimitives:
 
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         self.__transform = None
-        self.__prop      = None
+        self.__prop      = prop
         if no_init:
             self.thisptr = NULL
             return

@@ -112,6 +112,8 @@ cdef class CSProperties:
 
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         self.__CSX = None
+        # internal list of primitives
+        self.__primitives = []
         if no_init:
             self.thisptr = NULL
             return
@@ -132,6 +134,25 @@ cdef class CSProperties:
         :returns: int -- Number of primitives
         """
         return self.thisptr.GetQtyPrimitives()
+
+    def GetPrimitive(self, index):
+        return self.__GetPrimitive(index)
+
+    def GetAllPrimitives(self):
+        return [self.GetPrimitive(n) for n in range(self.GetQtyPrimitives())]
+
+    cdef __GetPrimitive(self, size_t index):
+        cdef _CSPrimitives *_prim
+        cdef CSPrimitives prim
+        _prim = self.thisptr.GetPrimitive(index)
+        for p in self.__primitives:
+            prim = p
+            if prim.thisptr == _prim:
+                return p
+        prim = CSPrimitives.fromType(_prim.GetType(), pset=self.__paraset, prop=self, no_init=True)
+        prim.thisptr = _prim
+        self.__primitives.append(prim)
+        return prim
 
     def GetType(self):
         """ Get the type of the property
@@ -381,6 +402,7 @@ cdef class CSProperties:
         prim = CSPrimitives.fromType(prim_type, pset, self, **kw)
         if prim is None:
             raise Exception('CreatePrimitive: Unknown primitive type requested!')
+        self.__primitives.append(prim)
         return prim
 
 ###############################################################################

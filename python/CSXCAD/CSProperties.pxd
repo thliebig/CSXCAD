@@ -21,6 +21,7 @@ from libcpp.vector cimport vector
 from libcpp cimport bool
 
 from ParameterObjects cimport _ParameterSet, ParameterSet
+from CSPrimitives cimport _CSPrimitives, CSPrimitives
 from CSXCAD cimport ContinuousStructure
 
 cdef extern from "CSXCAD/CSProperties.h":
@@ -52,6 +53,7 @@ cdef extern from "CSXCAD/CSProperties.h":
             string GetName()
 
             int GetQtyPrimitives()
+            _CSPrimitives* GetPrimitive(size_t index)
 
             bool ExistAttribute(string name)
             string GetAttributeValue(string name)
@@ -63,8 +65,10 @@ cdef extern from "CSXCAD/CSProperties.h":
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
     cdef __SetPtr(self, _CSProperties *ptr)
+    cdef __GetPrimitive(self, size_t index)
     cdef readonly ContinuousStructure __CSX
     cdef readonly ParameterSet __paraset
+    cdef readonly list __primitives
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropMaterial.h":
