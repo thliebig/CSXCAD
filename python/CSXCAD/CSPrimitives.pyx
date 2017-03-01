@@ -107,10 +107,6 @@ cdef class CSPrimitives:
         if 'priority' in kw:
             self.SetPriority(kw['priority'])
             del kw['priority']
-        if 'edges2grid' in kw:
-            if kw['edges2grid'] is not None:
-                self.AddEdges2Grid(kw['edges2grid'])
-            del kw['edges2grid']
         if 'no_init' in kw:
             del kw['no_init']
 
@@ -210,33 +206,6 @@ cdef class CSPrimitives:
         if self.__prop is None:
             return None
         return self.__prop.__CSX
-
-
-    def AddEdges2Grid(self, dirs, **kw):
-        """ AddEdges2Grid(dirs, **kw)
-
-        Add the edges of this primitive to the grid.
-
-        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
-        """
-        csx = self.__GetCSX()
-        if csx is None:
-            raise Exception('AddEdges2Grid: Unable to access CSX!')
-        grid = csx.GetGrid()
-        hint = self.GetGridHint(dirs, **kw)
-        for n in range(3):
-            if hint[n] is None:
-                continue
-            grid.AddLine(n, hint[n])
-
-    def GetGridHint(self, dirs, **kw):
-        """ GetGridHint(dirs)
-
-        Allow primitves supporting this feature to create a grid hint
-
-        :param dirs: str - 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
-        """
-        raise Exception('GetGridHint not possible or not (yet) implemented for this primtive type!')
 
     def GetTransform(self):
         """ GetTransform()
@@ -364,20 +333,6 @@ cdef class CSPrimPoint(CSPrimitives):
             coord[n] = ptr.GetCoord(n)
         return coord
 
-    def GetGridHint(self, dirs):
-        """ GetGridHint(dirs)
-
-        Get a grid hint for the coordinates of the point.
-
-        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
-        :returns: (3,) list of mesh hints
-        """
-        hint = [None, None, None]
-        coord = self.GetCoord()
-        for ny in GetMultiDirs(dirs):
-            hint[ny] = [coord[ny],]
-        return hint
-
 ###############################################################################
 cdef class CSPrimBox(CSPrimitives):
     """ Box Primitive
@@ -456,45 +411,6 @@ cdef class CSPrimBox(CSPrimitives):
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n+1)
         return coord
-
-    def GetGridHint(self, dirs, metal_edge_res=None, up_dir=True, down_dir=True):
-        """ GetGridHint(dirs, metal_edge_res=None)
-
-        Get a grid hint for the edges of this box with an an optional 2D metal
-        edge resolution.
-
-        :param dirs: str -- 'x','y','z' or 'xy', 'yz' or 'xyz' or 'all'
-        :param metal_edge_res: float -- 2D flat edge resolution
-        :returns: (3,) list of mesh hints
-        """
-        if metal_edge_res is None:
-            mer = 0
-        else:
-            mer = np.array([-1.0, 2.0])/3 * metal_edge_res
-        if self.HasTransform():
-            sys.stderr.write('AddEdges2Grid: Warning, cannot add edges to grid with transformations enabled\n')
-            return
-        hint = [None, None, None]
-        start = np.fmin(self.GetStart(), self.GetStop())
-        stop  = np.fmax(self.GetStart(), self.GetStop())
-        for ny in GetMultiDirs(dirs):
-            hint[ny] = []
-            if metal_edge_res is not None and stop[ny]-start[ny]>metal_edge_res:
-                if down_dir:
-                    hint[ny].append(start[ny]-mer[0])
-                    hint[ny].append(start[ny]-mer[1])
-                if up_dir:
-                    hint[ny].append(stop[ny]+mer[0])
-                    hint[ny].append(stop[ny]+mer[1])
-            elif stop[ny]-start[ny]:
-                if down_dir:
-                    hint[ny].append(start[ny])
-                if up_dir:
-                    hint[ny].append(stop[ny])
-            else:
-                hint[ny].append(start[ny])
-        return hint
-
 
 ###############################################################################
 cdef class CSPrimCylinder(CSPrimitives):
