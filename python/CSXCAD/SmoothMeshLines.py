@@ -243,8 +243,24 @@ if __name__ == "__main__":
 #    print(SmoothRange(0., 135., 5., 1.5, 25., 1.5))
 #    print(SmoothRange(0., 10., 6., 6.5, 25., 1.5))
 
-    l = [-100, -50,  50, 100]
-    l = [ -50., 100., 0., 0.381, 0.762, 1.143, 1.524]
+#    l = [-100, -50,  50, 100]
+#    l = [ -50., 100., 0., 0.381, 0.762, 1.143, 1.524]
 #
-    ol = SmoothMeshLines(l, 4.996540966666666)
+    l = [-100, -90, 0, 90, 100]
+
+    l = np.array([-6574.4, -6351.2, -4798.8, -4575.6, -1049.4, -826.198,  826.198, 1049.4, 4575.6, 4798.8, 6351.2, 6574.4])+6574.4
+    print (l)
+
+    print("sym: ", CheckSymmetry(l))
+#    print(np.mean(l))
+#
+    plt.plot(l, l, 'k*')
+    ol = SmoothMeshLines(l, 892.809033532)
     print(ol)
+    print("sym: ", CheckSymmetry(ol))
+#    ol = SmoothMeshLines(l, 800)
+#    print(np.mean(ol))
+#    print(ol)
+
+    plt.plot(ol, ol, 'r*')
+    plt.show()

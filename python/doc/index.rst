@@ -13,7 +13,7 @@ Contents:
 
    about
    install
-   CSXCAD_PY/CSXCAD_PY
+   pyCSXCAD
 
 
 Indices and tables
