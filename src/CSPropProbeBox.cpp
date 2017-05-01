@@ -50,6 +50,7 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 			prop->SetAttribute("NormDir",(int)uiNumber);
 	prop->SetAttribute("Type",ProbeType);
 	prop->SetAttribute("Weight",m_weight);
+	prop->SetAttribute("NormDir",m_NormDir);
 	prop->SetAttribute("StartTime",startTime);
 	prop->SetAttribute("StopTime" ,stopTime );
 
