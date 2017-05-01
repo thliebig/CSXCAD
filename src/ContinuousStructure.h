@@ -184,7 +184,9 @@ public:
 	 \param file Filename to read this structure from.
 	 */
 	const char* ReadFromXML(const char* file);
-	//! Read a structure from a given XML-node.
+	std::string ReadFromXML(std::string file);
+
+    //! Read a structure from a given XML-node.
 	/*!
 	 \return Will return a string with possible error-messages!
 	 \param rootNode XML-node to read this structure from.

@@ -631,6 +631,11 @@ const char* ContinuousStructure::ReadFromXML(const char* file)
 	return ReadFromXML(&doc);
 }
 
+std::string ContinuousStructure::ReadFromXML(std::string file)
+{
+	return ReadFromXML(file.c_str());
+}
+
 void ContinuousStructure::UpdateIDs()
 {
 	for (size_t i=0;i<vProperties.size();++i)
