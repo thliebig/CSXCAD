@@ -373,11 +373,11 @@ bool ContinuousStructure::isGeometryValid()
 	return true;
 }
 
-double* ContinuousStructure::GetObjectArea()
+double* ContinuousStructure::GetObjectArea(CSProperties::PropertyType type)
 {
 	CSPrimitives* prim=NULL;
 	bool AccBound;
-	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives();
+	std::vector<CSPrimitives*> vPrimitives=GetAllPrimitives(type);
 	for (size_t i=0;i<vPrimitives.size();++i)
 	{
 		prim=vPrimitives.at(i);

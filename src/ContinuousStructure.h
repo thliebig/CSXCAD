@@ -135,7 +135,6 @@ public:
 	//! Get a primitives array of a certian type
 	std::vector<CSPrimitives*>  GetPrimitivesByType(CSPrimitives::PrimitiveType type);
 
-
 	//! Get a primitives array inside a bounding box and with a certian property type (default is any)
 	std::vector<CSPrimitives*>  GetPrimitivesByBoundBox(const double* boundbox, bool sorted=false, CSProperties::PropertyType type=CSProperties::ANY);
 
@@ -160,7 +159,7 @@ public:
 	std::string Update();
 
 	//! Get an array containing the absolute size of the current structure.
-	double* GetObjectArea();
+	double* GetObjectArea(CSProperties::PropertyType type=CSProperties::ANY);
 
 	//! Delete and clear all objects includes. This will result in an empty structure.
 	void clear();
