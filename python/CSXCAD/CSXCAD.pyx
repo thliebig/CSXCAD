@@ -106,6 +106,15 @@ cdef class ContinuousStructure:
         """
         self.thisptr.Write2XML(fn.encode('UTF-8'))
 
+    def ReadFromXML(self, fn):
+        """ ReadFromXML(fn)
+
+        Read geometry from xml-file
+
+        :param fn: str -- file name
+        """
+        return self.thisptr.ReadFromXML(fn.encode('UTF-8')).decode('UTF-8')
+
     def GetParameterSet(self):
         """
         Get the parameter set assigned to this class
@@ -259,7 +268,42 @@ cdef class ContinuousStructure:
         prop.__CSX = self
         self.thisptr.AddProperty(prop.thisptr)
 
+    def GetProperty(self, index):
+        """ GetProperty(index)
+
+        Get the property at the given index
+
+        See Also
+        --------
+        CSXCAD.GetQtyProperties
+        """
+        if index<0 or index >=self.GetQtyProperties():
+            raise IndexError('Index is out of range')
+        return self._GetProperty(index)
+
+    cdef _GetProperty(self, int index):
+        cdef _CSProperties* _prop
+        cdef CSProperties prop
+        _prop = self.thisptr.GetProperty(index)
+        prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
+        prop.thisptr = _prop
+        return prop
+
+    def GetAllProperties(self):
+        """ GetAllProperties()
+
+        Get a list of all properties
+        """
+        props = []
+        for n in range(self.GetQtyProperties()):
+            props.append(self._GetProperty(n))
+        return props
+
     def GetPropertiesByName(self, name):
+        """ GetPropertiesByName(name)
+
+        Get all the property specifed by their name
+        """
         return self.__GetPropertiesByName(name.encode('UTF-8'))
 
     cdef __GetPropertiesByName(self, string name):
@@ -277,16 +321,37 @@ cdef class ContinuousStructure:
 
         return props
 
+    def GetPropertyByType(self, prop_type):
+        """ GetPropertyByType(prop_type)
+
+        Get a list of properties specified by their type
+        """
+        return self.__GetPropertyByType(prop_type)
+
+    cdef __GetPropertyByType(self, PropertyType prop_type):
+        cdef vector[_CSProperties*] vprop
+        vprop = self.thisptr.GetPropertyByType(prop_type)
+
+        cdef _CSProperties* _prop
+        cdef CSProperties prop
+        props = []
+        for n in range(vprop.size()):
+            _prop = vprop.at(n)
+            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
+            prop.thisptr = _prop
+            props.append(prop)
+
+        return props
+
     def GetPropertyByCoordPriority(self, coord, prop_type=c_CSProperties.ANY, markFoundAsUsed=False):
+        """ GetPropertyByCoordPriority(coord, prop_type=None, markFoundAsUsed=False)
+        """
         cdef double _coord[3]
         for n in range(3):
             _coord[n] = coord[n]
         return self.__GetPropertyByCoordPriority(_coord, prop_type, markFoundAsUsed)
 
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed):
-        """ GetPropertyByCoordPriority(coord, prop_type=None, markFoundAsUsed=False)
-        """
-
         cdef _CSPrimitives *prim
         cdef _CSProperties *_prop = self.thisptr.GetPropertyByCoordPriority(coord, prop_type, markFoundAsUsed, &prim)
 
@@ -297,3 +362,26 @@ cdef class ContinuousStructure:
             prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
             prop.thisptr = _prop
             return prop
+
+    def GetAllPrimitives(self, sort=False, prop_type=c_CSProperties.ANY):
+        """ GetAllPrimitives(sort, prop_type)
+
+        Get a list of all primitives.
+        """
+        return self.__GetAllPrimitives(sort, prop_type)
+
+    cdef __GetAllPrimitives(self, bool sort, PropertyType prop_type):
+        cdef vector[_CSPrimitives*] vprim
+        vprim = self.thisptr.GetAllPrimitives(sort, prop_type)
+
+        cdef _CSPrimitives* _prim
+        cdef CSPrimitives prim
+        prims = []
+        for n in range(vprim.size()):
+            _prim = vprim.at(n)
+            prim = CSPrimitives.fromType(_prim.GetType(), pset=None, prop=None, no_init=True)
+            prim.thisptr = _prim
+            prims.append(prim)
+
+        return prims
+

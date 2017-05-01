@@ -145,6 +145,8 @@ cdef class CSProperties:
         cdef _CSPrimitives *_prim
         cdef CSPrimitives prim
         _prim = self.thisptr.GetPrimitive(index)
+        if self.__primitives is None:
+            self.__primitives = []
         for p in self.__primitives:
             prim = p
             if prim.thisptr == _prim:

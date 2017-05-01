@@ -120,6 +120,24 @@ cdef class CSPrimitives:
         """
         return self.thisptr.GetID()
 
+    def GetProperty(self):
+        """
+        Get the property for this primitive
+
+        :returns: CSProperties.CSProperties
+        """
+        return self.__GetProperty()
+
+    cdef __GetProperty(self):
+        cdef _CSProperties* _prop
+        cdef CSProperties prop
+        if self.__prop is None:
+            _prop = self.thisptr.GetProperty()
+            self.__prop  = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
+            self.__prop.thisptr = _prop
+
+        return self.__prop
+
     def GetType(self):
         """
         Get the type as int for this primitive

@@ -50,6 +50,8 @@ cdef extern from "CSXCAD/CSPrimitives.h":
             int GetType()
             string GetTypeName()
 
+            _CSProperties* GetProperty()
+
             void SetPriority(int val)
             int GetPriority()
             bool Update(string *ErrStr)
@@ -72,6 +74,7 @@ cdef class CSPrimitives:
     cdef _CSPrimitives *thisptr
     cdef readonly CSTransform  __transform
     cdef readonly CSProperties __prop
+    cdef __GetProperty(self)
 
 ###############################################################################
 cdef extern from "CSXCAD/CSPrimPoint.h":
