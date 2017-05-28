@@ -8,11 +8,15 @@ function CSX = AddDump(CSX, name, varargin)
 %               1 for H-field time-domain dump
 %               2 for electric current time-domain dump
 %               3 for total current density (rot(H)) time-domain dump
+%               4 for D-field (electric flux density) time-domain dump
+%               5 for B-field (magnetic flux density) time-domain dump
 %
 %              10 for E-field frequency-domain dump
 %              11 for H-field frequency-domain dump
 %              12 for electric current frequency-domain dump
 %              13 for total current density (rot(H)) frequency-domain dump
+%              14 for D-field (electric flux density) frequency-domain dump
+%              15 for B-field (magnetic flux density) frequency-domain dump
 %
 %              20 local SAR frequency-domain dump
 %              21  1g averaging SAR frequency-domain dump
