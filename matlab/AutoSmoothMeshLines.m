@@ -44,7 +44,7 @@ lines = sort(unique(lines));
 
 range = lines(end)-lines(1);
 if (~isempty(find(diff(lines)<range*1e-6)))
-    warning('CSXCAD:AutoSmoothMeshLines','some lines found with very small distance which may cause smoothing failure!');
+    warning('CSXCAD:AutoSmoothMeshLines','some lines found with very small distance which may cause smoothing failure');
 end
 
 methods = {};
@@ -138,7 +138,7 @@ end
 
 if ((allowed_min_res>0) && (results.min_res<allowed_min_res))
     if (silent==0)
-        warning('CSXCAD:AutoSmoothMeshLines','method failed to obey allowed min res!');
+        warning('CSXCAD:AutoSmoothMeshLines','method failed to obey allowed min res');
     end
     quality = -1;
     return
@@ -152,7 +152,7 @@ if (results.max_res>max_res*1.01)
 end
 if (results.max_ratio>ratio*1.01)
     if (silent==0)
-        warning('CSXCAD:AutoSmoothMeshLines',['method failed to fulfill the max. ratio: ' num2str(results.max_ratio) ' > ' num2str(ratio)]');
+        warning('CSXCAD:AutoSmoothMeshLines',['method failed to fulfill the max. ratio: ' num2str(results.max_ratio) ' > ' num2str(ratio)]);
     end
     quality = quality*(ratio/results.max_ratio);
 end
