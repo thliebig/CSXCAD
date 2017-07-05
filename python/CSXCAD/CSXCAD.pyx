@@ -90,8 +90,6 @@ cdef class ContinuousStructure:
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
     def __dealloc__(self):
-        self.__grid.thisptr = NULL
-        self.__paraset.thisptr = NULL
         del self.thisptr
 
     def Update(self):

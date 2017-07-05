@@ -26,3 +26,4 @@ cdef extern from "CSXCAD/ParameterObjects.h":
 
 cdef class ParameterSet:
     cdef _ParameterSet *thisptr
+    cdef bool no_init

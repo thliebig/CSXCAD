@@ -23,11 +23,12 @@ cimport ParameterObjects
 
 cdef class ParameterSet:
     def __cinit__(self, no_init=False):
+        self.no_init = no_init
         if no_init==True:
             self.thisptr = NULL
         else:
             self.thisptr = new _ParameterSet()
 
-#    def __dealloc__(self):
-#        del self.thisptr
-#        self.thisptr = NULL
+    def __dealloc__(self):
+        if not self.no_init:
+            del self.thisptr

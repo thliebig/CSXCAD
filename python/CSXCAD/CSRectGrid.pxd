@@ -52,4 +52,5 @@ cdef extern from "CSXCAD/CSRectGrid.h":
             bool isValid()
 
 cdef class CSRectGrid:
-    cdef  _CSRectGrid *thisptr
+    cdef _CSRectGrid *thisptr
+    cdef bool no_init
