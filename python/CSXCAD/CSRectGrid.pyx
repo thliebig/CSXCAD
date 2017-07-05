@@ -34,6 +34,7 @@ cdef class CSRectGrid:
     :param CoordSystem: define the coordinate system (default 0 : Cartesian)
     """
     def __cinit__(self, *args, no_init=False, **kw):
+        self.no_init = no_init
         if no_init==False:
             self.thisptr = new _CSRectGrid()
             if 'CoordSystem' in kw:
@@ -48,7 +49,8 @@ cdef class CSRectGrid:
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
     def __dealloc__(self):
-        del self.thisptr
+        if not self.no_init:
+            del self.thisptr
 
     def SetMeshType(self, cs_type):
         """ SetMeshType(cs_type)
