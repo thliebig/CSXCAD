@@ -10,6 +10,8 @@ PROJECT(CSXCAD CXX C)
 
 cmake_minimum_required(VERSION 2.8)
 
+set (CMAKE_CXX_FLAGS -fPIC )
+
 # default
 set(LIB_VERSION_MAJOR 0)
 set(LIB_VERSION_MINOR 6)
