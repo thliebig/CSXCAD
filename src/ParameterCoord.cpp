@@ -210,8 +210,8 @@ bool ParameterCoord::Evaluate(std::string *ErrStr)
 	for (int i=0;i<3;++i)
 	{
 		EC=m_Coords[i]->Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in ParameterCoord (component: " << i << "): ";

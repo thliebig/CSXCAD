@@ -110,8 +110,8 @@ bool CSPrimRotPoly::Update(std::string *ErrStr)
 	bool bOK = CSPrimPolygon::Update(ErrStr);
 
 	EC=StartStopAngle[0].Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
 		std::stringstream stream;
@@ -121,8 +121,8 @@ bool CSPrimRotPoly::Update(std::string *ErrStr)
 	}
 
 	EC=StartStopAngle[1].Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
 		std::stringstream stream;

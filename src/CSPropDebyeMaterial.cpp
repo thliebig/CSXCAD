@@ -99,8 +99,8 @@ bool CSPropDebyeMaterial::Update(std::string *ErrStr)
 		for (int n=0;n<3;++n)
 		{
 			EC=EpsDelta[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Debye Material-Property epsilon Delta frequency value (ID: " << uiID << "): ";
@@ -109,8 +109,8 @@ bool CSPropDebyeMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=WeightEpsDelta[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Debye Material-Property epsilon Delta frequency weighting function (ID: " << uiID << "): ";
@@ -119,8 +119,8 @@ bool CSPropDebyeMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=EpsRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Debye Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
@@ -129,8 +129,8 @@ bool CSPropDebyeMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=WeightEpsRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Debye Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";

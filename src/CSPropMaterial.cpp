@@ -128,8 +128,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 	for (int n=0;n<3;++n)
 	{
 		EC=Epsilon[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Epsilon-Value (ID: " << uiID << "): ";
@@ -137,8 +137,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=Mue[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Mue-Value (ID: " << uiID << "): ";
@@ -146,8 +146,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=Kappa[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Kappa-Value (ID: " << uiID << "): ";
@@ -155,8 +155,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=Sigma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Sigma-Value (ID: " << uiID << "): ";
@@ -164,8 +164,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=WeightEpsilon[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Epsilon-Value weighting function (ID: " << uiID << "): ";
@@ -173,8 +173,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=WeightMue[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Mue-Value weighting function  (ID: " << uiID << "): ";
@@ -182,8 +182,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=WeightKappa[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Kappa-Value weighting function  (ID: " << uiID << "): ";
@@ -191,8 +191,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=WeightSigma[n].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Material-Property Sigma-Value weighting function  (ID: " << uiID << "): ";
@@ -202,8 +202,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 	}
 
 	EC=Density.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Material-Property Density-Value (ID: " << uiID << "): ";
@@ -211,8 +211,8 @@ bool CSPropMaterial::Update(std::string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	EC=WeightDensity.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Material-Property Density weighting function (ID: " << uiID << "): ";

@@ -171,8 +171,8 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 	for (unsigned int i=0;i<3;++i)
 	{
 		EC=Excitation[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Excitation-Property Excitaion-Value (ID: " << uiID << "): ";
@@ -180,8 +180,8 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 			PSErrorCode2Msg(EC,ErrStr);
 		}
 		EC=PropagationDir[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in Excitation-Property PropagationDir-Value (ID: " << uiID << "): ";
@@ -190,8 +190,8 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 		}
 	}
 	EC=m_Frequency.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Excitation-Property Frequency-Value";
@@ -199,8 +199,8 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 		PSErrorCode2Msg(EC,ErrStr);
 	}
 	EC=Delay.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Excitation-Property Delay-Value";

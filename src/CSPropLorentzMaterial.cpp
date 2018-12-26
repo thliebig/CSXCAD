@@ -163,8 +163,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 		for (int n=0;n<3;++n)
 		{
 			EC=EpsPlasma[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon plasma frequency value (ID: " << uiID << "): ";
@@ -172,8 +172,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=MuePlasma[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue plasma frequency value (ID: " << uiID << "): ";
@@ -182,8 +182,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=WeightEpsPlasma[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon plasma frequency weighting function (ID: " << uiID << "): ";
@@ -191,8 +191,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=WeightMuePlasma[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue plasma frequency value weighting function (ID: " << uiID << "): ";
@@ -201,8 +201,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=EpsLorPole[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon lorentz pole frequency value (ID: " << uiID << "): ";
@@ -210,8 +210,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=MueLorPole[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue lorentz pole frequency value (ID: " << uiID << "): ";
@@ -220,8 +220,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=WeightEpsLorPole[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon lorentz pole frequency weighting function (ID: " << uiID << "): ";
@@ -229,8 +229,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=WeightMueLorPole[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue lorentz pole frequency value weighting function (ID: " << uiID << "): ";
@@ -239,8 +239,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=EpsRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon relaxation time value (ID: " << uiID << "): ";
@@ -248,8 +248,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=MueRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue relaxation time value (ID: " << uiID << "): ";
@@ -258,8 +258,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 			}
 
 			EC=WeightEpsRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property epsilon relaxation time weighting function (ID: " << uiID << "): ";
@@ -267,8 +267,8 @@ bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 				PSErrorCode2Msg(EC,ErrStr);
 			}
 			EC=WeightMueRelaxTime[o][n].Evaluate();
-			if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-			if ((EC!=ParameterScalar::NO_ERROR) && (ErrStr!=NULL))
+			if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+			if ((EC!=ParameterScalar::PS_NO_ERROR) && (ErrStr!=NULL))
 			{
 				std::stringstream stream;
 				stream << std::endl << "Error in Lorentz Material-Property mue relaxation time value weighting function (ID: " << uiID << "): ";

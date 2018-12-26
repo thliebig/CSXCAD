@@ -15,8 +15,8 @@
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef _PARAMETEROBJECTS_H_
-#define _PARAMETEROBJECTS_H_
+#pragma once
+
 /*
  * Author:	Thorsten Liebig
  * Date:	03-12-2008
@@ -210,10 +210,10 @@ std::string PSErrorCode2Msg(int code);
 class CSXCAD_EXPORT ParameterScalar
 {
 public:
-    enum EvaluateErrorType
-    {
-        NO_ERROR
-    };
+	enum EvaluateErrorType
+	{
+		PS_NO_ERROR
+	};
 	ParameterScalar();
 	ParameterScalar(ParameterSet* ParaSet, double value);
 	ParameterScalar(ParameterSet* ParaSet, const std::string value);
@@ -247,5 +247,3 @@ protected:
 	std::string sValue;
 	double dValue;
 };
-
-#endif

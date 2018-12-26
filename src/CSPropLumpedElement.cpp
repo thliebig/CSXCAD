@@ -37,8 +37,8 @@ bool CSPropLumpedElement::Update(std::string *ErrStr)
 {
 	int EC=m_R.Evaluate();
 	bool bOK=true;
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in LumpedElement-Property Resistance-Value";
@@ -48,8 +48,8 @@ bool CSPropLumpedElement::Update(std::string *ErrStr)
 	}
 
 	EC=m_C.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in LumpedElement-Property Capacitor-Value";
@@ -59,8 +59,8 @@ bool CSPropLumpedElement::Update(std::string *ErrStr)
 	}
 
 	EC=m_L.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in LumpedElement-Property Inductance-Value";

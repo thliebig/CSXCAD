@@ -214,8 +214,8 @@ bool CSPrimPolygon::Update(std::string *ErrStr)
 	for (size_t i=1;i<vCoords.size();++i)
 	{
 		EC=vCoords[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
 			std::stringstream stream;
@@ -226,8 +226,8 @@ bool CSPrimPolygon::Update(std::string *ErrStr)
 	}
 
 	EC=Elevation.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
 		std::stringstream stream;

@@ -153,8 +153,8 @@ bool CSPrimCylinder::Update(std::string *ErrStr)
 
 
 	EC=psRadius.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		bOK=false;
 		std::stringstream stream;

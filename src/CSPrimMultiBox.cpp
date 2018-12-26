@@ -211,7 +211,7 @@ bool CSPrimMultiBox::Update(std::string *ErrStr)
 	for (size_t i=0;i<vCoords.size();++i)
 	{
 		EC=vCoords.at(i)->Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
 		if ((EC!=0)  && (ErrStr!=NULL))
 		{
 			bOK=false;

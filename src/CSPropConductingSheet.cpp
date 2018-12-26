@@ -39,8 +39,8 @@ bool CSPropConductingSheet::Update(std::string *ErrStr)
 {
 	int EC=Conductivity.Evaluate();
 	bool bOK=true;
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in ConductingSheet-Property Conductivity-Value";
@@ -49,8 +49,8 @@ bool CSPropConductingSheet::Update(std::string *ErrStr)
 	}
 
 	EC=Thickness.Evaluate();
-	if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-	if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+	if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in ConductingSheet-Property Thickness-Value";

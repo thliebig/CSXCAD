@@ -190,8 +190,8 @@ bool CSPrimUserDefined::Update(std::string *ErrStr)
 	for (int i=0;i<3;++i)
 	{
 		EC=dPosShift[i].Evaluate();
-		if (EC!=ParameterScalar::NO_ERROR) bOK=false;
-		if ((EC!=ParameterScalar::NO_ERROR)  && (ErrStr!=NULL))
+		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;
+		if ((EC!=ParameterScalar::PS_NO_ERROR)  && (ErrStr!=NULL))
 		{
 			bOK=false;
 			std::ostringstream oss;
