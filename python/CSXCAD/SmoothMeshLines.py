@@ -62,7 +62,7 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 
     # very large range and easy start/stop res
     if start_res>=(max_res/ratio) and stop_res>=(max_res/ratio):
-        N = np.ceil(rng/max_res)
+        N = np.ceil(rng/max_res).astype('int')
         return np.linspace(start, stop, N+1)
 
     def one_side_taper(start_res, ratio, max_res):
