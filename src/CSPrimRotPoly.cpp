@@ -20,6 +20,7 @@
 #include <limits>
 #include "tinyxml.h"
 #include "stdint.h"
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "CSPrimRotPoly.h"

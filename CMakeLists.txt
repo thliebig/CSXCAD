@@ -10,7 +10,11 @@ PROJECT(CSXCAD CXX C)
 
 cmake_minimum_required(VERSION 2.8)
 
-set (CMAKE_CXX_FLAGS -fPIC )
+cmake_policy(SET CMP0074 NEW)
+
+if (NOT WIN32)
+ set (CMAKE_CXX_FLAGS -fPIC )
+endif()
 
 # default
 set(LIB_VERSION_MAJOR 0)
@@ -73,39 +77,45 @@ IF(NOT EXISTS ${FPARSER_ROOT_DIR})
     SET(FPARSER_ROOT_DIR /usr)
 ENDIF()
 message(STATUS "FPARSER_ROOT_DIR: ${FPARSER_ROOT_DIR}" )
-find_library(fparser_LIBRARIES 
+find_library(fparser_LIBRARIES
   NAMES fparser
   HINTS ${FPARSER_ROOT_DIR}/lib${LIB_SUFFIX}
   NO_CMAKE_FIND_ROOT_PATH
-)
 message(STATUS "fparser_LIBRARIES: ${fparser_LIBRARIES}" )
-find_path(fparser_INCLUDE_DIR 
+)
+find_path(fparser_INCLUDE_DIR
   NAMES fparser.hh
   HINTS ${FPARSER_ROOT_DIR}/include ${FPARSER_ROOT_DIR}/include/fparser
   NO_CMAKE_FIND_ROOT_PATH
 )
 message(STATUS "fparser_INCLUDE_DIR: ${fparser_INCLUDE_DIR}" )
+
 #TODO test if fparser was found
 INCLUDE_DIRECTORIES( ${fparser_INCLUDE_DIR} ) 
 
+message(STATUS "TinyXML_ROOT_DIR ${TinyXML_ROOT_DIR}")
 # TinyXML module from https://github.com/ros/cmake_modules
 find_package(TinyXML REQUIRED)
-ADD_DEFINITIONS(  -DTIXML_USE_STL )
+ADD_DEFINITIONS( -DTIXML_USE_STL )
+message(STATUS "TinyXML_INCLUDE_DIR: ${TinyXML_INCLUDE_DIR}")
+message(STATUS "TinyXML_LIBRARY: ${TinyXML_LIBRARY}")
+
+INCLUDE_DIRECTORIES( ${TinyXML_INCLUDE_DIR} )
 
 find_package(HDF5 1.8 COMPONENTS C HL REQUIRED)
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
 link_directories(${HDF5_LIBRARY_DIRS})
 # hdf5 compat
 ADD_DEFINITIONS( -DH5_USE_16_API )
+ADD_DEFINITIONS( -DH5_BUILT_AS_DYNAMIC_LIB )
 
 # message(status "hdf5 all libs: ${HDF5_LIBRARIES}")
-
 
 find_package(CGAL REQUIRED)
 INCLUDE_DIRECTORIES (${CGAL_INCLUDE_DIR})
 
-# cgal needs, fail o Linux otherwise
-if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
+# cgal needs, fail on Linux otherwise
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math" )
 endif()
 

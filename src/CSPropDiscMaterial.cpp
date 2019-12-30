@@ -277,7 +277,7 @@ void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, 
 		return NULL;
 	}
 
-	hsize_t dims[rank];
+	hsize_t* dims = new hsize_t[rank];
 	status = H5LTget_dataset_info( file_id, d_name.c_str(), dims, &class_id, &type_size);
 	if (status < 0)
 	{
@@ -290,6 +290,7 @@ void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, 
 	size = 1;
 	for (int n=0;n<rank;++n)
 		size*=dims[n];
+	delete[] dims; dims = NULL;
 
 	void* data;
 	if (type_id==H5T_NATIVE_FLOAT)

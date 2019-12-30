@@ -501,10 +501,11 @@ bool CSTransform::TransformByString(std::string operation, std::string argument,
 void CSTransform::TransformByType(TransformType type, std::vector<double> args, bool concatenate)
 {
 	unsigned int numArgs = args.size();
-	double arguments[numArgs];
-	for (unsigned int n=0;n<numArgs;++n)
-		arguments[n] = args.at(n);
-	return TransformByType(type, arguments, concatenate);
+	double* arguments = new double[numArgs];
+	for (unsigned int n=0;n<args.size();++n)
+		arguments[n] = (double)args.at(n);
+	TransformByType(type, arguments, concatenate);
+	delete[] arguments; arguments=NULL;
 }
 
 bool CSTransform::TransformByType(TransformType type, std::string args, bool concatenate)

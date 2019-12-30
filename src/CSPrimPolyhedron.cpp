@@ -53,7 +53,7 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 		else
 		{
 			std::cerr << "Polyhedron_Builder::operator(): Face " << f << ": Trying reverse order... ";
-			int help[m_polyhedron->m_Faces.at(f).numVertex];
+			int* help = new int [m_polyhedron->m_Faces.at(f).numVertex];
 			for (unsigned int n=0;n<m_polyhedron->m_Faces.at(f).numVertex;++n)
 				help[n]=m_polyhedron->m_Faces.at(f).vertices[m_polyhedron->m_Faces.at(f).numVertex-1-n];
 			first = help;
@@ -74,6 +74,7 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 				std::cerr << "failed" << std::endl;
 				++m_polyhedron->m_InvalidFaces;
 			}
+			delete[] help; help = NULL;
 		}
 	}
 	B.end_surface();
