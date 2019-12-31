@@ -32,7 +32,7 @@ public:
 	CSPrimPolygon(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimPolygon();
 
-	virtual CSPrimPolygon* GetCopy(CSProperties *prop=NULL) {return new CSPrimPolygon(this,prop);}
+	virtual CSPrimPolygon* GetCopy(CSProperties *prop=NULL);
 
 	void SetCoord(int index, double val);
 	void SetCoord(int index, const std::string val);
@@ -46,10 +46,10 @@ public:
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
 
-	size_t GetQtyCoords() {return vCoords.size()/2;}
+	size_t GetQtyCoords();
 	double* GetAllCoords(size_t &Qty, double* array);
 
-	void SetNormDir(int dir) {if ((dir>=0) && (dir<3)) m_NormDir=dir;}
+	void SetNormDir(int dir);
 
 	int GetNormDir() {return m_NormDir;}
 

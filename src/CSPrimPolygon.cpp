@@ -53,6 +53,8 @@ CSPrimPolygon::~CSPrimPolygon()
 {
 }
 
+CSPrimPolygon* CSPrimPolygon::GetCopy(CSProperties *prop) {return new CSPrimPolygon(this,prop);}
+
 void CSPrimPolygon::SetCoord(int index, double val)
 {
 	if ((index>=0) && (index<(int)vCoords.size())) vCoords.at(index).SetValue(val);
@@ -90,6 +92,8 @@ ParameterScalar* CSPrimPolygon::GetCoordPS(int index)
 	return NULL;
 }
 
+size_t CSPrimPolygon::GetQtyCoords() {return vCoords.size()/2;}
+
 double* CSPrimPolygon::GetAllCoords(size_t &Qty, double* array)
 {
 	Qty=vCoords.size();
@@ -99,6 +103,7 @@ double* CSPrimPolygon::GetAllCoords(size_t &Qty, double* array)
 	return array;
 }
 
+void CSPrimPolygon::SetNormDir(int dir) {if ((dir>=0) && (dir<3)) m_NormDir=dir;}
 
 bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {

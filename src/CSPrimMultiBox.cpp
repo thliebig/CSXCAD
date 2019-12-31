@@ -49,6 +49,8 @@ CSPrimMultiBox::~CSPrimMultiBox()
 {
 }
 
+CSPrimitives* CSPrimMultiBox::GetCopy(CSProperties *prop) {return new CSPrimMultiBox(this,prop);}
+
 void CSPrimMultiBox::SetCoord(int index, double val)
 {
 	if ((index>=0) && (index<(int)vCoords.size()))
@@ -203,6 +205,8 @@ bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
 	}
 	return false;
 }
+
+unsigned int CSPrimMultiBox::GetQtyBoxes() {return (unsigned int) vCoords.size()/6;}
 
 bool CSPrimMultiBox::Update(std::string *ErrStr)
 {

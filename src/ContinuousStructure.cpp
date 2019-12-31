@@ -64,6 +64,12 @@ ContinuousStructure::~ContinuousStructure(void)
 	clParaSet=NULL;
 }
 
+ParameterSet* ContinuousStructure::GetParameterSet() {return clParaSet;}
+
+CSRectGrid* ContinuousStructure::GetGrid() {return &clGrid;}
+
+CSBackgroundMaterial* ContinuousStructure::GetBackgroundMaterial() {return &m_BG_Mat;}
+
 void ContinuousStructure::AddProperty(CSProperties* prop)
 {
 	if (prop==NULL) return;
@@ -127,6 +133,8 @@ int ContinuousStructure::GetIndex(CSProperties* prop)
 		if (vProperties.at(i)==prop) return (int)i;
 	return -1;
 }
+
+size_t ContinuousStructure::GetQtyProperties() {return vProperties.size();}
 
 size_t ContinuousStructure::GetQtyPropertyType(CSProperties::PropertyType type)
 {
@@ -344,6 +352,10 @@ void ContinuousStructure::SetCoordInputType(CoordinateSystem type)
 		vProperties.at(i)->SetCoordInputType(type);
 	}
 }
+
+CoordinateSystem ContinuousStructure::GetCoordInputType() {return m_MeshType;}
+
+void ContinuousStructure::SetDrawingTolerance(double val) {dDrawingTol=val;}
 
 bool ContinuousStructure::isGeometryValid()
 {

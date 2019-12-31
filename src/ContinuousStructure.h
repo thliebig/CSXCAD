@@ -55,13 +55,13 @@ public:
 	/*!
 	 \return ParameterSet owned by this class.
 	 */
-	ParameterSet* GetParameterSet() {return clParaSet;}
+	ParameterSet* GetParameterSet();
 
 	//! Get the Grid of this Structure.
-	CSRectGrid* GetGrid() {return &clGrid;}
+	CSRectGrid* GetGrid();
 
 	//! Get the background material
-	CSBackgroundMaterial* GetBackgroundMaterial() {return &m_BG_Mat;}
+	CSBackgroundMaterial* GetBackgroundMaterial();
 
 	//! Add an existing CSProperty. Class takes ownership!
 	void AddProperty(CSProperties* prop);
@@ -87,10 +87,10 @@ public:
 	//! Define the input type for the CSProperties weighting coordinate system 0=cartesian, 1=cylindrical, 2=spherical
 	void SetCoordInputType(CoordinateSystem type);
 
-	CoordinateSystem GetCoordInputType() const {return m_MeshType;}
+	CoordinateSystem GetCoordInputType();
 
 	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
-	void SetDrawingTolerance(double val) {dDrawingTol=val;}
+	void SetDrawingTolerance(double val);
 
 	//! Get a property by its priority at a given coordinate and property type.
 	/*!
@@ -142,7 +142,7 @@ public:
 	int GetIndex(CSProperties* prop);
 
 	//! Get the quantity of properties included in this structure.
-	size_t GetQtyProperties() {return vProperties.size();}
+	size_t GetQtyProperties();
 
 	//! Get the quantity of properties of a certain type included in this structure.
 	size_t GetQtyPropertyType(CSProperties::PropertyType type);

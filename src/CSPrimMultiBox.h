@@ -31,7 +31,7 @@ public:
 	CSPrimMultiBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
 	virtual ~CSPrimMultiBox();
 
-	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimMultiBox(this,prop);}
+	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL);
 
 	void SetCoord(int index, double val);
 	void SetCoord(int index, const char* val);
@@ -52,7 +52,7 @@ public:
 	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
-	unsigned int GetQtyBoxes() {return (unsigned int) vCoords.size()/6;}
+	unsigned int GetQtyBoxes();
 
 	virtual bool Update(std::string *ErrStr=NULL);
 	virtual bool Write2XML(TiXmlElement &elem, bool parameterised=true);

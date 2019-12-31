@@ -126,6 +126,10 @@ void CSRectGrid::ClearLines(int direct)
 	Lines[direct].clear();
 }
 
+void CSRectGrid::SetDeltaUnit(double val) {dDeltaUnit=val;}
+
+double CSRectGrid::GetDeltaUnit() {return dDeltaUnit;}
+
 bool CSRectGrid::SetLine(int direct, size_t Index, double value)
 {
 	if ((direct<0) || (direct>=3)) return false;
@@ -150,6 +154,13 @@ double* CSRectGrid::GetLines(int direct, double *array, unsigned int &qty, bool 
 	for (size_t i=0;i<Lines[direct].size();++i) array[i]=Lines[direct].at(i);
 	qty=Lines[direct].size();
 	return array;
+}
+
+size_t CSRectGrid::GetQtyLines(int direct)
+{
+	if ((direct>=0) && (direct<3))
+	return Lines[direct].size();
+	else return 0;
 }
 
 std::string CSRectGrid::GetLinesAsString(int direct)
@@ -198,6 +209,10 @@ int CSRectGrid::GetDimension()
 	if (Lines[2].size()>1) ++dim;
 	return dim;
 }
+
+void CSRectGrid::SetMeshType(CoordinateSystem type) {m_meshType=type;}
+
+CoordinateSystem CSRectGrid::GetMeshType() {return m_meshType;}
 
 void CSRectGrid::IncreaseResolution(int nu, int factor)
 {
