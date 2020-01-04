@@ -10,8 +10,6 @@ PROJECT(CSXCAD CXX C)
 
 cmake_minimum_required(VERSION 2.8)
 
-cmake_policy(SET CMP0074 NEW)
-
 if (NOT WIN32)
  set (CMAKE_CXX_FLAGS -fPIC )
 endif()
