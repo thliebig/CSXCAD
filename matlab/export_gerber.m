@@ -53,6 +53,12 @@ if isfield(CSX.Properties,'Metal')
 	options.Property = 'Metal';
 	process_primitives( fid, Metal, options );
 end
+if isfield(CSX.Properties,'ConductingSheet')
+	% process conductor
+	Metal = CSX.Properties.ConductingSheet;
+	options.Property = 'Metal';
+	process_primitives( fid, Metal, options );
+end
 
 fprintf( fid, '%s\n', 'M02*' ); % end of program
 fclose( fid );
