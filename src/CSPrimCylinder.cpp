@@ -25,6 +25,21 @@
 #include "CSProperties.h"
 #include "CSUseful.h"
 
+void NormalizeVector(double *vec)
+{
+        double mag = 0;
+        for (unsigned int i=0; i<3; ++i)
+        {
+                mag += pow(vec[i], 2);
+        }
+        mag = sqrt(mag);
+
+        for (unsigned int i=0; i<3; ++i)
+        {
+                vec[i] = vec[i] / mag;
+        }
+}
+
 CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=CYLINDER;
@@ -59,49 +74,128 @@ CSPrimCylinder::~CSPrimCylinder()
 
 bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
-//	cerr << "CSPrimCylinder::GetBoundBox: Warning: The bounding box for this object is not calculated properly... " << std::endl;
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways
-	bool accurate=false;
+	bool accurate=true;
 	int Direction=0;
 	const double* start=m_AxisCoords[0].GetCartesianCoords();
 	const double* stop =m_AxisCoords[1].GetCartesianCoords();
 	m_BoundBox_CoordSys=CARTESIAN;
 
 	double rad=psRadius.GetValue();
-	for (unsigned int i=0;i<3;++i)
-	{
-		double min=start[i];
-		double max=stop[i];
-		if (min<max)
-		{
-			dBoundBox[2*i]=min-rad;
-			dBoundBox[2*i+1]=max+rad;
-		}
-		else
-		{
-			dBoundBox[2*i+1]=min+rad;
-			dBoundBox[2*i]=max-rad;
-		}
-		if (min==max) Direction+=pow(2,i);
-	}
-	switch (Direction)
-	{
-	case 3: //orientaion in z-direction
-		dBoundBox[4]=dBoundBox[4]+rad;
-		dBoundBox[5]=dBoundBox[5]-rad;
-		accurate=true;
-		break;
-	case 5: //orientaion in y-direction
-		dBoundBox[2]=dBoundBox[2]+rad;
-		dBoundBox[3]=dBoundBox[3]-rad;
-		accurate=true;
-		break;
-	case 6: //orientaion in x-direction
-		dBoundBox[1]=dBoundBox[1]+rad;
-		dBoundBox[2]=dBoundBox[2]-rad;
-		accurate=true;
-		break;
-	}
+
+        // unit vector in direction of cylinder axis
+        double v[3];
+        int vnonzero = -1;  // TODO handle zero-height cylinders
+        unsigned int zero_count = 0;
+        for (unsigned int i=0; i<3; ++i)
+        {
+                v[i] = stop[i] - start[i];
+                if (v[i] != 0)
+                {
+                        vnonzero = i;
+                }
+                else
+                {
+                        ++zero_count;
+                        Direction+=pow(2,i);
+                }
+        }
+
+        if (zero_count == 2)
+        {
+                bool flip = start[vnonzero] > stop[vnonzero];
+                for (unsigned int i=0; i<3; ++i)
+                {
+                        if (i == vnonzero)
+                        {
+                                if (!flip)
+                                {
+                                        dBoundBox[2*i] = start[i];
+                                        dBoundBox[2*i+1] = stop[i];
+                                }
+                                else
+                                {
+                                        dBoundBox[2*i] = stop[i];
+                                        dBoundBox[2*i+1] = start[i];
+                                }
+                        }
+                        else
+                        {
+                                if (!flip)
+                                {
+                                        dBoundBox[2*i] = -rad + start[i];
+                                        dBoundBox[2*i+1] = rad + start[i];
+                                }
+                                else
+                                {
+                                        dBoundBox[2*i] = rad + start[i];
+                                        dBoundBox[2*i+1] = -rad + start[i];
+                                }
+                        }
+                }
+        }
+        else
+        {
+                NormalizeVector(v);
+
+                // some unit vector perpendicular to cylinder axis
+                double a[3];
+                for (unsigned int i=0; i<3; ++i)
+                {
+                        if (i == vnonzero)
+                        {
+                                unsigned int i1 = (i + 1) % 3;
+                                unsigned int i2 = (i + 2) % 3;
+                                a[i] = (v[i1] + v[i2]) / v[i];
+                        }
+                        else
+                        {
+                                a[i] = -1;
+                        }
+                }
+                NormalizeVector(a);
+
+                // unit vector perpendicular to cylinder axis and a
+                double b[3] = {a[1]*v[2] - a[2]*v[1], -a[0]*v[2] + a[2]*v[0], a[0]*v[1] - a[1]*v[0]};
+
+                double theta[3];
+                for (unsigned int i=0; i<3; ++i)
+                {
+                        theta[i] = atan(b[i]/a[i]);
+                }
+
+                double min[3] = {start[0], start[1], start[2]};
+                double max[3] = {start[0], start[1], start[2]};
+
+                for (unsigned int i=0; i<2; ++i)
+                {
+                        const double* coord = m_AxisCoords[i].GetCartesianCoords();
+                        for (unsigned int j=0; j<3; ++j)
+                        {
+                                double val = coord[j] + rad*a[j]*cos(theta[j]) + rad*b[j]*sin(theta[j]);
+                                double val2 = coord[j] + rad*a[j]*cos(theta[j]+PI) + rad*b[j]*sin(theta[j]+PI);
+                                min[j] = fmin(min[j], val);
+                                min[j] = fmin(min[j], val2);
+                                max[j] = fmax(max[j], val);
+                                max[j] = fmax(max[j], val2);
+                        }
+                }
+
+                for (unsigned int i=0; i<3; ++i)
+                {
+                        if (start[i] <= stop[i])
+                        {
+                                dBoundBox[2*i]=min[i];
+                                dBoundBox[2*i+1]=max[i];
+                        }
+                        else
+                        {
+                                dBoundBox[2*i]=max[i];
+                                dBoundBox[2*i+1]=min[i];
+                        }
+                }
+        }
+
 	if (rad>0)
 		m_Dimension=3;
 	else if (Direction==7)
@@ -207,4 +301,3 @@ void CSPrimCylinder::ShowPrimitiveStatus(std::ostream& stream)
 	stream << "  Axis-Stop : " << m_AxisCoords[1].GetValueString(0) << "," << m_AxisCoords[1].GetValueString(1) << "," << m_AxisCoords[1].GetValueString(2) << std::endl;
 	stream << "  Radius: " << psRadius.GetValueString() << std::endl;
 }
-
