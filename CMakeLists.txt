@@ -128,10 +128,16 @@ find_package(Boost 1.46 COMPONENTS
 )
 
 # vtk
-find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
+find_package(VTK REQUIRED COMPONENTS IOGeometry IOPLY NO_MODULE)
 
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
-include(${VTK_USE_FILE})
+
+if(${VTK_VERSION} GREATER 8.9)
+    message("-- For VTK_VERSION greather than 8.9 the VTK_USE_FILE is deprecated")
+else()
+    include(${VTK_USE_FILE})
+endif()
+
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
 if("${VTK_MAJOR_VERSION}" GREATER 5)
     set( vtk_LIBS ${VTK_LIBRARIES} )
