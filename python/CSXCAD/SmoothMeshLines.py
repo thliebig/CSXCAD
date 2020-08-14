@@ -17,7 +17,6 @@
 #
 
 import numpy as np
-import pylab as plt
 
 def MeshLinesSymmetric(l, rel_tol=1e-6):
     """
@@ -237,6 +236,7 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
 
 if __name__ == "__main__":
 
+    import pylab as plt
 #    print(SmoothRange(0., 1., 10., 50., 25., 1.5))
 #    print(SmoothRange(0., 100., 1., 50., 25., 1.5))
 #    print(SmoothRange(0., 100., 50., 1., 25., 1.5))
