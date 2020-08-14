@@ -23,7 +23,7 @@ Rectilinear Grid Class for CSXCAD
 import numpy as np
 cimport CSRectGrid
 from Utilities import CheckNyDir
-from SmoothMeshLines import SmoothMeshLines
+from CSXCAD.SmoothMeshLines import SmoothMeshLines
 
 cdef class CSRectGrid:
     """
