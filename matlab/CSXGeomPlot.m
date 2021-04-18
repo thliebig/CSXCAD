@@ -25,14 +25,14 @@ if nargin < 2
 end
 
 filename = mfilename('fullpath');
-dir = fileparts( filename );
+pathname = fileparts( filename );
 
 if isunix
     AppCSXCAD_bin = searchBinary('AppCSXCAD.sh', ...
-        {[dir filesep '..' filesep '..' filesep 'AppCSXCAD' filesep], ...
-         [dir filesep '..' filesep '..' filesep '..' filesep 'bin' filesep]});
+        {[pathname filesep '..' filesep '..' filesep 'AppCSXCAD' filesep], ...
+         [pathname filesep '..' filesep '..' filesep '..' filesep 'bin' filesep]});
 else % assume windows
-    AppCSXCAD_bin = searchBinary('AppCSXCAD.exe',[dir filesep '..' filesep]);
+    AppCSXCAD_bin = searchBinary('AppCSXCAD.exe',[pathname filesep '..' filesep]);
 end
 
 command = [AppCSXCAD_bin ' --disableEdit ' args_string ' ' CSX_filename];
@@ -40,4 +40,12 @@ disp( ['invoking AppCSXCAD, exit to continue script...'] );
 if isOctave()
     fflush(stdout);
 end
-system(command);
+
+if ~isunix && isOctave() % assume Octave on windows
+  old_qt_plugin_path=getenv('QT_PLUGIN_PATH');
+  setenv('QT_PLUGIN_PATH',[pathname filesep '..' filesep 'qt5' filesep 'plugins']);
+  system(command);
+  setenv('QT_PLUGIN_PATH', old_qt_plugin_path);
+else
+  system(command);
+end
