@@ -163,7 +163,7 @@ bool CSPrimPolyhedronReader::ReadFile()
 		AddVertex(polydata->GetPoint(n));
 
 	vtkIdType numP;
-#if VTK_CELL_ARRAY_V2
+#if VTK_MAJOR_VERSION>=9
 	const vtkIdType *vertices = nullptr;
 #else
 	vtkIdType *vertices = nullptr;
