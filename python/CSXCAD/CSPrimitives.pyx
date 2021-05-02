@@ -899,7 +899,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
             del kw['rot_axis']
         if 'angle' in kw:
             assert len(kw['angle'])==2, 'angle must be a list/array of length 2'
-            self.SetRotAxisDir(kw['angle'][0],kw['angle'][1])
+            self.SetAngle(kw['angle'][0],kw['angle'][1])
             del kw['angle']
         super(CSPrimRotPoly, self).__init__(pset, prop, *args, **kw)
 
