@@ -168,6 +168,7 @@ bool CSPrimPolyhedronReader::ReadFile()
 #else
 	vtkIdType *vertices = nullptr;
 #endif
+	verts->InitTraversal();
 	while (verts->GetNextCell(numP, vertices))
 	{
 		face f;
