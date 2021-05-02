@@ -163,10 +163,10 @@ bool CSPrimPolyhedronReader::ReadFile()
 		AddVertex(polydata->GetPoint(n));
 
 	vtkIdType numP;
-#if VTK_MAJOR_VERSION>=9
-	const vtkIdType *vertices = new vtkIdType[10];
+#if VTK_CELL_ARRAY_V2
+	const vtkIdType *vertices = nullptr;
 #else
-	vtkIdType *vertices = new vtkIdType[10];
+	vtkIdType *vertices = nullptr;
 #endif
 	while (verts->GetNextCell(numP, vertices))
 	{
@@ -177,6 +177,5 @@ bool CSPrimPolyhedronReader::ReadFile()
 			f.vertices[np]=vertices[np];
 		AddFace(f);
 	}
-	delete vertices;
 	return true;
 }
