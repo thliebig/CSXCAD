@@ -19,6 +19,10 @@
 
 #include "CSPrimitives.h"
 
+#define PI 3.141592653589793238462643383279
+
+void NormalizeVector(double *vec);
+
 //! Cylinder Primitive
 /*!
  This is a cylindrical primitive defined by its axis start-, end-coordinates and a radius.
@@ -62,4 +66,3 @@ protected:
 	ParameterCoord m_AxisCoords[2];
 	ParameterScalar psRadius;
 };
-
