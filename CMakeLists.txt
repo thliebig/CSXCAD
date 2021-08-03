@@ -125,7 +125,11 @@ find_package(Boost 1.46 COMPONENTS
   serialization
   chrono
   REQUIRED
-)
+  )
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 
 # vtk
 find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
