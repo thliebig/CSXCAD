@@ -125,7 +125,11 @@ find_package(Boost 1.46 COMPONENTS
   serialization
   chrono
   REQUIRED
-)
+  )
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
 
 # vtk 9.1 needs MPI find to fail?????
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
