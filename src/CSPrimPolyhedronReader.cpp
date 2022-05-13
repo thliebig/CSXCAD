@@ -89,7 +89,7 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;
-	if (elem->QueryStringAttribute("FileName",&m_filename)!=TIXML_SUCCESS)
+	if (elem->QueryStringAttribute("Filename",&m_filename)!=TIXML_SUCCESS)
 	{
 		std::cerr << "CSPrimPolyhedronReader::ReadFromXML: Error, can't read filename!" << std::endl;
 		return false;
