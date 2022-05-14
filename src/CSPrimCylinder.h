@@ -65,4 +65,5 @@ public:
 protected:
 	ParameterCoord m_AxisCoords[2];
 	ParameterScalar psRadius;
+	virtual double GetBBRadius() {return psRadius.GetValue();} // Get the radius for the bounding box calculation
 };

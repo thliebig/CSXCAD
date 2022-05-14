@@ -52,5 +52,6 @@ public:
 
 protected:
 	ParameterScalar psShellWidth;
+	virtual double GetBBRadius() {return psRadius.GetValue()+psShellWidth.GetValue()/2.0;} // Get the radius for the bounding box calculation
 };
 

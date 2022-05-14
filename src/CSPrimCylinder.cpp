@@ -81,7 +81,7 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	const double* stop =m_AxisCoords[1].GetCartesianCoords();
 	m_BoundBox_CoordSys=CARTESIAN;
 
-	double rad=psRadius.GetValue();
+	double rad=GetBBRadius();
 
         // unit vector in direction of cylinder axis
         double v[3];
