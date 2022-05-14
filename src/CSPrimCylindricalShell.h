@@ -41,7 +41,6 @@ public:
 	double GetShellWidth() {return psShellWidth.GetValue();}
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;}
 
-	virtual bool GetBoundBox(double dBoundBox[6], bool PreserveOrientation=false);
 	virtual bool IsInside(const double* Coord, double tol=0);
 
 	virtual bool Update(std::string *ErrStr=NULL);
