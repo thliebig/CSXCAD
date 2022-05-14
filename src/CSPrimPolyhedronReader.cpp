@@ -66,7 +66,7 @@ bool CSPrimPolyhedronReader::Update(std::string *ErrStr)
 
 bool CSPrimPolyhedronReader::Write2XML(TiXmlElement &elem, bool parameterised)
 {
-	elem.SetAttribute("Filename",m_filename);
+	elem.SetAttribute("FileName",m_filename);
 
 	switch (m_filetype)
 	{
