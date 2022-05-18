@@ -27,17 +27,17 @@
 
 void NormalizeVector(double *vec)
 {
-        double mag = 0;
-        for (unsigned int i=0; i<3; ++i)
-        {
-                mag += pow(vec[i], 2);
-        }
-        mag = sqrt(mag);
+	double mag = 0;
+	for (unsigned int i=0; i<3; ++i)
+	{
+		mag += pow(vec[i], 2);
+	}
+	mag = sqrt(mag);
 
-        for (unsigned int i=0; i<3; ++i)
-        {
-                vec[i] = vec[i] / mag;
-        }
+	for (unsigned int i=0; i<3; ++i)
+	{
+		vec[i] = vec[i] / mag;
+	}
 }
 
 CSPrimCylinder::CSPrimCylinder(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
@@ -82,119 +82,92 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	m_BoundBox_CoordSys=CARTESIAN;
 
 	double rad=GetBBRadius();
+	// unit vector in direction of cylinder axis
+	double v[3];
+	int vnonzero = -1;  // TODO handle zero-height cylinders
+	unsigned int zero_count = 0;
+	for (unsigned int i=0; i<3; ++i)
+	{
+		v[i] = stop[i] - start[i];
+		if (v[i] != 0)
+		{
+			vnonzero = i;
+		}
+		else
+		{
+			++zero_count;
+			Direction+=pow(2,i);
+		}
+	}
+	if (zero_count == 2)
+	{
+		for (unsigned int i=0; i<3; ++i)
+		{
+			if (i == vnonzero)
+			{
+				dBoundBox[2*i]   = fmin(start[i],stop[i]);
+				dBoundBox[2*i+1] = fmax(start[i],stop[i]);
+			}
+			else
+			{
+				dBoundBox[2*i]   = -rad + start[i];
+				dBoundBox[2*i+1] =  rad + stop[i];
+			}
+		}
+	}
+	else
+	{
+		NormalizeVector(v);
 
-        // unit vector in direction of cylinder axis
-        double v[3];
-        int vnonzero = -1;  // TODO handle zero-height cylinders
-        unsigned int zero_count = 0;
-        for (unsigned int i=0; i<3; ++i)
-        {
-                v[i] = stop[i] - start[i];
-                if (v[i] != 0)
-                {
-                        vnonzero = i;
-                }
-                else
-                {
-                        ++zero_count;
-                        Direction+=pow(2,i);
-                }
-        }
+		// some unit vector perpendicular to cylinder axis
+		double a[3];
+		for (unsigned int i=0; i<3; ++i)
+		{
+			if (i == vnonzero)
+			{
+				unsigned int i1 = (i + 1) % 3;
+				unsigned int i2 = (i + 2) % 3;
+				a[i] = (v[i1] + v[i2]) / v[i];
+			}
+			else
+			{
+				a[i] = -1;
+			}
+		}
+		NormalizeVector(a);
 
-        if (zero_count == 2)
-        {
-                bool flip = start[vnonzero] > stop[vnonzero];
-                for (unsigned int i=0; i<3; ++i)
-                {
-                        if (i == vnonzero)
-                        {
-                                if (!flip)
-                                {
-                                        dBoundBox[2*i] = start[i];
-                                        dBoundBox[2*i+1] = stop[i];
-                                }
-                                else
-                                {
-                                        dBoundBox[2*i] = stop[i];
-                                        dBoundBox[2*i+1] = start[i];
-                                }
-                        }
-                        else
-                        {
-                                if (!flip)
-                                {
-                                        dBoundBox[2*i] = -rad + start[i];
-                                        dBoundBox[2*i+1] = rad + start[i];
-                                }
-                                else
-                                {
-                                        dBoundBox[2*i] = rad + start[i];
-                                        dBoundBox[2*i+1] = -rad + start[i];
-                                }
-                        }
-                }
-        }
-        else
-        {
-                NormalizeVector(v);
+		// unit vector perpendicular to cylinder axis and a
+		double b[3] = {a[1]*v[2] - a[2]*v[1], -a[0]*v[2] + a[2]*v[0], a[0]*v[1] - a[1]*v[0]};
 
-                // some unit vector perpendicular to cylinder axis
-                double a[3];
-                for (unsigned int i=0; i<3; ++i)
-                {
-                        if (i == vnonzero)
-                        {
-                                unsigned int i1 = (i + 1) % 3;
-                                unsigned int i2 = (i + 2) % 3;
-                                a[i] = (v[i1] + v[i2]) / v[i];
-                        }
-                        else
-                        {
-                                a[i] = -1;
-                        }
-                }
-                NormalizeVector(a);
+		double theta[3];
+		for (unsigned int i=0; i<3; ++i)
+		{
+			theta[i] = atan(b[i]/a[i]);
+		}
 
-                // unit vector perpendicular to cylinder axis and a
-                double b[3] = {a[1]*v[2] - a[2]*v[1], -a[0]*v[2] + a[2]*v[0], a[0]*v[1] - a[1]*v[0]};
+		double min[3] = {start[0], start[1], start[2]};
+		double max[3] = {start[0], start[1], start[2]};
 
-                double theta[3];
-                for (unsigned int i=0; i<3; ++i)
-                {
-                        theta[i] = atan(b[i]/a[i]);
-                }
+		for (unsigned int i=0; i<2; ++i)
+		{
+			const double* coord = m_AxisCoords[i].GetCartesianCoords();
+			for (unsigned int j=0; j<3; ++j)
+			{
+				double val = coord[j] + rad*a[j]*cos(theta[j]) + rad*b[j]*sin(theta[j]);
+				double val2 = coord[j] + rad*a[j]*cos(theta[j]+PI) + rad*b[j]*sin(theta[j]+PI);
+				min[j] = fmin(min[j], val);
+				min[j] = fmin(min[j], val2);
+				max[j] = fmax(max[j], val);
+				max[j] = fmax(max[j], val2);
+			}
+		}
 
-                double min[3] = {start[0], start[1], start[2]};
-                double max[3] = {start[0], start[1], start[2]};
-
-                for (unsigned int i=0; i<2; ++i)
-                {
-                        const double* coord = m_AxisCoords[i].GetCartesianCoords();
-                        for (unsigned int j=0; j<3; ++j)
-                        {
-                                double val = coord[j] + rad*a[j]*cos(theta[j]) + rad*b[j]*sin(theta[j]);
-                                double val2 = coord[j] + rad*a[j]*cos(theta[j]+PI) + rad*b[j]*sin(theta[j]+PI);
-                                min[j] = fmin(min[j], val);
-                                min[j] = fmin(min[j], val2);
-                                max[j] = fmax(max[j], val);
-                                max[j] = fmax(max[j], val2);
-                        }
-                }
-
-                for (unsigned int i=0; i<3; ++i)
-                {
-                        if (start[i] <= stop[i])
-                        {
-                                dBoundBox[2*i]=min[i];
-                                dBoundBox[2*i+1]=max[i];
-                        }
-                        else
-                        {
-                                dBoundBox[2*i]=max[i];
-                                dBoundBox[2*i+1]=min[i];
-                        }
-                }
-        }
+		for (unsigned int i=0; i<3; ++i)
+		{
+			dBoundBox[2*i]  =fmin(min[i],max[i]);
+			dBoundBox[2*i+1]=fmax(min[i],max[i]);
+		}
+	}
 
 	if (rad>0)
 		m_Dimension=3;
