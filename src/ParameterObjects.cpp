@@ -557,7 +557,10 @@ int ParameterScalar::SetValue(const std::string value, bool Eval)
 	char *pEnd;
 	double val = strtod(value.c_str(),&pEnd);
 	if (*pEnd == 0)
+	{
 		SetValue(val);
+		return 0;
+	}
 
 	ParameterMode=true;
 	bModified=true;
