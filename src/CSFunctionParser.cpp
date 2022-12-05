@@ -60,6 +60,8 @@ double bessel_second_kind_n(const double* p)
 
 CSFunctionParser::CSFunctionParser()
 {
+	std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+
 	//some usefull constants
 	AddConstant("pi", 3.14159265358979323846);
 	AddConstant("e", 2.71828182845904523536);
