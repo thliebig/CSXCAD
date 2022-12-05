@@ -8,7 +8,7 @@ ENDIF()
 
 PROJECT(CSXCAD CXX C)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 if (NOT WIN32)
  set (CMAKE_CXX_FLAGS -fPIC )
@@ -127,19 +127,21 @@ find_package(Boost 1.46 COMPONENTS
   REQUIRED
 )
 
-# vtk
-find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
+# vtk 9.1 needs MPI find to fail?????
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+  find_package(MPI)
+endif()
+
+# vtk 9.1+
+find_package(VTK  COMPONENTS IOGeometry IOPLY QUIET NO_MODULE)
+if (NOT VTK_FOUND)
+  #try older vtk
+  find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
+endif()
 
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
-include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
-if("${VTK_MAJOR_VERSION}" GREATER 5)
-    set( vtk_LIBS ${VTK_LIBRARIES} )
-else()
-    set( vtk_LIBS
-        vtkCommon
-    )    
-endif()
+set( vtk_LIBS ${VTK_LIBRARIES} )
 message(STATUS "vtk libraries " ${vtk_LIBS})
 # depend on fparser.hh
 ADD_SUBDIRECTORY( src )
