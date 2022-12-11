@@ -132,12 +132,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   find_package(MPI)
 endif()
 
-# vtk 9.1+
-find_package(VTK  COMPONENTS IOGeometry IOPLY QUIET NO_MODULE)
-if (NOT VTK_FOUND)
-  #try older vtk
-  find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
-endif()
+find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
 
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
