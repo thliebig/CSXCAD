@@ -135,6 +135,7 @@ endif()
 find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
 
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
+include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
 set( vtk_LIBS ${VTK_LIBRARIES} )
 message(STATUS "vtk libraries " ${vtk_LIBS})
