@@ -39,9 +39,9 @@ import sys
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cimport CSPrimitives
-from Utilities import CheckNyDir, GetMultiDirs
-cimport CSRectGrid
+cimport CSXCAD.CSPrimitives
+from CSXCAD.Utilities import CheckNyDir, GetMultiDirs
+from CSXCAD.CSRectGrid import CSRectGrid
 
 cdef class CSPrimitives:
     """

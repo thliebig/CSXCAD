@@ -27,6 +27,8 @@ python/tests/*.xml
 *.pyc
 python/**/*.cpp
 python/build/*
+python/dist/*
+python/CSXCAD.egg-info/*
 CMakeLists.txt.user
 python/doc/_build
 !python/doc/Makefile

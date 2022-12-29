@@ -18,7 +18,7 @@
 
 from libcpp.string cimport string
 from libcpp cimport bool
-from ParameterObjects cimport _ParameterSet
+from CSXCAD.ParameterObjects cimport _ParameterSet
 
 cdef extern from "CSXCAD/CSTransform.h":
         cdef cppclass _CSTransform "CSTransform":

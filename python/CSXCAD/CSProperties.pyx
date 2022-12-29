@@ -35,11 +35,11 @@ Create a metal property:
 """
 
 import numpy as np
-from ParameterObjects cimport _ParameterSet, ParameterSet
-cimport CSProperties
-cimport CSPrimitives as c_CSPrimitives
-from CSPrimitives import CSPrimitives
-from Utilities import CheckNyDir
+from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+cimport CSXCAD.CSProperties
+cimport CSXCAD.CSPrimitives as c_CSPrimitives
+from CSXCAD.CSPrimitives import CSPrimitives
+from CSXCAD.Utilities import CheckNyDir
 
 def hex2color(color):
     if color.startswith('#'):

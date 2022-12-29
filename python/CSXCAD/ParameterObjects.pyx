@@ -19,7 +19,7 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
-cimport ParameterObjects
+cimport CSXCAD.ParameterObjects
 
 cdef class ParameterSet:
     def __cinit__(self, no_init=False):

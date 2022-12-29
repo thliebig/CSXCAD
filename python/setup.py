@@ -1,5 +1,4 @@
-from distutils.core import setup
-from distutils.extension import Extension
+from setuptools import Extension, setup
 from Cython.Build import cythonize
 
 import os
@@ -30,8 +29,8 @@ setup(
   author_email = 'Thorsten.Liebig@gmx.de',
   maintainer = 'Thorsten Liebig',
   maintainer_email = 'Thorsten.Liebig@gmx.de',
-  url = 'http://openEMS.de',
+  url = 'https://openEMS.de',
   packages=["CSXCAD", ],
   package_data={'CSXCAD': ['*.pxd']},
-  ext_modules = cythonize(extensions)
+  ext_modules = cythonize(extensions, language_level="3")
  )

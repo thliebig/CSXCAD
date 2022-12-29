@@ -21,9 +21,9 @@ Affine Transformations for primitives
 """
 
 import numpy as np
-from ParameterObjects cimport _ParameterSet, ParameterSet
-cimport CSTransform
-from Utilities import CheckNyDir
+from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+cimport CSXCAD.CSTransform
+from CSXCAD.Utilities import CheckNyDir
 
 cdef class CSTransform:
     """

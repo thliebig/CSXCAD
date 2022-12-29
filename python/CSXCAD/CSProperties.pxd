@@ -20,9 +20,9 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
-from ParameterObjects cimport _ParameterSet, ParameterSet
-from CSPrimitives cimport _CSPrimitives, CSPrimitives
-from CSXCAD cimport ContinuousStructure
+from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+from CSXCAD.CSPrimitives cimport _CSPrimitives, CSPrimitives
+from CSXCAD.CSXCAD cimport ContinuousStructure
 
 cdef extern from "CSXCAD/CSProperties.h":
     cpdef enum PropertyType "CSProperties::PropertyType":

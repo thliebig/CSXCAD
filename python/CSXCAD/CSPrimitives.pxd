@@ -19,10 +19,10 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 
-from ParameterObjects cimport _ParameterSet, ParameterSet
-from CSProperties cimport _CSProperties, CSProperties
-from CSTransform cimport _CSTransform, CSTransform
-from CSRectGrid cimport CoordinateSystem
+from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+from CSXCAD.CSProperties cimport _CSProperties, CSProperties
+from CSXCAD.CSTransform cimport _CSTransform, CSTransform
+from CSXCAD.CSRectGrid cimport CoordinateSystem
 
 cdef extern from "CSXCAD/CSPrimitives.h":
     cpdef enum PrimitiveType "CSPrimitives::PrimitiveType":

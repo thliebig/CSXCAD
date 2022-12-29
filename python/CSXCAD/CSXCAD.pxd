@@ -20,13 +20,13 @@ from libcpp.string cimport string
 from libcpp cimport bool
 from libcpp.vector cimport vector
 
-cimport CSPrimitives
-cimport CSProperties
+cimport CSXCAD.CSPrimitives
+cimport CSXCAD.CSProperties
 
-from CSPrimitives cimport _CSPrimitives, CSPrimitives, PrimitiveType
-from ParameterObjects cimport _ParameterSet, ParameterSet
-from CSProperties cimport _CSProperties, CSProperties, PropertyType
-from CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
+from CSXCAD.CSPrimitives cimport _CSPrimitives, CSPrimitives, PrimitiveType
+from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+from CSXCAD.CSProperties cimport _CSProperties, CSProperties, PropertyType
+from CSXCAD.CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
 
 cdef extern from "CSXCAD/ContinuousStructure.h":
     cdef cppclass _ContinuousStructure "ContinuousStructure":

@@ -33,22 +33,22 @@ Examples
 >>> mesh.SmoothMeshLines('x', 2.5)  # smooth the mesh
 """
 
-cimport CSXCAD
+cimport CSXCAD.CSXCAD
 
-from CSProperties import CSPropMaterial, CSPropExcitation
-from CSProperties import CSPropMetal, CSPropConductingSheet
-from CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox
-from CSPrimitives import CSPrimPoint, CSPrimBox, CSPrimCylinder, CSPrimCylindricalShell
-from CSPrimitives import CSPrimSphere, CSPrimSphericalShell
-from CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
-from CSPrimitives import CSPrimCurve, CSPrimWire
-from CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
-cimport CSProperties as c_CSProperties
-cimport CSRectGrid   as c_CSRectGrid
-from CSProperties import CSProperties
-from ParameterObjects import ParameterSet
+from CSXCAD.CSProperties import CSPropMaterial, CSPropExcitation
+from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet
+from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox
+from CSXCAD.CSPrimitives import CSPrimPoint, CSPrimBox, CSPrimCylinder, CSPrimCylindricalShell
+from CSXCAD.CSPrimitives import CSPrimSphere, CSPrimSphericalShell
+from CSXCAD.CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
+from CSXCAD.CSPrimitives import CSPrimCurve, CSPrimWire
+from CSXCAD.CSPrimitives import CSPrimPolyhedron, CSPrimPolyhedronReader
+cimport CSXCAD.CSProperties as c_CSProperties
+cimport CSXCAD.CSRectGrid   as c_CSRectGrid
+from CSXCAD.CSProperties import CSProperties
+from CSXCAD.ParameterObjects import ParameterSet
 
-from SmoothMeshLines import SmoothMeshLines
+from CSXCAD.SmoothMeshLines import SmoothMeshLines
 
 cdef class ContinuousStructure:
     """ ContinuousStructure
@@ -70,7 +70,7 @@ cdef class ContinuousStructure:
     >>> metal = CSX.AddMetal('metal') # create a metal property with name "metal"
     >>> start = [0,0,0]
     >>> stop  = [1,2,1]
-    >>> box   = CSX.AddBox(metal, start, stop) # Assign a box to propety "metal"
+    >>> box   = metal.AddBox(start, stop) # Assign a box to propety "metal"
     """
     def __cinit__(self, **kw):
         self.thisptr = new _ContinuousStructure()
