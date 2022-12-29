@@ -553,7 +553,7 @@ int ParameterScalar::SetValue(const std::string value, bool Eval)
 {
 	if (value.empty()) return -1;
 
-	std::setlocale(LC_NUMERIC, "en_US.UTF-8");
+	setlocale(LC_NUMERIC, "en_US.UTF-8");
 	//check if string is only a plain double
 	char *pEnd;
 	double val = strtod(value.c_str(),&pEnd);
