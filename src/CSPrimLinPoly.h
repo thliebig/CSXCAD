@@ -35,8 +35,8 @@ public:
 
 	virtual CSPrimLinPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimLinPoly(this,prop);}
 
-	void SetLength(double val) {extrudeLength.SetValue(val);}
-	void SetLength(const std::string val) {extrudeLength.SetValue(val);}
+	void SetLength(double val);
+	void SetLength(const std::string val);
 
 	double GetLength() {return extrudeLength.GetValue();}
 	ParameterScalar* GetLengthPS() {return &extrudeLength;}

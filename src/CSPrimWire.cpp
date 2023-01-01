@@ -51,6 +51,17 @@ CSPrimWire::~CSPrimWire()
 {
 }
 
+void CSPrimWire::SetWireRadius(double val)
+{
+	Invalidate();
+	wireRadius.SetValue(val);
+}
+
+void CSPrimWire::SetWireRadius(const char* val)
+{
+	Invalidate();
+	wireRadius.SetValue(val);
+}
 
 bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {

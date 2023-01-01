@@ -35,8 +35,8 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimWire(this,prop);}
 
-	void SetWireRadius(double val) {wireRadius.SetValue(val);}
-	void SetWireRadius(const char* val) {wireRadius.SetValue(val);}
+	void SetWireRadius(double val);
+	void SetWireRadius(const char* val);
 
 	double GetWireRadius() {return wireRadius.GetValue();}
 	ParameterScalar* GetWireRadiusPS() {return &wireRadius;}

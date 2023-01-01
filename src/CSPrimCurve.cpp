@@ -53,6 +53,7 @@ CSPrimCurve::~CSPrimCurve()
 
 size_t CSPrimCurve::AddPoint(double coords[])
 {
+	Invalidate();
 	points.push_back(new ParameterCoord(clParaSet,coords));
 	return points.size();
 }
@@ -61,6 +62,7 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, double val)
 {
 	if (point_index>=GetNumberOfPoints()) return;
 	if ((nu<0) || (nu>2)) return;
+	Invalidate();
 	points.at(point_index)->SetValue(nu,val);
 }
 
@@ -68,6 +70,7 @@ void CSPrimCurve::SetCoord(size_t point_index, int nu, std::string val)
 {
 	if (point_index>=GetNumberOfPoints()) return;
 	if ((nu<0) || (nu>2)) return;
+	Invalidate();
 	points.at(point_index)->SetValue(nu,val);
 }
 
@@ -93,6 +96,7 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c
 
 void CSPrimCurve::ClearPoints()
 {
+	Invalidate();
 	points.clear();
 }
 

@@ -53,28 +53,33 @@ CSPrimitives* CSPrimMultiBox::GetCopy(CSProperties *prop) {return new CSPrimMult
 
 void CSPrimMultiBox::SetCoord(int index, double val)
 {
+	Invalidate();
 	if ((index>=0) && (index<(int)vCoords.size()))
 		vCoords.at(index)->SetValue(val);
 }
 
 void CSPrimMultiBox::SetCoord(int index, const char* val)
 {
+	Invalidate();
 	if ((index>=0) && (index<(int)vCoords.size()))
 		vCoords.at(index)->SetValue(val);
 }
 
 void CSPrimMultiBox::AddCoord(double val)
 {
+	Invalidate();
 	vCoords.push_back(new ParameterScalar(clParaSet,val));
 }
 
 void CSPrimMultiBox::AddCoord(const char* val)
 {
+	Invalidate();
 	vCoords.push_back(new ParameterScalar(clParaSet,val));
 }
 
 void CSPrimMultiBox::AddBox(int initBox)
 {
+	Invalidate();
 	ClearOverlap();
 	if ((initBox<0) || (((initBox+1)*6)>(int)vCoords.size()))
 	{
@@ -87,6 +92,7 @@ void CSPrimMultiBox::AddBox(int initBox)
 
 void CSPrimMultiBox::DeleteBox(size_t box)
 {
+	Invalidate();
 	if ((box+1)*6>vCoords.size()) return;
 	std::vector<ParameterScalar*>::iterator start=vCoords.begin()+(box*6);
 	std::vector<ParameterScalar*>::iterator end=vCoords.begin()+(box*6+6);

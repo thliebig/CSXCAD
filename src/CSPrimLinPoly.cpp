@@ -51,6 +51,19 @@ CSPrimLinPoly::~CSPrimLinPoly()
 {
 }
 
+
+void CSPrimLinPoly::SetLength(double val)
+{
+	Invalidate();
+	extrudeLength.SetValue(val);
+}
+
+void CSPrimLinPoly::SetLength(const std::string val)
+{
+	Invalidate();
+	extrudeLength.SetValue(val);
+}
+
 bool CSPrimLinPoly::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways

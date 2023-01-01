@@ -72,6 +72,40 @@ CSPrimCylinder::~CSPrimCylinder()
 {
 }
 
+void CSPrimCylinder::SetCoord(int index, double val)
+{
+	Invalidate();
+	if ((index>=0) && (index<6))
+		m_AxisCoords[index%2].SetValue(index/2,val);
+}
+
+void CSPrimCylinder::SetCoord(int index, const char* val)
+{
+	Invalidate();
+	if ((index>=0) && (index<6))
+		m_AxisCoords[index%2].SetValue(index/2,val);
+}
+
+void CSPrimCylinder::SetCoord(int index, std::string val)
+{
+	Invalidate();
+	if ((index>=0) && (index<6))
+		m_AxisCoords[index%2].SetValue(index/2,val);
+}
+
+
+void CSPrimCylinder::SetRadius(double val)
+{
+	Invalidate();
+	psRadius.SetValue(val);
+}
+
+void CSPrimCylinder::SetRadius(const char* val)
+{
+	Invalidate();
+	psRadius.SetValue(val);
+}
+
 bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	UNUSED(PreserveOrientation); //has no orientation or preserved anyways

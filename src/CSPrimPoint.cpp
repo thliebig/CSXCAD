@@ -52,11 +52,13 @@ CSPrimPoint::~CSPrimPoint()
 
 void CSPrimPoint::SetCoord(int index, double val)
 {
+	Invalidate();
 	m_Coords.SetValue(index,val);
 }
 
 void CSPrimPoint::SetCoord(int index, const std::string val)
 {
+	Invalidate();
 	m_Coords.SetValue(index,val);
 }
 

@@ -37,9 +37,9 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCylinder(this,prop);}
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/2,val);}
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/2,val);}
-	void SetCoord(int index, std::string val) {if ((index>=0) && (index<6)) m_AxisCoords[index%2].SetValue(index/2,val);}
+	void SetCoord(int index, double val);
+	void SetCoord(int index, const char* val);
+	void SetCoord(int index, std::string val);
 
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetValue(index/2); else return 0;}
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_AxisCoords[index%2].GetCoordPS(index/2); else return NULL;}
@@ -47,8 +47,8 @@ public:
 	ParameterCoord* GetAxisStartCoord() {return &m_AxisCoords[0];}
 	ParameterCoord* GetAxisStopCoord() {return &m_AxisCoords[1];}
 
-	void SetRadius(double val) {psRadius.SetValue(val);}
-	void SetRadius(const char* val) {psRadius.SetValue(val);}
+	void SetRadius(double val);
+	void SetRadius(const char* val);
 
 	double GetRadius() {return psRadius.GetValue();}
 	ParameterScalar* GetRadiusPS() {return &psRadius;}

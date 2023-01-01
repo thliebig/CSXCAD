@@ -54,6 +54,33 @@ CSPrimBox::~CSPrimBox()
 {
 }
 
+void CSPrimBox::SetCoord(int index, double val)
+{
+	if ((index>=0) && (index<6))
+	{
+		Invalidate();
+		m_Coords[index%2].SetValue(index/2,val);
+	}
+}
+
+void CSPrimBox::SetCoord(int index, const char* val)
+{
+	if ((index>=0) && (index<6))
+	{
+		Invalidate();
+		m_Coords[index%2].SetValue(index/2,val);
+	}
+}
+
+void CSPrimBox::SetCoord(int index, std::string val)
+{
+	if ((index>=0) && (index<6))
+	{
+		Invalidate();
+		m_Coords[index%2].SetValue(index/2,val);
+	}
+}
+
 bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 {
 	const double* start = m_Coords[0].GetCoords(m_MeshType);

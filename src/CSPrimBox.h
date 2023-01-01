@@ -33,9 +33,9 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimBox(this,prop);}
 
-	void SetCoord(int index, double val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
-	void SetCoord(int index, const char* val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
-	void SetCoord(int index, std::string val) {if ((index>=0) && (index<6)) m_Coords[index%2].SetValue(index/2,val);}
+	void SetCoord(int index, double val);
+	void SetCoord(int index, const char* val);
+	void SetCoord(int index, std::string val);
 
 	double GetCoord(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetValue(index/2); else return 0;}
 	ParameterScalar* GetCoordPS(int index) {if ((index>=0) && (index<6)) return m_Coords[index%2].GetCoordPS(index/2); else return NULL;}
