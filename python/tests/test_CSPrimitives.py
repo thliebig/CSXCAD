@@ -33,6 +33,12 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         box.SetStart([0,0,0])
         box.SetStop([1,2,3])
+        self.assertEqual(box.GetDimension(), 3)
+
+        box.SetStop([0,0,3])
+        self.assertEqual(box.GetDimension(), 1)
+
+        box.SetStop([1,2,3])
         self.assertTrue(box.Update())
 
         self.assertTrue( (box.GetBoundBox() == np.array([[0,0,0],[1,2,3]])).all())
@@ -286,8 +292,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(ph.GetNumVertices(), 5)
         self.assertEqual(ph.GetNumFaces()   , 6)
 
-        ph.Update()
-        self.assertTrue (ph.IsInside([x0+width/4, y0+width/4, z0+height/2]))
+        self.assertTrue (ph.IsInside([x0+width/2, y0+width/2, z0+height/2]))
         self.assertFalse(ph.IsInside([x0        , y0        , z0+height/2]))
 
     def test_polyhedron_reader(self):

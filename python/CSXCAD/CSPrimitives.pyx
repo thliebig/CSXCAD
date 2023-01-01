@@ -41,7 +41,7 @@ from libcpp cimport bool
 
 cimport CSXCAD.CSPrimitives
 from CSXCAD.Utilities import CheckNyDir, GetMultiDirs
-from CSXCAD.CSRectGrid import CSRectGrid
+from CSXCAD import CSRectGrid
 
 cdef class CSPrimitives:
     """
@@ -1171,7 +1171,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         cdef unsigned int numVert=0
         i_v = ptr.GetFace(idx, numVert)
         assert i_v!=NULL
-        face = np.zeros(numVert, np.int)
+        face = np.zeros(numVert, np.int32)
         for n in range(numVert):
             face[n] = i_v[n]
         return face
