@@ -4,6 +4,8 @@
 
 from __future__ import absolute_import
 
+AppCSXCAD_BIN = 'AppCSXCAD'
+
 import os
 if os.name == 'nt' and 'OPENEMS_INSTALL_PATH' in os.environ and os.path.exists(os.environ['OPENEMS_INSTALL_PATH']):
     try:  # to use Python 3.8's DLL handling
@@ -11,5 +13,7 @@ if os.name == 'nt' and 'OPENEMS_INSTALL_PATH' in os.environ and os.path.exists(o
     except AttributeError:  # <3.8, use PATH
         if os.environ['OPENEMS_INSTALL_PATH'] not in os.environ['PATH']:
             os.environ['PATH'] += os.pathsep + os.environ['OPENEMS_INSTALL_PATH']
+    
+    AppCSXCAD_BIN = os.path.join(os.environ['OPENEMS_INSTALL_PATH'], 'AppCSXCAD')
 
 from CSXCAD.CSXCAD import ContinuousStructure
