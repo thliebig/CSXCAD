@@ -117,7 +117,7 @@ void CSPrimitives::Init()
 	m_MeshType = CARTESIAN;
 	m_PrimCoordSystem = UNDEFINED_CS;
 	m_BoundBox_CoordSys = UNDEFINED_CS;
-	m_Dimension = 0;
+	m_Dimension = -1; // not yet evaluated dimension!
 	for (int n=0;n<6;++n)
 		m_BoundBox[n]=0;
 	m_BoundBoxValid = false;
@@ -145,6 +145,23 @@ CSPrimitives::~CSPrimitives()
 		clProperty->RemovePrimitive(this);
 	delete m_Transform;
 	m_Transform=NULL;
+}
+
+int CSPrimitives::GetDimension()
+{
+	if (m_Dimension<0)
+		this->Update();
+	return m_Dimension;
+}
+
+void CSPrimitives::Invalidate()
+{
+	if (m_Dimension<0)
+		return;
+	m_Dimension = -1;
+	m_BoundBoxValid = false;
+	for (int n=0;n<6;++n)
+		m_BoundBox[n]=0;
 }
 
 int CSPrimitives::IsInsideBox(const double *boundbox)
@@ -184,6 +201,7 @@ bool CSPrimitives::Write2XML(TiXmlElement &elem, bool /*parameterised*/)
 
 bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 {
+	Invalidate();
 	int help;
 	TiXmlElement* elem=root.ToElement();
 	if (elem==NULL) return false;

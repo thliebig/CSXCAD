@@ -105,7 +105,7 @@ public:
 	virtual CoordinateSystem GetBoundBoxCoordSystem() const {return m_BoundBox_CoordSys;}
 
 	//! Get the dimension of this primitive
-	virtual int GetDimension() {return m_Dimension;}
+	virtual int GetDimension();
 
 	//! Check if given Coordinate (in the given mesh type) is inside the Primitive.
 	virtual bool IsInside(const double* Coord, double tol=0) {UNUSED(Coord);UNUSED(tol);return false;}
@@ -187,6 +187,9 @@ protected:
 	CSPrimitives(ParameterSet* paraSet, CSProperties* prop);
 	CSPrimitives(CSPrimitives* prim, CSProperties *prop=NULL);
 	CSPrimitives(unsigned int ID, ParameterSet* paraSet, CSProperties* prop);
+
+	//! Invalidate some cached data, e.g. object dimension and bounding box, should be called when data is modified
+	virtual void Invalidate();
 
 	//! Apply (invers) transformation to the given coordinate in the given coordinate system
 	void TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const;

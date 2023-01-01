@@ -134,6 +134,7 @@ void CSPrimPolyhedron::Reset()
 
 void CSPrimPolyhedron::AddVertex(float px, float py, float pz)
 {
+	Invalidate();
 	vertex nv;
 	nv.coord[0]=px;nv.coord[1]=py;nv.coord[2]=pz;
 	m_Vertices.push_back(nv);
@@ -148,12 +149,13 @@ float* CSPrimPolyhedron::GetVertex(unsigned int n)
 
 void CSPrimPolyhedron::AddFace(face f)
 {
+	Invalidate();
 	m_Faces.push_back(f);
 }
 
 void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 {
-	this->Invalidate();
+	Invalidate();
 	face f;
 	f.numVertex=numVertex;
 	f.vertices=new int[numVertex];
@@ -164,7 +166,7 @@ void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 
 void CSPrimPolyhedron::AddFace(std::vector<int> vertices)
 {
-	this->Invalidate();
+	Invalidate();
 	face f;
 	f.numVertex=vertices.size();
 	if (f.numVertex>3)
@@ -177,12 +179,9 @@ void CSPrimPolyhedron::AddFace(std::vector<int> vertices)
 
 void CSPrimPolyhedron::Invalidate()
 {
-	if (!m_BoundBoxValid)
+	if (m_Dimension<0)
 		return;
-	m_BoundBoxValid = false;
-	m_BoundBox[0]=m_BoundBox[1]=0;
-	m_BoundBox[2]=m_BoundBox[3]=0;
-	m_BoundBox[4]=m_BoundBox[5]=0;
+	CSPrimitives::Invalidate();
 	d_ptr->m_Polyhedron.clear();
 	if (d_ptr->m_PolyhedronTree == NULL)
 		return;
@@ -267,8 +266,8 @@ bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation
 
 bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 {
-	if (!m_BoundBoxValid && !this->Update())
-		return false;
+	if (m_Dimension<0)
+		this->Update();
 	if (m_Dimension<3)
 		return false;
 	double pos[3];
@@ -297,8 +296,6 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 
 bool CSPrimPolyhedron::Update(std::string *ErrStr)
 {
-	if (m_BoundBoxValid)
-		return true;
 	BuildTree();
 	//update local bounding box
 	m_BoundBoxValid = GetBoundBox(m_BoundBox);
