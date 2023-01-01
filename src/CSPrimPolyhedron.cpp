@@ -153,6 +153,7 @@ void CSPrimPolyhedron::AddFace(face f)
 
 void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 {
+	this->Invalidate();
 	face f;
 	f.numVertex=numVertex;
 	f.vertices=new int[numVertex];
@@ -163,6 +164,7 @@ void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 
 void CSPrimPolyhedron::AddFace(std::vector<int> vertices)
 {
+	this->Invalidate();
 	face f;
 	f.numVertex=vertices.size();
 	if (f.numVertex>3)
@@ -173,8 +175,30 @@ void CSPrimPolyhedron::AddFace(std::vector<int> vertices)
 	m_Faces.push_back(f);
 }
 
+void CSPrimPolyhedron::Invalidate()
+{
+	if (!m_BoundBoxValid)
+		return;
+	m_BoundBoxValid = false;
+	m_BoundBox[0]=m_BoundBox[1]=0;
+	m_BoundBox[2]=m_BoundBox[3]=0;
+	m_BoundBox[4]=m_BoundBox[5]=0;
+	d_ptr->m_Polyhedron.clear();
+	if (d_ptr->m_PolyhedronTree == NULL)
+		return;
+	delete d_ptr->m_PolyhedronTree;
+	d_ptr->m_PolyhedronTree = NULL;
+}
+
 bool CSPrimPolyhedron::BuildTree()
 {
+	Invalidate();
+	if (m_Faces.size() == 0)
+	{
+		m_Dimension = 0;
+		m_BoundBoxValid = true;
+		return true;
+	}
 	Polyhedron_Builder builder(this);
 	d_ptr->m_Polyhedron.delegate(builder);
 
@@ -193,7 +217,6 @@ bool CSPrimPolyhedron::BuildTree()
 	}
 
 	//build tree
-	delete d_ptr->m_PolyhedronTree;
 #if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(4,6,0)
     d_ptr->m_PolyhedronTree = new CGAL::AABB_tree< Traits >(faces(d_ptr->m_Polyhedron).first,faces(d_ptr->m_Polyhedron).second,d_ptr->m_Polyhedron);
 #else
@@ -226,9 +249,9 @@ bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation
 	if (m_Vertices.size()==0)
 		return true;
 
-	dBoundBox[0]=dBoundBox[1]=m_Vertices.at(0).coord[0];
-	dBoundBox[2]=dBoundBox[3]=m_Vertices.at(0).coord[1];
-	dBoundBox[4]=dBoundBox[5]=m_Vertices.at(0).coord[2];
+	dBoundBox[0]=dBoundBox[1]=(double)m_Vertices.at(0).coord[0];
+	dBoundBox[2]=dBoundBox[3]=(double)m_Vertices.at(0).coord[1];
+	dBoundBox[4]=dBoundBox[5]=(double)m_Vertices.at(0).coord[2];
 
 	for (size_t n=0;n<m_Vertices.size();++n)
 	{
@@ -244,9 +267,10 @@ bool CSPrimPolyhedron::GetBoundBox(double dBoundBox[6], bool PreserveOrientation
 
 bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 {
+	if (!m_BoundBoxValid && !this->Update())
+		return false;
 	if (m_Dimension<3)
 		return false;
-
 	double pos[3];
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
@@ -256,6 +280,10 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 	for (unsigned int n=0;n<3;++n)
 	{
 		if ((m_BoundBox[2*n]>pos[n]) || (m_BoundBox[2*n+1]<pos[n])) return false;
+	}
+	if (d_ptr->m_PolyhedronTree == NULL)
+	{
+		return false;
 	}
 
 	Point p(pos[0], pos[1], pos[2]);
@@ -269,6 +297,8 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double /*tol*/)
 
 bool CSPrimPolyhedron::Update(std::string *ErrStr)
 {
+	if (m_BoundBoxValid)
+		return true;
 	BuildTree();
 	//update local bounding box
 	m_BoundBoxValid = GetBoundBox(m_BoundBox);

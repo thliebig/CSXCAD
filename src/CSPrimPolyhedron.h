@@ -77,6 +77,7 @@ public:
 
 protected:
 	unsigned int m_InvalidFaces;
+	virtual void Invalidate();
 	std::vector<vertex> m_Vertices;
 	std::vector<face> m_Faces;
 	CSPrimPolyhedronPrivate *d_ptr; //!< pointer to private data structure, to hide the CGAL dependency from applications
