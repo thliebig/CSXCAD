@@ -62,7 +62,8 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
     # very large range and easy start/stop res
     if start_res>=(max_res/ratio) and stop_res>=(max_res/ratio):
         N = np.ceil(rng/max_res).astype('int')
-        return np.linspace(start, stop, N+1)
+        tmp = np.linspace(start, stop, N+1)
+        return np.append(np.append(start, tmp[1:-1]), stop)
 
     def one_side_taper(start_res, ratio, max_res):
         res = start_res
@@ -96,11 +97,13 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 
     # need to taper start
     if start_res<(max_res/ratio) and stop_res>=(max_res/ratio):
-        return start + one_side_taper(start_res, ratio, max_res)
+        tmp = start + one_side_taper(start_res, ratio, max_res)
+        return np.append(np.append(start, tmp[1:-1]), stop)
 
     # need to taper stop
     if start_res>=(max_res/ratio) and stop_res<(max_res/ratio):
-        return np.sort(stop - one_side_taper(stop_res, ratio, max_res))
+        tmp = np.sort(stop - one_side_taper(stop_res, ratio, max_res))
+        return np.append(np.append(start, tmp[1:-1]), stop)
 
     # test if max taper on both sides is possible
     pos1 = 0
@@ -139,7 +142,8 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 
         length = l[-1]+r[-1]
         c = Unique(np.r_[np.array(l), length-np.array(r)])
-        return start + c *rng/length
+        tmp = start + c *rng/length
+        return np.append(np.append(start, tmp[1:-1]), stop)
 
     l = [0]
     r = [0]
@@ -158,7 +162,8 @@ def SmoothRange(start, stop, start_res, stop_res, max_res, ratio):
 
     length = l[-1]+r[-1]
     c = Unique(np.r_[np.array(l), length-np.array(r)])
-    return start + c *rng/length
+    tmp = start + c *rng/length
+    return np.append(np.append(start, tmp[1:-1]), stop)
 
 def CheckSymmetry(lines):
     tolerance = 1e-10
