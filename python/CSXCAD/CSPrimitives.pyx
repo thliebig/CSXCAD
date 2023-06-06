@@ -21,8 +21,8 @@ Module for all Primitives
 
 Notes
 -----
-Usually it is not meant to create primitives manually, but instead
-use the ContinuousStructure object to create primives using the
+It is not usually necessary to create primitives manually, but instead
+use the ContinuousStructure object to create primitives using the
 e.g. AddBox or AddCylinder methods.
 
 Examples
@@ -45,7 +45,7 @@ from CSXCAD import CSRectGrid
 
 cdef class CSPrimitives:
     """
-    Virtual base class for all primives, cannot be created!
+    Virtual base class for all primitives, cannot be created!
 
     """
     @staticmethod
@@ -947,7 +947,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
 cdef class CSPrimCurve(CSPrimitives):
     """ Curve Primitive
 
-    A curve is a set of consequtive 3D coordinates.
+    A curve is a set of consecutive 3D coordinates.
 
     Parameters
     ----------
@@ -1189,7 +1189,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
 cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
     """ Polyhedron Reader
 
-    This primives creates a polyhedron by reading a STL or PLY file.
+    This primitives creates a polyhedron by reading a STL or PLY file.
 
     Parameters
     ----------
