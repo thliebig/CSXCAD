@@ -153,7 +153,6 @@ void CSPropLorentzMaterial::InitValues()
 	}
 }
 
-
 bool CSPropLorentzMaterial::Update(std::string *ErrStr)
 {
 	bool bOK=true;
