@@ -19,6 +19,13 @@
 
 #include "CSProperties.h"
 
+enum LEtype
+{
+	PARALLEL = 0,
+	SERIES = 1,
+	INVALID = -1
+};
+
 //! Continuous Structure Lumped Element Property
 /*!
   This property represents lumped elements, e.g. smd capacitors etc.
@@ -54,6 +61,9 @@ public:
 	void SetCaps(bool val) {m_Caps=val;}
 	int GetCaps() const {return m_Caps;}
 
+	void SetRLCtype(LEtype c_LEtype);
+	LEtype GetRLCtype() const {return e_LEtype; };
+
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
@@ -63,6 +73,9 @@ protected:
 	int m_ny;
 	bool m_Caps;
 	ParameterScalar m_R,m_C,m_L;
+
+	LEtype e_LEtype;
+
 	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
