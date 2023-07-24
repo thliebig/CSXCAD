@@ -54,8 +54,6 @@ class CSPropProbeBox;
 	class CSPropDumpBox;
 class CSPropResBox;
 
-class CSPropLumpedRLC;
-
 class TiXmlNode;
 
 
@@ -81,9 +79,9 @@ public:
 	enum PropertyType
 	{
 		ANY = 0xffff, UNKNOWN = 0x001, MATERIAL = 0x002, METAL = 0x004, EXCITATION = 0x008, PROBEBOX = 0x010, RESBOX = 0x020, DUMPBOX = 0x040, /* unused = 0x080, */
+		LUMPED_RLC = 0x500,	// Leave place here for more lumped element types
 		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400,
 		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000, CONDUCTINGSHEET = 0x4000,
-		LUMPED_RLC = 0x5000
 	};
 	
 	//! Get PropertyType \sa PropertyType
@@ -182,9 +180,6 @@ public:
 	CSPropResBox* ToResBox();
 	//! Convert to DumpBox Property, returns NULL if type is different! \return Returns a CSPropDumpBox* or NULL if type is different!
 	CSPropDumpBox* ToDumpBox();
-
-	//! Convert to Lumped RLC
-	CSPropLumpedRLC* ToLumpedRLC();
 
 	//! Update all parameters. Nothing to do in this base class. \param ErrStr Methode writes error messages to this string! \return Update success
 	virtual bool Update(std::string *ErrStr=NULL);
