@@ -39,7 +39,6 @@ set( PUB_HEADERS
   CSPropProbeBox.h
   CSPropDumpBox.h
   CSPropResBox.h
-  CSPropLumpedRLC.h
 )
 
 set(SOURCES
@@ -81,7 +80,6 @@ set(SOURCES
   CSPropDumpBox.cpp
   CSPropResBox.cpp
   CSBackgroundMaterial.cpp
-  CSPropLumpedRLC.cpp
 )
 
 # CSXCAD library
