@@ -61,8 +61,8 @@ public:
 	void SetCaps(bool val) {m_Caps=val;}
 	int GetCaps() const {return m_Caps;}
 
-	void SetRLCtype(LEtype c_LEtype);
-	LEtype GetRLCtype() const {return e_LEtype; };
+	void SetLEtype(LEtype c_LEtype);
+	LEtype GetLEtype() const {return e_LEtype; };
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
 

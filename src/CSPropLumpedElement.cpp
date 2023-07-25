@@ -125,7 +125,7 @@ bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
 	// Read RLC type, "parallel" or "series"
 	ParameterScalar s_LEtype;
 
-	// The default is a parallel lumped circuit.
+	// The default is a parallel lumped circuit, in case none is supplied
 	if (ReadTerm(s_LEtype,*prop,"LEtype")==false)
 		e_LEtype = LEtype::PARALLEL;
 	else
@@ -139,13 +139,6 @@ bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
 		else
 			e_LEtype = LEtype::INVALID;
 	}
-
-	// Here is the tricky part. If this is anything else than a parallel RC,
-	// then another type descriptor is necessary, to invoke an engine extension.
-	// With additional modifications to the LumpedElement functionality, this
-	// condition will have to change further.
-	if ((m_L.GetValue() > 0.0) || (e_LEtype == LEtype::SERIES))
-		Type = (CSProperties::PropertyType)(LUMPED_ELEMENT | LUMPED_RLC);
 
 	return true;
 }
