@@ -29,7 +29,6 @@
 #include "CSPropProbeBox.h"
 #include "CSPropDumpBox.h"
 #include "CSPropResBox.h"
-#include "CSPropLumpedRLC.h"
 
 #include "CSPrimitives.h"
 #include <iostream>
@@ -186,9 +185,6 @@ CSPropExcitation* CSProperties::ToExcitation() { return dynamic_cast<CSPropExcit
 CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*>(this); }
 CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }
 CSPropDumpBox* CSProperties::ToDumpBox() { return dynamic_cast<CSPropDumpBox*>(this); }
-
-// Don't know if this is necessary...
-CSPropLumpedRLC* CSProperties::ToLumpedRLC() { return dynamic_cast<CSPropLumpedRLC*>(this); }
 
 bool CSProperties::Update(std::string */*ErrStr*/) {return true;}
 
