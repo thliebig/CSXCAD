@@ -15,8 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-from cmath import nan
-from hgext.keyword import kw_amend
 
 """
 Module for all Properties like metal, material, propes and dumps
@@ -124,7 +122,7 @@ cdef class CSProperties:
         self.__paraset = ParameterSet(no_init=True)
         self.__paraset.thisptr = self.thisptr.GetParameterSet()
 
-        # assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
+        assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
 
     cdef __SetPtr(self, _CSProperties *ptr):
         self.thisptr = ptr
