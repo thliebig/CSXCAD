@@ -106,6 +106,13 @@ cdef class CSPropMaterial(CSProperties):
     pass
 
 ##############################################################################
+
+cdef extern from "CSXCAD/CSPropLumpedElement.h":
+    cpdef enum LEtype "CSPropLumpedElement::LEtype":
+        LE_PARALLEL     "CSPropLumpedElement::PARALLEL"
+        LE_SERIES       "CSPropLumpedElement::SERIES"
+        LE_INVALID      "CSPropLumpedElement::INVALID"
+
 cdef extern from "CSXCAD/CSPropLumpedElement.h":
     cdef cppclass _CSPropLumpedElement "CSPropLumpedElement" (_CSProperties):
             _CSPropLumpedElement(_ParameterSet*) except +
@@ -123,6 +130,9 @@ cdef extern from "CSXCAD/CSPropLumpedElement.h":
 
             void SetCaps(bool val)
             int GetCaps()
+            
+            void SetLEtype(LEtype c_LEtype)
+            LEtype GetLEtype()
 
 cdef class CSPropLumpedElement(CSProperties):
     pass
