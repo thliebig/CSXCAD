@@ -19,13 +19,6 @@
 
 #include "CSProperties.h"
 
-enum LEtype
-{
-	PARALLEL = 0,
-	SERIES = 1,
-	INVALID = -1
-};
-
 //! Continuous Structure Lumped Element Property
 /*!
   This property represents lumped elements, e.g. smd capacitors etc.
@@ -33,6 +26,13 @@ enum LEtype
 class CSXCAD_EXPORT CSPropLumpedElement : public CSProperties
 {
 public:
+	enum LEtype
+	{
+		PARALLEL = 0,
+		SERIES = 1,
+		INVALID = -1
+	};
+
 	CSPropLumpedElement(ParameterSet* paraSet);
 	CSPropLumpedElement(CSProperties* prop);
 	CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet);
@@ -61,8 +61,8 @@ public:
 	void SetCaps(bool val) {m_Caps=val;}
 	int GetCaps() const {return m_Caps;}
 
-	void SetLEtype(LEtype c_LEtype);
-	LEtype GetLEtype() const {return e_LEtype; };
+	void SetLEtype(LEtype c_LEtype) {m_LEtype = c_LEtype;};
+	LEtype GetLEtype() const {return m_LEtype; };
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
@@ -74,7 +74,7 @@ protected:
 	bool m_Caps;
 	ParameterScalar m_R,m_C,m_L;
 
-	LEtype e_LEtype;
+	LEtype m_LEtype;
 
 	virtual bool Update(std::string *ErrStr=NULL);
 

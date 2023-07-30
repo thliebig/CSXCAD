@@ -32,7 +32,7 @@ void CSPropLumpedElement::Init()
 	m_C.SetValue(NAN);
 	m_L.SetValue(NAN);
 
-	e_LEtype = LEtype::INVALID;
+	m_LEtype = LEtype::INVALID;
 }
 
 bool CSPropLumpedElement::Update(std::string *ErrStr)
@@ -96,7 +96,7 @@ bool CSPropLumpedElement::Write2XML(TiXmlNode& root, bool parameterised, bool sp
 
 	// Write down the numeric value LEtype
 	ParameterScalar s_LEtype;
-	s_LEtype.SetValue(int(this->e_LEtype));
+	s_LEtype.SetValue(int(this->m_LEtype));
 	WriteTerm(s_LEtype,*prop,"LEtype",parameterised);
 
 	return true;
@@ -127,17 +127,17 @@ bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
 
 	// The default is a parallel lumped circuit, in case none is supplied
 	if (ReadTerm(s_LEtype,*prop,"LEtype")==false)
-		e_LEtype = LEtype::PARALLEL;
+		m_LEtype = PARALLEL;
 	else
 	{
 		int i_RLCtype = (int)(s_LEtype.GetValue());
 
 		if (i_RLCtype == 0)
-			e_LEtype = LEtype::PARALLEL;
+			m_LEtype = PARALLEL;
 		else if (i_RLCtype == 1)
-			e_LEtype = LEtype::SERIES;
+			m_LEtype = SERIES;
 		else
-			e_LEtype = LEtype::INVALID;
+			m_LEtype = INVALID;
 	}
 
 	return true;
@@ -153,16 +153,18 @@ void CSPropLumpedElement::ShowPropertyStatus(std::ostream& stream)
 	stream << "  Inductance: " << m_L.GetValueString() << std::endl;
 
 	std::string	s_type;
-	switch (this->e_LEtype){
-		case LEtype::PARALLEL:
+	switch (this->m_LEtype){
+		case PARALLEL:
 			s_type = "Parallel";
 			break;
-		case LEtype::SERIES:
+		case SERIES:
 			s_type = "Series";
 			break;
-		case LEtype::INVALID:
+		case INVALID:
 			s_type = "Invalid";
 			break;
 	}
 	stream << "  Type: " << s_type << std::endl;
 }
+
+
