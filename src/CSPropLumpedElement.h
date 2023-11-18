@@ -26,6 +26,13 @@
 class CSXCAD_EXPORT CSPropLumpedElement : public CSProperties
 {
 public:
+	enum LEtype
+	{
+		PARALLEL = 0,
+		SERIES = 1,
+		INVALID = -1
+	};
+
 	CSPropLumpedElement(ParameterSet* paraSet);
 	CSPropLumpedElement(CSProperties* prop);
 	CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet);
@@ -54,6 +61,9 @@ public:
 	void SetCaps(bool val) {m_Caps=val;}
 	int GetCaps() const {return m_Caps;}
 
+	void SetLEtype(LEtype c_LEtype) {m_LEtype = c_LEtype;};
+	LEtype GetLEtype() const {return m_LEtype; };
+
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
@@ -63,6 +73,9 @@ protected:
 	int m_ny;
 	bool m_Caps;
 	ParameterScalar m_R,m_C,m_L;
+
+	LEtype m_LEtype;
+
 	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);

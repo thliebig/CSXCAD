@@ -56,6 +56,8 @@ class CSPropResBox;
 
 class TiXmlNode;
 
+
+
 typedef struct
 {
 	unsigned char R,G,B,a;
