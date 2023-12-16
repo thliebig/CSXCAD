@@ -32,5 +32,5 @@ setup(
   url = 'https://openEMS.de',
   packages=["CSXCAD", ],
   package_data={'CSXCAD': ['*.pxd']},
-  ext_modules = cythonize(extensions, language_level="3")
+  ext_modules = cythonize(extensions, language_level=3)
  )
