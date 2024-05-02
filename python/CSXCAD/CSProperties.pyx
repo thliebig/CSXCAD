@@ -72,6 +72,14 @@ cdef class CSProperties:
             prop = CSPropMetal(pset, no_init=no_init, **kw)
         elif p_type == MATERIAL:
             prop = CSPropMaterial(pset, no_init=no_init, **kw)
+        elif p_type == DISCRETE_MATERIAL + MATERIAL:
+            prop = CSPropDiscMaterial(pset, no_init=no_init, **kw)
+		elif p_type == DISPERSIVEMATERIAL + MATERIAL:
+            prop = CSPropDispersiveMaterial(pset, no_init=no_init, **kw)
+		elif p_type == LORENTZMATERIAL + DISPERSIVEMATERIAL:
+            prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
+		elif p_type == DEBYEMATERIAL + DISPERSIVEMATERIAL:
+            prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
         elif p_type == LUMPED_ELEMENT:
             prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
         elif p_type == EXCITATION:
@@ -80,6 +88,10 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif p_type == DUMPBOX:
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif p_type == UNKNOWN:
+            prop = CSPropUnknown(pset, no_init=no_init, **kw)
+		elif p_type == RESBOX:
+            prop = CSPropResBox(pset, no_init=no_init, **kw)
 
         return prop
 
@@ -96,6 +108,12 @@ cdef class CSProperties:
         prop = None
         if type_str=='Material':
             prop = CSPropMaterial(pset, no_init=no_init, **kw)
+        elif type_str=='Discrete-Material':
+            prop = CSPropDiscMaterial(pset, no_init=no_init, **kw)
+		elif type_str=='LorentzMaterial':
+            prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
+		elif type_str=='DebyeMaterial':
+            prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
         elif type_str=='LumpedElement':
             prop = CSPropLumpedElement(pset, no_init=no_init, **kw)
         elif type_str=='Metal':
@@ -108,6 +126,10 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif type_str=='DumpBox':
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif type_str=='Unknown':
+            prop = CSPropUnknown(pset, no_init=no_init, **kw)
+		elif type_str=='ResBox':
+            prop = CSPropResBox(pset, no_init=no_init, **kw)
         return prop
 
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
@@ -411,13 +433,13 @@ cdef class CSProperties:
 cdef class CSPropMaterial(CSProperties):
     """ General material property
 
-    This is a material with options to define relative electric permeability
-    (`eplsilon`), relative magnetic permittivity (`mue`), electric conductivity
+    This is a material with options to define relative electric permittivity
+    (`epsilon`), relative magnetic permeability (`mue`), electric conductivity
     (`kappa`), magnetic conductivity (`sigma`) and `density`.
 
-    :params epsilon: scalar or vector - relative electric permeability
-    :params mue:     scalar or vector - relative magnetic permittivity
-    :params kappa:   scalar or vector - relectric conductivity
+    :params epsilon: scalar or vector - relative electric permittivity
+    :params mue:     scalar or vector - relative magnetic permeability
+    :params kappa:   scalar or vector - electric conductivity
     :params sigma:   scalar or vector - magnetic conductivity
     :params density: float            - Density
     """
@@ -456,9 +478,9 @@ cdef class CSPropMaterial(CSProperties):
         """ SetMaterialProperty(**kw)
         Set the material properties.
 
-        :params epsilon: scalar or vector - relative electric permeability
-        :params mue:     scalar or vector - relative magnetic permittivity
-        :params kappa:   scalar or vector - relectric conductivity
+        :params epsilon: scalar or vector - relative electric permittivity
+        :params mue:     scalar or vector - relative magnetic permeability
+        :params kappa:   scalar or vector - electric conductivity
         :params sigma:   scalar or vector - magnetic conductivity
         :params density: float            - Density
         """
@@ -501,9 +523,9 @@ cdef class CSPropMaterial(CSProperties):
         all these variables are not weighted with the drawing unit defined by
         the grid
 
-        :params epsilon: str or str-vector - relative electric permeability
-        :params mue:     str or str-vector - relative magnetic permittivity
-        :params kappa:   str or str-vector - relectric conductivity
+        :params epsilon: str or str-vector - relative electric permittivity
+        :params mue:     str or str-vector - relative magnetic permeability
+        :params kappa:   str or str-vector - electric conductivity
         :params sigma:   str or str-vector - magnetic conductivity
         :params density: str               - Density
         """
@@ -589,6 +611,421 @@ cdef class CSPropMaterial(CSProperties):
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
 
+###############################################################################
+cdef class CSPropDiscMaterial(CSPropMaterial):
+    """
+	Continuous Structure Discrete Material Property
+
+    This Property reads a discrete material distribution from a file. (currently only HDF5)
+	
+	:params epsilon: str or str-vector - relative electric permeability
+    :params mue:     str or str-vector - relative magnetic permittivity
+    :params kappa:   str or str-vector - electric conductivity
+    :params sigma:   str or str-vector - magnetic conductivity
+    :params density: str               - Density
+    """
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropDiscMaterial(pset.thisptr)
+
+        super(CSPropDiscMaterial, self).__init__(pset, *args, **kw)
+	
+	def GetMaterialProperty(self, prop_name):
+        """ SetMaterialProperty(prop_name)
+        Get the material property with of type `prop_name`.
+
+        :params prop_name: str -- material property type
+        :returns: float for isotropic material and `density` or else (3,) array
+        """
+        if prop_name == 'density':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetDensity()
+        if (<_CSPropDiscMaterial*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialPropertyDir(prop_name, 0)
+        val = np.zeros(3)
+        for n in range(3):
+            val[n] = self.__GetMaterialPropertyDir(prop_name, n)
+        return val
+
+    def __GetMaterialPropertyDir(self, prop_name, ny):
+        if prop_name=='epsilon':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetEpsilon(ny)
+        elif prop_name=='mue':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetMue(ny)
+        elif prop_name=='kappa':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetKappa(ny)
+        elif prop_name=='sigma':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetSigma(ny)
+        else:
+            raise Exception('GetMaterialPropertyDir: Error, unknown discrete material property')
+
+    def GetMaterialWeight(self, prop_name):
+        """ GetMaterialWeight(prop_name)
+        Get the material weighting function(s).
+
+        :params prop_name: str -- material property type
+        :returns: str for isotropic material and `density` or else str array
+        """
+        if prop_name == 'density':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
+        if (<_CSPropDiscMaterial*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
+        val = ['', '', '']
+        for n in range(3):
+            val[n] = self.__GetMaterialWeightDir(prop_name, n).decode('UTF-8')
+        return val
+
+    def __GetMaterialWeightDir(self, prop_name, ny):
+        if prop_name=='epsilon':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetEpsilonWeightFunction(ny)
+        elif prop_name=='mue':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetMueWeightFunction(ny)
+        elif prop_name=='kappa':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetKappaWeightFunction(ny)
+        elif prop_name=='sigma':
+            return (<_CSPropDiscMaterial*>self.thisptr).GetSigmaWeightFunction(ny)
+        else:
+            raise Exception('GetMaterialWeightDir: Error, unknown discrete material property')
+		
+###############################################################################
+cdef class CSPropDispersiveMaterial(CSPropMaterial):
+    """
+	Continuous Structure Dispersive Material Property
+
+    This abstract Property can hold information about the special properties of dispersive materials.
+    """
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropDispersiveMaterial(pset.thisptr)
+
+        super(CSPropDispersiveMaterial, self).__init__(pset, *args, **kw)
+		
+###############################################################################
+cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
+    """
+	Continuous Structure Lorentz/Drude Dispersive Material Property
+
+    This Property can hold information about the special properties of Lorentz or Drude dispersive materials.
+	The Drude material model is a special case of the Lorentz material model.
+	
+	:params EpsPlasma: 		scalar or vector - epsilon plasma frequency
+    :params EpsLorPole:     scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
+    :params EpsRelaxTime:   scalar or vector - epsilon relaxation time
+	:params MuePlasma:   	scalar or vector - mue plasma frequency
+    :params MueLorPole:   	scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+    :params MueRelaxTime: 	scalar or vector - mue relaxation time
+    """
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropLorentzMaterial(pset.thisptr)
+
+        self.SetMaterialProperty(**kw)
+        for k in list(kw.keys()):
+            if k in ['EpsPlasma', 'EpsLorPole', 'EpsRelaxTime', 'MuePlasma', 'MueLorPole', 'MueRelaxTime']:
+                del kw[k]
+
+        super(CSPropLorentzMaterial, self).__init__(pset, *args, **kw)
+	
+	def SetMaterialProperty(self, **kw):
+        """ SetMaterialProperty(**kw)
+        Set the Lorentz/Drude material properties.
+
+        :params EpsPlasma: 		scalar or vector - epsilon plasma frequency
+		:params EpsLorPole:     scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
+		:params EpsRelaxTime:   scalar or vector - epsilon relaxation time
+		:params MuePlasma:   	scalar or vector - mue plasma frequency
+		:params MueLorPole:   	scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+		:params MueRelaxTime: 	scalar or vector - mue relaxation time
+        """
+        for prop_name in kw:
+            val = kw[prop_name]
+            """if prop_name == 'density':
+                (<_CSPropLorentzMaterial*>self.thisptr).SetDensity(val)
+                continue"""
+            if type(val)==float or type(val)==int:
+                self.__SetMaterialPropertyDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self.__SetMaterialPropertyDir(prop_name, order, n, val[n])
+		
+	def __SetMaterialPropertyDir(self, prop_name, order, ny, val):
+        if prop_name=='EpsPlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreq(order, val, ny)
+        elif prop_name=='EpsLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreq(order, val, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+        elif prop_name=='MuePlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreq(order, val, ny)
+		elif prop_name=='MueLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreq(order, val, ny)
+		elif prop_name=='MueRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTime(order, val, ny)
+        else:
+            raise Exception('SetMaterialPropertyDir: Error, unknown Lorentz material property')
+	
+	def SetMaterialWeight(self, **kw):
+        """ SetMaterialWeight(**kw)
+
+        Set the Lorentz material weighting function(s)
+
+        The functions can use the variables:
+        `x`,`y`,`z`
+        `rho` for the distance to z-axis
+        `r`   for the distance to origin
+        `a`   for alpha or phi (as in cylindircal and spherical coord systems)
+        `t`   for theta (as in the spherical coord system
+
+        all these variables are not weighted with the drawing unit defined by
+        the grid
+
+        :params EpsPlasma: 		scalar or vector - epsilon plasma frequency
+		:params EpsLorPole:     scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
+		:params EpsRelaxTime:   scalar or vector - epsilon relaxation time
+		:params MuePlasma:   	scalar or vector - mue plasma frequency
+		:params MueLorPole:   	scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+		:params MueRelaxTime: 	scalar or vector - mue relaxation time
+        """
+        for prop_name in kw:
+            val = kw[prop_name]
+            """if prop_name == 'density':
+                (<_CSPropLorentzMaterial*>self.thisptr).SetDensityWeightFunction(val.encode('UTF-8'))
+                continue"""
+            if type(val)==str:
+                self.__SetMaterialWeightDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self.__SetMaterialWeightDir(prop_name, order, n, val[n])
+
+    def __SetMaterialWeightDir(self, prop_name, order, ny, val):
+        val = val.encode('UTF-8')
+        if prop_name=='EpsPlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreqWeightFunction(order, val, ny)
+        elif prop_name=='EpsLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreqWeightFunction(order, val, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+        elif prop_name=='MuePlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreqWeightFunction(order, val, ny)
+		elif prop_name=='MueLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreqWeightFunction(order, val, ny)
+		elif prop_name=='MueRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTimeWeightFunction(order, val, ny)
+        else:
+            raise Exception('SetMaterialWeightDir: Error, unknown Lorentz material property')
+	
+	def GetMaterialProperty(self, prop_name, order):
+        """ SetMaterialProperty(prop_name)
+        Get the material property with of type `prop_name`.
+
+        :params prop_name: str -- material property type
+        :returns: float for isotropic material and `density` or else (3,) array
+        """
+        """if prop_name == 'density':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetDensity()
+        if (<_CSPropLorentzMaterial*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialPropertyDir(prop_name, 0)"""
+		val = np.zeros(3)
+        for n in range(3):
+            val[n] = self.__GetMaterialPropertyDir(prop_name, order, n)
+        return val
+
+    def __GetMaterialPropertyDir(self, prop_name, order, ny):
+        if prop_name=='EpsPlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreq(order, ny)
+        elif prop_name=='EpsLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreq(order, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+        elif prop_name=='MuePlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreq(order, ny)
+		elif prop_name=='MueLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreq(order, ny)
+		elif prop_name=='MueRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTime(order, ny)
+        else:
+            raise Exception('GetMaterialPropertyDir: Error, unknown Lorentz material property')
+
+    def GetMaterialWeight(self, prop_name, order):
+        """ GetMaterialWeight(prop_name)
+        Get the material weighting function(s).
+
+        :params prop_name: str -- material property type
+        :returns: str for isotropic material and `density` or else str array
+        """
+        """if prop_name == 'density':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
+        if (<_CSPropLorentzMaterial*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')"""
+        val = ['', '', '']
+        for n in range(3):
+            val[n] = self.__GetMaterialWeightDir(prop_name, order, n).decode('UTF-8')
+        return val
+
+    def __GetMaterialWeightDir(self, prop_name, order, ny):
+        if prop_name=='EpsPlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreqWeighted(order, ny)
+        elif prop_name=='EpsLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreqWeighted(order, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTimeWeighted(order, ny)
+		elif prop_name=='MuePlasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreqWeighted(order, ny)
+		elif prop_name=='MueLorPole':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreqWeighted(order, ny)
+		elif prop_name=='MueRelaxTime':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTimeWeighted(order, ny)
+        else:
+            raise Exception('GetMaterialWeightDir: Error, unknown Lorentz material property')
+
+###############################################################################
+cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
+    """
+	Continuous Structure Debye Dispersive Material Property
+
+    This Property can hold information about the special properties of Debye dispersive materials.
+	
+	:params EpsDelta: 			scalar or vector - epsilon delta value over frequency
+	:params EpsRelaxTime:     	scalar or vector - epsilon relaxation time over frequency
+	"""
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropDebyeMaterial(pset.thisptr)
+
+        self.SetMaterialProperty(**kw)
+        for k in list(kw.keys()):
+            if k in ['EpsDelta', 'EpsRelaxTime']:
+                del kw[k]
+
+        super(CSPropDebyeMaterial, self).__init__(pset, *args, **kw)
+	
+	def SetMaterialProperty(self, **kw):
+        """ SetMaterialProperty(**kw)
+        Set the Debye material properties.
+
+        :params EpsDelta: 			scalar or vector - epsilon delta value over frequency
+		:params EpsRelaxTime:     	scalar or vector - epsilon relaxation time over frequency
+        """
+        for prop_name in kw:
+            val = kw[prop_name]
+            """if prop_name == 'density':
+                (<_CSPropDebyeMateria*>self.thisptr).SetDensity(val)
+                continue"""
+            if type(val)==float or type(val)==int:
+                self.__SetMaterialPropertyDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self.__SetMaterialPropertyDir(prop_name, order, n, val[n])
+		
+	def __SetMaterialPropertyDir(self, prop_name, order, ny, val):
+        if prop_name=='EpsDelta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDelta(order, val, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+        else:
+            raise Exception('SetMaterialPropertyDir: Error, unknown Debye material property')
+	
+	def SetMaterialWeight(self, **kw):
+        """ SetMaterialWeight(**kw)
+
+        Set the Debye material weighting function(s)
+
+        The functions can use the variables:
+        `x`,`y`,`z`
+        `rho` for the distance to z-axis
+        `r`   for the distance to origin
+        `a`   for alpha or phi (as in cylindircal and spherical coord systems)
+        `t`   for theta (as in the spherical coord system
+
+        all these variables are not weighted with the drawing unit defined by
+        the grid
+
+        :params EpsDelta: 			scalar or vector - epsilon delta value over frequency
+		:params EpsRelaxTime:     	scalar or vector - epsilon relaxation time over frequency
+        """
+        for prop_name in kw:
+            val = kw[prop_name]
+            """if prop_name == 'density':
+                (<_CSPropDebyeMaterial*>self.thisptr).SetDensityWeightFunction(val.encode('UTF-8'))
+                continue"""
+            if type(val)==str:
+                self.__SetMaterialWeightDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self.__SetMaterialWeightDir(prop_name, order, n, val[n])
+
+    def __SetMaterialWeightDir(self, prop_name, order, ny, val):
+        val = val.encode('UTF-8')
+        if prop_name=='EpsDelta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDeltaWeightFunction(order, val, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+        else:
+            raise Exception('SetMaterialWeightDir: Error, unknown Debye material property')
+	
+	def GetMaterialProperty(self, prop_name, order):
+        """ SetMaterialProperty(prop_name)
+        Get the material property with of type `prop_name`.
+
+        :params prop_name: str -- material property type
+        :returns: float for isotropic material and `density` or else (3,) array
+        """
+        """if prop_name == 'density':
+            return (<_CSPropDebyeMateria*>self.thisptr).GetDensity()
+        if (<_CSPropDebyeMateria*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialPropertyDir(prop_name, 0)"""
+		val = np.zeros(3)
+        for n in range(3):
+            val[n] = self.__GetMaterialPropertyDir(prop_name, order, n)
+        return val
+
+    def __GetMaterialPropertyDir(self, prop_name, order, ny):
+        if prop_name=='EpsDelta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDelta(order, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+        else:
+            raise Exception('GetMaterialPropertyDir: Error, unknown Debye material property')
+
+    def GetMaterialWeight(self, prop_name, order):
+        """ GetMaterialWeight(prop_name)
+        Get the material weighting function(s).
+
+        :params prop_name: str -- material property type
+        :returns: str for isotropic material and `density` or else str array
+        """
+        """if prop_name == 'density':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
+        if (<_CSPropDebyeMateria*>self.thisptr).GetIsotropy():
+            return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')"""
+        val = ['', '', '']
+        for n in range(3):
+            val[n] = self.__GetMaterialWeightDir(prop_name, order, n).decode('UTF-8')
+        return val
+
+    def __GetMaterialWeightDir(self, prop_name, order, ny):
+        if prop_name=='EpsDelta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDeltaWeighted(order, ny)
+        elif prop_name=='EpsRelaxTime':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTimeWeighted(order, ny)
+        else:
+            raise Exception('GetMaterialWeightDir: Error, unknown Debye material property')
+			
 ###############################################################################
 cdef class CSPropLumpedElement(CSProperties):
     """
@@ -1182,3 +1619,68 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         for n in range(3):
             val[n] = (<_CSPropDumpBox*>self.thisptr).GetSubSampling(n)
         return val
+
+###############################################################################
+cdef class CSPropUnknown(CSProperties):
+    """
+	Continuous Structure Unknown Property
+
+    This is a property that is getting designated for new properties which are unknown so far (e.g. written by a newer version of CSXCAD)
+	
+	:param Property:       Unknown property name
+    """
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropUnknown(pset.thisptr)
+		
+		if 'Property' in kw:
+            self.SetProperty(kw['Property'])
+            del kw['Property']
+
+        super(CSPropUnknown, self).__init__(pset, *args, **kw)
+	
+	def SetProperty(self, val):
+        """ SetProperty(val)
+        """
+        (<_CSPropUnknown*>self.thisptr).SetProperty(val)
+
+    def GetProperty(self):
+        """ GetProperty()
+        """
+        return (<_CSPropUnknown*>self.thisptr).GetProperty()
+
+###############################################################################
+
+cdef class CSPropResBox(CSProperties):
+    """
+	Continuous Structure Resolution Property
+
+    This Property defines a refined mesh area.
+	
+	:param Factor:       Resolution factor
+    """
+	def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropResBox(pset.thisptr)
+			
+		if 'Factor' in kw:
+            self.SetResFactor(kw['Factor'])
+            del kw['Factor']
+
+        super(CSPropResBox, self).__init__(pset, *args, **kw)
+	
+	def SetResFactor(self, val):
+        """ SetResFactor(val)
+        """
+        (<_CSPropResBox*>self.thisptr).SetResFactor(val)
+
+    def GetResFactor(self):
+        """ GetResFactor()
+        """
+        return (<_CSPropResBox*>self.thisptr).GetResFactor()

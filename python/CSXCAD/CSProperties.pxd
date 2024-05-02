@@ -106,7 +106,78 @@ cdef class CSPropMaterial(CSProperties):
     pass
 
 ##############################################################################
+cdef extern from "CSXCAD/CSPropDiscMaterial.h":
+    cdef cppclass _CSPropDiscMaterial "CSPropDiscMaterial" (_CSPropMaterial):
+            _CSPropDiscMaterial(_ParameterSet*) except +
+			double GetScale()
+			bool ReadHDF5(string filename)
 
+cdef class CSPropDiscMaterial(CSPropMaterial):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropDispersiveMaterial.h":
+    cdef cppclass _CSPropDispersiveMaterial "CSPropDispersiveMaterial" (_CSPropMaterial):
+            _CSPropDispersiveMaterial(_ParameterSet*) except +
+
+cdef class CSPropDispersiveMaterial(CSPropMaterial):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropLorentzMaterial.h":
+    cdef cppclass _CSPropLorentzMaterial "CSPropLorentzMaterial" (_CSPropDispersiveMaterial):
+            _CSPropLorentzMaterial(_ParameterSet*) except +
+			void SetEpsPlasmaFreq(int order, double val, int ny)
+            double GetEpsPlasmaFreq(int order, int ny)
+			int SetEpsPlasmaFreqWeightFunction(int order, string val, int ny)
+            string GetEpsPlasmaFreqWeightFunction(int order, int ny)
+			
+			void SetEpsLorPoleFreq(int order, double val, int ny)
+			double GetEpsLorPoleFreq(int order, int ny)
+			int SetEpsLorPoleFreqWeightFunction(int order, string val, int ny)
+			string GetEpsLorPoleFreqWeightFunction(int order, int ny)
+			
+			void SetEpsRelaxTime(int order, double val, int ny)
+			double GetEpsRelaxTime(int order, int ny)
+			int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
+			string GetEpsRelaxTimeWeightFunction(int order, int ny)
+			
+			void SetMuePlasmaFreq(int order, double val, int ny)
+			double GetMuePlasmaFreq(int order, int ny)
+			int SetMuePlasmaFreqWeightFunction(int order, string val, int ny)
+			string GetMuePlasmaFreqWeightFunction(int order, int ny)
+			
+			void SetMueLorPoleFreq(int order, double val, int ny)
+			double GetMueLorPoleFreq(int order, int ny)
+			int SetMueLorPoleFreqWeightFunction(int order, string val, int ny)
+			string GetMueLorPoleFreqWeightFunction(int order, int ny)
+			
+			void SetMueRelaxTime(int order, double val, int ny)
+			double GetMueRelaxTime(int order, int ny)
+			int SetMueRelaxTimeWeightFunction(int order, string val, int ny)
+			string GetMueRelaxTimeWeightFunction(int order, int ny)
+
+cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropDebyeMaterial.h":
+    cdef cppclass _CSPropDebyeMaterial "CSPropDebyeMaterial" (_CSPropDispersiveMaterial):
+            _CSPropDebyeMaterial(_ParameterSet*) except +
+			void SetEpsDelta(int order, double val, int ny)
+			double GetEpsDelta(int order, int ny)
+			int SetEpsDeltaWeightFunction(int order, string val, int ny)
+			string GetEpsDeltaWeightFunction(int order, int ny)
+			
+			void SetEpsRelaxTime(int order, double val, int ny)
+			double GetEpsRelaxTime(int order, int ny)
+			int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
+			string GetEpsRelaxTimeWeightFunction(int order, int ny)
+			
+cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
+    pass
+
+##############################################################################
 cdef extern from "CSXCAD/CSPropLumpedElement.h":
     cpdef enum LEtype "CSPropLumpedElement::LEtype":
         LE_PARALLEL     "CSPropLumpedElement::PARALLEL"
@@ -225,4 +296,24 @@ cdef extern from "CSXCAD/CSPropDumpBox.h":
             unsigned int GetSubSampling(int ny)
 
 cdef class CSPropDumpBox(CSPropProbeBox):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropUnknown.h":
+    cdef cppclass _CSPropUnknown "CSPropUnknown" (_CSProperties):
+            _CSPropUnknown(_ParameterSet*) except +
+            void SetProperty(string val)
+            string GetProperty()
+
+cdef class CSPropUnknown(CSProperties):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropResBox.h":
+    cdef cppclass _CSPropResBox "CSPropResBox" (_CSProperties):
+            _CSPropResBox(_ParameterSet*) except +
+            void SetResFactor(unsigned int val)
+            unsigned int GetResFactor()
+
+cdef class CSPropResBox(CSProperties):
     pass
