@@ -109,8 +109,8 @@ cdef class CSPropMaterial(CSProperties):
 cdef extern from "CSXCAD/CSPropDiscMaterial.h":
     cdef cppclass _CSPropDiscMaterial "CSPropDiscMaterial" (_CSPropMaterial):
             _CSPropDiscMaterial(_ParameterSet*) except +
-			double GetScale()
-			bool ReadHDF5(string filename)
+            double GetScale()
+            bool ReadHDF5(string filename)
 
 cdef class CSPropDiscMaterial(CSPropMaterial):
     pass
@@ -127,35 +127,35 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
 cdef extern from "CSXCAD/CSPropLorentzMaterial.h":
     cdef cppclass _CSPropLorentzMaterial "CSPropLorentzMaterial" (_CSPropDispersiveMaterial):
             _CSPropLorentzMaterial(_ParameterSet*) except +
-			void SetEpsPlasmaFreq(int order, double val, int ny)
+            void SetEpsPlasmaFreq(int order, double val, int ny)
             double GetEpsPlasmaFreq(int order, int ny)
-			int SetEpsPlasmaFreqWeightFunction(int order, string val, int ny)
+            int SetEpsPlasmaFreqWeightFunction(int order, string val, int ny)
             string GetEpsPlasmaFreqWeightFunction(int order, int ny)
 			
-			void SetEpsLorPoleFreq(int order, double val, int ny)
-			double GetEpsLorPoleFreq(int order, int ny)
-			int SetEpsLorPoleFreqWeightFunction(int order, string val, int ny)
-			string GetEpsLorPoleFreqWeightFunction(int order, int ny)
+            void SetEpsLorPoleFreq(int order, double val, int ny)
+            double GetEpsLorPoleFreq(int order, int ny)
+            int SetEpsLorPoleFreqWeightFunction(int order, string val, int ny)
+            string GetEpsLorPoleFreqWeightFunction(int order, int ny)
 			
-			void SetEpsRelaxTime(int order, double val, int ny)
-			double GetEpsRelaxTime(int order, int ny)
-			int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
-			string GetEpsRelaxTimeWeightFunction(int order, int ny)
+            void SetEpsRelaxTime(int order, double val, int ny)
+            double GetEpsRelaxTime(int order, int ny)
+            int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
+            string GetEpsRelaxTimeWeightFunction(int order, int ny)
 			
-			void SetMuePlasmaFreq(int order, double val, int ny)
-			double GetMuePlasmaFreq(int order, int ny)
-			int SetMuePlasmaFreqWeightFunction(int order, string val, int ny)
-			string GetMuePlasmaFreqWeightFunction(int order, int ny)
+            void SetMuePlasmaFreq(int order, double val, int ny)
+            double GetMuePlasmaFreq(int order, int ny)
+            int SetMuePlasmaFreqWeightFunction(int order, string val, int ny)
+            string GetMuePlasmaFreqWeightFunction(int order, int ny)
 			
-			void SetMueLorPoleFreq(int order, double val, int ny)
-			double GetMueLorPoleFreq(int order, int ny)
-			int SetMueLorPoleFreqWeightFunction(int order, string val, int ny)
-			string GetMueLorPoleFreqWeightFunction(int order, int ny)
+            void SetMueLorPoleFreq(int order, double val, int ny)
+            double GetMueLorPoleFreq(int order, int ny)
+            int SetMueLorPoleFreqWeightFunction(int order, string val, int ny)
+            string GetMueLorPoleFreqWeightFunction(int order, int ny)
 			
-			void SetMueRelaxTime(int order, double val, int ny)
-			double GetMueRelaxTime(int order, int ny)
-			int SetMueRelaxTimeWeightFunction(int order, string val, int ny)
-			string GetMueRelaxTimeWeightFunction(int order, int ny)
+            void SetMueRelaxTime(int order, double val, int ny)
+            double GetMueRelaxTime(int order, int ny)
+            int SetMueRelaxTimeWeightFunction(int order, string val, int ny)
+            string GetMueRelaxTimeWeightFunction(int order, int ny)
 
 cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
     pass
@@ -164,15 +164,15 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
 cdef extern from "CSXCAD/CSPropDebyeMaterial.h":
     cdef cppclass _CSPropDebyeMaterial "CSPropDebyeMaterial" (_CSPropDispersiveMaterial):
             _CSPropDebyeMaterial(_ParameterSet*) except +
-			void SetEpsDelta(int order, double val, int ny)
-			double GetEpsDelta(int order, int ny)
-			int SetEpsDeltaWeightFunction(int order, string val, int ny)
-			string GetEpsDeltaWeightFunction(int order, int ny)
+            void SetEpsDelta(int order, double val, int ny)
+            double GetEpsDelta(int order, int ny)
+            int SetEpsDeltaWeightFunction(int order, string val, int ny)
+            string GetEpsDeltaWeightFunction(int order, int ny)
 			
-			void SetEpsRelaxTime(int order, double val, int ny)
-			double GetEpsRelaxTime(int order, int ny)
-			int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
-			string GetEpsRelaxTimeWeightFunction(int order, int ny)
+            void SetEpsRelaxTime(int order, double val, int ny)
+            double GetEpsRelaxTime(int order, int ny)
+            int SetEpsRelaxTimeWeightFunction(int order, string val, int ny)
+            string GetEpsRelaxTimeWeightFunction(int order, int ny)
 			
 cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
     pass
@@ -274,7 +274,6 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
 
 cdef class CSPropProbeBox(CSProperties):
     pass
-
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropDumpBox.h":
