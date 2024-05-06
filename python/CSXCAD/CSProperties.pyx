@@ -617,7 +617,7 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
     Continuous Structure Discrete Material Property
 
     This Property reads a discrete material distribution from a file. (currently only HDF5)
-	
+
     :params epsilon: str or str-vector - relative electric permeability
     :params mue:     str or str-vector - relative magnetic permittivity
     :params kappa:   str or str-vector - electric conductivity
@@ -632,7 +632,7 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
             self.thisptr = <_CSProperties*> new _CSPropDiscMaterial(pset.thisptr)
 
         super(CSPropDiscMaterial, self).__init__(pset, *args, **kw)
-	
+
         def GetMaterialProperty(self, prop_name):
         """ SetMaterialProperty(prop_name)
         Get the material property with of type `prop_name`.
@@ -688,7 +688,7 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
             return (<_CSPropDiscMaterial*>self.thisptr).GetSigmaWeightFunction(ny)
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown discrete material property')
-		
+
 ###############################################################################
 cdef class CSPropDispersiveMaterial(CSPropMaterial):
     """
@@ -704,7 +704,7 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
             self.thisptr = <_CSProperties*> new _CSPropDispersiveMaterial(pset.thisptr)
 
         super(CSPropDispersiveMaterial, self).__init__(pset, *args, **kw)
-		
+
 ###############################################################################
 cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
     """
@@ -712,13 +712,13 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
 
     This Property can hold information about the special properties of Lorentz or Drude dispersive materials.
     The Drude material model is a special case of the Lorentz material model.
-	
-    :params EpsPlasma: 		scalar or vector - epsilon plasma frequency
-    :params EpsLorPole:         scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
-    :params EpsRelaxTime:       scalar or vector - epsilon relaxation time
-    :params MuePlasma:   	scalar or vector - mue plasma frequency
-    :params MueLorPole:   	scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
-    :params MueRelaxTime: 	scalar or vector - mue relaxation time
+
+    :params EpsPlasma:      scalar or vector - epsilon plasma frequency
+    :params EpsLorPole:     scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
+    :params EpsRelaxTime:   scalar or vector - epsilon relaxation time
+    :params MuePlasma:      scalar or vector - mue plasma frequency
+    :params MueLorPole:     scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+    :params MueRelaxTime:   scalar or vector - mue relaxation time
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -733,17 +733,17 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
                 del kw[k]
 
         super(CSPropLorentzMaterial, self).__init__(pset, *args, **kw)
-	
+
     def SetMaterialProperty(self, **kw):
         """ SetMaterialProperty(**kw)
         Set the Lorentz/Drude material properties.
 
-        :params EpsPlasma: 		scalar or vector - epsilon plasma frequency
-        :params EpsLorPole:     	scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
-        :params EpsRelaxTime:   	scalar or vector - epsilon relaxation time
-        :params MuePlasma:   		scalar or vector - mue plasma frequency
-        :params MueLorPole:   		scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
-        :params MueRelaxTime: 		scalar or vector - mue relaxation time
+        :params EpsPlasma:          scalar or vector - epsilon plasma frequency
+        :params EpsLorPole:         scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
+        :params EpsRelaxTime:       scalar or vector - epsilon relaxation time
+        :params MuePlasma:          scalar or vector - mue plasma frequency
+        :params MueLorPole:         scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+        :params MueRelaxTime:       scalar or vector - mue relaxation time
         """
         for prop_name in kw:
             val = kw[prop_name]
@@ -756,7 +756,7 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
             assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self.__SetMaterialPropertyDir(prop_name, order, n, val[n])
-		
+
     def __SetMaterialPropertyDir(self, prop_name, order, ny, val):
         if prop_name=='EpsPlasma':
             return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreq(order, val, ny)
@@ -772,7 +772,7 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
             return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTime(order, val, ny)
         else:
             raise Exception('SetMaterialPropertyDir: Error, unknown Lorentz material property')
-	
+
     def SetMaterialWeight(self, **kw):
         """ SetMaterialWeight(**kw)
 
@@ -788,12 +788,12 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
         all these variables are not weighted with the drawing unit defined by
         the grid
 
-        :params EpsPlasma: 		scalar or vector - epsilon plasma frequency
+        :params EpsPlasma:      scalar or vector - epsilon plasma frequency
         :params EpsLorPole:     scalar or vector - epsilon lorentz pole frequency - 0 for Drude material definition
         :params EpsRelaxTime:   scalar or vector - epsilon relaxation time
-        :params MuePlasma:   	scalar or vector - mue plasma frequency
-        :params MueLorPole:   	scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
-        :params MueRelaxTime: 	scalar or vector - mue relaxation time
+        :params MuePlasma:      scalar or vector - mue plasma frequency
+        :params MueLorPole:     scalar or vector - mue lorentz pole frequency - 0 for Drude material definition
+        :params MueRelaxTime:   scalar or vector - mue relaxation time
         """
         for prop_name in kw:
             val = kw[prop_name]
@@ -823,7 +823,7 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
             return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTimeWeightFunction(order, val, ny)
         else:
             raise Exception('SetMaterialWeightDir: Error, unknown Lorentz material property')
-	
+
     def GetMaterialProperty(self, prop_name, order):
         """ SetMaterialProperty(prop_name)
         Get the material property with of type `prop_name`.
@@ -894,9 +894,9 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
     Continuous Structure Debye Dispersive Material Property
 
     This Property can hold information about the special properties of Debye dispersive materials.
-	
-    :params EpsDelta: 			scalar or vector - epsilon delta value over frequency
-    :params EpsRelaxTime:     	scalar or vector - epsilon relaxation time over frequency
+
+    :params EpsDelta:           scalar or vector - epsilon delta value over frequency
+    :params EpsRelaxTime:       scalar or vector - epsilon relaxation time over frequency
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -911,13 +911,13 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
                 del kw[k]
 
         super(CSPropDebyeMaterial, self).__init__(pset, *args, **kw)
-	
+
     def SetMaterialProperty(self, **kw):
         """ SetMaterialProperty(**kw)
         Set the Debye material properties.
 
-        :params EpsDelta: 			scalar or vector - epsilon delta value over frequency
-        :params EpsRelaxTime:		     	scalar or vector - epsilon relaxation time over frequency
+        :params EpsDelta:           scalar or vector - epsilon delta value over frequency
+        :params EpsRelaxTime:       scalar or vector - epsilon relaxation time over frequency
         """
         for prop_name in kw:
             val = kw[prop_name]
@@ -930,7 +930,7 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self.__SetMaterialPropertyDir(prop_name, order, n, val[n])
-		
+
     def __SetMaterialPropertyDir(self, prop_name, order, ny, val):
         if prop_name=='EpsDelta':
             return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDelta(order, val, ny)
@@ -938,7 +938,7 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
         else:
             raise Exception('SetMaterialPropertyDir: Error, unknown Debye material property')
-	
+
     def SetMaterialWeight(self, **kw):
         """ SetMaterialWeight(**kw)
 
@@ -954,8 +954,8 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
         all these variables are not weighted with the drawing unit defined by
         the grid
 
-        :params EpsDelta: 			scalar or vector - epsilon delta value over frequency
-        :params EpsRelaxTime:		     	scalar or vector - epsilon relaxation time over frequency
+        :params EpsDelta:           scalar or vector - epsilon delta value over frequency
+        :params EpsRelaxTime:       scalar or vector - epsilon relaxation time over frequency
         """
         for prop_name in kw:
             val = kw[prop_name]
@@ -977,7 +977,7 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             return (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
         else:
             raise Exception('SetMaterialWeightDir: Error, unknown Debye material property')
-	
+
     def GetMaterialProperty(self, prop_name, order):
         """ SetMaterialProperty(prop_name)
         Get the material property with of type `prop_name`.
@@ -989,7 +989,7 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             return (<_CSPropDebyeMateria*>self.thisptr).GetDensity()
         if (<_CSPropDebyeMateria*>self.thisptr).GetIsotropy():
             return self.__GetMaterialPropertyDir(prop_name, 0)"""
-		val = np.zeros(3)
+        val = np.zeros(3)
         for n in range(3):
             val[n] = self.__GetMaterialPropertyDir(prop_name, order, n)
         return val
@@ -1025,7 +1025,7 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTimeWeighted(order, ny)
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown Debye material property')
-			
+
 ###############################################################################
 cdef class CSPropLumpedElement(CSProperties):
     """
@@ -1626,7 +1626,7 @@ cdef class CSPropUnknown(CSProperties):
     Continuous Structure Unknown Property
 
     This is a property that is getting designated for new properties which are unknown so far (e.g. written by a newer version of CSXCAD)
-	
+
     :param Property:       Unknown property name
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
@@ -1635,13 +1635,13 @@ cdef class CSPropUnknown(CSProperties):
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropUnknown(pset.thisptr)
-		
+
         if 'Property' in kw:
             self.SetProperty(kw['Property'])
             del kw['Property']
 
         super(CSPropUnknown, self).__init__(pset, *args, **kw)
-	
+
     def SetProperty(self, val):
         """ SetProperty(val)
         """
@@ -1659,7 +1659,7 @@ cdef class CSPropResBox(CSProperties):
     Continuous Structure Resolution Property
 
     This Property defines a refined mesh area.
-	
+
     :param Factor:       Resolution factor
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
@@ -1668,13 +1668,13 @@ cdef class CSPropResBox(CSProperties):
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropResBox(pset.thisptr)
-			
+
         if 'Factor' in kw:
             self.SetResFactor(kw['Factor'])
             del kw['Factor']
 
         super(CSPropResBox, self).__init__(pset, *args, **kw)
-	
+
     def SetResFactor(self, val):
         """ SetResFactor(val)
         """
