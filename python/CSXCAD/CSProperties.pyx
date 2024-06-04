@@ -411,13 +411,13 @@ cdef class CSProperties:
 cdef class CSPropMaterial(CSProperties):
     """ General material property
 
-    This is a material with options to define relative electric permeability
-    (`eplsilon`), relative magnetic permittivity (`mue`), electric conductivity
+    This is a material with options to define relative electric permittivity
+    (`epsilon`), relative magnetic permeability (`mue`), electric conductivity
     (`kappa`), magnetic conductivity (`sigma`) and `density`.
 
-    :params epsilon: scalar or vector - relative electric permeability
-    :params mue:     scalar or vector - relative magnetic permittivity
-    :params kappa:   scalar or vector - relectric conductivity
+    :params epsilon: scalar or vector - relative electric permittivity
+    :params mue:     scalar or vector - relative magnetic permeability
+    :params kappa:   scalar or vector - electric conductivity
     :params sigma:   scalar or vector - magnetic conductivity
     :params density: float            - Density
     """
@@ -456,9 +456,9 @@ cdef class CSPropMaterial(CSProperties):
         """ SetMaterialProperty(**kw)
         Set the material properties.
 
-        :params epsilon: scalar or vector - relative electric permeability
-        :params mue:     scalar or vector - relative magnetic permittivity
-        :params kappa:   scalar or vector - relectric conductivity
+        :params epsilon: scalar or vector - relative electric permittivity
+        :params mue:     scalar or vector - relative magnetic permeability
+        :params kappa:   scalar or vector - electric conductivity
         :params sigma:   scalar or vector - magnetic conductivity
         :params density: float            - Density
         """
@@ -495,15 +495,15 @@ cdef class CSPropMaterial(CSProperties):
         `x`,`y`,`z`
         `rho` for the distance to z-axis
         `r`   for the distance to origin
-        `a`   for alpha or phi (as in cylindircal and spherical coord systems)
+        `a`   for alpha or phi (as in cylindrical and spherical coord systems)
         `t`   for theta (as in the spherical coord system
 
         all these variables are not weighted with the drawing unit defined by
         the grid
 
-        :params epsilon: str or str-vector - relative electric permeability
-        :params mue:     str or str-vector - relative magnetic permittivity
-        :params kappa:   str or str-vector - relectric conductivity
+        :params epsilon: str or str-vector - relative electric permittivity
+        :params mue:     str or str-vector - relative magnetic permeability
+        :params kappa:   str or str-vector - electric conductivity
         :params sigma:   str or str-vector - magnetic conductivity
         :params density: str               - Density
         """
@@ -594,14 +594,14 @@ cdef class CSPropLumpedElement(CSProperties):
     """
     Lumped element property.
 
-    A lumped element can consist of a resitor `R`, capacitor `C` and inductance
+    A lumped element can consist of a resistor `R`, capacitor `C` and inductance
     `L` active in a given direction `ny`.
     If Caps are enable, a small PEC plate is added to each
     end of the lumped element to ensure contact to a connecting line
 
     :param ny: int or str -- direction:  0,1,2 or 'x','y','z' for the orientation of the lumped element
     :param caps: bool     -- enable/disable caps
-    :param R:  float      -- lumped resitance value
+    :param R:  float      -- lumped resistance value
     :param C:  float      -- lumped capacitance value
     :param L:  float      -- lumped inductance values
     :param LEtype:  int      -- lumped element type
