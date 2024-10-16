@@ -40,6 +40,7 @@ cimport CSXCAD.CSProperties
 cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
+from pathlib import Path
 
 def hex2color(color):
     if color.startswith('#'):
@@ -388,16 +389,23 @@ cdef class CSProperties:
         """
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRON, **kw)
 
-    def AddPolyhedronReader(self, filename, **kw):
+    def AddPolyhedronReader(self, path_to_file:Path|str, **kw):
         """ AddPolyhedronReader(filename, **kw)
 
         Add a polyhedron from file to this property.
+
+        Arguments
+        ---------
+        path_to_file : Path or str
+            The path to the file containing the geometry.
 
         See Also
         --------
         CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
         """
-        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=filename, **kw)
+        path_to_file = Path(path_to_file) # Check that we can interpret this as a path.
+        path_to_file.resolve(strict=True) # Check that file exists, raise error otherwise.
+        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=path_to_file.name, **kw)
 
     def __CreatePrimitive(self, prim_type, **kw):
         pset = self.GetParameterSet()
@@ -607,13 +615,13 @@ cdef class CSPropLumpedElement(CSProperties):
     :param LEtype:  int      -- lumped element type
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
-                
+
         if no_init:
             self.thisptr = NULL
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropLumpedElement(pset.thisptr)
-        
+
         b_LEtype_found = False
         for k in kw:
             if k=='R':
@@ -630,11 +638,11 @@ cdef class CSPropLumpedElement(CSProperties):
                 b_LEtype_found = True
                 # Consider adding some logic here, to prevent silly errors. Default parallel and all that
                 self.SetLEtype(kw[k])
-        
-        # If the lumped element type is not found, assume parallel 
+
+        # If the lumped element type is not found, assume parallel
         if (not b_LEtype_found):
             self.SetLEtype(LE_PARALLEL)
-            
+
         for k in ['R', 'L', 'C', 'ny', 'caps','LEtype']:
             if k in kw:
                 del kw[k]
@@ -695,7 +703,7 @@ cdef class CSPropLumpedElement(CSProperties):
         """ SetLEtype(val)
         """
         (<_CSPropLumpedElement*>self.thisptr).SetLEtype(val)
-        
+
     def GetLEtype(self):
         """ GetLEtype()
         """
