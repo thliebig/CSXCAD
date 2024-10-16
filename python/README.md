@@ -1,14 +1,11 @@
 # CSXCAD python interface
 
 ## Install
-* Simple version:
-```python
-python setup.py install
-```
+If openEMS was installed into `~/opt/openEMS`, then install this package with:
 
-* Extended options, e.g. for custom install path at */opt/openEMS*:
 ```python
-python setup.py build_ext -I/opt/openEMS/include -L/opt/openEMS/lib -R/opt/openEMS/lib"
+python setup.py build_ext -I ~/opt/openEMS/include -L ~/opt/openEMS/lib -R ~/opt/openEMS/lib"
 pyhton setup.py install
 ```
-**Note:** The install command may require root on Linux, or add --user to install to ~/.local
+
+Otherwise, replace `~/opt/openEMS` with the path to the place where it was installed.
