@@ -1256,6 +1256,11 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
         Issue to read the file.
 
         :return succ: bool -- True on successful read
+
+        :raises RuntimeError: If it is not possible to read the file, for whatever reason.
         """
         ptr = <_CSPrimPolyhedronReader*>self.thisptr
-        return ptr.ReadFile()
+        success = ptr.ReadFile()
+        if success != True:
+            raise RuntimeError(f'Cannot read file {self.GetFilename().decode()}. Check file name, file location, or its content.')
+        return success

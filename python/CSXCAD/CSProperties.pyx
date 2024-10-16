@@ -389,23 +389,16 @@ cdef class CSProperties:
         """
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRON, **kw)
 
-    def AddPolyhedronReader(self, path_to_file:Path|str, **kw):
+    def AddPolyhedronReader(self, filename, **kw):
         """ AddPolyhedronReader(filename, **kw)
 
         Add a polyhedron from file to this property.
-
-        Arguments
-        ---------
-        path_to_file : Path or str
-            The path to the file containing the geometry.
 
         See Also
         --------
         CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
         """
-        path_to_file = Path(path_to_file) # Check that we can interpret this as a path.
-        path_to_file.resolve(strict=True) # Check that file exists, raise error otherwise.
-        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=path_to_file.name, **kw)
+        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=filename, **kw)
 
     def __CreatePrimitive(self, prim_type, **kw):
         pset = self.GetParameterSet()
