@@ -40,7 +40,6 @@ cimport CSXCAD.CSProperties
 cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
-from pathlib import Path
 
 def hex2color(color):
     if color.startswith('#'):
