@@ -8,9 +8,9 @@ extensions = [
     Extension(
         '*', 
         ['CSXCAD/*.pyx'],
-        include_dirs = [str(PATH_TO_OPEN_EMS_INSTALLATION/'include')],
-        library_dirs = [str(PATH_TO_OPEN_EMS_INSTALLATION/'lib')],
-        runtime_library_dirs = [str(PATH_TO_OPEN_EMS_INSTALLATION/'lib')],
+        include_dirs = [str(Path(PATH_TO_OPEN_EMS_INSTALLATION)/'include')],
+        library_dirs = [str(Path(PATH_TO_OPEN_EMS_INSTALLATION)/'lib')],
+        runtime_library_dirs = [str(Path(PATH_TO_OPEN_EMS_INSTALLATION)/'lib')],
         language = 'c++',
         libraries = ['CSXCAD'],
     )
