@@ -1,0 +1,30 @@
+[project]
+name = 'CSXCAD'
+version = '0.6.2'
+description = "Python interface for the CSXCAD library"
+classifiers = [
+	'Development Status :: 3 - Alpha',
+	'Intended Audience :: Developers',
+	'Intended Audience :: Information Technology',
+	'Intended Audience :: Science/Research',
+	'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
+	'Programming Language :: Python',
+	'Topic :: Scientific/Engineering',
+	'Topic :: Software Development :: Libraries :: Python Modules',
+	'Operating System :: POSIX :: Linux',
+	'Operating System :: Microsoft :: Windows',
+]
+authors = [
+	{name = 'Thorsten Liebig', email = 'Thorsten.Liebig@gmx.de'}
+]
+maintainers = [
+	{name = 'Thorsten Liebig', email = 'Thorsten.Liebig@gmx.de'}
+]
+
+[project.urls]
+Documentation = 'https://openEMS.de'
+Source = 'https://github.com/thliebig/CSXCAD/tree/master/python'
+
+[build-system]
+requires = ['setuptools','Cython']
+build-backend = 'setuptools.build_meta'
