@@ -20,6 +20,9 @@ authors = [
 maintainers = [
 	{name = 'Thorsten Liebig', email = 'Thorsten.Liebig@gmx.de'}
 ]
+dependencies = [
+	'numpy'
+]
 
 [project.urls]
 Documentation = 'https://openEMS.de'
