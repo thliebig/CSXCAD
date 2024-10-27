@@ -50,6 +50,8 @@ from CSXCAD.ParameterObjects import ParameterSet
 
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
 
+from pathlib import Path
+
 cdef class ContinuousStructure:
     """ ContinuousStructure
 
@@ -95,14 +97,15 @@ cdef class ContinuousStructure:
     def Update(self):
         return self.thisptr.Update().decode('UTF-8')
 
-    def Write2XML(self, fn):
-        """ Write2XML(fn)
+    def Write2XML(self, file:Path|str):
+        """Write geometry to an xml-file
 
-        Write geometry to an xml-file
-
-        :param fn: str -- file name
+        :param file: Path to the file where to write the data.
         """
-        self.thisptr.Write2XML(fn.encode('UTF-8'))
+        file = Path(file) # Check that whatever we receive can be interpreted as a path.
+        if not file.parent.is_dir():
+            raise FileNotFoundError(f'Directory in which file is to be saved does not exist. ')
+        self.thisptr.Write2XML(str(file).encode('UTF-8'))
 
     def ReadFromXML(self, fn):
         """ ReadFromXML(fn)
