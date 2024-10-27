@@ -410,6 +410,8 @@ cdef class CSProperties:
         if not file.is_file():
             raise FileNotFoundError(f'`file` points to a file that does not exist. Received {repr(str(file))}, absolute path is {repr(str(file.resolve()))}. ')
 
+        file = file.resolve() # Convert the path into an absolute path, otherwise it fails silently later on.
+
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=str(file), **kw)
 
     def __CreatePrimitive(self, prim_type, **kw):
