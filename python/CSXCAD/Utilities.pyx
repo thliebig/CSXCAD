@@ -25,14 +25,16 @@ def CheckNyDir(ny):
     :param ny: int or str
     :returns: int -- direction as 0/1/2
     """
+    CARTESIAN_COORDINATES = ('x','y','z')
+    CYLINDRICAL_COORDINATES = ('r','a','z')
     if ny in [0, 1, 2]:
         return ny
-    elif ny in ['x','y','z']:
-        return ['x','y','z'].index(ny)
-    elif ny in ['r','a','z']:
-        return ['r','a','z'].index(ny)
+    elif ny in CARTESIAN_COORDINATES:
+        return CARTESIAN_COORDINATES.index(ny)
+    elif ny in CYLINDRICAL_COORDINATES:
+        return CYLINDRICAL_COORDINATES.index(ny)
     else:
-        raise Exception('CheckNyDir: invalid direction: "{}"'.format(ny))
+        raise ValueError(f'Invalid direction `{ny}`, valid directions are {(0,1,2)}, or {CARTESIAN_COORDINATES} in Cartesian coordinates or {CYLINDRICAL_COORDINATES} in cylindrical coordinates.')
 
 def GetMultiDirs(dirs):
     assert type(dirs)==str, 'GetMultiDirs: dirs must be of type str'
