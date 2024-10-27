@@ -167,11 +167,10 @@ cdef class CSRectGrid:
         """
         self.thisptr.clear()
 
-    def SetDeltaUnit(self, unit):
-        """ SetDeltaUnit(unit)
-
-        Set the drawing unit for all mesh lines. Default is 1 (m)
-        """
+    def SetDeltaUnit(self, unit:float=1):
+        """Set the drawing unit for all mesh lines, e.g. `unit=1` means units will be in meter, `unit=1e-3` means units will be in millimeter, and so."""
+        if not isinstance(unit, (int,float)) or not unit>0:
+            raise ValueError(f'`unit` must be a number > 0, received {unit}. ')
         self.thisptr.SetDeltaUnit(unit)
 
     def GetDeltaUnit(self):
