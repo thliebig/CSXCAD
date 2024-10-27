@@ -195,15 +195,15 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('LumpedElement', name, **kw)
 
-    def AddMetal(self, name):
-        """ AddMetal(name)
-
-        Add a metal property with name `name`.
+    def AddMetal(self, name:str):
+        """Add a metal property with name `name`.
 
         See Also
         --------
         CSXCAD.CSProperties.CSPropMetal
         """
+        if not isinstance(name, str):
+            raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Metal', name)
 
     def AddConductingSheet(self, name, **kw):
