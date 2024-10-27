@@ -173,15 +173,15 @@ cdef class ContinuousStructure:
     def GetQtyPrimitives(self, prop_type=c_CSProperties.ANY):
         return self.thisptr.GetQtyPrimitives(prop_type)
 
-    def AddMaterial(self, name, **kw):
-        """ AddMaterial(name, **kw)
-
-        Add a material property with name `name`.
+    def AddMaterial(self, name:str, **kw):
+        """Add a material property with name `name`.
 
         See Also
         --------
         CSXCAD.CSProperties.CSPropMaterial
         """
+        if not isinstance(name, str):
+            raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Material', name, **kw)
 
     def AddLumpedElement(self, name, **kw):
