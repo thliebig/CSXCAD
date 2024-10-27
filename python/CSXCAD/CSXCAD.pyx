@@ -239,7 +239,7 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('ProbeBox', name, p_type=p_type, **kw)
 
-    def AddDump(self, name, **kw):
+    def AddDump(self, name:str, **kw):
         """ AddDump(name, **kw)
 
         Add a dump property with name `name`.
@@ -250,11 +250,10 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('DumpBox', name, **kw)
 
-    def __CreateProperty(self, type_str, name, *args, **kw):
-        assert len(args)==0, 'CreateProperty does not support additional arguments'
+    def __CreateProperty(self, type_str:str, name:str, **kw):
         prop = CSProperties.fromTypeName(type_str, self.__paraset, **kw)
         if prop is None:
-            raise Exception('CreateProperty: Unknown property type requested: {}'.format(type_str))
+            raise RuntimeError(f'Unknown property type: {type_str}')
         prop.SetName(name)
         self.AddProperty(prop)
         return prop
