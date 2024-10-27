@@ -81,22 +81,18 @@ cdef class CSRectGrid:
         for n in range(len(lines)):
             self.thisptr.AddDiscLine(ny, lines[n])
 
-    def AddLine(self, ny, line):
-        """ AddLine(ny, lines)
-
-        Add an array of lines. This will *not* clear the previous defined lines in
+    def AddLine(self, ny:int|str, lines:list):
+        """Add an array of lines. This will *not* clear the previous defined lines in
         the given direction.
 
-        :param ny: int or str -- direction definition
-        :param lines: array -- list of lines to be added in the given direction
+        :param ny: Direction definition, 'x','y','z' or 0,1,2.
+        :param lines: List of scalars specifying the lines to be added in the given direction.
         """
         ny = CheckNyDir(ny)
-        if np.isscalar(line):
+        if not isinstance(lines, (list,tuple)) or not all([isinstance(_, (int,float)) for _ in lines]):
+            raise ValueError(f'`lines` must be a list of scalars (float, int), received object of type {type(lines)} with instances of { {type(_) for _ in lines} }')
+        for line in lines:
             self.thisptr.AddDiscLine(ny, line)
-            return
-        assert len(line)>0, 'AddLine: "lines" must be a float, array or list'
-        for n in range(len(line)):
-            self.thisptr.AddDiscLine(ny, line[n])
 
     def GetQtyLines(self, ny):
         """ GetQtyLines(ny)
