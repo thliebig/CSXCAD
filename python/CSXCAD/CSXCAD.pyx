@@ -132,6 +132,11 @@ cdef class ContinuousStructure:
         """
         return self.__grid
 
+    @property
+    def grid(self):
+        """Get the CSRectGrid, same as calling the `GetGrid` method."""
+        return self.GetGrid()
+
     def SetMeshType(self, cs_type):
         self.__grid.SetMeshType(cs_type)
         self.thisptr.SetCoordInputType(cs_type)
