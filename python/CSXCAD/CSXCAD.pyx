@@ -284,34 +284,37 @@ cdef class ContinuousStructure:
             SAR_10g_averaging_frequency_domain = 22,
             SAR_raw_data = 29,
         )
+        DUMP_TYPE_OLD_ACCEPTED_VALUES = {i:i for i in (0,1,2,3,4,5,10,11,12,13,14,15,20,21,22,29)}
         DUMP_MODE_MAPPING = dict(
             no_interpolation = 0,
             node_interpolation = 1,
             cell_interpolation = 2,
         )
+        DUMP_MODE_OLD_ACCEPTED_VALUES = {i:i for i in (0,1,2)}
         FILE_TYPE_MAPPING = dict(
             vtk = 0,
             hdf5 = 1,
         )
+        FILE_TYPE_OLD_ACCEPTED_VALUES = {i:i for i in (0,1)}
 
         kw = {}
 
-        if dump_type not in DUMP_TYPE_MAPPING | {i:i for i in (0,1,2,3,4,5,10,11,12,13,14,15,20,21,22,29)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
+        if dump_type not in DUMP_TYPE_MAPPING | DUMP_TYPE_OLD_ACCEPTED_VALUES:
             raise ValueError(f'`dump_type` must be one of {sorted(DUMP_TYPE_MAPPING)}, received {dump_type}. ')
-        kw['dump_type'] = DUMP_TYPE_MAPPING[dump_type]
+        kw['dump_type'] = (DUMP_TYPE_MAPPING | DUMP_TYPE_OLD_ACCEPTED_VALUES)[dump_type]
 
         if frequency is not None:
             if not isinstance(frequency, (list, tuple)) or any([not isinstance(f, (float,int)) for f in frequency]):
                 raise TypeError(f'`frequency` must be a list of floats. ')
             kw['Frequency'] = frequency
 
-        if dump_mode not in DUMP_MODE_MAPPING | {i:i for i in (0,1,2)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
+        if dump_mode not in DUMP_MODE_MAPPING | DUMP_MODE_OLD_ACCEPTED_VALUES:
             raise ValueError(f'`dump_mode` must be one of {sorted(DUMP_MODE_MAPPING)}, received {dump_mode}. ')
-        kw['dump_mode'] = DUMP_MODE_MAPPING[dump_mode]
+        kw['dump_mode'] = (DUMP_MODE_MAPPING | DUMP_MODE_OLD_ACCEPTED_VALUES)[dump_mode]
 
-        if file_type not in FILE_TYPE_MAPPING | {i:i for i in (0,1)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
+        if file_type not in FILE_TYPE_MAPPING | FILE_TYPE_OLD_ACCEPTED_VALUES:
             raise ValueError(f'`file_type` must be one of {sorted(FILE_TYPE_MAPPING)}, received {file_type}. ')
-        kw['file_type'] = FILE_TYPE_MAPPING[file_type]
+        kw['file_type'] = (FILE_TYPE_MAPPING | FILE_TYPE_OLD_ACCEPTED_VALUES)[file_type]
 
         if sub_sampling is not None:
             if isinstance(sub_sampling, int):
