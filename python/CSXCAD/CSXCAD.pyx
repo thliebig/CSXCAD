@@ -231,15 +231,95 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('ProbeBox', name, p_type=p_type, **kw)
 
-    def AddDump(self, name, **kw):
-        """ AddDump(name, **kw)
+    def AddDump(self, name:str, dump_type:str='E_field_time_domain', frequency:list=None, dump_mode:str='node_interpolation', file_type:str='vtk', sub_sampling:list=None, opt_resolution:list=None):
+        """Add a dump property.
 
-        Add a dump property with name `name`.
+        Arguments
+        ---------
+        name:
+            A name for this dump. This name will be used as file name.
+        dump_type:
+            Define the type of dump, one of 'B_field_frequency_domain', 'B_field_time_domain',  'D_field_frequency_domain', 'D_field_time_domain', 'E_field_frequency_domain', 'E_field_time_domain', 'H_field_frequency_domain', 'H_field_time_domain', 'SAR_10g_averaging_frequency_domain', 'SAR_1g_averaging_frequency_domain', 'SAR_local_frequency_domain', 'SAR_raw_data', 'current_density_frequency_domain', 'current_density_time_domain', 'electric_current_frequency_domain', 'electric_current_time_domain'.
+        frequency:
+            A list of frequencies, required for frequency domain dumps.
+        dump_mode:
+            One of 'no_interpolation', 'node_interpolation', 'cell_interpolation'. See warning below.
+        file_type:
+            The file format, one of 'vtk', 'hdf5'.
+        sub_sampling:
+            A 3-int list defining the field domain subsampling in each direction. E.g. `[2,2,4]` means "dump only every second line in x- and y- and only every forth line in z-direction".
+        opt_resolution:
+            A 3-int defining the field domain dump resolution in each direction. E.g. `[10,20,5]` means "choose lines to dump in such a way, that they are about 10 in x-, 20 in y- and 5 in z-direction drawing units apart from another". This can mean in some area that every line is dumped (as they may be about 10 drawing units or more apart), or maybe only every second, or tenth etc. line to result in an average distance of <10 drawing units apart. The first and last line inside the dump box are always choosen.
+            Note: The dumped lines must not be homogeneous, they only try to be as much as possible. This option may be useful in case of a very inhomogeneous FDTD mesh to create a somewhat more homogeneous field dump.
+
+        Warning
+        -------
+        FDTD Interpolation abnormalities:
+          - no-interpolation: fields are located in the mesh by the Yee-scheme, the mesh only specifies E- or H-Yee-nodes. Use node- or cell-interpolation or be aware of the offset
+          - E-field dump & node-interpolation: normal electric fields on boundaries will have false amplitude due to forward/backward interpolation in case of (strong) changes in material permittivity or on metal surfaces. Use no- or cell-interpolation.
+          - H-field dump & cell-interpolation: normal magnetic fields on boundaries will have false amplitude due to forward/backward interpolation in case of (strong) changes in material permeability. Use no- or node-interpolation.
 
         See Also
         --------
         CSXCAD.CSProperties.CSPropDumpBox
         """
+        DUMP_TYPE_MAPPING = dict(
+            E_field_time_domain = 0,
+            H_field_time_domain = 1,
+            electric_current_time_domain = 2,
+            current_density_time_domain = 3,
+            D_field_time_domain = 4,
+            B_field_time_domain = 5,
+            E_field_frequency_domain = 10,
+            H_field_frequency_domain = 11,
+            electric_current_frequency_domain = 12,
+            current_density_frequency_domain = 13,
+            D_field_frequency_domain = 14,
+            B_field_frequency_domain = 15,
+            SAR_local_frequency_domain = 20,
+            SAR_1g_averaging_frequency_domain = 21,
+            SAR_10g_averaging_frequency_domain = 22,
+            SAR_raw_data = 29,
+        )
+        DUMP_MODE_MAPPING = dict(
+            no_interpolation = 0,
+            node_interpolation = 1,
+            cell_interpolation = 2,
+        )
+        FILE_TYPE_MAPPING = dict(
+            vtk = 0,
+            hdf5 = 1,
+        )
+
+        kw = {}
+
+        if dump_type not in DUMP_TYPE_MAPPING:
+            raise ValueError(f'`dump_type` must be one of {sorted(DUMP_TYPE_MAPPING)}, received {dump_type}. ')
+        kw['dump_type'] = DUMP_TYPE_MAPPING[dump_type]
+
+        if frequency is not None:
+            if not isinstance(frequency, (list, tuple)) or any([not isinstance(f, (float,int)) for f in frequency]):
+                raise TypeError(f'`frequency` must be a list of floats. ')
+            kw['Frequency'] = frequency
+
+        if dump_mode not in DUMP_MODE_MAPPING:
+            raise ValueError(f'`dump_mode` must be one of {sorted(DUMP_MODE_MAPPING)}, received {dump_mode}. ')
+        kw['dump_mode'] = DUMP_MODE_MAPPING[dump_mode]
+
+        if file_type not in FILE_TYPE_MAPPING:
+            raise ValueError(f'`file_type` must be one of {sorted(FILE_TYPE_MAPPING)}, received {file_type}. ')
+        kw['file_type'] = FILE_TYPE_MAPPING[file_type]
+
+        if sub_sampling is not None:
+            if not isinstance(sub_sampling, list) or any([not isinstance(_, int) for _ in sub_sampling]) or len(sub_sampling) != 3:
+                raise TypeError(f'`sub_sampling` must be a 3-int list, received {sub_sampling}. ')
+            kw['sub_sampling'] = sub_sampling
+
+        if opt_resolution is not None:
+            if not isinstance(opt_resolution, list) or any([not isinstance(_, int) for _ in opt_resolution]) or len(opt_resolution) != 3:
+                raise TypeError(f'`opt_resolution` must be a 3-int list, received {opt_resolution}. ')
+            kw['opt_resolution'] = opt_resolution
+
         return self.__CreateProperty('DumpBox', name, **kw)
 
     def __CreateProperty(self, type_str, name, *args, **kw):
