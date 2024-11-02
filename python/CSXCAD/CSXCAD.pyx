@@ -231,7 +231,7 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('ProbeBox', name, p_type=p_type, **kw)
 
-    def AddDump(self, name:str, dump_type:str='E_field_time_domain', frequency:list=None, dump_mode:str='node_interpolation', file_type:str='vtk', sub_sampling:list=None, opt_resolution:list=None):
+    def AddDump(self, name:str, dump_type:str|int='E_field_time_domain', frequency:list=None, dump_mode:str|int='node_interpolation', file_type:str|int='vtk', sub_sampling:list|int=None, opt_resolution:list|int=None):
         """Add a dump property.
 
         Arguments
@@ -240,16 +240,19 @@ cdef class ContinuousStructure:
             A name for this dump. This name will be used as file name.
         dump_type:
             Define the type of dump, one of 'B_field_frequency_domain', 'B_field_time_domain',  'D_field_frequency_domain', 'D_field_time_domain', 'E_field_frequency_domain', 'E_field_time_domain', 'H_field_frequency_domain', 'H_field_time_domain', 'SAR_10g_averaging_frequency_domain', 'SAR_1g_averaging_frequency_domain', 'SAR_local_frequency_domain', 'SAR_raw_data', 'current_density_frequency_domain', 'current_density_time_domain', 'electric_current_frequency_domain', 'electric_current_time_domain'.
+            Note: The acceptance of an `int` value is kept for backwards compatibility, but should not be used.
         frequency:
             A list of frequencies, required for frequency domain dumps.
         dump_mode:
             One of 'no_interpolation', 'node_interpolation', 'cell_interpolation'. See warning below.
+            Note: The acceptance of an `int` value is kept for backwards compatibility, but should not be used.
         file_type:
             The file format, one of 'vtk', 'hdf5'.
+            Note: The acceptance of an `int` value is kept for backwards compatibility, but should not be used.
         sub_sampling:
-            A 3-int list defining the field domain subsampling in each direction. E.g. `[2,2,4]` means "dump only every second line in x- and y- and only every forth line in z-direction".
+            A 3-int list defining the field domain subsampling in each direction, or a single int that will be used as the same number in all directions. E.g. `[2,2,4]` means "dump only every second line in x- and y- and only every forth line in z-direction". `4` is equivalent to `[4,4,4]`.
         opt_resolution:
-            A 3-int defining the field domain dump resolution in each direction. E.g. `[10,20,5]` means "choose lines to dump in such a way, that they are about 10 in x-, 20 in y- and 5 in z-direction drawing units apart from another". This can mean in some area that every line is dumped (as they may be about 10 drawing units or more apart), or maybe only every second, or tenth etc. line to result in an average distance of <10 drawing units apart. The first and last line inside the dump box are always choosen.
+            A 3-int defining the field domain dump resolution in each direction, or a single int that will be used as the same number in all directions.. E.g. `[10,20,5]` means "choose lines to dump in such a way, that they are about 10 in x-, 20 in y- and 5 in z-direction drawing units apart from another". This can mean in some area that every line is dumped (as they may be about 10 drawing units or more apart), or maybe only every second, or tenth etc. line to result in an average distance of <10 drawing units apart. The first and last line inside the dump box are always choosen. `4` is equivalent to `[4,4,4]`.
             Note: The dumped lines must not be homogeneous, they only try to be as much as possible. This option may be useful in case of a very inhomogeneous FDTD mesh to create a somewhat more homogeneous field dump.
 
         Warning
@@ -293,7 +296,7 @@ cdef class ContinuousStructure:
 
         kw = {}
 
-        if dump_type not in DUMP_TYPE_MAPPING:
+        if dump_type not in DUMP_TYPE_MAPPING | {i:i for i in (0,1,2,3,4,5,10,11,12,13,14,15,20,21,22,29)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
             raise ValueError(f'`dump_type` must be one of {sorted(DUMP_TYPE_MAPPING)}, received {dump_type}. ')
         kw['dump_type'] = DUMP_TYPE_MAPPING[dump_type]
 
@@ -302,20 +305,24 @@ cdef class ContinuousStructure:
                 raise TypeError(f'`frequency` must be a list of floats. ')
             kw['Frequency'] = frequency
 
-        if dump_mode not in DUMP_MODE_MAPPING:
+        if dump_mode not in DUMP_MODE_MAPPING | {i:i for i in (0,1,2)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
             raise ValueError(f'`dump_mode` must be one of {sorted(DUMP_MODE_MAPPING)}, received {dump_mode}. ')
         kw['dump_mode'] = DUMP_MODE_MAPPING[dump_mode]
 
-        if file_type not in FILE_TYPE_MAPPING:
+        if file_type not in FILE_TYPE_MAPPING | {i:i for i in (0,1)}: # The union with `{i:i for i in (0,...)}` is there for backwards compatibility.
             raise ValueError(f'`file_type` must be one of {sorted(FILE_TYPE_MAPPING)}, received {file_type}. ')
         kw['file_type'] = FILE_TYPE_MAPPING[file_type]
 
         if sub_sampling is not None:
+            if isinstance(sub_sampling, int):
+                sub_sampling = [sub_sampling]*3
             if not isinstance(sub_sampling, list) or any([not isinstance(_, int) for _ in sub_sampling]) or len(sub_sampling) != 3:
                 raise TypeError(f'`sub_sampling` must be a 3-int list, received {sub_sampling}. ')
             kw['sub_sampling'] = sub_sampling
 
         if opt_resolution is not None:
+            if isinstance(opt_resolution, int):
+                opt_resolution = [opt_resolution]*3
             if not isinstance(opt_resolution, list) or any([not isinstance(_, int) for _ in opt_resolution]) or len(opt_resolution) != 3:
                 raise TypeError(f'`opt_resolution` must be a 3-int list, received {opt_resolution}. ')
             kw['opt_resolution'] = opt_resolution
