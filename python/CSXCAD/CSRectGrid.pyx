@@ -24,6 +24,7 @@ import numpy as np
 cimport CSXCAD.CSRectGrid
 from CSXCAD.Utilities import CheckNyDir
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
+from collections.abc import Iterable
 
 cdef class CSRectGrid:
     """
@@ -81,16 +82,18 @@ cdef class CSRectGrid:
         for n in range(len(lines)):
             self.thisptr.AddDiscLine(ny, lines[n])
 
-    def AddLine(self, ny:int|str, lines:list):
+    def AddLine(self, ny:int|str, lines):
         """Add an array of lines. This will *not* clear the previous defined lines in
         the given direction.
 
         :param ny: Direction definition, 'x','y','z' or 0,1,2.
-        :param lines: List of scalars specifying the lines to be added in the given direction.
+        :param lines: A scalar or an iterable of scalars specifying the lines to be added in the given direction.
         """
         ny = CheckNyDir(ny)
-        if not isinstance(lines, (list,tuple)) or not all([isinstance(_, (int,float)) for _ in lines]):
-            raise ValueError(f'`lines` must be a list of scalars (float, int), received object of type {type(lines)} with instances of { {type(_) for _ in lines} }')
+        if isinstance(lines, (int,float)):
+            lines = [lines]
+        if not isinstance(lines, Iterable) or not all([isinstance(_, (int,float)) for _ in lines]):
+            raise ValueError(f'`lines` must be an iterable of scalars (e.g. a list of float), received object of type {type(lines)} with instances of { {type(_) for _ in lines} }')
         for line in lines:
             self.thisptr.AddDiscLine(ny, line)
 
