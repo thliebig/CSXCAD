@@ -50,6 +50,8 @@ from CSXCAD.ParameterObjects import ParameterSet
 
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
 
+from pathlib import Path
+
 cdef class ContinuousStructure:
     """ ContinuousStructure
 
@@ -95,14 +97,15 @@ cdef class ContinuousStructure:
     def Update(self):
         return self.thisptr.Update().decode('UTF-8')
 
-    def Write2XML(self, fn):
-        """ Write2XML(fn)
+    def Write2XML(self, file:Path|str):
+        """Write geometry to an xml-file
 
-        Write geometry to an xml-file
-
-        :param fn: str -- file name
+        :param file: Path to the file where to write the data.
         """
-        self.thisptr.Write2XML(fn.encode('UTF-8'))
+        file = Path(file) # Check that whatever we receive can be interpreted as a path.
+        if not file.parent.is_dir():
+            raise FileNotFoundError(f'Directory in which file is to be saved does not exist. ')
+        self.thisptr.Write2XML(str(file).encode('UTF-8'))
 
     def ReadFromXML(self, fn):
         """ ReadFromXML(fn)
@@ -128,6 +131,11 @@ cdef class ContinuousStructure:
         CSXCAD.CSRectGrid, DefineGrid
         """
         return self.__grid
+
+    @property
+    def grid(self):
+        """Get the CSRectGrid, same as calling the `GetGrid` method."""
+        return self.GetGrid()
 
     def SetMeshType(self, cs_type):
         self.__grid.SetMeshType(cs_type)
@@ -165,15 +173,15 @@ cdef class ContinuousStructure:
     def GetQtyPrimitives(self, prop_type=c_CSProperties.ANY):
         return self.thisptr.GetQtyPrimitives(prop_type)
 
-    def AddMaterial(self, name, **kw):
-        """ AddMaterial(name, **kw)
-
-        Add a material property with name `name`.
+    def AddMaterial(self, name:str, **kw):
+        """Add a material property with name `name`.
 
         See Also
         --------
         CSXCAD.CSProperties.CSPropMaterial
         """
+        if not isinstance(name, str):
+            raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Material', name, **kw)
 
     def AddLumpedElement(self, name, **kw):
@@ -187,15 +195,15 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('LumpedElement', name, **kw)
 
-    def AddMetal(self, name):
-        """ AddMetal(name)
-
-        Add a metal property with name `name`.
+    def AddMetal(self, name:str):
+        """Add a metal property with name `name`.
 
         See Also
         --------
         CSXCAD.CSProperties.CSPropMetal
         """
+        if not isinstance(name, str):
+            raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Metal', name)
 
     def AddConductingSheet(self, name, **kw):
@@ -231,7 +239,7 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('ProbeBox', name, p_type=p_type, **kw)
 
-    def AddDump(self, name, **kw):
+    def AddDump(self, name:str, **kw):
         """ AddDump(name, **kw)
 
         Add a dump property with name `name`.
@@ -242,11 +250,10 @@ cdef class ContinuousStructure:
         """
         return self.__CreateProperty('DumpBox', name, **kw)
 
-    def __CreateProperty(self, type_str, name, *args, **kw):
-        assert len(args)==0, 'CreateProperty does not support additional arguments'
+    def __CreateProperty(self, type_str:str, name:str, **kw):
         prop = CSProperties.fromTypeName(type_str, self.__paraset, **kw)
         if prop is None:
-            raise Exception('CreateProperty: Unknown property type requested: {}'.format(type_str))
+            raise RuntimeError(f'Unknown property type: {type_str}')
         prop.SetName(name)
         self.AddProperty(prop)
         return prop

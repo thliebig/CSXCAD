@@ -607,13 +607,13 @@ cdef class CSPropLumpedElement(CSProperties):
     :param LEtype:  int      -- lumped element type
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
-                
+
         if no_init:
             self.thisptr = NULL
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropLumpedElement(pset.thisptr)
-        
+
         b_LEtype_found = False
         for k in kw:
             if k=='R':
@@ -630,11 +630,11 @@ cdef class CSPropLumpedElement(CSProperties):
                 b_LEtype_found = True
                 # Consider adding some logic here, to prevent silly errors. Default parallel and all that
                 self.SetLEtype(kw[k])
-        
-        # If the lumped element type is not found, assume parallel 
+
+        # If the lumped element type is not found, assume parallel
         if (not b_LEtype_found):
             self.SetLEtype(LE_PARALLEL)
-            
+
         for k in ['R', 'L', 'C', 'ny', 'caps','LEtype']:
             if k in kw:
                 del kw[k]
@@ -695,7 +695,7 @@ cdef class CSPropLumpedElement(CSProperties):
         """ SetLEtype(val)
         """
         (<_CSPropLumpedElement*>self.thisptr).SetLEtype(val)
-        
+
     def GetLEtype(self):
         """ GetLEtype()
         """
