@@ -24,6 +24,7 @@ import numpy as np
 cimport CSXCAD.CSRectGrid
 from CSXCAD.Utilities import CheckNyDir
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
+from collections.abc import Iterable
 
 cdef class CSRectGrid:
     """
@@ -81,22 +82,20 @@ cdef class CSRectGrid:
         for n in range(len(lines)):
             self.thisptr.AddDiscLine(ny, lines[n])
 
-    def AddLine(self, ny, line):
-        """ AddLine(ny, lines)
-
-        Add an array of lines. This will *not* clear the previous defined lines in
+    def AddLine(self, ny:int|str, lines):
+        """Add an array of lines. This will *not* clear the previous defined lines in
         the given direction.
 
-        :param ny: int or str -- direction definition
-        :param lines: array -- list of lines to be added in the given direction
+        :param ny: Direction definition, 'x','y','z' or 0,1,2.
+        :param lines: A scalar or an iterable of scalars specifying the lines to be added in the given direction.
         """
         ny = CheckNyDir(ny)
-        if np.isscalar(line):
+        if isinstance(lines, (int,float)):
+            lines = [lines]
+        if not isinstance(lines, Iterable) or not all([isinstance(_, (int,float)) for _ in lines]):
+            raise ValueError(f'`lines` must be an iterable of scalars (e.g. a list of float), received object of type {type(lines)} with instances of { {type(_) for _ in lines} }')
+        for line in lines:
             self.thisptr.AddDiscLine(ny, line)
-            return
-        assert len(line)>0, 'AddLine: "lines" must be a float, array or list'
-        for n in range(len(line)):
-            self.thisptr.AddDiscLine(ny, line[n])
 
     def GetQtyLines(self, ny):
         """ GetQtyLines(ny)
@@ -167,11 +166,10 @@ cdef class CSRectGrid:
         """
         self.thisptr.clear()
 
-    def SetDeltaUnit(self, unit):
-        """ SetDeltaUnit(unit)
-
-        Set the drawing unit for all mesh lines. Default is 1 (m)
-        """
+    def SetDeltaUnit(self, unit:float):
+        """Set the drawing unit for all mesh lines, e.g. `unit=1` means units will be in meter, `unit=1e-3` means units will be in millimeter, and so."""
+        if not isinstance(unit, (int,float)) or not unit>0 or not np.isfinite(unit):
+            raise ValueError(f'`unit` must be a finite number > 0, received {repr(unit)}. ')
         self.thisptr.SetDeltaUnit(unit)
 
     def GetDeltaUnit(self):
