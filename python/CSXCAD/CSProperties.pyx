@@ -40,6 +40,7 @@ cimport CSXCAD.CSProperties
 cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
+from pathlib import Path
 
 def hex2color(color):
     if color.startswith('#'):
@@ -388,16 +389,30 @@ cdef class CSProperties:
         """
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRON, **kw)
 
-    def AddPolyhedronReader(self, filename, **kw):
-        """ AddPolyhedronReader(filename, **kw)
+    def AddPolyhedronReader(self, file:str|Path, **kw)->CSPrimitives:
+        """Add a polyhedron from file to this property.
 
-        Add a polyhedron from file to this property.
+        Arguments
+        ---------
+        file:
+            The path to the file to add.
+
+        Returns
+        -------
+        primitive:
+            An object of type `CSPrimitives` with the primitive just created.
 
         See Also
         --------
         CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
         """
-        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=filename, **kw)
+        file = Path(file) # Make sure that whatever we receive can be interpreted as a path to a file.
+        if not file.is_file():
+            raise FileNotFoundError(f'`file` points to a file that does not exist. Received {repr(str(file))}, absolute path is {repr(str(file.resolve()))}. ')
+
+        file = file.resolve() # Convert the path into an absolute path, otherwise it fails silently later on.
+
+        return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=str(file), **kw)
 
     def __CreatePrimitive(self, prim_type, **kw):
         pset = self.GetParameterSet()
@@ -452,25 +467,39 @@ cdef class CSPropMaterial(CSProperties):
         """
         return (<_CSPropMaterial*>self.thisptr).GetIsotropy()
 
-    def SetMaterialProperty(self, **kw):
-        """ SetMaterialProperty(**kw)
-        Set the material properties.
+    def SetMaterialProperty(self, epsilon:float|list=None, mue:float|list=None, kappa:float|list=None, sigma:float|list=None, density:float=None):
+        """Set the material properties.
 
-        :params epsilon: scalar or vector - relative electric permittivity
-        :params mue:     scalar or vector - relative magnetic permeability
-        :params kappa:   scalar or vector - electric conductivity
-        :params sigma:   scalar or vector - magnetic conductivity
-        :params density: float            - Density
+        :params epsilon: scalar or vector - Relative electric permittivity.
+        :params mue:     scalar or vector - Relative magnetic permeability.
+        :params kappa:   scalar or vector - Electric conductivity.
+        :params sigma:   scalar or vector - Magnetic conductivity.
+        :params density: float            - Density.
         """
-        for prop_name in kw:
-            val = kw[prop_name]
+        # Validate epsilon, mue, kappa, sigma:
+        for name,val in dict(epsilon=epsilon, mue=mue, kappa=kappa, sigma=sigma).items():
+            if val is not None:
+                if isinstance(val, (int,float)):
+                    continue
+                elif  isinstance(val, (tuple,list)) and len(val)==3 and all([isinstance(_, (int,float)) for _ in val]):
+                    continue
+                else:
+                    raise ValueError(f'`{name}` must be a scalar or a 3-vector of scalars, received `{val}`. ')
+        # Validate density:
+        if density is not None:
+            if not isinstance(density, (int, float)):
+                raise TypeError(f'`density` must be a float number, received object of type {type(density)}. ')
+        # Do the same as in the previous implementation:
+        kw = dict(epsilon=epsilon, mue=mue, kappa=kappa, sigma=sigma, density=density)
+        for prop_name,val in kw.items():
+            if val is None:
+                continue
             if prop_name == 'density':
                 (<_CSPropMaterial*>self.thisptr).SetDensity(val)
                 continue
-            if type(val)==float or type(val)==int:
+            if isinstance(val, (int,float)):
                 self.__SetMaterialPropertyDir(prop_name, 0, val)
                 continue
-            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self.__SetMaterialPropertyDir(prop_name, n, val[n])
 
