@@ -168,8 +168,8 @@ cdef class CSRectGrid:
 
     def SetDeltaUnit(self, unit:float):
         """Set the drawing unit for all mesh lines, e.g. `unit=1` means units will be in meter, `unit=1e-3` means units will be in millimeter, and so."""
-        if not isinstance(unit, (int,float)) or not unit>0:
-            raise ValueError(f'`unit` must be a number > 0, received {unit}. ')
+        if not isinstance(unit, (int,float)) or not unit>0 or not np.isfinite(unit):
+            raise ValueError(f'`unit` must be a finite number > 0, received {repr(unit)}. ')
         self.thisptr.SetDeltaUnit(unit)
 
     def GetDeltaUnit(self):
