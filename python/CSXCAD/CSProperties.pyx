@@ -389,7 +389,7 @@ cdef class CSProperties:
         """
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRON, **kw)
 
-    def AddPolyhedronReader(self, file:Path, **kw)->CSPrimitives:
+    def AddPolyhedronReader(self, file:str|Path, **kw)->CSPrimitives:
         """Add a polyhedron from file to this property.
 
         Arguments
