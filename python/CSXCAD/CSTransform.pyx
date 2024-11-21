@@ -21,11 +21,26 @@ Affine Transformations for primitives
 """
 
 import numpy as np
-from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
+from CSXCAD.ParameterObjects cimport ParameterSet
 cimport CSXCAD.CSTransform
 from CSXCAD.Utilities import CheckNyDir
+from libc.stdint cimport uintptr_t
 
 cdef class CSTransform:
+    _instances = {}
+
+    @staticmethod
+    cdef fromPtr(_CSTransform  *ptr):
+        if ptr == NULL:
+            return None
+        cdef CSTransform cls
+        cls = CSTransform._instances.get(<uintptr_t>ptr, None)
+        if cls is not None:
+            return cls
+        cls = CSTransform(no_init=True)
+        cls._SetPtr(ptr)
+        return cls
+
     """
     This class can realize affine transformations for all CSPrimtivies.
     Individual tranformations can be concatenated to the previous. As a result
@@ -37,9 +52,16 @@ cdef class CSTransform:
                 self.thisptr = new _CSTransform()
             else:
                 self.thisptr = new _CSTransform(pset.thisptr)
+            self._SetPtr(self.thisptr)
             self.thisptr.SetAngleRadian()
         else:
             self.thisptr = NULL
+
+    cdef _SetPtr(self, _CSTransform *ptr):
+        if self.thisptr != NULL and self.thisptr != ptr:
+            raise Exception('Different C++ class pointer already assigned to python wrapper class!')
+        self.thisptr = ptr
+        CSTransform._instances[<uintptr_t>self.thisptr] = self
 
     def Reset(self):
         """

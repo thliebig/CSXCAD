@@ -18,17 +18,39 @@
 
 from libcpp.string cimport string
 from libcpp cimport bool
+from libc.stdint cimport uintptr_t
 
 cimport CSXCAD.ParameterObjects
 
 cdef class ParameterSet:
+    _instances = {}
+
+    @staticmethod
+    cdef fromPtr(_ParameterSet  *ptr):
+        if ptr == NULL:
+            return None
+        cdef ParameterSet pset
+        pset = ParameterSet._instances.get(<uintptr_t>ptr, None)
+        if pset is not None:
+            return pset
+        pset = ParameterSet(no_init=True)
+        pset._SetPtr(ptr)
+        return pset
+
     def __cinit__(self, no_init=False):
         self.no_init = no_init
         if no_init==True:
             self.thisptr = NULL
         else:
-            self.thisptr = new _ParameterSet()
+            self._SetPtr(new _ParameterSet())
+
+    cdef _SetPtr(self, _ParameterSet *ptr):
+        if self.thisptr != NULL and self.thisptr != ptr:
+            raise Exception('Different C++ class pointer already assigned to python wrapper class!')
+        self.thisptr = ptr
+        ParameterSet._instances[<uintptr_t>self.thisptr] = self
 
     def __dealloc__(self):
         if not self.no_init:
+            del ParameterSet._instances[<uintptr_t>self.thisptr]
             del self.thisptr

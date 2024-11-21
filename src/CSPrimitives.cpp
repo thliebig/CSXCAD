@@ -130,6 +130,13 @@ CSTransform* CSPrimitives::GetTransform()
 	return m_Transform;
 }
 
+bool CSPrimitives::HasTransform() const
+{
+	if (m_Transform==NULL)
+		return false;
+	return m_Transform->HasTransform();
+}
+
 void CSPrimitives::SetProperty(CSProperties *prop)
 {
 	if ((clProperty!=NULL) && (clProperty!=prop))

@@ -86,6 +86,8 @@ public:
 	//! Get the property for this primitive.
 	CSProperties* GetProperty() {return clProperty;}
 
+	ParameterSet* GetParameterSet() {return clParaSet;}
+
 	//! Getthe unique ID for this primitive.
 	unsigned int GetID() {return uiID;}
 	//! Change the unique ID for this primitive. This is not recommended! Be sure what you are doing!
@@ -179,6 +181,9 @@ public:
 
 	//! Get the CSTransform if it exists already or create a new one
 	CSTransform* GetTransform();
+
+	//! Check if this primitive has a transformation attached. It will not create one if it does not.
+	bool HasTransform() const;
 
 	//! Show status of this primitve
 	virtual void ShowPrimitiveStatus(std::ostream& stream);

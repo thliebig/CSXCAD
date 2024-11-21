@@ -45,6 +45,11 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         self.assertEqual( len(prop.GetAllPrimitives()), 5)
 
+        self.assertEqual(prop.GetPrimitive(-1), prop.GetPrimitive(prop.GetQtyPrimitives()-1))
+
+        #with self.assertRaises(Exception):
+        self.assertEqual(prop.GetPrimitive(10), None)
+
     def test_metal(self):
         prop = CSProperties.CSPropMetal(self.pset)
 

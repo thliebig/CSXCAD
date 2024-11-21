@@ -51,6 +51,7 @@ cdef extern from "CSXCAD/CSPrimitives.h":
             string GetTypeName()
 
             _CSProperties* GetProperty()
+            _ParameterSet* GetParameterSet()
 
             void SetPriority(int val)
             int GetPriority()
@@ -69,11 +70,13 @@ cdef extern from "CSXCAD/CSPrimitives.h":
             CoordinateSystem GetCoordinateSystem()
 
             _CSTransform* GetTransform()
+            bool HasTransform()
 
 cdef class CSPrimitives:
     cdef _CSPrimitives *thisptr
-    cdef readonly CSTransform  __transform
-    cdef readonly CSProperties __prop
+    @staticmethod
+    cdef fromPtr(_CSPrimitives  *ptr)
+    cdef _SetPtr(self, _CSPrimitives *ptr)
     cdef __GetProperty(self)
 
 ###############################################################################

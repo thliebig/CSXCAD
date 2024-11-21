@@ -40,6 +40,7 @@ cimport CSXCAD.CSProperties
 cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
+from libc.stdint cimport uintptr_t
 
 def hex2color(color):
     if color.startswith('#'):
@@ -50,6 +51,7 @@ def hex2color(color):
         return None
 
 cdef class CSProperties:
+    _instances = {}
     """
     Virtual base class for all properties, cannot be created!
 
@@ -65,6 +67,8 @@ cdef class CSProperties:
         :param pset: ParameterSet to assign to the new primitive
         :param no_init: do not create an actual C++ instance
         """
+        if no_init and len(kw)!=0:
+            raise Exception('Unable to not init a property and set kw options!')
         prop = None
         if p_type == CONDUCTINGSHEET + METAL:
             prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
@@ -93,6 +97,8 @@ cdef class CSProperties:
         :param pset: ParameterSet to assign to the new primitive
         :param no_init: do not create an actual C++ instance
         """
+        if no_init and len(kw)!=0:
+            raise Exception('Unable to not init and set property options!')
         prop = None
         if type_str=='Material':
             prop = CSPropMaterial(pset, no_init=no_init, **kw)
@@ -110,22 +116,35 @@ cdef class CSProperties:
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
         return prop
 
+    @staticmethod
+    cdef fromPtr(_CSProperties  *ptr):
+        if ptr == NULL:
+            return None
+        cdef CSProperties prop
+        prop = CSProperties._instances.get(<uintptr_t>ptr, None)
+        if prop is not None:
+            return prop
+        prop = CSProperties.fromType(ptr.GetType(), pset=None, no_init=True)
+        prop._SetPtr(ptr)
+        return prop
+
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
-        self.__CSX = None
-        # internal list of primitives
-        self.__primitives = []
         if no_init:
             self.thisptr = NULL
             return
-        assert self.thisptr, "Error, cannot create CSProperties (protected)"
+        if not self.thisptr:
+            raise Exception("Error, cannot create CSProperties (protected)")
 
-        self.__paraset = ParameterSet(no_init=True)
-        self.__paraset.thisptr = self.thisptr.GetParameterSet()
+        self._SetPtr(self.thisptr)
 
-        assert len(kw)==0, 'Unknown keywords: {}'.format(kw)
+        if len(kw)!=0:
+            raise Exception('Unknown keywords: {}'.format(kw))
 
-    cdef __SetPtr(self, _CSProperties *ptr):
+    cdef _SetPtr(self, _CSProperties *ptr):
+        if self.thisptr != NULL and self.thisptr != ptr:
+            raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
+        CSProperties._instances[<uintptr_t>self.thisptr] = self
 
     def GetQtyPrimitives(self):
         """
@@ -136,25 +155,15 @@ cdef class CSProperties:
         return self.thisptr.GetQtyPrimitives()
 
     def GetPrimitive(self, index):
+        if index<0:
+            index = index%self.thisptr.GetQtyPrimitives()
         return self.__GetPrimitive(index)
 
     def GetAllPrimitives(self):
         return [self.GetPrimitive(n) for n in range(self.GetQtyPrimitives())]
 
     cdef __GetPrimitive(self, size_t index):
-        cdef _CSPrimitives *_prim
-        cdef CSPrimitives prim
-        _prim = self.thisptr.GetPrimitive(index)
-        if self.__primitives is None:
-            self.__primitives = []
-        for p in self.__primitives:
-            prim = p
-            if prim.thisptr == _prim:
-                return p
-        prim = CSPrimitives.fromType(_prim.GetType(), pset=self.__paraset, prop=self, no_init=True)
-        prim.thisptr = _prim
-        self.__primitives.append(prim)
-        return prim
+        return CSPrimitives.fromPtr(self.thisptr.GetPrimitive(index))
 
     def GetType(self):
         """ Get the type of the property
@@ -174,7 +183,7 @@ cdef class CSProperties:
         """
         Get the parameter set assigned to this class
         """
-        return self.__paraset
+        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
 
     def SetName(self, name):
         """ SetName(name)
@@ -404,7 +413,6 @@ cdef class CSProperties:
         prim = CSPrimitives.fromType(prim_type, pset, self, **kw)
         if prim is None:
             raise Exception('CreatePrimitive: Unknown primitive type requested!')
-        self.__primitives.append(prim)
         return prim
 
 ###############################################################################
@@ -423,7 +431,7 @@ cdef class CSPropMaterial(CSProperties):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropMaterial, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMaterial(pset.thisptr)
@@ -607,9 +615,8 @@ cdef class CSPropLumpedElement(CSProperties):
     :param LEtype:  int      -- lumped element type
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
-
         if no_init:
-            self.thisptr = NULL
+            super(CSPropLumpedElement, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropLumpedElement(pset.thisptr)
@@ -714,7 +721,7 @@ cdef class CSPropMetal(CSProperties):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropMetal, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMetal(pset.thisptr)
@@ -735,7 +742,7 @@ cdef class CSPropConductingSheet(CSPropMetal):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropConductingSheet, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropConductingSheet(pset.thisptr)
@@ -783,7 +790,7 @@ cdef class CSPropExcitation(CSProperties):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropExcitation, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropExcitation(pset.thisptr)
@@ -942,7 +949,7 @@ cdef class CSPropProbeBox(CSProperties):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropProbeBox, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropProbeBox(pset.thisptr)
@@ -1101,7 +1108,7 @@ cdef class CSPropDumpBox(CSPropProbeBox):
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPropDumpBox, self).__init__(pset, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropDumpBox(pset.thisptr)

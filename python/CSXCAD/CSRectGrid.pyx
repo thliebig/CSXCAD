@@ -24,8 +24,23 @@ import numpy as np
 cimport CSXCAD.CSRectGrid
 from CSXCAD.Utilities import CheckNyDir
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
+from libc.stdint cimport uintptr_t
 
 cdef class CSRectGrid:
+    _instances = {}
+
+    @staticmethod
+    cdef fromPtr(_CSRectGrid  *ptr):
+        if ptr == NULL:
+            return None
+        cdef CSRectGrid cls
+        cls = CSRectGrid._instances.get(<uintptr_t>ptr, None)
+        if cls is not None:
+            return cls
+        cls = CSRectGrid(no_init=True)
+        cls._SetPtr(ptr)
+        return cls
+
     """
     Rectilinear Grid Class for CSXCAD. The grid can be defined e.g. as a Cartesian
     or cylindrical mesh and can hold mesh lines in the 3 fundamental directions.
@@ -36,7 +51,7 @@ cdef class CSRectGrid:
     def __cinit__(self, *args, no_init=False, **kw):
         self.no_init = no_init
         if no_init==False:
-            self.thisptr = new _CSRectGrid()
+            self._SetPtr(new _CSRectGrid())
             if 'CoordSystem' in kw:
                 self.SetMeshType(kw['CoordSystem'])
                 del kw['CoordSystem']
@@ -48,8 +63,15 @@ cdef class CSRectGrid:
 
         assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
 
+    cdef _SetPtr(self, _CSRectGrid *ptr):
+        if self.thisptr != NULL and self.thisptr != ptr:
+            raise Exception('Different C++ class pointer already assigned to python wrapper class!')
+        self.thisptr = ptr
+        CSRectGrid._instances[<uintptr_t>self.thisptr] = self
+
     def __dealloc__(self):
         if not self.no_init:
+            del CSRectGrid._instances[<uintptr_t>self.thisptr]
             del self.thisptr
 
     def SetMeshType(self, cs_type):

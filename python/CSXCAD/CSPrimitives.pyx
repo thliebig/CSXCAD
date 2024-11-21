@@ -38,12 +38,15 @@ import numpy as np
 import sys
 from libcpp.string cimport string
 from libcpp cimport bool
+from libc.stdint cimport uintptr_t
 
 cimport CSXCAD.CSPrimitives
 from CSXCAD.Utilities import CheckNyDir, GetMultiDirs
 from CSXCAD import CSRectGrid
 
+
 cdef class CSPrimitives:
+    _instances = {}
     """
     Virtual base class for all primitives, cannot be created!
 
@@ -59,10 +62,10 @@ cdef class CSPrimitives:
         :param prop: CSProperty to assign to the new primitive
         :param no_init: do not create an actual C++ instance
         """
+        if no_init and len(kw)!=0:
+            raise Exception('Unable to not init a primitive and set kw options!')
         prim = None
         if prim_type == POINT:
-            prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
-        elif prim_type == POINT:
             prim = CSPrimPoint(pset, prop, no_init=no_init, **kw)
         elif prim_type == BOX:
             prim = CSPrimBox(pset, prop, no_init=no_init, **kw)
@@ -94,23 +97,40 @@ cdef class CSPrimitives:
             prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
         return prim
 
+    @staticmethod
+    cdef fromPtr(_CSPrimitives  *ptr):
+        if ptr == NULL:
+            return None
+        cdef CSPrimitives prim
+        prim = CSPrimitives._instances.get(<uintptr_t>ptr, None)
+        if prim is not None:
+            return prim
+        prim = CSPrimitives.fromType(ptr.GetType(), None, None, no_init=True)
+        prim._SetPtr(ptr)
+        return prim
+
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
-        self.__transform = None
-        self.__prop      = prop
         if no_init:
             self.thisptr = NULL
             return
 
-        assert self.thisptr, 'Error, object cannot be created (protected)'
-        self.__prop = prop
+        if self.thisptr == NULL:
+            raise Exception('Error, object cannot be created (protected)')
+
+        self._SetPtr(self.thisptr)
 
         if 'priority' in kw:
             self.SetPriority(kw['priority'])
             del kw['priority']
-        if 'no_init' in kw:
-            del kw['no_init']
 
-        assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
+        if len(kw)!=0:
+            raise Exception('Unknown keyword arguments: "{}"'.format(kw))
+
+    cdef _SetPtr(self, _CSPrimitives *ptr):
+        if self.thisptr != NULL and self.thisptr != ptr:
+            raise Exception('Different C++ class pointer already assigned to python wrapper class!')
+        self.thisptr = ptr
+        CSPrimitives._instances[<uintptr_t>self.thisptr] = self
 
     def GetID(self):
         """
@@ -129,14 +149,13 @@ cdef class CSPrimitives:
         return self.__GetProperty()
 
     cdef __GetProperty(self):
-        cdef _CSProperties* _prop
-        cdef CSProperties prop
-        if self.__prop is None:
-            _prop = self.thisptr.GetProperty()
-            self.__prop  = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
-            self.__prop.thisptr = _prop
+        return CSProperties.fromPtr(self.thisptr.GetProperty())
 
-        return self.__prop
+    def GetParameterSet(self):
+        """
+        Get the parameter set assigned to this class
+        """
+        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
 
     def GetType(self):
         """
@@ -220,11 +239,6 @@ cdef class CSPrimitives:
         """
         self.thisptr.SetPrimitiveUsed(val)
 
-    def __GetCSX(self):
-        if self.__prop is None:
-            return None
-        return self.__prop.__CSX
-
     def GetTransform(self):
         """ GetTransform()
 
@@ -237,12 +251,9 @@ cdef class CSPrimitives:
         --------
         CSXCAD.CSTransform.CSTransform
         """
-        if self.__transform is None:
-            self.__transform         = CSTransform(no_init=True)
-            self.__transform.thisptr = self.thisptr.GetTransform()
-        return self.__transform
+        return CSTransform.fromPtr(self.thisptr.GetTransform())
 
-    def AddTransform(self, transform, *args, no_init=False, **kw):
+    def AddTransform(self, transform, *args, **kw):
         """ AddTransform(transform, *args, **kw)
 
         Add a transformation to this primitive.
@@ -261,9 +272,7 @@ cdef class CSPrimitives:
 
         :returns: bool
         """
-        if self.__transform is None:
-            return False
-        return self.__transform.HasTransform()
+        return self.thisptr.HasTransform()
 
     def SetCoordinateSystem(self, cs_type):
         """ SetCoordinateSystem(cs_type)
@@ -317,7 +326,7 @@ cdef class CSPrimPoint(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimPoint, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr   = new _CSPrimPoint(pset.thisptr, prop.thisptr)
@@ -370,7 +379,7 @@ cdef class CSPrimBox(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimBox, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr   = new _CSPrimBox(pset.thisptr, prop.thisptr)
@@ -449,7 +458,7 @@ cdef class CSPrimCylinder(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimCylinder, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr   = new _CSPrimCylinder(pset.thisptr, prop.thisptr)
@@ -545,7 +554,7 @@ cdef class CSPrimCylindricalShell(CSPrimCylinder):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimCylindricalShell, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimCylindricalShell(pset.thisptr, prop.thisptr)
@@ -590,7 +599,7 @@ cdef class CSPrimSphere(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimSphere, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr   = new _CSPrimSphere(pset.thisptr, prop.thisptr)
@@ -658,7 +667,7 @@ cdef class CSPrimSphericalShell(CSPrimSphere):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimSphericalShell, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimSphericalShell(pset.thisptr, prop.thisptr)
@@ -713,7 +722,7 @@ cdef class CSPrimPolygon(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimPolygon, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolygon(pset.thisptr, prop.thisptr)
@@ -837,7 +846,7 @@ cdef class CSPrimLinPoly(CSPrimPolygon):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimLinPoly, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimLinPoly(pset.thisptr, prop.thisptr)
@@ -890,7 +899,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimRotPoly, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimRotPoly(pset.thisptr, prop.thisptr)
@@ -965,7 +974,7 @@ cdef class CSPrimCurve(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimCurve, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimCurve(pset.thisptr, prop.thisptr)
@@ -1017,7 +1026,8 @@ cdef class CSPrimCurve(CSPrimitives):
         """
         ptr = <_CSPrimCurve*>self.thisptr
         cdef double dp[3]
-        assert ptr.GetPoint(idx, dp), 'GetPoint: invalid index'
+        if not ptr.GetPoint(idx, dp):
+            raise Exception('GetPoint: invalid index')
         point = np.zeros(3)
         for n in range(3):
             point[n] = dp[n]
@@ -1053,7 +1063,7 @@ cdef class CSPrimWire(CSPrimCurve):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimWire, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimWire(pset.thisptr, prop.thisptr)
@@ -1091,7 +1101,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimPolyhedron, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolyhedron(pset.thisptr, prop.thisptr)
@@ -1198,7 +1208,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
     """
     def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
         if no_init:
-            self.thisptr = NULL
+            super(CSPrimPolyhedronReader, self).__init__(pset, prop, no_init=True)
             return
         if not self.thisptr:
             self.thisptr = new _CSPrimPolyhedronReader(pset.thisptr, prop.thisptr)

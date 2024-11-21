@@ -51,3 +51,6 @@ cdef extern from "CSXCAD/CSTransform.h":
 
 cdef class CSTransform:
     cdef  _CSTransform *thisptr
+    @staticmethod
+    cdef fromPtr(_CSTransform  *ptr)
+    cdef _SetPtr(self, _CSTransform *ptr)

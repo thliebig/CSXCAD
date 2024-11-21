@@ -75,12 +75,7 @@ cdef class ContinuousStructure:
     >>> box   = metal.AddBox(start, stop) # Assign a box to propety "metal"
     """
     def __cinit__(self, **kw):
-        self.thisptr = new _ContinuousStructure()
-        self.__paraset = ParameterSet(no_init=True)
-        self.__paraset.thisptr = self.thisptr.GetParameterSet()
-
-        self.__grid         = CSRectGrid(no_init=True)
-        self.__grid.thisptr = self.thisptr.GetGrid()
+        self.thisptr   = new _ContinuousStructure()
 
         if 'CoordSystem' in kw:
             self.SetMeshType(kw['CoordSystem'])
@@ -89,7 +84,8 @@ cdef class ContinuousStructure:
             self.SetMeshType(kw['cs_type'])
             del kw['cs_type']
 
-        assert len(kw)==0, 'Unknown keyword arguments: "{}"'.format(kw)
+        if len(kw)!=0:
+            raise Exception('Unknown keyword arguments: "{}"'.format(kw))
 
     def __dealloc__(self):
         del self.thisptr
@@ -120,7 +116,7 @@ cdef class ContinuousStructure:
         """
         Get the parameter set assigned to this class
         """
-        return self.__paraset
+        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
 
     def GetGrid(self):
         """
@@ -130,7 +126,7 @@ cdef class ContinuousStructure:
         --------
         CSXCAD.CSRectGrid, DefineGrid
         """
-        return self.__grid
+        return CSRectGrid.fromPtr(self.thisptr.GetGrid())
 
     @property
     def grid(self):
@@ -138,7 +134,8 @@ cdef class ContinuousStructure:
         return self.GetGrid()
 
     def SetMeshType(self, cs_type):
-        self.__grid.SetMeshType(cs_type)
+        grid = self.GetGrid()
+        grid.SetMeshType(cs_type)
         self.thisptr.SetCoordInputType(cs_type)
 
     def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
@@ -251,7 +248,8 @@ cdef class ContinuousStructure:
         return self.__CreateProperty('DumpBox', name, **kw)
 
     def __CreateProperty(self, type_str:str, name:str, **kw):
-        prop = CSProperties.fromTypeName(type_str, self.__paraset, **kw)
+        pset = self.GetParameterSet()
+        prop = CSProperties.fromTypeName(type_str, pset, **kw)
         if prop is None:
             raise RuntimeError(f'Unknown property type: {type_str}')
         prop.SetName(name)
@@ -270,7 +268,6 @@ cdef class ContinuousStructure:
         self._AddProperty(prop)
 
     cdef _AddProperty(self, CSProperties prop):
-        prop.__CSX = self
         self.thisptr.AddProperty(prop.thisptr)
 
     def GetProperty(self, index):
@@ -288,11 +285,8 @@ cdef class ContinuousStructure:
 
     cdef _GetProperty(self, int index):
         cdef _CSProperties* _prop
-        cdef CSProperties prop
         _prop = self.thisptr.GetProperty(index)
-        prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
-        prop.thisptr = _prop
-        return prop
+        return CSProperties.fromPtr(_prop)
 
     def GetAllProperties(self):
         """ GetAllProperties()
@@ -320,8 +314,7 @@ cdef class ContinuousStructure:
         props = []
         for n in range(vprop.size()):
             _prop = vprop.at(n)
-            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
-            prop.thisptr = _prop
+            prop = CSProperties.fromPtr(_prop)
             props.append(prop)
 
         return props
@@ -342,8 +335,7 @@ cdef class ContinuousStructure:
         props = []
         for n in range(vprop.size()):
             _prop = vprop.at(n)
-            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
-            prop.thisptr = _prop
+            prop = CSProperties.fromPtr(_prop)
             props.append(prop)
 
         return props
@@ -359,14 +351,7 @@ cdef class ContinuousStructure:
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed):
         cdef _CSPrimitives *prim
         cdef _CSProperties *_prop = self.thisptr.GetPropertyByCoordPriority(coord, prop_type, markFoundAsUsed, &prim)
-
-        cdef CSProperties prop
-        if _prop==NULL:
-            return None
-        else:
-            prop = CSProperties.fromType(_prop.GetType(), pset=None, no_init=True)
-            prop.thisptr = _prop
-            return prop
+        return CSProperties.fromPtr(_prop)
 
     def GetAllPrimitives(self, sort=False, prop_type=c_CSProperties.ANY):
         """ GetAllPrimitives(sort, prop_type)
@@ -384,8 +369,7 @@ cdef class ContinuousStructure:
         prims = []
         for n in range(vprim.size()):
             _prim = vprim.at(n)
-            prim = CSPrimitives.fromType(_prim.GetType(), pset=None, prop=None, no_init=True)
-            prim.thisptr = _prim
+            prim = CSPrimitives.fromPtr(_prim)
             prims.append(prim)
 
         return prims

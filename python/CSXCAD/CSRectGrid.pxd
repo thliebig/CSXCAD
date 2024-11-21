@@ -53,4 +53,7 @@ cdef extern from "CSXCAD/CSRectGrid.h":
 
 cdef class CSRectGrid:
     cdef _CSRectGrid *thisptr
+    @staticmethod
+    cdef fromPtr(_CSRectGrid  *ptr)
+    cdef _SetPtr(self, _CSRectGrid *ptr)
     cdef bool no_init

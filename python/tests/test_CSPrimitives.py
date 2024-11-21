@@ -13,6 +13,10 @@ from CSXCAD import CSPrimitives
 
 import unittest
 
+import os
+
+DATA_PATH = os.path.dirname(__file__)
+
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
         self.pset  = ParameterObjects.ParameterSet()
@@ -20,6 +24,12 @@ class Test_CSPrimMethods(unittest.TestCase):
 
     def test_general(self):
         box = CSPrimitives.CSPrimBox(self.pset, self.metal)
+
+        self.assertEqual(box.GetProperty(), self.metal)
+        self.assertEqual(box.GetParameterSet(), self.pset)
+
+        self.assertEqual(self.metal.GetPrimitive(0), box)
+        self.assertEqual(self.metal.GetAllPrimitives(), [box,])
 
         self.assertEqual(box.GetType(), 1)
         self.assertEqual(box.GetTypeName(), 'Box')
@@ -52,14 +62,22 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         tr = box.GetTransform()
         self.assertFalse(tr.HasTransform())
+        self.assertFalse(box.HasTransform())
 
         box.AddTransform('Translate', [0, 1, 0])
         self.assertTrue(tr.HasTransform())
+        self.assertTrue(box.HasTransform())
 
+        self.assertEqual(box.GetTransform(), tr) # make sure a repeated get transform will yield always the same python object
         self.assertEqual(box.GetCoordinateSystem(), None)
 
         box.SetCoordinateSystem(0)
         self.assertEqual(box.GetCoordinateSystem(), 0)
+
+        with self.assertRaises(Exception):
+            # must raise an exception for the unknown/undefined keyword
+            CSPrimitives.CSPrimBox(self.pset, self.metal, unknown_key = -1)
+
 
     def test_point(self):
         coord = [0,0.1,0.2]
@@ -71,10 +89,10 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( (point.GetCoord() == coord).all())
 
     def test_box(self):
-        box = CSPrimitives.CSPrimBox(self.pset, self.metal)
+        box = CSPrimitives.CSPrimBox(self.pset, self.metal, priority=10)
+        self.assertEqual(box.GetPriority(), 10)
         tr = box.GetTransform()
         self.assertFalse(tr.HasTransform())
-
 
     def test_cylinder(self):
         # TEST Cylinder
@@ -298,7 +316,7 @@ class Test_CSPrimMethods(unittest.TestCase):
     def test_polyhedron_reader(self):
         ## Test CSPrimPolyhedronReader
         phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)
-        phr.SetFilename('sphere.stl')
+        phr.SetFilename(os.path.join(DATA_PATH, 'sphere.stl'))
         self.assertTrue( phr.ReadFile() )
         self.assertEqual(phr.GetNumVertices(), 50)
         self.assertEqual(phr.GetNumFaces(), 96)
