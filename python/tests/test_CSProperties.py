@@ -50,6 +50,26 @@ class Test_CSPrimMethods(unittest.TestCase):
         #with self.assertRaises(Exception):
         self.assertEqual(prop.GetPrimitive(10), None)
 
+    def test_attributes(self):
+        prop = CSProperties.CSPropMaterial(self.pset)
+
+        prop.SetAttributeValue('my_attr1', 'value1')
+        self.assertTrue(prop.ExistAttribute('my_attr1'))
+        self.assertFalse(prop.ExistAttribute('my_attr2'))
+        self.assertEqual(prop.GetAttributeValue('my_attr1'), 'value1')
+
+        prop.SetAttributeValue('my_attr2', 'value2')
+        prop.SetAttributeValue('my_attr3', 'value3')
+        prop.SetAttributeValue('my_attr4', 'value4')
+
+        prop.SetAttributeValue('my_attr1', 'value_new')
+        self.assertEqual(prop.GetAttributeValue('my_attr1'), 'value_new')
+
+        self.assertEqual(prop.GetAttributeValue('my_attr3'), 'value3')
+        prop.RemoveAttribute('my_attr3')
+        self.assertFalse(prop.ExistAttribute('my_attr3'))
+        self.assertEqual(prop.GetAttributeValue('my_attr3'), '')
+
     def test_metal(self):
         prop = CSProperties.CSPropMetal(self.pset)
 

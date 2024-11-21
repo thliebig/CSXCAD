@@ -134,7 +134,7 @@ void CSProperties::SetUniqueID(unsigned int uID) {UniqueID=uID;}
 void CSProperties::SetName(const std::string name) {sName=std::string(name);}
 const std::string CSProperties::GetName() {return sName;}
 
-bool CSProperties::ExistAttribute(std::string name)
+bool CSProperties::ExistAttribute(std::string name) const
 {
 	for (size_t n=0;n<m_Attribute_Name.size();++n)
 	{
@@ -144,7 +144,7 @@ bool CSProperties::ExistAttribute(std::string name)
 	return false;
 }
 
-std::string CSProperties::GetAttributeValue(std::string name)
+std::string CSProperties::GetAttributeValue(std::string name) const
 {
 	for (size_t n=0;n<m_Attribute_Name.size();++n)
 	{
@@ -154,11 +154,33 @@ std::string CSProperties::GetAttributeValue(std::string name)
 	return std::string();
 }
 
-void CSProperties::AddAttribute(std::string name, std::string value)
+void CSProperties::SetAttributeValue(std::string name, std::string value)
 {
 	if (name.empty()) return;
+	for (size_t n=0;n<m_Attribute_Name.size();++n)
+	{
+		if (m_Attribute_Name.at(n) == name)
+		{
+			m_Attribute_Value.at(n) = value;
+			return;
+		}
+	}
 	m_Attribute_Name.push_back(name);
 	m_Attribute_Value.push_back(value);
+}
+
+void CSProperties::RemoveAttribute(std::string name)
+{
+	if (name.empty()) return;
+	for (size_t n=0;n<m_Attribute_Name.size();++n)
+	{
+		if (m_Attribute_Name.at(n) == name)
+		{
+			m_Attribute_Name.erase(m_Attribute_Name.begin()+n);
+			m_Attribute_Value.erase(m_Attribute_Value.begin()+n);
+			return;
+		}
+	}
 }
 
 size_t CSProperties::GetQtyPrimitives() {return vPrimitives.size();}

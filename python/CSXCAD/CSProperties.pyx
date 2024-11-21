@@ -255,15 +255,24 @@ cdef class CSProperties:
         """
         return self.thisptr.GetAttributeValue(name.encode('UTF-8')).decode('UTF-8')
 
-    def AddAttribute(self, name, val):
-        """ AddAttribute(name, val)
+    def SetAttributeValue(self, name, val):
+        """ SetAttributeValue(name, val)
 
-        Add an attribure and value
+        Set a new or change an existing attribute
 
         :param name: str -- Attribute name
         :param val: str -- Attribute value
         """
-        self.thisptr.AddAttribute(name.encode('UTF-8'), val.encode('UTF-8'))
+        self.thisptr.SetAttributeValue(name.encode('UTF-8'), val.encode('UTF-8'))
+
+    def RemoveAttribute(self, name):
+        """ RemoveAttribute(name)
+
+        Remove an existing attribute
+
+        :param name: str -- Attribute name
+        """
+        self.thisptr.RemoveAttribute(name.encode('UTF-8'))
 
     def AddPoint(self, coord, **kw):
         """ AddPoint(coord, **kw)

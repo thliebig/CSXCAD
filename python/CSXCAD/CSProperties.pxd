@@ -57,7 +57,8 @@ cdef extern from "CSXCAD/CSProperties.h":
 
             bool ExistAttribute(string name)
             string GetAttributeValue(string name)
-            void AddAttribute(string name, string value)
+            void SetAttributeValue(string name, string value)
+            void RemoveAttribute(string name)
 
             void SetFillColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)
             void SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)

@@ -111,11 +111,15 @@ public:
 	const std::string GetName();
 
 	//! Check if given attribute exists
-	bool ExistAttribute(std::string name);
+	bool ExistAttribute(std::string name) const;
 	//! Get the value of a given attribute
-	std::string GetAttributeValue(std::string name);
-	//! Add a new attribute
-	void AddAttribute(std::string name, std::string value);
+	std::string GetAttributeValue(std::string name) const;
+	//! Add a new attribute (deprecated, use SetAttributeValue)
+	void AddAttribute(std::string name, std::string value) {this->SetAttributeValue(name, value);}
+	//! Set a new or change an existing attribute
+	void SetAttributeValue(std::string name, std::string value);
+	//! Remove Attribute
+	void RemoveAttribute(std::string name);
 
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
