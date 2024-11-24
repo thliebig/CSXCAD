@@ -43,12 +43,10 @@ from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
 
 def hex2color(color):
-    if color.startswith('#'):
-        color = color.lstrip('#')
-        rgb = tuple(int(color[i:i+2], 16) for i in (0, 2 ,4))
-        return rgb
-    else:
-        return None
+    if type(color) in [list, tuple]:
+        return tuple([int(x*255) for x in color])
+    import matplotlib
+    return tuple([int(x*255) for x in matplotlib.colors.to_rgb(color)])
 
 cdef class CSProperties:
     _instances = {}
@@ -137,6 +135,15 @@ cdef class CSProperties:
 
         self._SetPtr(self.thisptr)
 
+        alpha = 1.0
+        if 'alpha' in kw:
+            alpha = kw['alpha']
+            del kw['alpha']
+
+        if 'color' in kw:
+            self.SetColor(kw['color'], alpha)
+            del kw['color']
+
         if len(kw)!=0:
             raise Exception('Unknown keywords: {}'.format(kw))
 
@@ -202,38 +209,38 @@ cdef class CSProperties:
         """
         return self.thisptr.GetName().decode('UTF-8')
 
-    def SetColor(self, color, alpha=255):
-        """ SetColor(color, alpha=255)
+    def SetColor(self, color, alpha=1.0):
+        """ SetColor(color, alpha=1.0)
 
         Set the fill and edge color for this property.
 
-        :param color: hex color value
-        :param alpha: transparency value
+        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
+        :param alpha: transparency value (0.0 .. 1.0)
         """
         self.SetFillColor(color, alpha)
         self.SetEdgeColor(color, alpha)
 
-    def SetFillColor(self, color, alpha=255):
-        """ SetFillColor(color, alpha=255)
+    def SetFillColor(self, color, alpha=1.0):
+        """ SetFillColor(color, alpha=1.0)
 
         Set the fill color for this property.
 
-        :param color: hex color value
-        :param alpha: transparency value
+        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
+        :param alpha: transparency value (0.0 .. 1.0)
         """
         rgb = hex2color(color)
-        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
+        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], int(alpha*255))
 
-    def SetEdgeColor(self, color, alpha=255):
-        """ SetColor(color, alpha=255)
+    def SetEdgeColor(self, color, alpha=1.0):
+        """ SetColor(color, alpha=1.0)
 
         Set the edge color for this property.
 
-        :param color: hex color value
-        :param alpha: transparency value
+        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
+        :param alpha: transparency value (0.0 .. 1.0)
         """
         rgb = hex2color(color)
-        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
+        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], int(alpha*255))
 
     def ExistAttribute(self, name):
         """ ExistAttribute(name)
@@ -445,10 +452,13 @@ cdef class CSPropMaterial(CSProperties):
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropMaterial(pset.thisptr)
 
-        self.SetMaterialProperty(**kw)
         for k in list(kw.keys()):
+            mat_props = {}
             if k in ['epsilon', 'mue', 'kappa', 'sigma', 'density']:
+                mat_props[k] = kw[k]
                 del kw[k]
+            if mat_props:
+                self.SetMaterialProperty(**mat_props)
 
         super(CSPropMaterial, self).__init__(pset, *args, **kw)
 
