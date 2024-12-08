@@ -40,6 +40,7 @@ cdef extern from "CSXCAD/CSProperties.h":
         DISCRETE_MATERIAL  "CSProperties::DISCRETE_MATERIAL"
         LUMPED_ELEMENT     "CSProperties::LUMPED_ELEMENT"
         CONDUCTINGSHEET    "CSProperties::CONDUCTINGSHEET"
+        ABSORBING_BC       "CSProperties::ABSORBING_BC"
 
 cdef extern from "CSXCAD/CSProperties.h":
     cdef cppclass _CSProperties "CSProperties":
@@ -103,6 +104,29 @@ cdef extern from "CSXCAD/CSPropMaterial.h":
             bool GetIsotropy()
 
 cdef class CSPropMaterial(CSProperties):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cpdef enum BCtype "CSPropAbsorbingBC::BCtype":
+        MUR_1ST_1PV "CSPropAbsorbingBC::MUR_1ST_1PV"
+        MUR_1ST_1PV_SA "CSPropAbsorbingBC::MUR_1ST_1PV_SA"
+
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cdef cppclass _CSPropAbsorbingBC "CSPropAbsorbingBC" (_CSProperties):
+        _CSPropAbsorbingBC(_ParameterSet*) except +
+            
+        # Insert methods here:
+        void SetNormDir(int val)
+        int GetNormDir()
+        
+        void SetPhaseVelocity(double val)
+        double GetPhaseVelocity()
+        
+        void    SetBoundaryType(BCtype val)
+        BCtype  GetBoundaryType()
+            
+cdef class CSPropAbsorbingBC(CSProperties):
     pass
 
 ##############################################################################
@@ -174,6 +198,9 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             int SetWeightFunction(string fct, int ny)
             string GetWeightFunction(int ny)
 
+            void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, unsigned int listLength)
+            void ClearManualWeights()
+
             void SetFrequency(double val)
             double GetFrequency()
 
@@ -192,6 +219,9 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
 
             void SetWeighting(double weight)
             double GetWeighting()
+
+            void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, unsigned int listLength)
+            void ClearManualWeights()
 
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()

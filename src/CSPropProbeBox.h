@@ -32,6 +32,8 @@ public:
 	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropProbeBox();
 
+	void Init();
+
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("ProbeBox");}
 
@@ -49,6 +51,12 @@ public:
 	void SetWeighting(double weight) {m_weight=weight;}
 	//! Get the probe weighting \sa GetWeighting
 	double GetWeighting() {return m_weight;}
+
+	void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength);
+	void ClearManualWeights();
+	std::vector<float> GetManualWeights(uint dir);
+	std::vector<float> GetManualWeightCoors(uint dir);
+
 
 	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
 	void SetProbeType(int type) {ProbeType=type;}
@@ -82,5 +90,8 @@ protected:
 	int ProbeType;
 	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
+
+	std::vector<float> Weights[3];
+	std::vector<float> WeightCoors[3];
 };
 

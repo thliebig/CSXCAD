@@ -82,6 +82,8 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif p_type == DUMPBOX:
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif p_type == ABSORBING_BC:
+            prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
 
         return prop
 
@@ -112,6 +114,8 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif type_str=='DumpBox':
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif type_str=='AbsorbingBC':
+            prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
         return prop
 
     @staticmethod
@@ -429,6 +433,7 @@ cdef class CSProperties:
         prim = CSPrimitives.fromType(prim_type, pset, self, **kw)
         if prim is None:
             raise Exception('CreatePrimitive: Unknown primitive type requested!')
+        self.__primitives.append(prim)
         return prim
 
 ###############################################################################
@@ -615,7 +620,59 @@ cdef class CSPropMaterial(CSProperties):
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
+###############################################################################
+cdef class CSPropAbsorbingBC(CSProperties):
+    """
+    Local absorbing Boundary Conditions
 
+    At this point this property only supports 1st order Mur, and an addition of 
+    "superabsorption" to increase ~10dB absorption efficiency.
+    In the future, the plan is to support modal absorption, and multi-modal 
+    absorption.
+
+    :param NormDir: int          -- Positive or negative 1,2 or 3, denoting +-x,+y and +-z, respectively.
+    :param PhaseVelocity: double -- The phase velocity of the expected propagating mode\signal. If not set, will set C0, with respect to the material at the border.    
+    :param BCtype: enum BCtype   -- 'BCtype.MUR_1ST_1PV', 'BCtype.MUR_1ST_1PV_SA'
+    """
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return 
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropAbsorbingBC(pset.thisptr)
+        
+        for k in kw:
+            if k=='NormDir':
+                self.SetNormDir(kw[k])
+            elif k=='PhaseVelocity':
+                self.SetPhaseVelocity(kw[k])
+            elif k=='BCtype':
+                self.SetBoundaryType(kw[k])
+                
+        for k in ['NormDir', 'PhaseVelocity', 'BCtype']:
+            if k in kw:
+                del kw[k]
+                
+        super(CSPropAbsorbingBC, self).__init__(pset, *args, **kw)
+        
+    def SetNormDir(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetNormDir(val)
+        
+    def GetNormDir(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetNormDir()
+        
+    def SetPhaseVelocity(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetPhaseVelocity(val)
+    
+    def GetPhaseVelocity(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetPhaseVelocity()
+    
+    def SetBoundaryType(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetBoundaryType(val)
+    
+    def GetBoundaryType(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetBoundaryType()
+    
 ###############################################################################
 cdef class CSPropLumpedElement(CSProperties):
     """
@@ -915,6 +972,59 @@ cdef class CSPropExcitation(CSProperties):
             func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
         return func
 
+    def SetManualWeights(self, Weights):
+        """ SetManualWeights(weights,coors)
+        
+        Sets the vectors for manual excitation weights, instead of text expression.
+        
+        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
+        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        
+        """
+        
+        N = Weights.shape[0]
+        
+        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef unsigned int   c_len   = N
+        
+        cdef int elIdx
+        try:
+            for elIdx in range(N):
+                cx[elIdx] = Weights[elIdx,0]
+                cy[elIdx] = Weights[elIdx,1]
+                cz[elIdx] = Weights[elIdx,2]
+                
+                cwx[elIdx] = Weights[elIdx,3]
+                cwy[elIdx] = Weights[elIdx,4]
+                cwz[elIdx] = Weights[elIdx,5]
+                
+            (<_CSPropExcitation*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
+        finally:
+            # don't forget to fee allocated memory
+            stdlib.free(cx)
+            stdlib.free(cy)
+            stdlib.free(cz)
+            
+            stdlib.free(cwx)
+            stdlib.free(cwy)
+            stdlib.free(cwz)
+        
+    def ClearManualWeights(self):
+        """ ClearManualWeights(weights,coors)
+        
+        Clears the manual weight vectors.
+                
+        """
+        
+        (<_CSPropExcitation*>self.thisptr).ClearManualWeights()
+        
     def SetFrequency(self, val):
         """ SetFrequency(val)
 
@@ -1010,6 +1120,60 @@ cdef class CSPropProbeBox(CSProperties):
         """
         return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
 
+    def SetManualWeights(self, Weights):
+        """ SetManualWeights(weights,coors)
+        
+        Sets the vectors for manual excitation weights, instead of text expression.
+        
+        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
+        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        
+        """
+    
+        N = Weights.shape[0]
+        
+        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef unsigned int   c_len   = N
+        
+        cdef int elIdx
+        try:
+            for elIdx in range(N):
+                cx[elIdx] = Weights[elIdx,0]
+                cy[elIdx] = Weights[elIdx,1]
+                cz[elIdx] = Weights[elIdx,2]
+                
+                cwx[elIdx] = Weights[elIdx,3]
+                cwy[elIdx] = Weights[elIdx,4]
+                cwz[elIdx] = Weights[elIdx,5]
+        
+                (<_CSPropProbeBox*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
+        
+        finally:
+            # don't forget to fee allocated memory
+            stdlib.free(cx)
+            stdlib.free(cy)
+            stdlib.free(cz)
+            
+            stdlib.free(cwx)
+            stdlib.free(cwy)
+            stdlib.free(cwz)
+            
+    def ClearManualWeights(self):
+        """ ClearManualWeights(weights,coors)
+        
+        Clears the manual weight vectors.
+                
+        """
+        
+        (<_CSPropProbeBox*>self.thisptr).ClearManualWeights()
+
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """
@@ -1058,6 +1222,15 @@ cdef class CSPropProbeBox(CSProperties):
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
         """
+        
+        # Check if this is a numpy array, namely custom mode.
+        if mode_fun.__class__.__name__ == 'ndarray':
+            if not (mode_fun.shape[1] == 6):
+                raise Exception('"E_func" must have 6 columns')
+            
+            self.SetManualWeights(mode_fun)
+            return
+        
         assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
         self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
         self.AddAttribute('ModeFunctionY', str(mode_fun[1]))
