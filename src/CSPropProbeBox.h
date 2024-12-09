@@ -32,8 +32,6 @@ public:
 	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropProbeBox();
 
-	void Init();
-
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("ProbeBox");}
 
@@ -93,5 +91,7 @@ protected:
 
 	std::vector<float> Weights[3];
 	std::vector<float> WeightCoors[3];
+
+	void InitWeightContainers();
 };
 

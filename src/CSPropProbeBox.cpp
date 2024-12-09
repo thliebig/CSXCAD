@@ -19,31 +19,19 @@
 
 #include "CSPropProbeBox.h"
 
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX; Init();}
-
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX; Init();}
-
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX; Init();}
-
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;InitWeightContainers();}
+CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;InitWeightContainers();}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;InitWeightContainers();}
 CSPropProbeBox::~CSPropProbeBox() {}
 
-void CSPropProbeBox::Init()
+void CSPropProbeBox::InitWeightContainers()
 {
-	uiNumber=0;
-	m_NormDir=-1;
-	ProbeType=0;
-	m_weight=1;
-	bVisisble=false;
-	startTime=0;
-	stopTime=0;
-
 	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
 	{
 		Weights[dirIdx].clear();
 		WeightCoors[dirIdx].clear();
 	}
 }
-
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
