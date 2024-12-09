@@ -435,7 +435,7 @@ cdef class CSProperties:
         prim = CSPrimitives.fromType(prim_type, pset, self, **kw)
         if prim is None:
             raise Exception('CreatePrimitive: Unknown primitive type requested!')
-        self.__primitives.append(prim)
+
         return prim
 
 ###############################################################################
