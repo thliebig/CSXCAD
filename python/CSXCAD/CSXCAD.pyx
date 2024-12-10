@@ -181,6 +181,18 @@ cdef class ContinuousStructure:
             raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Material', name, **kw)
 
+    def AddAbsorbingBC(self, name, **kw):
+        """ AddAbsorbingBC(name, **kw)
+
+        Add a local absorbing BC with name `name`.
+
+        See Also
+        --------
+        CSXCAD.CSProperties.CSPropAbsorbingBC
+        """
+
+        return self.__CreateProperty('AbsorbingBC', name, **kw)
+    
     def AddLumpedElement(self, name, **kw):
         """ AddLumpedElement(name, **kw)
 
