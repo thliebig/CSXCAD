@@ -395,7 +395,7 @@ double* ContinuousStructure::GetObjectArea(CSProperties::PropertyType type)
 		prim=vPrimitives.at(i);
 		double box[6] = {0,0,0,0,0,0};
 		AccBound = prim->GetBoundBox(box);
-		if (box!=NULL && AccBound)
+		if (AccBound)
 		{
 			if (i==0) for (int i=0;i<6;++i) ObjArea[i]=box[i];
 			else
