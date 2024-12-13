@@ -134,35 +134,35 @@ public:
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	//! Get the corresponing Box-Primitive or NULL in case of different type.
-	CSPrimBox* ToBox() { return ( this && Type == BOX ) ? (CSPrimBox*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimBox* ToBox() { return ( Type == BOX ) ? (CSPrimBox*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing MultiBox-Primitive or NULL in case of different type.
-	CSPrimMultiBox* ToMultiBox() { return ( this && Type == MULTIBOX ) ? (CSPrimMultiBox*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimMultiBox* ToMultiBox() { return ( Type == MULTIBOX ) ? (CSPrimMultiBox*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Sphere-Primitive or NULL in case of different type.
-	CSPrimSphere* ToSphere() { return ( this && Type == SPHERE ) ? (CSPrimSphere*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimSphere* ToSphere() { return ( Type == SPHERE ) ? (CSPrimSphere*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing SphereicalShell-Primitive or NULL in case of different type.
-	CSPrimSphericalShell* ToSphericalShell() { return ( this && Type == SPHERICALSHELL ) ? (CSPrimSphericalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimSphericalShell* ToSphericalShell() { return ( Type == SPHERICALSHELL ) ? (CSPrimSphericalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
-	CSPrimCylinder* ToCylinder() { return ( this && Type == CYLINDER ) ? (CSPrimCylinder*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimCylinder* ToCylinder() { return ( Type == CYLINDER ) ? (CSPrimCylinder*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing CylindricalShell-Primitive or NULL in case of different type.
-	CSPrimCylindricalShell* ToCylindricalShell() { return ( this && Type == CYLINDRICALSHELL ) ? (CSPrimCylindricalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimCylindricalShell* ToCylindricalShell() { return ( Type == CYLINDRICALSHELL ) ? (CSPrimCylindricalShell*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Polygon-Primitive or NULL in case of different type.
-	CSPrimPolygon* ToPolygon() { return ( this && Type == POLYGON ) ? (CSPrimPolygon*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimPolygon* ToPolygon() { return ( Type == POLYGON ) ? (CSPrimPolygon*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing LinPoly-Primitive or NULL in case of different type.
-	CSPrimLinPoly* ToLinPoly() { return ( this && Type == LINPOLY ) ? (CSPrimLinPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimLinPoly* ToLinPoly() { return ( Type == LINPOLY ) ? (CSPrimLinPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Cylinder-Primitive or NULL in case of different type.
-	CSPrimRotPoly* ToRotPoly() { return ( this && Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimRotPoly* ToRotPoly() { return ( Type == ROTPOLY ) ? (CSPrimRotPoly*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Polyhedron-Primitive or NULL in case of different type.
-	CSPrimPolyhedron* ToPolyhedron() { return ( this && Type == POLYHEDRON ) ? (CSPrimPolyhedron*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimPolyhedron* ToPolyhedron() { return ( Type == POLYHEDRON ) ? (CSPrimPolyhedron*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Polyhedron-Import-Primitive or NULL in case of different type.
-	CSPrimPolyhedronReader* ToPolyhedronReader() { return ( this && Type == POLYHEDRONREADER ) ? (CSPrimPolyhedronReader*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimPolyhedronReader* ToPolyhedronReader() { return ( Type == POLYHEDRONREADER ) ? (CSPrimPolyhedronReader*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Curve-Primitive or NULL in case of different type.
-	CSPrimCurve* ToCurve() { return ( this && Type == CURVE ) ? (CSPrimCurve*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimCurve* ToCurve() { return ( Type == CURVE ) ? (CSPrimCurve*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Wire-Primitive or NULL in case of different type.
-	CSPrimWire* ToWire() { return ( this && Type == WIRE ) ? (CSPrimWire*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimWire* ToWire() { return ( Type == WIRE ) ? (CSPrimWire*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing UserDefined-Primitive or NULL in case of different type.
-	CSPrimUserDefined* ToUserDefined() { return ( this && Type == USERDEFINED ) ? (CSPrimUserDefined*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
+	CSPrimUserDefined* ToUserDefined() { return ( Type == USERDEFINED ) ? (CSPrimUserDefined*) this : 0; } /// Cast Primitive to a more defined type. Will return null if not of the requested type.
 	//! Get the corresponing Point-Primitive or 0 in case of different type.
-	CSPrimPoint* ToPoint() { return ( this && Type == POINT ) ? (CSPrimPoint*) this : 0; } //!< Cast Primitive to a more defined type. Will return 0 if not of the requested type.
+	CSPrimPoint* ToPoint() { return ( Type == POINT ) ? (CSPrimPoint*) this : 0; } //!< Cast Primitive to a more defined type. Will return 0 if not of the requested type.
 
 	bool operator<(CSPrimitives& vgl) { return iPriority<vgl.GetPriority();}
 	bool operator>(CSPrimitives& vgl) { return iPriority>vgl.GetPriority();}
