@@ -86,8 +86,8 @@ public:
 
 	virtual Parameter* Clone() {return new Parameter(this);}
 
-	Parameter* ToConst() { return ( this && Type == Const ) ? this : 0; } /// Cast Parameter to a more defined type. Will return null if not of the requested type.
-	LinearParameter* ToLinear() { return ( this && Type == Linear ) ? (LinearParameter*) this : 0; } /// Cast Parameter to a more defined type. Will return null if not of the requested type.
+	Parameter* ToConst() { return ( Type == Const ) ? this : 0; } /// Cast Parameter to a more defined type. Will return null if not of the requested type.
+	LinearParameter* ToLinear() { return ( Type == Linear ) ? (LinearParameter*) this : 0; } /// Cast Parameter to a more defined type. Will return null if not of the requested type.
 
 protected:
 	std::string sName;
