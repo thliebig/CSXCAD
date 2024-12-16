@@ -106,6 +106,29 @@ cdef class CSPropMaterial(CSProperties):
     pass
 
 ##############################################################################
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cpdef enum BCtype "CSPropAbsorbingBC::BCtype":
+        MUR_1ST_1PV "CSPropAbsorbingBC::MUR_1ST_1PV"
+        MUR_1ST_1PV_SA "CSPropAbsorbingBC::MUR_1ST_1PV_SA"
+
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cdef cppclass _CSPropAbsorbingBC "CSPropAbsorbingBC" (_CSProperties):
+        _CSPropAbsorbingBC(_ParameterSet*) except +
+            
+        # Insert methods here:
+        void SetNormDir(int val)
+        int GetNormDir()
+        
+        void SetPhaseVelocity(double val)
+        double GetPhaseVelocity()
+        
+        void    SetBoundaryType(BCtype val)
+        BCtype  GetBoundaryType()
+            
+cdef class CSPropAbsorbingBC(CSProperties):
+    pass
+
+##############################################################################
 
 cdef extern from "CSXCAD/CSPropLumpedElement.h":
     cpdef enum LEtype "CSPropLumpedElement::LEtype":
