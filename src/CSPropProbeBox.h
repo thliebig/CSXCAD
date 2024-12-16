@@ -50,12 +50,6 @@ public:
 	//! Get the probe weighting \sa GetWeighting
 	double GetWeighting() {return m_weight;}
 
-	void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength);
-	void ClearManualWeights();
-	std::vector<float> GetManualWeights(uint dir);
-	std::vector<float> GetManualWeightCoors(uint dir);
-
-
 	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
 	void SetProbeType(int type) {ProbeType=type;}
 	//! Get the probe type \sa SetProbeType
@@ -88,10 +82,5 @@ protected:
 	int ProbeType;
 	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
-
-	std::vector<float> Weights[3];
-	std::vector<float> WeightCoors[3];
-
-	void InitWeightContainers();
 };
 

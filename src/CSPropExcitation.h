@@ -85,12 +85,6 @@ public:
 	//! Get the propagation direction as a string for a given component
 	const std::string GetPropagationDirString(int Comp=0);
 
-	// Methods to add manual weights
-	void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength);
-	void ClearManualWeights();
-	std::vector<float> GetManualWeights(uint dir);
-	std::vector<float> GetManualWeightCoors(uint dir);
-
 	//! Set the excitation delay
 	void SetDelay(double val);
 	//! Set the excitation delay
@@ -117,8 +111,4 @@ protected:
 	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
 	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
 	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
-
-	// Vectors for field weights and their respective coordinates
-	std::vector<float> Weights[3];
-	std::vector<float> WeightCoors[3];
 };
