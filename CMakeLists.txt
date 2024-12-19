@@ -100,7 +100,8 @@ message(STATUS "TinyXML_LIBRARY: ${TinyXML_LIBRARY}")
 
 INCLUDE_DIRECTORIES( ${TinyXML_INCLUDE_DIR} )
 
-find_package(HDF5 1.8 COMPONENTS C HL REQUIRED)
+find_package(HDF5 COMPONENTS C HL REQUIRED)
+
 INCLUDE_DIRECTORIES (${HDF5_INCLUDE_DIRS})
 link_directories(${HDF5_LIBRARY_DIRS})
 # hdf5 compat
@@ -133,7 +134,7 @@ endif()
 
 # vtk 9.1 needs MPI find to fail?????
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  find_package(MPI)
+  find_package(MPI QUIET)
 endif()
 
 find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
