@@ -134,7 +134,7 @@ endif()
 
 # vtk 9.1 needs MPI find to fail?????
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  find_package(MPI)
+  find_package(MPI QUIET)
 endif()
 
 find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
