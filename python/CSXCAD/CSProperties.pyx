@@ -43,8 +43,8 @@ from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
 
 def hex2color(color):
-    if type(color) in [list, tuple]:
-        return tuple([int(x*255) for x in color])
+    if not type(color) is str:
+        return color
     import matplotlib
     return tuple([int(x*255) for x in matplotlib.colors.to_rgb(color)])
 
@@ -135,7 +135,7 @@ cdef class CSProperties:
 
         self._SetPtr(self.thisptr)
 
-        alpha = 1.0
+        alpha = 255
         if 'alpha' in kw:
             alpha = kw['alpha']
             del kw['alpha']
@@ -209,38 +209,38 @@ cdef class CSProperties:
         """
         return self.thisptr.GetName().decode('UTF-8')
 
-    def SetColor(self, color, alpha=1.0):
-        """ SetColor(color, alpha=1.0)
+    def SetColor(self, color, alpha=255):
+        """ SetColor(color, alpha=255)
 
         Set the fill and edge color for this property.
 
-        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
-        :param alpha: transparency value (0.0 .. 1.0)
+        :param color: color value (e.g. 'red','#1234ab', (50, 128, 200))
+        :param alpha: opacity value (0 .. 255)
         """
         self.SetFillColor(color, alpha)
         self.SetEdgeColor(color, alpha)
 
-    def SetFillColor(self, color, alpha=1.0):
-        """ SetFillColor(color, alpha=1.0)
+    def SetFillColor(self, color, alpha=255):
+        """ SetFillColor(color, alpha=255)
 
         Set the fill color for this property.
 
-        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
-        :param alpha: transparency value (0.0 .. 1.0)
+        :param color: color value (e.g. 'red','#1234ab', (50, 128, 200))
+        :param alpha: opacity value (0.0 .. 255)
         """
         rgb = hex2color(color)
-        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], int(alpha*255))
+        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
 
-    def SetEdgeColor(self, color, alpha=1.0):
-        """ SetColor(color, alpha=1.0)
+    def SetEdgeColor(self, color, alpha=255):
+        """ SetColor(color, alpha=255)
 
         Set the edge color for this property.
 
-        :param color: color value (e.g. 'red','#1234ab', (0.2, 0.4, 0.6))
-        :param alpha: transparency value (0.0 .. 1.0)
+        :param color: color value (e.g. 'red','#1234ab', (50, 128, 200))
+        :param alpha: opacity value (0 .. 255)
         """
         rgb = hex2color(color)
-        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], int(alpha*255))
+        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
 
     def ExistAttribute(self, name):
         """ ExistAttribute(name)
