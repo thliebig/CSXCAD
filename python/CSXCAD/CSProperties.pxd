@@ -42,6 +42,9 @@ cdef extern from "CSXCAD/CSProperties.h":
         CONDUCTINGSHEET    "CSProperties::CONDUCTINGSHEET"
 
 cdef extern from "CSXCAD/CSProperties.h":
+    ctypedef struct RGBa:
+        unsigned char R,G,B,a
+
     cdef cppclass _CSProperties "CSProperties":
             _CSProperties(_ParameterSet*) except +
             int GetType()
@@ -61,7 +64,12 @@ cdef extern from "CSXCAD/CSProperties.h":
             void RemoveAttribute(string name)
 
             void SetFillColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)
+            RGBa GetFillColor()
             void SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a)
+            RGBa GetEdgeColor()
+
+            bool GetVisibility()
+            void SetVisibility(bool val)
 
 cdef class CSProperties:
     cdef  _CSProperties *thisptr

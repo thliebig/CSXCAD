@@ -73,14 +73,39 @@ class Test_CSPrimMethods(unittest.TestCase):
     def test_colors(self):
         prop = CSProperties.CSPropMaterial(self.pset)
         prop.SetColor('red')
+        self.assertEqual(prop.GetFillColor(), (255,0,0,255))
+        self.assertEqual(prop.GetEdgeColor(), (255,0,0,255))
         prop.SetColor('red', 128) # 50% transparency
+        self.assertEqual(prop.GetFillColor(), (255,0,0,128))
+        self.assertEqual(prop.GetEdgeColor(), (255,0,0,128))
         prop.SetColor('#00ff00') # green
+        self.assertEqual(prop.GetFillColor(), (0,255,0,255))
+        self.assertEqual(prop.GetEdgeColor(), (0,255,0,255))
         prop.SetColor('#00ff00', 128) # green + 50% transparency
-        prop.SetColor((128, 128, 128)) # grey
-        prop.SetColor((128, 128, 128), 111) # grey
-        prop.SetColor([128, 128, 128]) # grey
-        prop.SetColor([128, 128, 128], 111) # grey
+        self.assertEqual(prop.GetFillColor(), (0,255,0,128))
+        self.assertEqual(prop.GetEdgeColor(), (0,255,0,128))
 
+        prop.SetColor((128, 128, 128)) # grey
+        self.assertEqual(prop.GetFillColor(), (128,128,128,255))
+        self.assertEqual(prop.GetEdgeColor(), (128,128,128,255))
+        prop.SetColor((128, 128, 128), 111) # grey
+        self.assertEqual(prop.GetFillColor(), (128,128,128,111))
+        self.assertEqual(prop.GetEdgeColor(), (128,128,128,111))
+
+        prop.SetFillColor([100, 150, 200]) # grey
+        self.assertEqual(prop.GetFillColor(), (100,150,200,255))
+        self.assertEqual(prop.GetEdgeColor(), (128,128,128,111))
+        prop.SetEdgeColor([200, 210, 220], 50) # grey
+        self.assertEqual(prop.GetFillColor(), (100,150,200,255))
+        self.assertEqual(prop.GetEdgeColor(), (200,210,220, 50))
+
+    def test_visibility(self):
+        prop = CSProperties.CSPropMetal(self.pset)
+        self.assertTrue(prop.GetVisibility())
+        prop.SetVisibility(False)
+        self.assertFalse(prop.GetVisibility())
+        prop.SetVisibility(True)
+        self.assertTrue(prop.GetVisibility())
 
     def test_metal(self):
         prop = CSProperties.CSPropMetal(self.pset)

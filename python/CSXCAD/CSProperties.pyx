@@ -231,6 +231,16 @@ cdef class CSProperties:
         rgb = hex2color(color)
         self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
 
+    def GetFillColor(self):
+        """
+        Get the fill color of this property
+
+        :returns: (R,G,B,a) -- tuple for red, green, blue, alpha
+        """
+        cdef RGBa rgba
+        rgba = self.thisptr.GetFillColor()
+        return (rgba.R, rgba.G, rgba.B, rgba.a)
+
     def SetEdgeColor(self, color, alpha=255):
         """ SetColor(color, alpha=255)
 
@@ -241,6 +251,22 @@ cdef class CSProperties:
         """
         rgb = hex2color(color)
         self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
+
+    def GetEdgeColor(self):
+        """
+        Get the edge color of this property
+
+        :returns: (R,G,B,a) -- tuple for red, green, blue, alpha
+        """
+        cdef RGBa rgba
+        rgba = self.thisptr.GetEdgeColor()
+        return (rgba.R, rgba.G, rgba.B, rgba.a)
+
+    def GetVisibility(self):
+        return self.thisptr.GetVisibility()
+
+    def SetVisibility(self, val):
+        self.thisptr.SetVisibility(val)
 
     def ExistAttribute(self, name):
         """ ExistAttribute(name)
