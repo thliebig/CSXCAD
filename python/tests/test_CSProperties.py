@@ -70,6 +70,18 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertFalse(prop.ExistAttribute('my_attr3'))
         self.assertEqual(prop.GetAttributeValue('my_attr3'), '')
 
+    def test_colors(self):
+        prop = CSProperties.CSPropMaterial(self.pset)
+        prop.SetColor('red')
+        prop.SetColor('red', 128) # 50% transparency
+        prop.SetColor('#00ff00') # green
+        prop.SetColor('#00ff00', 128) # green + 50% transparency
+        prop.SetColor((128, 128, 128)) # grey
+        prop.SetColor((128, 128, 128), 111) # grey
+        prop.SetColor([128, 128, 128]) # grey
+        prop.SetColor([128, 128, 128], 111) # grey
+
+
     def test_metal(self):
         prop = CSProperties.CSPropMetal(self.pset)
 
