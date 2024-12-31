@@ -26,10 +26,11 @@
 class CSXCAD_EXPORT CSPropAbsorbingBC : public CSProperties
 {
 public:
-	enum BCtype
+	enum ABCtype
 	{
-		MUR_1ST_1PV= 0,				// Mur's BC, 1st order, Single Speed
-		MUR_1ST_1PV_SA = 1			// Mur's BC, 1st order, Single Speed, with SuperAbsorption
+		UNDEFINED	= 0,
+		MUR_1ST 	= 1,	// Mur's BC, 1st order
+		MUR_1ST_SA 	= 2		// Mur's BC, 1st order, with Super Absorption
 	};
 
 	CSPropAbsorbingBC(ParameterSet* paraSet);
@@ -40,7 +41,7 @@ public:
 	virtual void Init();
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
-	virtual const std::string GetTypeXMLString() const {return std::string("AbsorbingSheet");}
+	virtual const std::string GetTypeXMLString() const {return std::string("AbsorbingBoundary");}
 
 	//! Set the normal direction
 	void SetNormDir(double val) {NormDir.SetValue(val);}
@@ -62,12 +63,12 @@ public:
 	//! Get the Thickness as a string
 	const std::string GetPhaseVelocityTerm() {return PhaseVelocity.GetString();}
 
-	void SetBoundaryType(BCtype val) {BoundaryType = val;};
-	BCtype GetBoundaryType() {return BoundaryType; };
+	void SetBoundaryType(ABCtype val) {BoundaryType = val;};
+	ABCtype GetBoundaryType() {return BoundaryType; };
 
-	virtual bool Update(std::string *ErrStr=NULL);
+	virtual bool Update(std::string *ErrStr = NULL);
 
-	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
+	virtual bool Write2XML(TiXmlNode& root, bool parameterised = true, bool sparse = false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
@@ -76,5 +77,5 @@ protected:
 
 	ParameterScalar	NormDir;
 	ParameterScalar	PhaseVelocity;
-	BCtype			BoundaryType;
+	ABCtype			BoundaryType;
 };

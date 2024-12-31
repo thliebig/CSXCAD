@@ -67,8 +67,8 @@ const std::string CSPropAbsorbingBC::GetNormDirTerm()
 void CSPropAbsorbingBC::Init()
 {
 	NormDir.SetValue(0);
-	PhaseVelocity.SetValue(_C0_);
-	BoundaryType = CSPropAbsorbingBC::MUR_1ST_1PV;
+	PhaseVelocity.SetValue(0);
+	BoundaryType = CSPropAbsorbingBC::UNDEFINED;
 }
 
 bool CSPropAbsorbingBC::Update(std::string *ErrStr)
@@ -108,7 +108,7 @@ bool CSPropAbsorbingBC::Write2XML(TiXmlNode& root, bool parameterised, bool spar
 
 	ParameterScalar s_BoundaryType;
 	s_BoundaryType.SetValue((double)(this->BoundaryType));
-	WriteTerm(s_BoundaryType,*prop,"BCtype",parameterised);
+	WriteTerm(s_BoundaryType,*prop,"ABCtype",parameterised);
 
 	return true;
 }
@@ -130,7 +130,7 @@ bool CSPropAbsorbingBC::ReadFromXML(TiXmlNode &root)
 	if (ReadTerm(s_BoundaryType,*prop,"BCtype")==false)
 		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read Boundary Condition type. Set to 'Mur 1st Order, single speed' (0)." << std::endl;
 	else
-		BoundaryType = (CSPropAbsorbingBC::BCtype)(s_BoundaryType.GetValue());
+		BoundaryType = (CSPropAbsorbingBC::ABCtype)(s_BoundaryType.GetValue());
 
 
 
@@ -146,11 +146,11 @@ void CSPropAbsorbingBC::ShowPropertyStatus(std::ostream& stream)
 
 	switch (BoundaryType)
 	{
-	case MUR_1ST_1PV:
-		s_BoundaryType = "Mur 1st order, Single speed";
+	case MUR_1ST:
+		s_BoundaryType = "Mur 1st order";
 		break;
-	case MUR_1ST_1PV_SA:
-		s_BoundaryType = "Mur 1st order, Single speed, with Super Absorption";
+	case MUR_1ST_SA:
+		s_BoundaryType = "Mur 1st order with Super Absorption";
 		break;
 	}
 

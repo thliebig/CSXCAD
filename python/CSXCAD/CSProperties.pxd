@@ -40,6 +40,7 @@ cdef extern from "CSXCAD/CSProperties.h":
         DISCRETE_MATERIAL  "CSProperties::DISCRETE_MATERIAL"
         LUMPED_ELEMENT     "CSProperties::LUMPED_ELEMENT"
         CONDUCTINGSHEET    "CSProperties::CONDUCTINGSHEET"
+        ABSORBING_BC       "CSProperties::ABSORBING_BC"
 
 cdef extern from "CSXCAD/CSProperties.h":
     cdef cppclass _CSProperties "CSProperties":
@@ -107,9 +108,10 @@ cdef class CSPropMaterial(CSProperties):
 
 ##############################################################################
 cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
-    cpdef enum BCtype "CSPropAbsorbingBC::BCtype":
-        MUR_1ST_1PV "CSPropAbsorbingBC::MUR_1ST_1PV"
-        MUR_1ST_1PV_SA "CSPropAbsorbingBC::MUR_1ST_1PV_SA"
+    cpdef enum ABCtype "CSPropAbsorbingBC::ABCtype":
+        UNDEFINED   "CSPropAbsorbingBC::UNDEFINED"
+        MUR_1ST     "CSPropAbsorbingBC::MUR_1ST"
+        MUR_1ST_SA  "CSPropAbsorbingBC::MUR_1ST_SA"
 
 cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
     cdef cppclass _CSPropAbsorbingBC "CSPropAbsorbingBC" (_CSProperties):
@@ -122,8 +124,8 @@ cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
         void SetPhaseVelocity(double val)
         double GetPhaseVelocity()
         
-        void    SetBoundaryType(BCtype val)
-        BCtype  GetBoundaryType()
+        void    SetBoundaryType(ABCtype val)
+        ABCtype  GetBoundaryType()
             
 cdef class CSPropAbsorbingBC(CSProperties):
     pass
