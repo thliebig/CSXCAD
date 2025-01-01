@@ -88,11 +88,21 @@ class Test_CSPrimMethods(unittest.TestCase):
         point.SetCoord(coord)
         self.assertTrue( (point.GetCoord() == coord).all())
 
+        point2 = point.copy()
+        self.assertTrue( (point.GetCoord() == coord).all())
+
+        self.assertTrue(point.GetID() != point2.GetID())
+
     def test_box(self):
         box = CSPrimitives.CSPrimBox(self.pset, self.metal, priority=10)
         self.assertEqual(box.GetPriority(), 10)
         tr = box.GetTransform()
         self.assertFalse(tr.HasTransform())
+
+        box2 = box.copy()
+        tr = box2.GetTransform()
+        self.assertFalse(tr.HasTransform())
+        self.assertTrue(box.GetID() != box2.GetID())
 
     def test_cylinder(self):
         # TEST Cylinder
@@ -112,6 +122,12 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         cyl.SetRadius(5)
         self.assertTrue( cyl.GetRadius()==5.0 )
+
+        cyl2 = cyl.copy()
+        self.assertTrue( cyl2.GetRadius()==5.0 )
+        self.assertTrue( (cyl2.GetStart()==start).all() )
+        self.assertTrue( (cyl2.GetStop()==stop).all() )
+        self.assertTrue(cyl.GetID() != cyl2.GetID())
 
     def test_cylinder_shell(self):
         # TEST Cylinder-Shell
@@ -135,6 +151,13 @@ class Test_CSPrimMethods(unittest.TestCase):
         cyl_shell.SetShellWidth(1.5)
         self.assertTrue( cyl_shell.GetShellWidth()==1.5 )
 
+        cyl_shell2 = cyl_shell.copy()
+        self.assertTrue( (cyl_shell2.GetStart()==start).all() )
+        self.assertTrue( (cyl_shell2.GetStop()==stop).all() )
+        self.assertTrue( cyl_shell2.GetRadius()==5.0 )
+        self.assertTrue( cyl_shell2.GetShellWidth()==1.5 )
+        self.assertTrue(cyl_shell.GetID() != cyl_shell2.GetID())
+
     def test_sphere(self):
         # TEST Sphere
         sphere = CSPrimitives.CSPrimSphere(self.pset, self.metal)
@@ -149,6 +172,11 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         sphere.SetRadius(5)
         self.assertTrue( sphere.GetRadius()==5.0 )
+
+        sphere2 = sphere.copy()
+        self.assertTrue( (sphere2.GetCenter()==center).all() )
+        self.assertTrue( sphere2.GetRadius()==5.0 )
+        self.assertTrue(sphere.GetID() != sphere2.GetID())
 
     def test_sphere_shell(self):
         # TEST Sphere-Shell
@@ -167,6 +195,14 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         sphere_shell.SetShellWidth(1.5)
         self.assertTrue( sphere_shell.GetShellWidth()==1.5 )
+
+        sphere_shell2 = sphere_shell.copy()
+        self.assertFalse(sphere_shell2==sphere_shell)
+        self.assertFalse(sphere_shell2==sphere_shell)
+        self.assertTrue( (sphere_shell2.GetCenter()==center).all() )
+        self.assertTrue( sphere_shell2.GetRadius()==5.0 )
+        self.assertTrue( sphere_shell2.GetShellWidth()==1.5 )
+        self.assertTrue(sphere_shell.GetID() != sphere_shell2.GetID())
 
     def test_polygon(self):
         # Test polygon
@@ -187,6 +223,16 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         poly.SetElevation(0.123)
         self.assertTrue( poly.GetElevation()==0.123 )
+
+        poly2 = poly.copy()
+        self.assertTrue( poly2.GetNormDir()==2 )
+        self.assertTrue( poly2.GetElevation()==0.123 )
+        self.assertTrue(poly.GetID() != poly2.GetID())
+
+        o0, o1 = poly2.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
 
     def test_lin_poly(self):
         # Test Lin-Polygon
@@ -211,6 +257,14 @@ class Test_CSPrimMethods(unittest.TestCase):
         linpoly.SetLength(11.23)
         self.assertTrue( linpoly.GetLength()==11.23 )
 
+        linpoly2 = linpoly.copy()
+        self.assertTrue( linpoly2.GetNormDir()==2 )
+        self.assertTrue( linpoly2.GetElevation()==0.123 )
+        self.assertTrue( linpoly2.GetLength()==11.23 )
+        o0, o1 = linpoly2.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
     def test_rot_poly(self):
         # Test Rot-Polygon
         rotpoly = CSPrimitives.CSPrimRotPoly(self.pset, self.metal)
@@ -234,6 +288,15 @@ class Test_CSPrimMethods(unittest.TestCase):
         rotpoly.SetAngle(0, 2*np.pi)
         self.assertTrue( (rotpoly.GetAngle() == np.array([0, 2*np.pi])).all() )
 
+        rotpoly2 = rotpoly.copy()
+        self.assertTrue( rotpoly2.GetQtyCoords()==4 )
+        self.assertTrue( rotpoly2.GetNormDir()==0 )
+        self.assertTrue( rotpoly2.GetRotAxisDir()==2 )
+        self.assertTrue( (rotpoly2.GetAngle() == np.array([0, 2*np.pi])).all() )
+        o0, o1 = rotpoly2.GetCoords()
+        self.assertTrue( (o0==x0).all() )
+        self.assertTrue( (o1==x1).all() )
+
     def test_curve(self):
         # Test Curve
         x = np.array([0, 0, 1, 1]) + 1.5
@@ -248,8 +311,13 @@ class Test_CSPrimMethods(unittest.TestCase):
         curve.AddPoint([10, 10, 10.5])
         self.assertTrue( curve.GetNumberOfPoints()==5 )
 
+        curve2 = curve.copy()
+        self.assertTrue( (curve2.GetPoint(0)==np.array([1.5,2.5,0])).all() )
+        self.assertTrue( curve2.GetNumberOfPoints()==5 )
+
         curve.ClearPoints()
         self.assertTrue( curve.GetNumberOfPoints()==0 )
+        self.assertTrue( curve2.GetNumberOfPoints()==5 )
 
     def test_wire(self):
         # Test Wire
@@ -268,6 +336,12 @@ class Test_CSPrimMethods(unittest.TestCase):
         wire.SetWireRadius(1.5)
         self.assertTrue( wire.GetWireRadius()==1.5 )
 
+        wire2 = wire.copy()
+        self.assertTrue( (wire2.GetPoint(0)==np.array([-1.5,-2.5,0])).all() )
+        self.assertTrue( wire2.GetNumberOfPoints()==5 )
+        self.assertTrue( wire2.GetWireRadius()==1.5 )
+
+    def test_polyhedron(self):
         # Test CSPrimPolyhedron
         ph = CSPrimitives.CSPrimPolyhedron(self.pset, self.metal)
         self.assertTrue( ph.GetNumVertices()==0 )
@@ -283,7 +357,13 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( ph.GetNumFaces()==1 )
         self.assertTrue( (ph.GetFace(0)==np.array([0,1,2])).all() )
 
-    def test_polyhedron(self):
+        ph2 = ph.copy()
+        self.assertTrue( ph2.GetNumVertices()==3 )
+        self.assertTrue( (ph2.GetVertex(0)==np.array([0,0,0])).all() )
+        self.assertTrue( ph2.GetNumFaces()==1 )
+        self.assertTrue( (ph2.GetFace(0)==np.array([0,1,2])).all() )
+
+    def test_polyhedron2(self):
         ## Test CSPrimPolyhedron
         ph = CSPrimitives.CSPrimPolyhedron(self.pset, self.metal)
 
@@ -313,6 +393,14 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue (ph.IsInside([x0+width/2, y0+width/2, z0+height/2]))
         self.assertFalse(ph.IsInside([x0        , y0        , z0+height/2]))
 
+        ph2 = ph.copy()
+        self.assertTrue((ph2.GetFace(1)==np.array([0,2,3])).all())
+        self.assertEqual(ph2.GetNumVertices(), 5)
+        self.assertEqual(ph2.GetNumFaces()   , 6)
+
+        self.assertTrue (ph2.IsInside([x0+width/2, y0+width/2, z0+height/2]))
+        self.assertFalse(ph2.IsInside([x0        , y0        , z0+height/2]))
+
     def test_polyhedron_reader(self):
         ## Test CSPrimPolyhedronReader
         phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)
@@ -320,6 +408,11 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( phr.ReadFile() )
         self.assertEqual(phr.GetNumVertices(), 50)
         self.assertEqual(phr.GetNumFaces(), 96)
+
+        phr2 = phr.copy()
+        self.assertTrue( phr2.ReadFile() )
+        self.assertEqual(phr2.GetNumVertices(), 50)
+        self.assertEqual(phr2.GetNumFaces(), 96)
 
 if __name__ == '__main__':
     unittest.main()

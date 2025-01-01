@@ -39,6 +39,7 @@ import sys
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport uintptr_t
+from libcpp.vector cimport vector
 
 cimport CSXCAD.CSPrimitives
 from CSXCAD.Utilities import CheckNyDir, GetMultiDirs
@@ -95,6 +96,8 @@ cdef class CSPrimitives:
             raise Exception('Primitive type "USERDEFINED" not yet implemented!')
         elif prim_type == POLYHEDRONREADER:
             prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
+        else:
+            raise Exception(f'fromType:: Unknown/invalid primitive type "{prim_type}"!')
         return prim
 
     @staticmethod
@@ -131,6 +134,48 @@ cdef class CSPrimitives:
             raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
         CSPrimitives._instances[<uintptr_t>self.thisptr] = self
+
+    def Copy(self, CSProperties prop=None):
+        if prop is None:
+            prop = self.GetProperty()
+        prim_type = self.GetType()
+
+        if prim_type == POINT:
+            ptr = new _CSPrimPoint(<_CSPrimPoint*>self.thisptr, prop.thisptr)
+        elif prim_type == BOX:
+            ptr = new _CSPrimBox(<_CSPrimBox*>self.thisptr, prop.thisptr)
+        elif prim_type == MULTIBOX:
+            raise Exception('Copy::Primitive type "MULTIBOX" not yet implemented!')
+        elif prim_type == SPHERE:
+            ptr = new _CSPrimSphere(<_CSPrimSphere*>self.thisptr, prop.thisptr)
+        elif prim_type == SPHERICALSHELL:
+            ptr = new _CSPrimSphericalShell(<_CSPrimSphericalShell*>self.thisptr, prop.thisptr)
+        elif prim_type == CYLINDER:
+            ptr = new _CSPrimCylinder(<_CSPrimCylinder*>self.thisptr, prop.thisptr)
+        elif prim_type == CYLINDRICALSHELL:
+            ptr = new _CSPrimCylindricalShell(<_CSPrimCylindricalShell*>self.thisptr, prop.thisptr)
+        elif prim_type == POLYGON:
+            ptr = new _CSPrimPolygon(<_CSPrimPolygon*>self.thisptr, prop.thisptr)
+        elif prim_type == LINPOLY:
+            ptr = new _CSPrimLinPoly(<_CSPrimLinPoly*>self.thisptr, prop.thisptr)
+        elif prim_type == ROTPOLY:
+            ptr = new _CSPrimRotPoly(<_CSPrimRotPoly*>self.thisptr, prop.thisptr)
+        elif prim_type == POLYHEDRON:
+            ptr = new _CSPrimPolyhedron(<_CSPrimPolyhedron*>self.thisptr, prop.thisptr)
+        elif prim_type == CURVE:
+            ptr = new _CSPrimCurve(<_CSPrimCurve*>self.thisptr, prop.thisptr)
+        elif prim_type == WIRE:
+            ptr = new _CSPrimWire(<_CSPrimWire*>self.thisptr, prop.thisptr)
+        elif prim_type == USERDEFINED:
+            raise Exception('Copy::Primitive type "USERDEFINED" not yet implemented!')
+        elif prim_type == POLYHEDRONREADER:
+            ptr = new _CSPrimPolyhedronReader(<_CSPrimPolyhedronReader*>self.thisptr, prop.thisptr)
+        else:
+            raise Exception(f'Copy::Unknown/invalid primitive type "{prim_type}"!')
+
+        return CSPrimitives.fromPtr(ptr)
+
+    copy = Copy
 
     def GetID(self):
         """
