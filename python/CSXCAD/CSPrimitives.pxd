@@ -17,6 +17,7 @@
 #
 
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 from libcpp cimport bool
 
 from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
@@ -226,7 +227,8 @@ cdef extern from "CSXCAD/CSPrimPolyhedron.h":
             void AddVertex(float px, float py, float pz)
             float* GetVertex(unsigned int n)
             unsigned int GetNumVertices()
-            void AddFace(int numVertex, int* vertices)
+            bool GetFaceValid(int idx)
+            void AddFace(vector[int] vertices)
             int* GetFace(unsigned int n, unsigned int &numVertices)
             unsigned int GetNumFaces()
 

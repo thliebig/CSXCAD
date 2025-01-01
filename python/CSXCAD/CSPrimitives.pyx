@@ -1196,6 +1196,16 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         ptr = <_CSPrimPolyhedron*>self.thisptr
         return ptr.GetNumVertices()
 
+    def GetFaceValid(self, idx):
+        """
+        Get if face with index "idx" is valid
+
+        :param idx: int -- Face index to return
+        :returns bool -- valid face
+        """
+        ptr = <_CSPrimPolyhedron*>self.thisptr
+        return ptr.GetFaceValid(idx)
+
     def AddFace(self, verts):
         """ AddFace(verts)
 
@@ -1203,14 +1213,10 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         The vertices have to be added already.
         Currently only triangle faces are possible.
 
-        :params verts: (N,) array -- Face with N vericies (currently N=3!)
+        :params verts: (N,) array -- Face with N vericies
         """
-        assert len(verts)==3, 'AddFace: currently only triangles allowed as faces'
-        cdef int i_v[3]
-        for n in range(3):
-            i_v[n] = verts[n]
         ptr = <_CSPrimPolyhedron*>self.thisptr
-        ptr.AddFace(len(verts), i_v)
+        ptr.AddFace(verts)
 
     def GetFace(self, idx):
         """ GetFace(idx)
@@ -1221,11 +1227,13 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         :returns: (N,) array -- Vertices array for face with index `idx`
         """
         ptr = <_CSPrimPolyhedron*>self.thisptr
-        assert idx>=0 and idx<ptr.GetNumFaces(), "Error: invalid face index"
+        if idx<0 or idx>=ptr.GetNumFaces():
+            raise Exception("Error: invalid face index")
         cdef int *i_v
         cdef unsigned int numVert=0
         i_v = ptr.GetFace(idx, numVert)
-        assert i_v!=NULL
+        if i_v==NULL:
+            raise Exception("Error: invalid face values")
         face = np.zeros(numVert, np.int32)
         for n in range(numVert):
             face[n] = i_v[n]
