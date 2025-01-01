@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -159,6 +159,7 @@ bool CSPrimPolyhedronReader::ReadFile()
 		return false;
 	}
 
+	Reset();
 	for (int n=0;n<polydata->GetNumberOfPoints();++n)
 		AddVertex(polydata->GetPoint(n));
 

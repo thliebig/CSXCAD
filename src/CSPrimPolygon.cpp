@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -38,6 +38,8 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 	Type=POLYGON;
 	m_NormDir = primPolygon->m_NormDir;
 	Elevation.Copy(&primPolygon->Elevation);
+	for (size_t i=0;i<primPolygon->vCoords.size();++i)
+		vCoords.push_back(new ParameterScalar(primPolygon->vCoords.at(i)));
 	PrimTypeName = std::string("Polygon");
 }
 

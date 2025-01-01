@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -158,6 +158,8 @@ void CSPrimPolyhedron::AddFace(int numVertex, int* vertices)
 	Invalidate();
 	face f;
 	f.numVertex=numVertex;
+	if (f.numVertex>3)
+		std::cerr << __func__ << ": Warning, faces other than triangles are currently not supported for discretization, expect false results!!!" << std::endl;
 	f.vertices=new int[numVertex];
 	for (int n=0;n<numVertex;++n)
 		f.vertices[n]=vertices[n];

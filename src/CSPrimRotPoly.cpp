@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -31,6 +31,9 @@ CSPrimRotPoly::CSPrimRotPoly(unsigned int ID, ParameterSet* paraSet, CSPropertie
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=0;
+	StartStopAngle[0].SetParameterSet(paraSet);
+	StartStopAngle[1].SetParameterSet(paraSet);
+	StartStopAngle[1].SetValue(2*M_PI); // by default rot poly full rotation
 	PrimTypeName = std::string("RotPoly");
 }
 
@@ -38,6 +41,8 @@ CSPrimRotPoly::CSPrimRotPoly(CSPrimRotPoly* primRotPoly, CSProperties *prop) : C
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=primRotPoly->m_RotAxisDir;
+	StartStopAngle[0].Copy(&primRotPoly->StartStopAngle[0]);
+	StartStopAngle[1].Copy(&primRotPoly->StartStopAngle[1]);
 	PrimTypeName = std::string("RotPoly");
 }
 
@@ -45,6 +50,9 @@ CSPrimRotPoly::CSPrimRotPoly(ParameterSet* paraSet, CSProperties* prop) : CSPrim
 {
 	Type=ROTPOLY;
 	m_RotAxisDir=0;
+	StartStopAngle[0].SetParameterSet(paraSet);
+	StartStopAngle[1].SetParameterSet(paraSet);
+	StartStopAngle[1].SetValue(2*M_PI); // by default rot poly full rotation
 	PrimTypeName = std::string("RotPoly");
 }
 
