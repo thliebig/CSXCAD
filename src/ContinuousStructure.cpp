@@ -478,6 +478,7 @@ bool ContinuousStructure::Write2XML(const char* file, bool parameterised, bool s
 
 bool ContinuousStructure::Write2XML(std::string file, bool parameterised, bool sparse)
 {
+	setlocale(LC_NUMERIC, "en_US.UTF-8");
 	TiXmlDocument doc(file);
 	doc.InsertEndChild(TiXmlDeclaration("1.0","UTF-8","yes"));
 
