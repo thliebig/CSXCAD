@@ -38,6 +38,7 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             _CSRectGrid* GetGrid()
 
             void SetCoordInputType(CoordinateSystem cs_type)
+            CoordinateSystem GetCoordInputType()
 
             void AddProperty(_CSProperties* prop)
             _CSProperties* GetProperty(int index)

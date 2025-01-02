@@ -138,6 +138,9 @@ cdef class ContinuousStructure:
         grid.SetMeshType(cs_type)
         self.thisptr.SetCoordInputType(cs_type)
 
+    def GetCoordInputType(self):
+        return self.thisptr.GetCoordInputType()
+
     def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
         """ DefineGrid(mesh, unit, smooth_mesh_res=None)
 
