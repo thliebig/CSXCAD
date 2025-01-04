@@ -89,6 +89,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( (point.GetCoord() == coord).all())
 
         point2 = point.copy()
+        self.assertFalse(point == point2)
         self.assertTrue( (point.GetCoord() == coord).all())
 
         self.assertTrue(point.GetID() != point2.GetID())
@@ -124,6 +125,8 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue( cyl.GetRadius()==5.0 )
 
         cyl2 = cyl.copy()
+        self.assertTrue( cyl2.GetRadius()==5.0 )
+        cyl.SetRadius(1)
         self.assertTrue( cyl2.GetRadius()==5.0 )
         self.assertTrue( (cyl2.GetStart()==start).all() )
         self.assertTrue( (cyl2.GetStop()==stop).all() )

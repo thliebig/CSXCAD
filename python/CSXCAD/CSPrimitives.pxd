@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015,20016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+# Copyright (C) 2015-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
@@ -51,6 +51,8 @@ cdef extern from "CSXCAD/CSPrimitives.h":
             int GetType()
             string GetTypeName()
 
+            _CSPrimitives* GetCopy(_CSProperties* prop)
+
             _CSProperties* GetProperty()
             _ParameterSet* GetParameterSet()
 
@@ -84,7 +86,6 @@ cdef class CSPrimitives:
 cdef extern from "CSXCAD/CSPrimPoint.h":
     cdef cppclass _CSPrimPoint "CSPrimPoint" (_CSPrimitives):
             _CSPrimPoint(_ParameterSet*, _CSProperties*) except +
-            _CSPrimPoint(_CSPrimPoint*, _CSProperties*) except +
             void   SetCoord(int idx, double val)
             double GetCoord(int idx)
 
@@ -95,7 +96,6 @@ cdef class CSPrimPoint(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimBox.h":
     cdef cppclass _CSPrimBox "CSPrimBox" (_CSPrimitives):
             _CSPrimBox(_ParameterSet*, _CSProperties*) except +
-            _CSPrimBox(_CSPrimBox*, _CSProperties*) except +
             void   SetCoord(int idx, double val)
             double GetCoord(int idx)
 
@@ -106,7 +106,6 @@ cdef class CSPrimBox(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimCylinder.h":
     cdef cppclass _CSPrimCylinder "CSPrimCylinder" (_CSPrimitives):
             _CSPrimCylinder(_ParameterSet*, _CSProperties*) except +
-            _CSPrimCylinder(_CSPrimCylinder*, _CSProperties*) except +
             void   SetCoord(int idx, double val)
             double GetCoord(int idx)
             void SetRadius(double val)
@@ -119,7 +118,6 @@ cdef class CSPrimCylinder(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimCylindricalShell.h":
     cdef cppclass _CSPrimCylindricalShell "CSPrimCylindricalShell" (_CSPrimCylinder):
             _CSPrimCylindricalShell(_ParameterSet*, _CSProperties*) except +
-            _CSPrimCylindricalShell(_CSPrimCylindricalShell*, _CSProperties*) except +
             void SetShellWidth(double val)
             double GetShellWidth()
 
@@ -131,7 +129,6 @@ cdef class CSPrimCylindricalShell(CSPrimCylinder):
 cdef extern from "CSXCAD/CSPrimSphere.h":
     cdef cppclass _CSPrimSphere "CSPrimSphere" (_CSPrimitives):
             _CSPrimSphere(_ParameterSet*, _CSProperties*) except +
-            _CSPrimSphere(_CSPrimSphere*, _CSProperties*) except +
             void SetCenter(double x1, double x2, double x3)
             double GetCoord(int idx)
             void SetRadius(double val)
@@ -144,7 +141,6 @@ cdef class CSPrimSphere(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimSphericalShell.h":
     cdef cppclass _CSPrimSphericalShell "CSPrimSphericalShell" (_CSPrimSphere):
             _CSPrimSphericalShell(_ParameterSet*, _CSProperties*) except +
-            _CSPrimSphericalShell(_CSPrimSphericalShell*, _CSProperties*) except +
             void SetShellWidth(double val)
             double GetShellWidth()
 
@@ -155,7 +151,6 @@ cdef class CSPrimSphericalShell(CSPrimSphere):
 cdef extern from "CSXCAD/CSPrimPolygon.h":
     cdef cppclass _CSPrimPolygon "CSPrimPolygon" (_CSPrimitives):
             _CSPrimPolygon(_ParameterSet*, _CSProperties*) except +
-            _CSPrimPolygon(_CSPrimPolygon*, _CSProperties*) except +
             void AddCoord(double val)
             double GetCoord(int index)
             void ClearCoords()
@@ -172,7 +167,6 @@ cdef class CSPrimPolygon(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimLinPoly.h":
     cdef cppclass _CSPrimLinPoly "CSPrimLinPoly" (_CSPrimPolygon):
             _CSPrimLinPoly(_ParameterSet*, _CSProperties*) except +
-            _CSPrimLinPoly(_CSPrimLinPoly*, _CSProperties*) except +
             void SetLength(double val)
             double GetLength()
 
@@ -184,7 +178,6 @@ cdef class CSPrimLinPoly(CSPrimPolygon):
 cdef extern from "CSXCAD/CSPrimRotPoly.h":
     cdef cppclass _CSPrimRotPoly "CSPrimRotPoly" (_CSPrimPolygon):
             _CSPrimRotPoly(_ParameterSet*, _CSProperties*) except +
-            _CSPrimRotPoly(_CSPrimRotPoly*, _CSProperties*) except +
             void SetRotAxisDir(int ny)
             int GetRotAxisDir()
             void SetAngle(int index, double val)
@@ -198,7 +191,6 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
 cdef extern from "CSXCAD/CSPrimCurve.h":
     cdef cppclass _CSPrimCurve "CSPrimCurve" (_CSPrimitives):
             _CSPrimCurve(_ParameterSet*, _CSProperties*) except +
-            _CSPrimCurve(_CSPrimCurve*, _CSProperties*) except +
             size_t AddPoint(double *coords)
             size_t GetNumberOfPoints()
             bool GetPoint(size_t point_index, double point[3])
@@ -211,7 +203,6 @@ cdef class CSPrimCurve(CSPrimitives):
 cdef extern from "CSXCAD/CSPrimWire.h":
     cdef cppclass _CSPrimWire "CSPrimWire" (_CSPrimCurve):
             _CSPrimWire(_ParameterSet*, _CSProperties*) except +
-            _CSPrimWire(_CSPrimWire*, _CSProperties*) except +
             void SetWireRadius(double val)
             double GetWireRadius()
 
@@ -222,7 +213,6 @@ cdef class CSPrimWire(CSPrimCurve):
 cdef extern from "CSXCAD/CSPrimPolyhedron.h":
     cdef cppclass _CSPrimPolyhedron "CSPrimPolyhedron" (_CSPrimitives):
             _CSPrimPolyhedron(_ParameterSet*, _CSProperties*) except +
-            _CSPrimPolyhedron(_CSPrimPolyhedron*, _CSProperties*) except +
             void Reset()
             void AddVertex(float px, float py, float pz)
             float* GetVertex(unsigned int n)
@@ -243,7 +233,6 @@ cdef extern from "CSXCAD/CSPrimPolyhedronReader.h":
         PLY_FILE "CSPrimPolyhedronReader::PLY_FILE"
     cdef cppclass _CSPrimPolyhedronReader "CSPrimPolyhedronReader" (_CSPrimPolyhedron):
         _CSPrimPolyhedronReader(_ParameterSet*, _CSProperties*) except +
-        _CSPrimPolyhedronReader(_CSPrimPolyhedronReader*, _CSProperties*) except +
         void SetFilename(string name)
         string GetFilename()
         void SetFileType(FileType ft)
