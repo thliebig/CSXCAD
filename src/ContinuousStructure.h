@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008,2009,2010 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -68,6 +68,9 @@ public:
 
 	//! Replace an existing property with a new one. \sa AddProperty, DeleteProperty
 	bool ReplaceProperty(CSProperties* oldProp, CSProperties* newProp);
+
+	//! Remove a known Property
+	void RemoveProperty(CSProperties* prop);
 
 	//! Remove and delete Property at known index
 	void DeleteProperty(size_t index);

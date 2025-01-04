@@ -41,6 +41,8 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             CoordinateSystem GetCoordInputType()
 
             void AddProperty(_CSProperties* prop)
+            void RemoveProperty(_CSProperties* prop)
+            void DeleteProperty(_CSProperties* prop)
             _CSProperties* GetProperty(int index)
             int GetQtyPrimitives(PropertyType prop_type)
             int  GetQtyProperties()
@@ -56,7 +58,6 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping
-    cdef _AddProperty(self, CSProperties prop)
     cdef _GetProperty(self, int index)
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed)
     cdef __GetAllPrimitives(self, bool sort, PropertyType prop_type)

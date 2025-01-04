@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008,2009,2010 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -101,6 +101,18 @@ bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* n
 		}
 	}
 	return false;
+}
+
+void ContinuousStructure::RemoveProperty(CSProperties* prop)
+{
+	std::vector<CSProperties*>::iterator iter;
+	for (iter=vProperties.begin();iter<vProperties.end();++iter)
+		if (*iter==prop)
+		{
+			vProperties.erase(iter);
+			return;
+		}
+	this->UpdateIDs();
 }
 
 void ContinuousStructure::DeleteProperty(size_t index)

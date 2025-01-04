@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015,20016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+# Copyright (C) 2015-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
@@ -82,6 +82,10 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif p_type == DUMPBOX:
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif p_type == LORENTZMATERIAL + DISPERSIVEMATERIAL + MATERIAL:
+            prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
+        elif p_type == DEBYEMATERIAL + DISPERSIVEMATERIAL + MATERIAL:
+            prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
 
         return prop
 
@@ -112,6 +116,10 @@ cdef class CSProperties:
             prop = CSPropProbeBox(pset, no_init=no_init, **kw)
         elif type_str=='DumpBox':
             prop = CSPropDumpBox(pset, no_init=no_init, **kw)
+        elif type_str=='LorentzMaterial':
+            prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
+        elif type_str=='DebyeMaterial':
+            prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
         return prop
 
     @staticmethod
@@ -144,6 +152,10 @@ cdef class CSProperties:
             self.SetColor(kw['color'], alpha)
             del kw['color']
 
+        if 'name' in kw:
+            self.SetName(kw['name'])
+            del kw['name']
+
         if len(kw)!=0:
             raise Exception('Unknown keywords: {}'.format(kw))
 
@@ -152,6 +164,18 @@ cdef class CSProperties:
             raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
         CSProperties._instances[<uintptr_t>self.thisptr] = self
+
+    def GetCopy(self, incl_prim=False):
+        """
+        Get a copy of this property
+
+        :param incl_prim: Include a copy of all primitive
+        :return: CSProperties -- Copy of this property
+        """
+        ptr = self.thisptr.GetCopy(incl_prim)
+        return CSProperties.fromPtr(ptr)
+
+    copy = GetCopy
 
     def GetQtyPrimitives(self):
         """
@@ -191,6 +215,12 @@ cdef class CSProperties:
         Get the parameter set assigned to this class
         """
         return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
+
+    def GetMaterial(self):
+        return self.thisptr.GetMaterial()
+
+    def GetID(self):
+        return self.thisptr.GetID()
 
     def SetName(self, name):
         """ SetName(name)
@@ -306,6 +336,16 @@ cdef class CSProperties:
         :param name: str -- Attribute name
         """
         self.thisptr.RemoveAttribute(name.encode('UTF-8'))
+
+    def GetAttributeNames(self):
+        names = self.thisptr.GetAttributeNames()
+        return tuple([name.decode('UTF-8') for name in self.thisptr.GetAttributeNames()])
+
+    def GetAttributes(self):
+        attr = dict()
+        for name in self.GetAttributeNames():
+            attr[name] = self.GetAttributeValue(name)
+        return attr
 
     def AddPoint(self, coord, **kw):
         """ AddPoint(coord, **kw)
@@ -521,13 +561,13 @@ cdef class CSPropMaterial(CSProperties):
                 (<_CSPropMaterial*>self.thisptr).SetDensity(val)
                 continue
             if type(val)==float or type(val)==int:
-                self.__SetMaterialPropertyDir(prop_name, 0, val)
+                self._SetMaterialPropertyDir(prop_name, 0, val)
                 continue
             assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
-                self.__SetMaterialPropertyDir(prop_name, n, val[n])
+                self._SetMaterialPropertyDir(prop_name, n, val[n])
 
-    def __SetMaterialPropertyDir(self, prop_name, ny, val):
+    def _SetMaterialPropertyDir(self, prop_name, ny, val):
         if prop_name=='epsilon':
             return (<_CSPropMaterial*>self.thisptr).SetEpsilon(val, ny)
         elif prop_name=='mue':
@@ -566,13 +606,13 @@ cdef class CSPropMaterial(CSProperties):
                 (<_CSPropMaterial*>self.thisptr).SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
             if type(val)==str:
-                self.__SetMaterialWeightDir(prop_name, 0, val)
+                self._SetMaterialWeightDir(prop_name, 0, val)
                 continue
             assert len(val)==3, 'SetMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
-                self.__SetMaterialWeightDir(prop_name, n, val[n])
+                self._SetMaterialWeightDir(prop_name, n, val[n])
 
-    def __SetMaterialWeightDir(self, prop_name, ny, val):
+    def _SetMaterialWeightDir(self, prop_name, ny, val):
         val = val.encode('UTF-8')
         if prop_name=='epsilon':
             return (<_CSPropMaterial*>self.thisptr).SetEpsilonWeightFunction(val, ny)
@@ -595,13 +635,13 @@ cdef class CSPropMaterial(CSProperties):
         if prop_name == 'density':
             return (<_CSPropMaterial*>self.thisptr).GetDensity()
         if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
-            return self.__GetMaterialPropertyDir(prop_name, 0)
+            return self._GetMaterialPropertyDir(prop_name, 0)
         val = np.zeros(3)
         for n in range(3):
-            val[n] = self.__GetMaterialPropertyDir(prop_name, n)
+            val[n] = self._GetMaterialPropertyDir(prop_name, n)
         return val
 
-    def __GetMaterialPropertyDir(self, prop_name, ny):
+    def _GetMaterialPropertyDir(self, prop_name, ny):
         if prop_name=='epsilon':
             return (<_CSPropMaterial*>self.thisptr).GetEpsilon(ny)
         elif prop_name=='mue':
@@ -623,13 +663,13 @@ cdef class CSPropMaterial(CSProperties):
         if prop_name == 'density':
             return (<_CSPropMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
         if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
-            return self.__GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
+            return self._GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
         val = ['', '', '']
         for n in range(3):
-            val[n] = self.__GetMaterialWeightDir(prop_name, n).decode('UTF-8')
+            val[n] = self._GetMaterialWeightDir(prop_name, n).decode('UTF-8')
         return val
 
-    def __GetMaterialWeightDir(self, prop_name, ny):
+    def _GetMaterialWeightDir(self, prop_name, ny):
         if prop_name=='epsilon':
             return (<_CSPropMaterial*>self.thisptr).GetEpsilonWeightFunction(ny)
         elif prop_name=='mue':
@@ -1234,3 +1274,220 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         for n in range(3):
             val[n] = (<_CSPropDumpBox*>self.thisptr).GetSubSampling(n)
         return val
+
+###############################################################################
+cdef class CSPropDispersiveMaterial(CSPropMaterial):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPropDispersiveMaterial, self).__init__(pset, no_init=True)
+            return
+        if not self.thisptr:
+            raise Exception("Error, cannot create CSPropDispersiveMaterial (protected)")
+        if 'order' in kw:
+            self.SetDispersionOrder(kw['order'])
+            del kw['order']
+        super(CSPropDispersiveMaterial, self).__init__(pset, *args, **kw)
+
+    def GetDispersionOrder(self):
+        return  (<_CSPropDispersiveMaterial*>self.thisptr).GetDispersionOrder()
+
+    def SetDispersionOrder(self, val):
+        return  (<_CSPropDispersiveMaterial*>self.thisptr).SetDispersionOrder(val)
+
+    def _CheckOrder(self, order):
+        if order<0 or order>=(<_CSPropDispersiveMaterial*>self.thisptr).GetDispersionOrder():
+            raise IndexError('Invalid dispersive media order requested')
+
+    def GetDispersiveMaterialProperty(self, prop_name, order):
+        """ GetDispersiveMaterialProperty(prop_name)
+        Get the dispersive material property with of type `prop_name` and for order `order`.
+
+        :params prop_name: str -- material property type
+        :params order:     int -- material property order
+        :returns: float for isotropic material or else (3,) array
+        """
+        self._CheckOrder(order)
+        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+            return self._GetDispersiveMaterialPropertyDir(prop_name, order, 0)
+        val = np.zeros(3)
+        for n in range(3):
+            val[n] = self._GetDispersiveMaterialPropertyDir(prop_name, order, n)
+        return val
+
+    def _GetDispersiveMaterialPropertyDir(self, prop_name, order, ny):
+        raise Exception('GetDispersiveMaterialPropertyDir: Error, unknown material property')
+
+    def SetDispersiveMaterialProperty(self, order, **kw):
+        """ SetMaterialProperty(**kw)
+        Set the material properties.
+
+        :params epsilon: scalar or vector - relative electric permittivity
+        :params mue:     scalar or vector - relative magnetic permeability
+        :params kappa:   scalar or vector - electric conductivity
+        :params sigma:   scalar or vector - magnetic conductivity
+        :params density: float            - Density
+        """
+        self._CheckOrder(order)
+        for prop_name in kw:
+            val = kw[prop_name]
+            if type(val)==float or type(val)==int:
+                self._SetDispersiveMaterialPropertyDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self._SetDispersiveMaterialPropertyDir(prop_name, order, n, val[n])
+
+    def _SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val):
+        raise Exception('SetMaterialPropertyDir: Error, unknown material property')
+
+    def GetDispersiveMaterialWeight(self, prop_name, order):
+        """ GetMaterialWeight(prop_name)
+        Get the material weighting function(s).
+
+        :params prop_name: str -- material property type
+        :returns: str for isotropic material and `density` or else str array
+        """
+        self._CheckOrder(order)
+        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+            return self._GetDispersiveMaterialWeightDir(prop_name, order, 0).decode('UTF-8')
+        val = ['', '', '']
+        for n in range(3):
+            val[n] = self._GetDispersiveMaterialWeightDir(prop_name, order, n).decode('UTF-8')
+        return val
+
+    def _GetDispersiveMaterialWeightDir(self, prop_name, order, ny):
+        raise Exception('GetMaterialWeightDir: Error, unknown material property')
+
+    def SetDispersiveMaterialWeight(self, order, **kw):
+        self._CheckOrder(order)
+        for prop_name in kw:
+            val = kw[prop_name]
+            if type(val)==str:
+                self._SetDispersiveMaterialWeightDir(prop_name, order, 0, val)
+                continue
+            assert len(val)==3, 'SetDispersiveMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
+            for n in range(3):
+                self._SetDispersiveMaterialWeightDir(prop_name, order, n, val[n])
+
+    def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
+        raise Exception('SetMaterialWeightDir: Error, unknown material property')
+
+###############################################################################
+cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPropLorentzMaterial, self).__init__(pset, no_init=True)
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropLorentzMaterial(pset.thisptr)
+
+        super(CSPropLorentzMaterial, self).__init__(pset, *args, **kw)
+
+    def _GetDispersiveMaterialPropertyDir(self, prop_name, order, ny):
+        if prop_name == 'eps_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreq(order, ny)
+        elif prop_name == 'eps_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreq(order, ny)
+        elif prop_name == 'eps_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+        elif prop_name == 'mue_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreq(order, ny)
+        elif prop_name == 'mue_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreq(order, ny)
+        elif prop_name == 'mue_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTime(order, ny)
+        else:
+            CSPropDispersiveMaterial._GetDispersiveMaterialPropertyDir(self, prop_name, order, ny)
+
+    def _SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val):
+        if prop_name == 'eps_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreq(order, val, ny)
+        elif prop_name == 'eps_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreq(order, val, ny)
+        elif prop_name == 'eps_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+        elif prop_name == 'mue_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreq(order, val, ny)
+        elif prop_name == 'mue_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreq(order, val, ny)
+        elif prop_name == 'mue_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTime(order, val, ny)
+        else:
+            CSPropDispersiveMaterial._SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val)
+
+    def _GetDispersiveMaterialWeightDir(self, prop_name, order, ny):
+        if prop_name == 'eps_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreqWeightFunction(order, ny)
+        elif prop_name == 'eps_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreqWeightFunction(order, ny)
+        elif prop_name == 'eps_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTimeWeightFunction(order, ny)
+        elif prop_name == 'mue_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreqWeightFunction(order, ny)
+        elif prop_name == 'mue_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreqWeightFunction(order, ny)
+        elif prop_name == 'mue_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTimeWeightFunction(order, ny)
+        else:
+            CSPropDispersiveMaterial._GetDispersiveMaterialWeightDir(self, prop_name, order, ny)
+
+    def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
+        if prop_name == 'eps_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreqWeightFunction(order, val, ny)
+        elif prop_name == 'eps_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreqWeightFunction(order, val, ny)
+        elif prop_name == 'eps_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+        elif prop_name == 'mue_plasma':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreqWeightFunction(order, val, ny)
+        elif prop_name == 'mue_pole_freq':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreqWeightFunction(order, val, ny)
+        elif prop_name == 'mue_relax':
+            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTimeWeightFunction(order, val, ny)
+        else:
+            CSPropDispersiveMaterial._SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val)
+
+###############################################################################
+cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPropDebyeMaterial, self).__init__(pset, no_init=True)
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropDebyeMaterial(pset.thisptr)
+
+        super(CSPropDebyeMaterial, self).__init__(pset, *args, **kw)
+
+    def _GetDispersiveMaterialPropertyDir(self, prop_name, order, ny):
+        if prop_name == 'eps_delta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDelta(order, ny)
+        elif prop_name == 'eps_relax':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+        else:
+            CSPropDispersiveMaterial._GetDispersiveMaterialPropertyDir(self, prop_name, order, ny)
+
+    def _SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val):
+        if prop_name=='eps_delta':
+            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDelta(order, val, ny)
+        elif prop_name=='eps_relax':
+            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+        else:
+            CSPropDispersiveMaterial._SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val)
+
+    def _GetDispersiveMaterialWeightDir(self, prop_name, order, ny):
+        if prop_name=='eps_delta':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDeltaWeightFunction(order, ny)
+        elif prop_name=='eps_relax':
+            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTimeWeightFunction(order, ny)
+        else:
+            CSPropDispersiveMaterial._GetDispersiveMaterialWeightDir(self, prop_name, order, ny)
+
+    def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
+        val = val.encode('UTF-8')
+        if prop_name=='eps_delta':
+            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDeltaWeightFunction(order, val, ny)
+        elif prop_name=='eps_relax':
+            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+        else:
+            CSPropDispersiveMaterial._SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val)
+

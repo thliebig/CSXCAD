@@ -257,7 +257,7 @@ cdef class ContinuousStructure:
         self.AddProperty(prop)
         return prop
 
-    def AddProperty(self, prop):
+    def AddProperty(self, CSProperties prop):
         """ AddProperty(prop)
 
         Add an already created property (`prop`) to this class.
@@ -266,10 +266,13 @@ cdef class ContinuousStructure:
         -----
         This class will take ownership of the property.
         """
-        self._AddProperty(prop)
-
-    cdef _AddProperty(self, CSProperties prop):
         self.thisptr.AddProperty(prop.thisptr)
+
+    def RemoveProperty(self, CSProperties prop):
+        self.thisptr.RemoveProperty(prop.thisptr)
+
+    def DeleteProperty(self, CSProperties prop):
+        self.thisptr.DeleteProperty(prop.thisptr)
 
     def GetProperty(self, index):
         """ GetProperty(index)
