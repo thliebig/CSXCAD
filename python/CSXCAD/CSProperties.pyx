@@ -339,7 +339,8 @@ cdef class CSProperties:
 
     def GetAttributeNames(self):
         names = self.thisptr.GetAttributeNames()
-        return tuple([name.decode('UTF-8') for name in self.thisptr.GetAttributeNames()])
+        attr_names = self.thisptr.GetAttributeNames()
+        return tuple([name.decode('UTF-8') for name in attr_names])
 
     def GetAttributes(self):
         attr = dict()
