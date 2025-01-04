@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -27,9 +27,12 @@ class CSXCAD_EXPORT CSPropResBox : public CSProperties
 {
 public:
 	CSPropResBox(ParameterSet* paraSet);
-	CSPropResBox(CSProperties* prop);
+	CSPropResBox(CSPropResBox* prop, bool copyPrim=false);
 	CSPropResBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropResBox();
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropResBox(this, incl_prim);}
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("ResBox");}

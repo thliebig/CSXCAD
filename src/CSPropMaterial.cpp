@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -19,9 +19,39 @@
 
 #include "CSPropMaterial.h"
 
-CSPropMaterial::CSPropMaterial(ParameterSet* paraSet) : CSProperties(paraSet) {Type=MATERIAL;Init();}
-CSPropMaterial::CSPropMaterial(CSProperties* prop) : CSProperties(prop) {Type=MATERIAL;Init();}
-CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=MATERIAL;Init();}
+CSPropMaterial::CSPropMaterial(ParameterSet* paraSet) : CSProperties(paraSet)
+{
+	Type=MATERIAL;
+	Init();
+	bVisisble=true;
+	FillColor.a=EdgeColor.a=123; // default opacity for materials
+}
+CSPropMaterial::CSPropMaterial(CSPropMaterial* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=MATERIAL;
+	Init();
+	bIsotropy = prop->bIsotropy;
+	for (int n=0;n<3;++n)
+	{
+		Epsilon[n].Copy(&prop->Epsilon[n]);
+		Mue[n].Copy(&prop->Mue[n]);
+		Kappa[n].Copy(&prop->Kappa[n]);
+		Sigma[n].Copy(&prop->Sigma[n]);
+		WeightEpsilon[n].Copy(&prop->WeightEpsilon[n]);
+		WeightMue[n].Copy(&prop->WeightMue[n]);
+		WeightKappa[n].Copy(&prop->WeightKappa[n]);
+		WeightSigma[n].Copy(&prop->WeightSigma[n]);
+	}
+	Density.Copy(&prop->Density);
+	WeightDensity.Copy(&prop->WeightDensity);
+}
+CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
+{
+	Type=MATERIAL;
+	Init();
+	bVisisble=true;
+	FillColor.a=EdgeColor.a=123; // default opacity for materials
+}
 CSPropMaterial::~CSPropMaterial() {}
 
 double CSPropMaterial::GetValue(ParameterScalar *ps, int ny)
@@ -95,7 +125,6 @@ double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 void CSPropMaterial::Init()
 {
 	bIsotropy = true;
-	bMaterial=true;
 	for (int n=0;n<3;++n)
 	{
 		Epsilon[n].SetValue(1);
@@ -116,9 +145,9 @@ void CSPropMaterial::Init()
 		WeightSigma[n].SetParameterSet(coordParaSet);
 	}
 	Density.SetValue(0);
+	Density.SetParameterSet(coordParaSet);
 	WeightDensity.SetValue(1.0);
-	FillColor.a=EdgeColor.a=123;
-	bVisisble=true;
+	WeightDensity.SetParameterSet(coordParaSet);
 }
 
 bool CSPropMaterial::Update(std::string *ErrStr)

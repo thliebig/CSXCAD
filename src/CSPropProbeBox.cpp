@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,17 @@
 #include "CSPropProbeBox.h"
 
 CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
-CSPropProbeBox::CSPropProbeBox(CSProperties* prop) : CSProperties(prop) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=PROBEBOX;
+	uiNumber=prop->uiNumber;
+	m_NormDir=prop->m_NormDir;
+	ProbeType=prop->ProbeType;
+	m_weight=prop->m_weight;
+	startTime=prop->startTime;
+	stopTime=prop->stopTime;
+	m_FD_Samples=prop->m_FD_Samples;
+}
 CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
 CSPropProbeBox::~CSPropProbeBox() {}
 

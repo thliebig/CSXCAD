@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,11 @@
 #include "CSPropResBox.h"
 
 CSPropResBox::CSPropResBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
-CSPropResBox::CSPropResBox(CSProperties* prop) : CSProperties(prop) {Type=RESBOX;uiFactor=1;bVisisble=false;}
+CSPropResBox::CSPropResBox(CSPropResBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=RESBOX;
+	uiFactor=prop->uiFactor;
+}
 CSPropResBox::CSPropResBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
 CSPropResBox::~CSPropResBox() {};
 

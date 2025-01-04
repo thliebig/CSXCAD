@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,18 +20,39 @@
 #include "CSPropLorentzMaterial.h"
 
 CSPropLorentzMaterial::CSPropLorentzMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
-CSPropLorentzMaterial::CSPropLorentzMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
+CSPropLorentzMaterial::CSPropLorentzMaterial(CSPropLorentzMaterial* prop, bool copyPrim) : CSPropDispersiveMaterial(prop, copyPrim)
+{
+	Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);
+	InitValues();
+	for (int o=0;o<m_Order;++o)
+	{
+		for (int n=0;n<3;++n)
+		{
+			EpsPlasma[o][n].Copy(&prop->EpsPlasma[o][n]);
+			MuePlasma[o][n].Copy(&prop->MuePlasma[o][n]);
+			WeightEpsPlasma[o][n].Copy(&prop->WeightEpsPlasma[o][n]);
+			WeightMuePlasma[o][n].Copy(&prop->WeightMuePlasma[o][n]);
+			EpsLorPole[o][n].Copy(&prop->EpsLorPole[o][n]);
+			MueLorPole[o][n].Copy(&prop->MueLorPole[o][n]);
+			WeightEpsLorPole[o][n].Copy(&prop->WeightEpsLorPole[o][n]);
+			WeightMueLorPole[o][n].Copy(&prop->WeightMueLorPole[o][n]);
+			EpsRelaxTime[o][n].Copy(&prop->EpsRelaxTime[o][n]);
+			MueRelaxTime[o][n].Copy(&prop->MueRelaxTime[o][n]);
+			WeightEpsRelaxTime[o][n].Copy(&prop->WeightEpsRelaxTime[o][n]);
+			WeightMueRelaxTime[o][n].Copy(&prop->WeightMueRelaxTime[o][n]);
+		}
+	}
+}
 CSPropLorentzMaterial::CSPropLorentzMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(LORENTZMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
 
 CSPropLorentzMaterial::~CSPropLorentzMaterial()
 {
 	DeleteValues();
-	m_Order = 0;
 }
 
 void CSPropLorentzMaterial::Init()
 {
-	m_Order = 0;
+	CSPropDispersiveMaterial::Init();
 	EpsPlasma=NULL;
 	MuePlasma=NULL;
 	WeightEpsPlasma=NULL;
@@ -44,12 +65,13 @@ void CSPropLorentzMaterial::Init()
 	MueRelaxTime=NULL;
 	WeightEpsRelaxTime=NULL;
 	WeightMueRelaxTime=NULL;
-	InitValues();
-	CSPropDispersiveMaterial::Init();
 }
 
 void CSPropLorentzMaterial::DeleteValues()
 {
+	CSPropDispersiveMaterial::DeleteValues();
+	if (EpsPlasma == NULL)
+		return;
 	for (int o=0;o<m_Order;++o)
 	{
 		delete[] EpsPlasma[o];
@@ -94,7 +116,7 @@ void CSPropLorentzMaterial::DeleteValues()
 
 void CSPropLorentzMaterial::InitValues()
 {
-//	DeleteValues();
+	CSPropDispersiveMaterial::InitValues();
 	EpsPlasma=new ParameterScalar*[m_Order];
 	MuePlasma=new ParameterScalar*[m_Order];
 	WeightEpsPlasma=new ParameterScalar*[m_Order];

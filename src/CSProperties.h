@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008,2009,2010 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -74,7 +74,7 @@ class CSXCAD_EXPORT CSProperties
 public:
 	virtual ~CSProperties();
 	//! Copy constructor
-	CSProperties(CSProperties* prop);
+	CSProperties(CSProperties* prop, bool copyPrim=false);
 	//! Enumeration of all possible sub-types of this base-class
 	enum PropertyType
 	{
@@ -82,7 +82,10 @@ public:
 		DISPERSIVEMATERIAL = 0x100, LORENTZMATERIAL = 0x200, DEBYEMATERIAL = 0x400,
 		DISCRETE_MATERIAL = 0x1000, LUMPED_ELEMENT = 0x2000, CONDUCTINGSHEET = 0x4000
 	};
-	
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSProperties(this, incl_prim);}
+
 	//! Get PropertyType \sa PropertyType
 	int GetType();
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
@@ -94,7 +97,7 @@ public:
 	ParameterSet* GetParameterSet() {return clParaSet;}
 
 	//! Check if Property is a physical material. Current PropertyType: MATERIAL & METAL
-	bool GetMaterial() {return bMaterial;}
+	virtual bool GetMaterial() const {return false;}
 	//!Get ID of this property. Used for primitive-->property mapping. \sa SetID	
 	unsigned int GetID();
 	//!Set ID to this property. USE ONLY WHEN YOU KNOW WHAT YOU ARE DOING!!!! \sa GetID
@@ -120,6 +123,8 @@ public:
 	void SetAttributeValue(std::string name, std::string value);
 	//! Remove Attribute
 	void RemoveAttribute(std::string name);
+	//! Get list of all attributes
+	std::vector<std::string> GetAttributeNames() {return this->m_Attribute_Name;}
 
 	//! Add a primitive to this Propertie. Takes ownership of this primitive! \sa CSPrimitives, RemovePrimitive, TakePrimitive
 	void AddPrimitive(CSPrimitives *prim);
@@ -213,7 +218,6 @@ protected:
 	Parameter* coordPara[7];
 	CoordinateSystem coordInputType;
 	PropertyType Type;
-	bool bMaterial;
 	unsigned int uiID;
 	unsigned int UniqueID;
 	std::string sName;

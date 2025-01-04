@@ -32,9 +32,12 @@ class CSXCAD_EXPORT CSPropDiscMaterial : public CSPropMaterial
 {
 public:
 	CSPropDiscMaterial(ParameterSet* paraSet);
-	CSPropDiscMaterial(CSProperties* prop);
+	CSPropDiscMaterial(CSPropDiscMaterial* prop, bool copyPrim=false);
 	CSPropDiscMaterial(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropDiscMaterial();
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropDiscMaterial(this, incl_prim);}
 
 	virtual const std::string GetTypeXMLString() const {return std::string("Discrete-Material");}
 
@@ -52,12 +55,10 @@ public:
 
 	double GetScale() {return m_Scale;}
 
-	virtual void Init();
-
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
-	bool ReadHDF5(std::string filename);
+	bool ReadFile();
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
@@ -67,6 +68,7 @@ public:
 protected:
 	unsigned int GetWeightingPos(const double* coords);
 	int GetDBPos(const double* coords);
+	virtual void Init();
 
 	int m_FileType;
 	std::string m_Filename;
@@ -83,6 +85,7 @@ protected:
 	bool m_DB_Background;
 	CSTransform* m_Transform;
 
+	bool ReadHDF5(std::string filename);
 	void* ReadDataSet(std::string filename, std::string d_name, int type_id, int &rank, unsigned int &size, bool debug=false);
 };
 

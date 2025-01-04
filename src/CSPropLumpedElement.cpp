@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,17 @@
 #include "CSPropLumpedElement.h"
 
 CSPropLumpedElement::CSPropLumpedElement(ParameterSet* paraSet) : CSProperties(paraSet) {Type=LUMPED_ELEMENT;Init();}
-CSPropLumpedElement::CSPropLumpedElement(CSProperties* prop) : CSProperties(prop) {Type=LUMPED_ELEMENT;Init();}
+CSPropLumpedElement::CSPropLumpedElement(CSPropLumpedElement* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=LUMPED_ELEMENT;
+	Init();
+	m_ny=prop->m_ny;
+	m_Caps=prop->m_Caps;
+	m_R.Copy(&prop->m_R);
+	m_C.Copy(&prop->m_C);
+	m_L.Copy(&prop->m_L);
+	m_LEtype = prop->m_LEtype;
+}
 CSPropLumpedElement::CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=LUMPED_ELEMENT;Init();}
 CSPropLumpedElement::~CSPropLumpedElement() {}
 

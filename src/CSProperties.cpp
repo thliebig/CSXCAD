@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008,2009,2010 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -36,27 +36,26 @@
 #include "tinyxml.h"
 
 /*********************CSProperties********************************************************************/
-CSProperties::CSProperties(CSProperties* prop)
+CSProperties::CSProperties(CSProperties* prop, bool copyPrim)
 {
 	uiID=prop->uiID;
-	bMaterial=prop->bMaterial;
 	coordInputType=prop->coordInputType;
 	clParaSet=prop->clParaSet;
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
 	bVisisble=prop->bVisisble;
 	sName=std::string(prop->sName);
-	for (size_t i=0;i<prop->vPrimitives.size();++i)
-	{
-		vPrimitives.push_back(prop->vPrimitives.at(i));
-	}
+	if (copyPrim)
+		for (size_t i=0;i<prop->vPrimitives.size();++i)
+			prop->vPrimitives.at(i)->GetCopy(this);
+	m_Attribute_Name = prop->m_Attribute_Name;
+	m_Attribute_Value = prop->m_Attribute_Value;
 	InitCoordParameter();
 }
 
 CSProperties::CSProperties(ParameterSet* paraSet)
 {
 	uiID=0;
-	bMaterial=false;
 	coordInputType=CARTESIAN;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);
@@ -74,7 +73,6 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 {
 	uiID=ID;
-	bMaterial=false;
 	coordInputType=CARTESIAN;
 	clParaSet=paraSet;
 	FillColor.R=(rand()%256);

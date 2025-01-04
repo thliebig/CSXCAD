@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -28,9 +28,12 @@ class CSXCAD_EXPORT CSPropProbeBox : public CSProperties
 {
 public:
 	CSPropProbeBox(ParameterSet* paraSet);
-	CSPropProbeBox(CSProperties* prop);
+	CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim=false);
 	CSPropProbeBox(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropProbeBox();
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropProbeBox(this, incl_prim);}
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("ProbeBox");}

@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -34,9 +34,12 @@ public:
 	};
 
 	CSPropLumpedElement(ParameterSet* paraSet);
-	CSPropLumpedElement(CSProperties* prop);
+	CSPropLumpedElement(CSPropLumpedElement* prop, bool copyPrim=false);
 	CSPropLumpedElement(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropLumpedElement();
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropLumpedElement(this, incl_prim);}
 
 	virtual void Init();
 

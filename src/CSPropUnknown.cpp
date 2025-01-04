@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -21,7 +21,10 @@
 
 CSPropUnknown::CSPropUnknown(ParameterSet* paraSet) : CSProperties(paraSet) {Type=UNKNOWN;bVisisble=false;}
 CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=UNKNOWN;bVisisble=false;}
-CSPropUnknown::CSPropUnknown(CSProperties* prop) : CSProperties(prop) {Type=UNKNOWN;bVisisble=false;}
+CSPropUnknown::CSPropUnknown(CSPropUnknown* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=UNKNOWN;
+}
 CSPropUnknown::~CSPropUnknown() {}
 
 void CSPropUnknown::SetProperty(const std::string val) {sUnknownProperty=std::string(val);}

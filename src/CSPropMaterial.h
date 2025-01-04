@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -29,9 +29,14 @@ class CSXCAD_EXPORT CSPropMaterial : public CSProperties
 {
 public:
 	CSPropMaterial(ParameterSet* paraSet);
-	CSPropMaterial(CSProperties* prop);
+	CSPropMaterial(CSPropMaterial* prop, bool copyPrim=false);
 	CSPropMaterial(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMaterial();
+
+	virtual bool GetMaterial() const {return true;}
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropMaterial(this, incl_prim);}
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("Material");}
@@ -84,7 +89,6 @@ public:
 	void SetIsotropy(bool val) {bIsotropy=val;}
 	bool GetIsotropy() {return bIsotropy;}
 
-	virtual void Init();
 	virtual bool Update(std::string *ErrStr=NULL);
 
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
@@ -98,6 +102,7 @@ protected:
 	void SetValue(double val, ParameterScalar *ps, int ny);
 	int SetValue(std::string val, ParameterScalar *ps, int ny);
 
+	virtual void Init();
 	//electro-magnetic properties
 	ParameterScalar Epsilon[3],Mue[3],Kappa[3],Sigma[3];
 	ParameterScalar WeightEpsilon[3],WeightMue[3],WeightKappa[3],WeightSigma[3];

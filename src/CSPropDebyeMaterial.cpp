@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2013 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2013-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -19,29 +19,43 @@
 
 #include "CSPropDebyeMaterial.h"
 
-CSPropDebyeMaterial::CSPropDebyeMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
-CSPropDebyeMaterial::CSPropDebyeMaterial(CSProperties* prop) : CSPropDispersiveMaterial(prop) {Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
-CSPropDebyeMaterial::CSPropDebyeMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);Init();}
+CSPropDebyeMaterial::CSPropDebyeMaterial(ParameterSet* paraSet) : CSPropDispersiveMaterial(paraSet) {Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);}
+CSPropDebyeMaterial::CSPropDebyeMaterial(CSPropDebyeMaterial* prop, bool copyPrim) : CSPropDispersiveMaterial(prop, copyPrim)
+{
+	Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);
+	InitValues();
+	for (int o=0;o<m_Order;++o)
+	{
+		for (int n=0;n<3;++n)
+		{
+			EpsDelta[o][n].Copy(&prop->EpsDelta[o][n]);
+			WeightEpsDelta[o][n].Copy(&prop->WeightEpsDelta[o][n]);
+			EpsRelaxTime[o][n].Copy(&prop->EpsRelaxTime[o][n]);
+			WeightEpsRelaxTime[o][n].Copy(&prop->WeightEpsRelaxTime[o][n]);
+		}
+	}
+}
+CSPropDebyeMaterial::CSPropDebyeMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropDispersiveMaterial(ID,paraSet) {Type=(CSProperties::PropertyType)(DEBYEMATERIAL | DISPERSIVEMATERIAL | MATERIAL);}
 
 CSPropDebyeMaterial::~CSPropDebyeMaterial()
 {
 	DeleteValues();
-	m_Order = 0;
 }
 
 void CSPropDebyeMaterial::Init()
 {
-	m_Order = 0;
+	CSPropDispersiveMaterial::Init();
 	EpsDelta=NULL;
 	WeightEpsDelta=NULL;
 	EpsRelaxTime=NULL;
 	WeightEpsRelaxTime=NULL;
-	InitValues();
-	CSPropDispersiveMaterial::Init();
 }
 
 void CSPropDebyeMaterial::DeleteValues()
 {
+	CSPropDispersiveMaterial::DeleteValues();
+	if (EpsDelta==NULL) // nothing to do
+		return;
 	for (int o=0;o<m_Order;++o)
 	{
 		delete[] EpsDelta[o];
@@ -62,7 +76,9 @@ void CSPropDebyeMaterial::DeleteValues()
 
 void CSPropDebyeMaterial::InitValues()
 {
-//	DeleteValues();
+	CSPropDispersiveMaterial::InitValues();
+	if (m_Order<=0)
+		return;
 	EpsDelta=new ParameterScalar*[m_Order];
 	WeightEpsDelta=new ParameterScalar*[m_Order];
 	EpsRelaxTime=new ParameterScalar*[m_Order];

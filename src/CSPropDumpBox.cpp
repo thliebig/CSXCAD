@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,22 @@
 #include "CSPropDumpBox.h"
 
 CSPropDumpBox::CSPropDumpBox(ParameterSet* paraSet) : CSPropProbeBox(paraSet) {Type=DUMPBOX;Init();}
-CSPropDumpBox::CSPropDumpBox(CSProperties* prop) : CSPropProbeBox(prop) {Type=DUMPBOX;Init();}
+CSPropDumpBox::CSPropDumpBox(CSPropDumpBox* prop, bool copyPrim) : CSPropProbeBox(prop, copyPrim)
+{
+	Type=DUMPBOX;
+	Init();
+	DumpType = prop->DumpType;
+	DumpMode = prop->DumpMode;
+	FileType = prop->FileType;
+	MultiGridLevel = prop->MultiGridLevel;
+	m_SubSampling=prop->m_SubSampling;
+	m_OptResolution=prop->m_OptResolution;
+	for (int ny=0;ny<3;++ny)
+	{
+		SubSampling[ny]=prop->SubSampling[ny];
+		OptResolution[ny]=prop->OptResolution[ny];
+	}
+}
 CSPropDumpBox::CSPropDumpBox(unsigned int ID, ParameterSet* paraSet) : CSPropProbeBox(ID,paraSet) {Type=DUMPBOX;Init();}
 CSPropDumpBox::~CSPropDumpBox() {}
 

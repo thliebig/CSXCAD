@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -27,9 +27,14 @@ class CSXCAD_EXPORT CSPropMetal : public CSProperties
 {
 public:
 	CSPropMetal(ParameterSet* paraSet);
-	CSPropMetal(CSProperties* prop);
+	CSPropMetal(CSPropMetal* prop, bool copyPrim=false);
 	CSPropMetal(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropMetal();
+
+	virtual bool GetMaterial() const {return true;}
+
+	//! Create a copy of this property. Optional: Copy all primitives assigned to this property too.
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropMetal(this, incl_prim);}
 
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("Metal");}

@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,22 @@
 #include "CSPropExcitation.h"
 
 CSPropExcitation::CSPropExcitation(ParameterSet* paraSet,unsigned int number) : CSProperties(paraSet) {Type=EXCITATION;Init();uiNumber=number;}
-CSPropExcitation::CSPropExcitation(CSProperties* prop) : CSProperties(prop) {Type=EXCITATION;Init();}
+CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type=EXCITATION;
+	Init();
+	uiNumber=prop->uiNumber;
+	iExcitType=prop->iExcitType;
+	coordInputType=prop->coordInputType;
+	m_Frequency.Copy(&prop->m_Frequency);
+	Delay.Copy(&prop->Delay);
+	for (unsigned int i=0;i<3;++i)
+	{
+		ActiveDir[i]=prop->ActiveDir[i];
+		Excitation[i].Copy(&prop->Excitation[i]);
+		WeightFct[i].Copy(&prop->WeightFct[i]);
+	}
+}
 CSPropExcitation::CSPropExcitation(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=EXCITATION;Init();}
 CSPropExcitation::~CSPropExcitation() {}
 
@@ -127,6 +142,8 @@ void CSPropExcitation::Init()
 	iExcitType=1;
 	coordInputType=UNDEFINED_CS;
 	m_Frequency.SetValue(0.0);
+	Delay.SetValue(0.0);
+	Delay.SetParameterSet(clParaSet);
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=true;
@@ -134,8 +151,6 @@ void CSPropExcitation::Init()
 		Excitation[i].SetParameterSet(clParaSet);
 		WeightFct[i].SetValue(1.0);
 		WeightFct[i].SetParameterSet(coordParaSet);
-		Delay.SetValue(0.0);
-		Delay.SetParameterSet(clParaSet);
 	}
 }
 

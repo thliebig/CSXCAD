@@ -1,5 +1,5 @@
 /*
-*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +20,13 @@
 #include "CSPropConductingSheet.h"
 
 CSPropConductingSheet::CSPropConductingSheet(ParameterSet* paraSet) : CSPropMetal(paraSet) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
-CSPropConductingSheet::CSPropConductingSheet(CSProperties* prop) : CSPropMetal(prop) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
+CSPropConductingSheet::CSPropConductingSheet(CSPropConductingSheet* prop, bool copyPrim) : CSPropMetal(prop, copyPrim)
+{
+	Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);
+	Init();
+	Conductivity.Copy(&prop->Conductivity);
+	Thickness.Copy(&prop->Thickness);
+}
 CSPropConductingSheet::CSPropConductingSheet(unsigned int ID, ParameterSet* paraSet) : CSPropMetal(ID,paraSet) {Type=(CSProperties::PropertyType)(CONDUCTINGSHEET | METAL);Init();}
 
 CSPropConductingSheet::~CSPropConductingSheet()

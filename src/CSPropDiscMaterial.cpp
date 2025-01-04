@@ -32,10 +32,15 @@ CSPropDiscMaterial::CSPropDiscMaterial(ParameterSet* paraSet) : CSPropMaterial(p
 	Init();
 }
 
-CSPropDiscMaterial::CSPropDiscMaterial(CSProperties* prop) : CSPropMaterial(prop)
+CSPropDiscMaterial::CSPropDiscMaterial(CSPropDiscMaterial* prop, bool copyPrim) : CSPropMaterial(prop, copyPrim)
 {
 	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);
 	Init();
+	m_Filename = prop->m_Filename;
+	m_FileType = prop->m_FileType;
+	m_DB_Background = prop->m_DB_Background;
+	m_Scale = prop->m_Scale;
+	//Copy does not read the data!!
 }
 
 CSPropDiscMaterial::CSPropDiscMaterial(unsigned int ID, ParameterSet* paraSet) : CSPropMaterial(ID, paraSet)
@@ -220,7 +225,8 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 	m_FileType = 0;
 	prop->QueryIntAttribute("Type",&m_FileType);
-	const char* c_filename = prop->Attribute("File");
+	if (prop->QueryStringAttribute("File",&m_Filename)!=TIXML_SUCCESS)
+		m_Filename.clear();
 
 	int help;
 	if (prop->QueryIntAttribute("UseDBBackground",&help)==TIXML_SUCCESS)
@@ -232,15 +238,19 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
 		m_Scale=1;
 
-	if (c_filename==NULL)
-		return true;
+	return this->ReadFile();
+}
 
-	if ((m_FileType==0) && (c_filename!=NULL))
-		return ReadHDF5(c_filename);
+bool CSPropDiscMaterial::ReadFile()
+{
+	if (m_Filename.empty())
+		return false;
+
+	if (m_FileType==0)
+		return ReadHDF5(m_Filename);
 	else
 		std::cerr << "CSPropDiscMaterial::ReadFromXML: Unknown file type or no filename given." << std::endl;
-
-	return true;
+	return false;
 }
 
 void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, int type_id, int &rank, unsigned int &size, bool debug)
@@ -327,6 +337,7 @@ void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, 
 
 bool CSPropDiscMaterial::ReadHDF5( std::string filename )
 {
+	m_Filename = filename;
 	cout << __func__ << ": Reading \"" << filename << "\"" << std::endl;
 
 	// open hdf5 file
