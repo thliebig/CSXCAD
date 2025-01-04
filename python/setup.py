@@ -40,7 +40,7 @@ setup(
   maintainer = 'Thorsten Liebig',
   maintainer_email = 'Thorsten.Liebig@gmx.de',
   url = 'https://openEMS.de',
-  packages=["CSXCAD", ],
+  packages=["CSXCAD", "CSXCAD/GUI"],
   package_data={'CSXCAD': ['*.pxd']},
   ext_modules = cythonize(extensions, language_level=3)
  )
