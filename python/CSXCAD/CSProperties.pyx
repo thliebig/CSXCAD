@@ -328,6 +328,8 @@ cdef class CSProperties:
         """
         self.thisptr.SetAttributeValue(name.encode('UTF-8'), val.encode('UTF-8'))
 
+    AddAttribute = SetAttributeValue
+
     def RemoveAttribute(self, name):
         """ RemoveAttribute(name)
 

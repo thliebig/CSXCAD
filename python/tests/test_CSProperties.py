@@ -94,6 +94,11 @@ class Test_CSPrimMethods(unittest.TestCase):
         attrs = prop.GetAttributes()
         self.assertEqual(attrs, {'my_attr1': 'value_new', 'my_attr2': 'value2', 'my_attr4': 'value4'})
 
+        prop.AddAttribute('test_add', 'added_value')
+        self.assertTrue(prop.ExistAttribute('test_add'))
+        self.assertEqual(prop.GetAttributeValue('test_add'), 'added_value')
+
+
         # test that attributes are copied!
         prop2 = prop.copy()
         self.assertEqual(prop2.GetName(), 'new_name')
