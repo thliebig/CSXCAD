@@ -29,6 +29,7 @@
 #include "CSPropProbeBox.h"
 #include "CSPropDumpBox.h"
 #include "CSPropResBox.h"
+#include "CSPropAbsorbingBC.h"
 
 #include "CSPrimitives.h"
 #include <iostream>
