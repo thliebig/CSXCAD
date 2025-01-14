@@ -86,6 +86,8 @@ cdef class CSProperties:
             prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
         elif p_type == DEBYEMATERIAL + DISPERSIVEMATERIAL + MATERIAL:
             prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
+        elif p_type == ABSORBING_BC:
+            prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
 
         return prop
 
@@ -120,6 +122,9 @@ cdef class CSProperties:
             prop = CSPropLorentzMaterial(pset, no_init=no_init, **kw)
         elif type_str=='DebyeMaterial':
             prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
+        elif type_str=='AbsorbingBC':
+            prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
+        
         return prop
 
     @staticmethod
@@ -684,7 +689,60 @@ cdef class CSPropMaterial(CSProperties):
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
+###############################################################################
+cdef class CSPropAbsorbingBC(CSProperties):
+    """
+    Local absorbing Boundary Conditions
 
+
+    At this point this property only supports 1st order Mur, and an addition of 
+    "superabsorption" to increase ~10dB absorption efficiency.
+    In the future, the plan is to support modal absorption, and multi-modal 
+    absorption.
+
+    :param NormDir: int          -- Positive or negative 1,2 or 3, denoting +-x,+y and +-z, respectively.
+    :param PhaseVelocity: double -- The phase velocity of the expected propagating mode\signal. If not set, will set C0, with respect to the material at the border.    
+    :param BCtype: enum BCtype   -- 'BCtype.MUR_1ST_1PV', 'BCtype.MUR_1ST_1PV_SA'
+    """
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            self.thisptr = NULL
+            return 
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropAbsorbingBC(pset.thisptr)
+        
+        for k in kw:
+            if k=='NormalSignPos':
+                self.SetNormalSignPos(kw[k])
+            elif k=='PhaseVelocity':
+                self.SetPhaseVelocity(kw[k])
+            elif k=='BCtype':
+                self.SetBoundaryType(kw[k])
+                
+        for k in ['NormalSignPos', 'PhaseVelocity', 'BCtype']:
+            if k in kw:
+                del kw[k]
+                
+        super(CSPropAbsorbingBC, self).__init__(pset, *args, **kw)
+        
+    def SetNormalSignPos(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetNormalSignPos(val)
+        
+    def GetNormalSignPos(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetNormalSignPos()
+        
+    def SetPhaseVelocity(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetPhaseVelocity(val)
+    
+    def GetPhaseVelocity(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetPhaseVelocity()
+    
+    def SetBoundaryType(self,val):
+        (<_CSPropAbsorbingBC*>self.thisptr).SetBoundaryType(val)
+    
+    def GetBoundaryType(self):
+        return (<_CSPropAbsorbingBC*>self.thisptr).GetBoundaryType()
+    
 ###############################################################################
 cdef class CSPropLumpedElement(CSProperties):
     """
