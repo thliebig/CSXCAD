@@ -34,7 +34,7 @@ public:
 	};
 
 	CSPropAbsorbingBC(ParameterSet* paraSet);
-	CSPropAbsorbingBC(CSProperties* prop);
+	CSPropAbsorbingBC(CSPropAbsorbingBC* prop, bool copyPrim = false);
 	CSPropAbsorbingBC(unsigned int ID, ParameterSet* paraSet);
 	virtual ~CSPropAbsorbingBC();
 
@@ -44,26 +44,20 @@ public:
 	virtual const std::string GetTypeXMLString() const {return std::string("AbsorbingBC");}
 
 	//! Set the normal sign. Direction will be set by post-processing the primitive itself.
-	void SetNormalSignPos(bool val);
+	void SetNormalSignPositive(bool val) {this->NormSignPositive = val;}
 
 	//! Get the normal direction
-	bool GetNormalSignPos() {return (NormSign.GetValue() > 0);}
-
-	//! Get the normal direction as a string
-	const std::string GetNormalSignPosTerm();
+	bool GetNormalSignPositive() {return NormSignPositive;}
 
 	//! Set the phase velocity using a double value
-	void SetPhaseVelocity(double val) {PhaseVelocity.SetValue(val);}
-	//! Set the phase velocity using a string
-	double SetPhaseVelocity(const std::string val)  {return PhaseVelocity.SetValue(val);}
+	void SetPhaseVelocity(double val);
+
 	//! Get the phase velocity
 	double GetPhaseVelocity() {return PhaseVelocity.GetValue();}
-	//! Get the phase velocity as a string
-	const std::string GetPhaseVelocityTerm() {return PhaseVelocity.GetString();}
+	const std::string GetPhaseVelocityTerm() const	{return PhaseVelocity.GetString();}
 
-	void SetBoundaryType(ABCtype val) {BoundaryType = val;};
-	ABCtype GetBoundaryType() {return BoundaryType; };
-	const std::string GetBoundaryTypeTerm();
+	void SetAbsorbingBoundaryType(ABCtype val) {AbsorbingBoundaryType = val;};
+	ABCtype GetAbsorbingBoundaryType() {return AbsorbingBoundaryType;};
 
 	virtual bool Update(std::string *ErrStr = NULL);
 
@@ -74,7 +68,7 @@ public:
 
 protected:
 
-	ParameterScalar	NormSign;
+	bool			NormSignPositive;
 	ParameterScalar	PhaseVelocity;
-	ABCtype			BoundaryType;
+	ABCtype			AbsorbingBoundaryType;
 };
