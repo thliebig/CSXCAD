@@ -21,67 +21,37 @@
 
 #define _C0_ 299792458.0
 
-CSPropAbsorbingBC::CSPropAbsorbingBC(ParameterSet* paraSet) : CSProperties(paraSet) {Type=(CSProperties::PropertyType)(ABSORBING_BC); Init();}
-CSPropAbsorbingBC::CSPropAbsorbingBC(CSProperties* prop) : CSProperties(prop) {Type=(CSProperties::PropertyType)(ABSORBING_BC); Init();}
-CSPropAbsorbingBC::CSPropAbsorbingBC(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=(CSProperties::PropertyType)(ABSORBING_BC); Init();}
+CSPropAbsorbingBC::CSPropAbsorbingBC(ParameterSet* paraSet) : CSProperties(paraSet) {Type = ABSORBING_BC; Init();}
+CSPropAbsorbingBC::CSPropAbsorbingBC(CSPropAbsorbingBC* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+{
+	Type = ABSORBING_BC;
+	Init();
 
+	NormSignPositive = prop->NormSignPositive;
+	PhaseVelocity.Copy(&prop->PhaseVelocity);
+	AbsorbingBoundaryType = prop->AbsorbingBoundaryType;
+}
+CSPropAbsorbingBC::CSPropAbsorbingBC(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type = ABSORBING_BC; Init();}
 CSPropAbsorbingBC::~CSPropAbsorbingBC()
 {
 }
 
-void CSPropAbsorbingBC::SetNormalSignPos(bool val)
-{
-	int outVal = val ? 1 : -1;
-	NormSign.SetValue(outVal);
-}
-
-const std::string CSPropAbsorbingBC::GetNormalSignPosTerm()
-{
-	char ch_sign = (NormSign.GetValue() >= 0.0) ? '+' : '-';
-	std::string outStr(1,' ');
-	outStr[0] = ch_sign;
-	return outStr;
-}
-
-const std::string CSPropAbsorbingBC::GetBoundaryTypeTerm()
-{
-	std::string outStr;
-	if (BoundaryType == ABCtype::MUR_1ST)
-		outStr = "1st Order Mur ABC";
-	if (BoundaryType == ABCtype::MUR_1ST_SA)
-		outStr = "1st Order Mur ABC with Super-Absorption";
-	if (BoundaryType == ABCtype::UNDEFINED)
-		outStr = "Undefined";
-
-	return outStr;
-}
-
 void CSPropAbsorbingBC::Init()
 {
-	NormSign.SetValue(0);
-	PhaseVelocity.SetValue(0);
-	BoundaryType = CSPropAbsorbingBC::UNDEFINED;
+	NormSignPositive = true;
+	PhaseVelocity.SetValue((double)_C0_);
+	AbsorbingBoundaryType = CSPropAbsorbingBC::UNDEFINED;
 }
 
 bool CSPropAbsorbingBC::Update(std::string *ErrStr)
 {
-	int EC = NormSign.Evaluate();
 	bool bOK = true;
+	int EC = PhaseVelocity.Evaluate();
 	if (EC != ParameterScalar::PS_NO_ERROR) bOK = false;
-	if ((EC != ParameterScalar::PS_NO_ERROR)  && (ErrStr != NULL))
+	if ((EC != ParameterScalar::PS_NO_ERROR) && (ErrStr != NULL))
 	{
 		std::stringstream stream;
-		stream << std::endl << "Error in AbsorbingBC-Property NormSign - Value";
-		ErrStr->append(stream.str());
-		PSErrorCode2Msg(EC,ErrStr);
-	}
-
-	EC = PhaseVelocity.Evaluate();
-	if (EC != ParameterScalar::PS_NO_ERROR) bOK = false;
-	if ((EC != ParameterScalar::PS_NO_ERROR)  && (ErrStr != NULL))
-	{
-		std::stringstream stream;
-		stream << std::endl << "Error in AbsorbingBC-Property PhaseVelocity - Value";
+		stream << std::endl << "Error in AbsorbingBC-Property PhaseVelocity-Value";
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
@@ -89,18 +59,30 @@ bool CSPropAbsorbingBC::Update(std::string *ErrStr)
 	return bOK & CSProperties::Update(ErrStr);
 }
 
+void CSPropAbsorbingBC::SetPhaseVelocity(double val)
+{
+	if (val >= 0)
+		PhaseVelocity.SetValue(val);
+	else
+	{
+		std::cerr << "CSPropAbsorbingBC::SetPhaseVelocity: Warning: Unable to set velocity smaller than zero. Setting to 0*C0" << std::endl;
+		PhaseVelocity.SetValue(0);
+	}
+
+}
+
 bool CSPropAbsorbingBC::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 {
 	if (CSProperties::Write2XML(root,parameterised,sparse) == false) return false;
+
 	TiXmlElement* prop=root.ToElement();
+
 	if (prop==NULL) return false;
 
-	WriteTerm(NormSign,*prop,"NormSign",parameterised);
-	WriteTerm(PhaseVelocity,*prop,"PhaseVelocity",parameterised);
+	prop->SetAttribute("NormSignPositive",(int)NormSignPositive);
+	prop->SetAttribute("AbsorbingBoundaryType",(int)AbsorbingBoundaryType);
 
-	ParameterScalar s_BoundaryType;
-	s_BoundaryType.SetValue((double)(this->BoundaryType));
-	WriteTerm(s_BoundaryType,*prop,"ABCtype",parameterised);
+	WriteTerm(PhaseVelocity,*prop,"PhaseVelocity",parameterised);
 
 	return true;
 }
@@ -112,35 +94,40 @@ bool CSPropAbsorbingBC::ReadFromXML(TiXmlNode &root)
 	TiXmlElement* prop=root.ToElement();
 	if (prop==NULL) return false;
 
-	if (ReadTerm(NormSign,*prop,"NormalSignPos")==false)
-		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read Normal direction. Set to 0 (undefined)." << std::endl;
+	if (prop->QueryBoolAttribute("NormalSignPositive", &NormSignPositive) != TIXML_SUCCESS) NormSignPositive = true;
 
 	if (ReadTerm(PhaseVelocity,*prop,"PhaseVelocity")==false)
 		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read Phase velocity. Set to C0." << std::endl;
 
-	ParameterScalar s_BoundaryType;
-	if (ReadTerm(s_BoundaryType,*prop,"BCtype")==false)
-		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read Boundary Condition type. Set to 'Mur 1st Order, single speed' (0)." << std::endl;
-	else
-		BoundaryType = (CSPropAbsorbingBC::ABCtype)(s_BoundaryType.GetValue());
-
-
+	int i_ABCtype;
+	if (prop->QueryIntAttribute("AbsorbingBoundaryType", &i_ABCtype) != TIXML_SUCCESS) i_ABCtype = 0;
+	AbsorbingBoundaryType = (ABCtype)i_ABCtype;
 
 	return true;
 }
 
 void CSPropAbsorbingBC::ShowPropertyStatus(std::ostream& stream)
 {
-	char ch_sign = (NormSign.GetValue() > 0) ? '+' : '-';
+	std::string s_sign = NormSignPositive ?  "True" : "False";
 
 	std::string s_BoundaryType;
 
-	s_BoundaryType = GetBoundaryTypeTerm();
+	switch (AbsorbingBoundaryType)
+	{
+		case ABCtype::UNDEFINED:
+			s_BoundaryType = "Undefined";
+			break;
+		case ABCtype::MUR_1ST:
+			s_BoundaryType = "1st order Mur BC";
+			break;
+		case ABCtype::MUR_1ST_SA:
+			s_BoundaryType = "1st order Mur BC with super-absorption";
+			break;
+	}
 
 	CSProperties::ShowPropertyStatus(stream);
 	stream << " --- Absorbing BC Properties --- " << std::endl;
-	stream << "  Normal Sign: " << ch_sign << std::endl;
+	stream << "  Normal Sign Positive: " << s_sign << std::endl;
 	stream << "  Phase velocity: "   << PhaseVelocity.GetValue()/_C0_ << "*C0" << std::endl;
-	stream << "  Boundary condition type: "   << s_BoundaryType << std::endl;
-
+	stream << "  Absorbing boundary condition type: "   << s_BoundaryType << std::endl;
 }

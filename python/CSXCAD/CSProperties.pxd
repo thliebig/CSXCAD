@@ -133,14 +133,14 @@ cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
         _CSPropAbsorbingBC(_ParameterSet*) except +
             
         # Insert methods here:
-        void SetNormalSignPos(bool val)
-        bool GetNormalSignPos()
+        void SetNormalSignPositive(bool val)
+        bool GetNormalSignPositive()
         
         void SetPhaseVelocity(double val)
         double GetPhaseVelocity()
         
-        void    SetBoundaryType(ABCtype val)
-        ABCtype  GetBoundaryType()
+        void    SetAbsorbingBoundaryType(ABCtype val)
+        ABCtype  GetAbsorbingBoundaryType()
             
 cdef class CSPropAbsorbingBC(CSProperties):
     pass
