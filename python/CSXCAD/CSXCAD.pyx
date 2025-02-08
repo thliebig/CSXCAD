@@ -87,11 +87,13 @@ cdef class ContinuousStructure:
         if len(kw)!=0:
             raise Exception('Unknown keyword arguments: "{}"'.format(kw))
 
-    def __dealloc__(self):
-        del self.thisptr
-
     def Update(self):
         return self.thisptr.Update().decode('UTF-8')
+
+    def Clear(self):
+        return self.thisptr.clear()
+
+    Reset=Clear
 
     def Write2XML(self, file:Path|str):
         """Write geometry to an xml-file

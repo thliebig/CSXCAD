@@ -54,6 +54,7 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             vector[_CSProperties*] GetPropertiesByName(string name)
             vector[_CSProperties*] GetPropertyByType(PropertyType prop_type)
 
+            void clear()
             string Update()
 
 cdef class ContinuousStructure:
