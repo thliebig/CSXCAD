@@ -183,6 +183,9 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             void SetExcitation(double val, int Component)
             double GetExcitation(int Component)
 
+            void SetEnabled(bool val)
+            bool GetEnabled()
+
             void SetPropagationDir(double val, int Component)
             double GetPropagationDir(int Component)
 

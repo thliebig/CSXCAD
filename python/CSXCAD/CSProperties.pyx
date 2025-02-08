@@ -909,6 +909,15 @@ cdef class CSPropExcitation(CSProperties):
         """
         return (<_CSPropExcitation*>self.thisptr).GetExcitType()
 
+
+    def SetEnabled(self, val):
+        """ Enable/Disable the excitation"""
+        (<_CSPropExcitation*>self.thisptr).SetEnabled(val)
+
+    def GetEnabled(self):
+        """ Get enable/disable state of the excitation"""
+        return (<_CSPropExcitation*>self.thisptr).GetEnabled()
+
     def SetExcitation(self, val):
         """ SetExcitation(val)
 

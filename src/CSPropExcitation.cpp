@@ -26,6 +26,7 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	Init();
 	uiNumber=prop->uiNumber;
 	iExcitType=prop->iExcitType;
+	m_enabled=prop->m_enabled;
 	coordInputType=prop->coordInputType;
 	m_Frequency.Copy(&prop->m_Frequency);
 	Delay.Copy(&prop->Delay);
@@ -140,6 +141,7 @@ void CSPropExcitation::Init()
 {
 	uiNumber=0;
 	iExcitType=1;
+	m_enabled=true;
 	coordInputType=UNDEFINED_CS;
 	m_Frequency.SetValue(0.0);
 	Delay.SetValue(0.0);
@@ -232,6 +234,7 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 	if (prop==NULL) return false;
 
 	prop->SetAttribute("Number",(int)uiNumber);
+	prop->SetAttribute("Enabled",m_enabled);
 	WriteTerm(m_Frequency,*prop,"Frequency",parameterised);
 	WriteTerm(Delay,*prop,"Delay",parameterised);
 
@@ -260,6 +263,8 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("Number",&iHelp)!=TIXML_SUCCESS) uiNumber=0;
 	else uiNumber=(unsigned int)iHelp;
 
+	prop->QueryBoolAttribute("Enabled",&m_enabled);
+
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
@@ -285,6 +290,7 @@ void CSPropExcitation::ShowPropertyStatus(std::ostream& stream)
 	CSProperties::ShowPropertyStatus(stream);
 	stream << " --- Excitation Properties --- " << std::endl;
 	stream << "  Type: " << iExcitType << std::endl;
+	stream << "  Enabled: " << m_enabled << std::endl;
 	stream << "  Active directions: " << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << std::endl;
 	stream << "  Excitation\t: " << Excitation[0].GetValueString() << ", "  << Excitation[1].GetValueString() << ", "  << Excitation[2].GetValueString()  << std::endl;
 	stream << "  Weighting\t: " << WeightFct[0].GetValueString() << ", "  << WeightFct[1].GetValueString() << ", "  << WeightFct[2].GetValueString()  << std::endl;

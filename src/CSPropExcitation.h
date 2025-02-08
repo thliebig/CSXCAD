@@ -61,6 +61,11 @@ public:
 	//! Get the excitation frequency as a string
 	const std::string GetFrequencyString()  {return m_Frequency.GetValueString();}
 
+	//! Set this excitation to be enabled or not
+	void SetEnabled(bool val) {m_enabled=val;}
+	//! Get if this excitation is enabled or not
+	bool GetEnabled() {return m_enabled;}
+
 	//! Set the excitation amplitude for a given component
 	void SetExcitation(double val, int Component=0);
 	//! Set the excitation amplitude for a given component
@@ -108,6 +113,7 @@ public:
 protected:
 	unsigned int uiNumber;
 	int iExcitType;
+	bool m_enabled;
 	bool ActiveDir[3];
 	ParameterScalar m_Frequency;
 	ParameterScalar Excitation[3];		// excitation amplitude vector
