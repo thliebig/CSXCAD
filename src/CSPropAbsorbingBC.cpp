@@ -79,7 +79,7 @@ bool CSPropAbsorbingBC::Write2XML(TiXmlNode& root, bool parameterised, bool spar
 
 	if (prop==NULL) return false;
 
-	prop->SetAttribute("NormSignPositive",(int)NormSignPositive);
+	prop->SetAttribute("NormalSignPositive",(int)NormSignPositive);
 	prop->SetAttribute("AbsorbingBoundaryType",(int)AbsorbingBoundaryType);
 
 	WriteTerm(PhaseVelocity,*prop,"PhaseVelocity",parameterised);
@@ -94,7 +94,11 @@ bool CSPropAbsorbingBC::ReadFromXML(TiXmlNode &root)
 	TiXmlElement* prop=root.ToElement();
 	if (prop==NULL) return false;
 
-	if (prop->QueryBoolAttribute("NormalSignPositive", &NormSignPositive) != TIXML_SUCCESS) NormSignPositive = true;
+	if (prop->QueryBoolAttribute("NormalSignPositive", &NormSignPositive) != TIXML_SUCCESS)
+	{
+		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read normal sign. Setting to true" << std::endl;
+		NormSignPositive = true;
+	}
 
 	if (ReadTerm(PhaseVelocity,*prop,"PhaseVelocity")==false)
 		std::cerr << "CSPropAbsorbingBC::ReadFromXML: Warning: Failed to read Phase velocity. Set to C0." << std::endl;
