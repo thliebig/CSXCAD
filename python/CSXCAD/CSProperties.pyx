@@ -43,6 +43,8 @@ from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
 
+from libc cimport stdlib as stdlib
+
 def hex2color(color):
     if not type(color) is str:
         return color
@@ -1052,6 +1054,59 @@ cdef class CSPropExcitation(CSProperties):
             func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
         return func
 
+    def SetManualWeights(self, Weights):
+        """ SetManualWeights(weights,coors)
+        
+        Sets the vectors for manual excitation weights, instead of text expression.
+        
+        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
+        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        
+        """
+        
+        N = Weights.shape[0]
+        
+        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef unsigned int   c_len   = N
+        
+        cdef int elIdx
+        try:
+            for elIdx in range(N):
+                cx[elIdx] = Weights[elIdx,0]
+                cy[elIdx] = Weights[elIdx,1]
+                cz[elIdx] = Weights[elIdx,2]
+                
+                cwx[elIdx] = Weights[elIdx,3]
+                cwy[elIdx] = Weights[elIdx,4]
+                cwz[elIdx] = Weights[elIdx,5]
+                
+            (<_CSPropExcitation*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
+        finally:
+            # don't forget to fee allocated memory
+            stdlib.free(cx)
+            stdlib.free(cy)
+            stdlib.free(cz)
+            
+            stdlib.free(cwx)
+            stdlib.free(cwy)
+            stdlib.free(cwz)
+        
+    def ClearManualWeights(self):
+        """ ClearManualWeights(weights,coors)
+        
+        Clears the manual weight vectors.
+                
+        """
+        
+        (<_CSPropExcitation*>self.thisptr).ClearManualWeights()
+        
     def SetFrequency(self, val):
         """ SetFrequency(val)
 
@@ -1147,6 +1202,60 @@ cdef class CSPropProbeBox(CSProperties):
         """
         return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
 
+    def SetManualWeights(self, Weights):
+        """ SetManualWeights(weights,coors)
+        
+        Sets the vectors for manual excitation weights, instead of text expression.
+        
+        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
+        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        
+        """
+    
+        N = Weights.shape[0]
+        
+        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
+        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+        
+        cdef unsigned int   c_len   = N
+        
+        cdef int elIdx
+        try:
+            for elIdx in range(N):
+                cx[elIdx] = Weights[elIdx,0]
+                cy[elIdx] = Weights[elIdx,1]
+                cz[elIdx] = Weights[elIdx,2]
+                
+                cwx[elIdx] = Weights[elIdx,3]
+                cwy[elIdx] = Weights[elIdx,4]
+                cwz[elIdx] = Weights[elIdx,5]
+        
+                (<_CSPropProbeBox*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
+        
+        finally:
+            # don't forget to fee allocated memory
+            stdlib.free(cx)
+            stdlib.free(cy)
+            stdlib.free(cz)
+            
+            stdlib.free(cwx)
+            stdlib.free(cwy)
+            stdlib.free(cwz)
+            
+    def ClearManualWeights(self):
+        """ ClearManualWeights(weights,coors)
+        
+        Clears the manual weight vectors.
+                
+        """
+        
+        (<_CSPropProbeBox*>self.thisptr).ClearManualWeights()
+
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """
@@ -1195,6 +1304,15 @@ cdef class CSPropProbeBox(CSProperties):
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
         """
+        
+        # Check if this is a numpy array, namely custom mode.
+        if mode_fun.__class__.__name__ == 'ndarray':
+            if not (mode_fun.shape[1] == 6):
+                raise Exception('"E_func" must have 6 columns')
+            
+            self.SetManualWeights(mode_fun)
+            return
+        
         assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
         self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
         self.AddAttribute('ModeFunctionY', str(mode_fun[1]))

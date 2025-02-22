@@ -19,7 +19,24 @@
 
 #include "CSPropProbeBox.h"
 
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
+{
+	Type=PROBEBOX;
+	uiNumber=0;
+	m_NormDir=-1;
+	ProbeType=0;
+	m_weight=1;
+	bVisisble=false;
+	startTime=0;
+	stopTime=0;
+
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+}
+
 CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
 {
 	Type=PROBEBOX;
@@ -30,12 +47,93 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 	startTime=prop->startTime;
 	stopTime=prop->stopTime;
 	m_FD_Samples=prop->m_FD_Samples;
+
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx] = prop->Weights[dirIdx];
+		WeightCoords[dirIdx] = prop->WeightCoords[dirIdx];
+	}
 }
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
+{
+	Type=PROBEBOX;
+	uiNumber=0;
+	m_NormDir=-1;
+	ProbeType=0;
+	m_weight=1;
+	bVisisble=false;
+	startTime=0;
+	stopTime=0;
+
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+}
+
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
+
+void CSPropProbeBox::SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength)
+{
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+
+	Weights[0].insert(Weights[0].end(),wx,&wx[listLength]);
+	Weights[1].insert(Weights[1].end(),wy,&wy[listLength]);
+	Weights[2].insert(Weights[2].end(),wz,&wz[listLength]);
+
+	WeightCoords[0].insert(WeightCoords[0].end(),cx,&cx[listLength]);
+	WeightCoords[1].insert(WeightCoords[1].end(),cy,&cy[listLength]);
+	WeightCoords[2].insert(WeightCoords[2].end(),cz,&cz[listLength]);
+
+}
+
+std::vector<float> CSPropProbeBox::GetManualWeights(uint dir)
+{
+	if (dir < 3)
+		return Weights[dir];
+	else
+	{
+		std::stringstream stream;
+		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
+
+		std::vector<float> tempVect;
+		tempVect.clear();
+		return tempVect;
+	}
+}
+
+std::vector<float> CSPropProbeBox::GetManualWeightCoords(uint dir)
+{
+	if (dir < 3)
+		return WeightCoords[dir];
+	else
+	{
+		std::stringstream stream;
+		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
+
+		std::vector<float> tempVect;
+		tempVect.clear();
+		return tempVect;
+	}
+}
+
+void CSPropProbeBox::ClearManualWeights()
+{
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+}
 
 void CSPropProbeBox::AddFDSample(std::vector<double> *freqs)
 {
