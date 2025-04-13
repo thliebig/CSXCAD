@@ -4,20 +4,20 @@ function lines = SmoothMeshLines2(lines, max_res, ratio, varargin)
 % Create smooth mesh lines.
 %
 % input:
-%   lines:   1xn vector of (fixed) mesh lines
-%   max_res: maximum distance between any two lines (e.g. lambda/10)
-%   ratio:   (optional) default: 1.3
+% - lines:   1xn vector of (fixed) mesh lines
+% - max_res: maximum distance between any two lines (e.g. lambda/10)
+% - ratio:   (optional) default: 1.3
 %
 % optional variable arguments ('key', value)
-%   CheckMesh:          Do a final mesh check (default is true)
-%   allowed_max_ratio:  allow only a given max. grading ratio
+% - CheckMesh:          Do a final mesh check (default is true)
+% - allowed_max_ratio:  allow only a given max. grading ratio
 %                           (default --> ratio*1.25)
 % output:
-%   lines:   1xn vector of (smoothed) mesh lines
+% - lines:   1xn vector of (smoothed) mesh lines
 %
 % example:
-%   mesh.x = [0 100 2300 2400];
-%   mesh.x = SmoothMeshLines2( mesh.x, 43 );
+% - mesh.x = [0 100 2300 2400];
+% - mesh.x = SmoothMeshLines2( mesh.x, 43 );
 %
 % todo:
 %  - if gaps cannot be completely filled because of the ratio restriction,

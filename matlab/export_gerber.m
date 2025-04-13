@@ -4,11 +4,11 @@ function export_gerber( CSX, filename, options )
 % Exports the geometry defined in CSX to filename as a gerber RS-274X file.
 % The xy-plane is exported.
 %
-% CSX: CSX-object created by InitCSX()
-% filename: export filename (e.g. '/tmp/export.gbr')
-% options (optional): struct
-%   .header: (string) add this to the header of the file
-%   .ignore: (cell array) ignore these CSX-properties
+% - CSX: CSX-object created by InitCSX()
+% - filename: export filename (e.g. '/tmp/export.gbr')
+% - options (optional): struct
+%   - .header: (string) add this to the header of the file
+%   - .ignore: (cell array) ignore these CSX-properties
 %
 % See also InitCSX 
 % CSXCAD matlab interface

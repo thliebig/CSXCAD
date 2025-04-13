@@ -4,16 +4,17 @@ function CSX = SetMaterialWeight(CSX, name, varargin)
 % Define the material weighting function(s)
 %
 % The functions can use the variables:
-%   x,y,z
-%   rho for the distance to z-axis
-%   r   for the distance to origin
-%   a   for alpha (as in cylindircal and spherical coord systems)
-%   t   for theta (as in the spherical coord system
+% - x,y,z
+% - rho for the distance to z-axis
+% - r   for the distance to origin
+% - a   for alpha (as in cylindircal and spherical coord systems)
+% - t   for theta (as in the spherical coord system
 %   
 %   all these variables are not weighted with the drawing unit defined by
 %   the grid
 % 
 % example:
+%
 %     %material distribution as a rect-function with 4 periods
 %     start=[-500 -100 -500];
 %     stop =[ 500  100  500];

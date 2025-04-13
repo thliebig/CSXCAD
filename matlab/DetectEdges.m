@@ -5,22 +5,23 @@ function mesh = DetectEdges(CSX, mesh, varargin)
 % found in the CSX structure.
 %
 % optional arguments:
-%   mesh:       add edges to an existing (predefined) mesh
+% - mesh:       add edges to an existing (predefined) mesh
 %
 % optional: 'keyword', value
-%   'Debug'         enable debug mode (default is 1)
-%   'AddPropertyType'  add a list of additional property types to detect
+% - 'Debug'         enable debug mode (default is 1)
+% - 'AddPropertyType'  add a list of additional property types to detect
 %                   e.g. 'DumpBox' or {'DumpBox','ProbeBox'}
-%   'SetPropertyType'  set the list of property types to detect (override default)
+% - 'SetPropertyType'  set the list of property types to detect (override default)
 %                   e.g. 'Metal' or {'Metal','ConductingSheet'}
-%   'ExcludeProperty'  give a list of property names to exclude from
+% - 'ExcludeProperty'  give a list of property names to exclude from
 %                      detection
-%   'SetProperty'  give a list of property names to handly exlusively for detection
+% - 'SetProperty'  give a list of property names to handly exlusively for detection
 %
 % advanced options: 'keyword', value
-%   '2D_Metal_Edge_Res' define a one-third/two-third metal edge resolution
+% - '2D_Metal_Edge_Res' define a one-third/two-third metal edge resolution
 %
 % example:
+%
 %     CSX = InitCSX();
 %     % define all properties and primitives to detect
 %     % ...

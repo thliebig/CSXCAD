@@ -4,14 +4,14 @@ function eps_debye = CalcDebyeMaterial(f, eps_r, kappa, eps_Delta, t_relax)
 % Calculate the Debye type dispersive material constant
 %
 % arguments:
-%   f:      frequeny range of interest
-%   eps_r:  eps_r infinity
-%   kappa:  conductivity (losses)
-%   eps_Delta: (vector) delta of relative permitivity
-%   t_relax:  (vector) relaxation time (losses)
+% - f:      frequeny range of interest
+% - eps_r:  eps_r infinity
+% - kappa:  conductivity (losses)
+% - eps_Delta: (vector) delta of relative permitivity
+% - t_relax:  (vector) relaxation time (losses)
 %
 % return:
-%   eps_debye:    the complex relative permitivity
+% - eps_debye:    the complex relative permitivity
 %
 % See also: CalcLorentzMaterial
 %

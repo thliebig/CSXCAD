@@ -4,42 +4,43 @@ function eps_lorentz = CalcLorentzMaterial(f, eps_r, kappa, plasmaFreq, LorPoleF
 % Calculate the Lorentz type dispersive material constant
 %
 % arguments:
-%   f:           frequeny range of interest
-%   eps_r:       eps_r infinity
-%   kappa:       conductivity (losses)
-%   plasmaFreq:  (vector) plasma frequencies (Drude model)
-%   LorPoleFreq: (vector) Lorentz pole frequencies (zero for pure Drude model)
-%   t_relax:     (vector) relaxation time (losses)
+% - f:           frequeny range of interest
+% - eps_r:       eps_r infinity
+% - kappa:       conductivity (losses)
+% - plasmaFreq:  (vector) plasma frequencies (Drude model)
+% - LorPoleFreq: (vector) Lorentz pole frequencies (zero for pure Drude model)
+% - t_relax:     (vector) relaxation time (losses)
 %
 % return:
-%   eps_lorentz: the complex relative permitivity
+% - eps_lorentz: the complex relative permitivity
 %
 % Example:
-% % silver (AG) at optical frequencies (Drude model) [1, p. 201]
-% f = linspace(300e12, 1100e12, 201);
-% eps_model = CalcLorentzMaterial(f, 3.942, 7.97e3, 7e15/2/pi, 0, 1/2.3e13);
 %
-% figure
-% plot(f,real(eps_model))
-% hold on;
-% grid on;
-% plot(f,imag(eps_model),'r--')
+%     % silver (AG) at optical frequencies (Drude model) [1, p. 201]
+%     f = linspace(300e12, 1100e12, 201);
+%     eps_model = CalcLorentzMaterial(f, 3.942, 7.97e3, 7e15/2/pi, 0, 1/2.3e13);
 %
-% % silver (AG) at optical frequencies (Drude+Lorentz model) [1, p. 201]
-% f = linspace(300e12, 1100e12, 201);
-% eps_model = CalcLorentzMaterial(f, 1.138, 4.04e3, [13e15 9.61e15]/2/pi, [0 7.5e15]/2/pi,[1/2.59e13 1/3e14]);
+%     figure
+%     plot(f,real(eps_model))
+%     hold on;
+%     grid on;
+%     plot(f,imag(eps_model),'r--')
 %
-% figure
-% plot(f,real(eps_model))
-% hold on;
-% grid on;
-% plot(f,imag(eps_model),'r--')
+%     % silver (AG) at optical frequencies (Drude+Lorentz model) [1, p. 201]
+%     f = linspace(300e12, 1100e12, 201);
+%     eps_model = CalcLorentzMaterial(f, 1.138, 4.04e3, [13e15 9.61e15]/2/pi, [0 7.5e15]/2/pi,[1/2.59e13 1/3e14]);
+%
+%     figure
+%     plot(f,real(eps_model))
+%     hold on;
+%     grid on;
+%     plot(f,imag(eps_model),'r--')
 %
 % See also: CalcDebyeMaterial
 %
-% [1] Rennings, Andre: "Elektromagnetische Zeitbereichssimulationen
-%     innovativer Antennen auf Basis von Metamaterialien."
-%     PhD Thesis, University of Duisburg-Essen, September 2008
+% * [1] Rennings, Andre: "Elektromagnetische Zeitbereichssimulationen
+%       innovativer Antennen auf Basis von Metamaterialien."
+%       PhD Thesis, University of Duisburg-Essen, September 2008
 %
 % CSXCAD matlab interface
 % -----------------------

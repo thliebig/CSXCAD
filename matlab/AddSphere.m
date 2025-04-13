@@ -3,13 +3,14 @@ function CSX = AddSphere(CSX, propName, prio, center, rad, varargin)
 %
 % Add a sphere to CSX and assign to a property with name <propName>.
 %
-%  center:  sphere center coordinates
-%  rad  :   sphere radius
-%  prio :   primitive priority
+% - center:  sphere center coordinates
+% - rad  :   sphere radius
+% - prio :   primitive priority
 %
-%   example:
-%       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
-%       CSX = AddSphere(CSX,'metal',10,[0 0 0],50);
+% example:
+%
+%     CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
+%     CSX = AddSphere(CSX,'metal',10,[0 0 0],50);
 %
 % See also AddBox, AddCylindricalShell, AddCylinder, AddSphericalShell,
 % AddCurve, AddWire, AddMetal

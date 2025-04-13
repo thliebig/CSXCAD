@@ -18,21 +18,24 @@ function resultMeshPoints = RecursiveSmoothMesh(fixedMeshPoints, max_res, ratio,
 %  At a value of 1.2, the calculation takes a very long time.
 %
 %
-% Parameter:    fixedMeshPoints:    List containing points at which a mesh
-%                                    line should appear
-%               max_res:            Maximum distance between two mesh lines
-%               ratio:              Maximum grading ratio between two
-%                                    neighbour mesh lines
+% Parameter:
+% - fixedMeshPoints:    List containing points at which a mesh
+%                       line should appear
+% - max_res:            Maximum distance between two mesh lines
+% - ratio:              Maximum grading ratio between two
+%                       neighbour mesh lines
 %
 % optional variable arguments ('key', value):
-%      CheckMesh:          Do a final mesh check (default is true)
-%      allowed_max_ratio:  allow only a given max. grading ratio
-%                           (default --> ratio*1.25)
+% - CheckMesh:          Do a final mesh check (default is true)
+% - allowed_max_ratio:  allow only a given max. grading ratio
+%                       (default --> ratio*1.25)
 %
-% Returns:      resultMeshPoints:   List containing the positions of all
-%                                     mesh lines. If a empty list is
-%                                     returned, no resolution could be
-%                                     found.
+% Returns:
+%
+% - resultMeshPoints:   List containing the positions of all
+%                       mesh lines. If a empty list is
+%                       returned, no resolution could be
+%                       found.
 %
 % CSXCAD matlab interface
 % -----------------------

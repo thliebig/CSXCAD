@@ -4,12 +4,12 @@ function results = AnalyseMesh(lines)
 %   Analyse a given mesh line vector
 %
 % output structure:
-%   results.numLines:       number of lines
-%   results.max_res:        max. resolution found
-%   results.min_res:        min. resolution found
-%   results.max_ratio:      max. grading ratio found
-%   results.homogeneous:    true/false for homogeneous mesh
-%   results.symmetric:      true/false for symmetric mesh
+% - results.numLines:       number of lines
+% - results.max_res:        max. resolution found
+% - results.min_res:        min. resolution found
+% - results.max_ratio:      max. grading ratio found
+% - results.homogeneous:    true/false for homogeneous mesh
+% - results.symmetric:      true/false for symmetric mesh
 %
 % CSXCAD matlab interface
 % -----------------------
