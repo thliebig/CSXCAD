@@ -4,16 +4,17 @@ function CSX = SetExcitationWeight(CSX, name, weight)
 % Define weighting functions for x-, y- and z-direction of excitation
 %
 % The functions can use the variables:
-%   x,y,z
-%   rho for the distance to z-axis
-%   r   for the distance to origin
-%   a   for alpha (as in cylindircal and spherical coord systems)
-%   t   for theta (as in the spherical coord system
+% - x,y,z
+% - rho for the distance to z-axis
+% - r   for the distance to origin
+% - a   for alpha (as in cylindircal and spherical coord systems)
+% - t   for theta (as in the spherical coord system
 %   
 %   all these variables are not weighted with the drawing unit defined by
 %   the grid
 % 
 % example:
+%
 %     start=[0 0 0];
 %     stop=[width height 0];
 %     CSX = AddExcitation(CSX,'excite',0,[1 1 0]);

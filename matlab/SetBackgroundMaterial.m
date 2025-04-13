@@ -4,11 +4,12 @@ function CSX = SetBackgroundMaterial(CSX, varargin)
 % Set the background material properties
 %
 % variable arguments:
-%   'Epsilon'       : background rel. electric permittivity (default 1)
-%   'Kappa'         : background electric conductivity (default 0)
-%   'Mue'           : background rel. magnetic permeability (default 1) 
+% - 'Epsilon'       : background rel. electric permittivity (default 1)
+% - 'Kappa'         : background electric conductivity (default 0)
+% - 'Mue'           : background rel. magnetic permeability (default 1) 
 %
 % example:
+%
 %     CSX = InitCSX();
 %     CSX = SetBackgroundMaterial(CSX, 'Epsilon', 4)
 % 

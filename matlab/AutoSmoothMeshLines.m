@@ -7,24 +7,25 @@ function [lines quality] = AutoSmoothMeshLines( lines, max_res, ratio, varargin)
 %       SmoothMeshLines, SmoothMeshLines2 and RecursiveSmoothMesh
 %
 %  arguments:
-%   lines:      given fixed lines to create a smooth mesh in between
-%   max_res:    desired max. resolution
-%   ratio:      grading ratio: desired neighboring line-delta ratio
-%                   - default is 1.5
-%                   - see also 'allowed_max_ratio' argument
+%  - lines:      given fixed lines to create a smooth mesh in between
+%  - max_res:    desired max. resolution
+%  - ratio:      grading ratio: desired neighboring line-delta ratio
+%    - default is 1.5
+%    - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorithm:          define subset of tried algorihm, e.g. [1 3]
-%   symmetric:          0/1 force symmetric mesh (default is input symmetry)
-%   homogeneous:        0/1 force homogeneous mesh
-%   allowed_min_res:    allow a given min resolution only
-%   allowed_max_ratio:  allow only a given max. grading ratio
+%  - algorithm:          define subset of tried algorihm, e.g. [1 3]
+%  - symmetric:          0/1 force symmetric mesh (default is input symmetry)
+%  - homogeneous:        0/1 force homogeneous mesh
+%  - allowed_min_res:    allow a given min resolution only
+%  - allowed_max_ratio:  allow only a given max. grading ratio
 %                           (default --> ratio*1.25)
-%   debug:              0/1 off/on
+%  - debug:              0/1 off/on
 %
 % example:
-%   lines = AutoSmoothMeshLines([-100 -10 10 100], 20, 1.5, 'algorihm', ...
-%   1:3);
+%
+%     lines = AutoSmoothMeshLines([-100 -10 10 100], 20, 1.5, 'algorihm', ...
+%     1:3);
 %
 % See also InitCSX, DefineRectGrid
 %

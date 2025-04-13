@@ -4,15 +4,15 @@ function [EC pos E_type] = CheckMesh(lines, min_res, max_res, ratio, be_quiet)
 %   Check if mesh lines are valid
 %
 %   parameter:
-%       min_res: minimal allowed mesh-diff
-%       max_res: maximal allowed mesh-diff
-%       ratio:   maximal allowed mesh-diff ratio
-%       be_quiet: disable warnings
+%   - min_res: minimal allowed mesh-diff
+%   - max_res: maximal allowed mesh-diff
+%   - ratio:   maximal allowed mesh-diff ratio
+%   - be_quiet: disable warnings
 %
 %   return:
-%       EC:     error code (number of found errors)
-%       pos:    line positions with error
-%       E_type: error type
+%   - EC:     error code (number of found errors)
+%   - pos:    line positions with error
+%   - E_type: error type
 %
 % CSXCAD matlab interface
 % -----------------------

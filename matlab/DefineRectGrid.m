@@ -4,6 +4,7 @@ function CSX = DefineRectGrid(CSX, deltaUnit, mesh)
 % Create a rectiliniear grid.
 % 
 % example Cartesian mesh:
+%
 %     CSX = InitCSX();
 %     mesh.x = AutoSmoothMeshLines([0 a], 10);
 %     mesh.y = AutoSmoothMeshLines([0 b], 10);
@@ -11,6 +12,7 @@ function CSX = DefineRectGrid(CSX, deltaUnit, mesh)
 %     CSX = DefineRectGrid(CSX, unit,mesh);
 % 
 % example Cylindrical mesh:
+%
 %     CSX = InitCSX('CoordSystem',1);
 %     mesh.r = AutoSmoothMeshLines([0 a], 10);
 %     mesh.a = AutoSmoothMeshLines([0 2*pi], pi/30);

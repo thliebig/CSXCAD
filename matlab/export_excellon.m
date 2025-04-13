@@ -5,14 +5,14 @@ function export_excellon( CSX, filename, options )
 % Only cylinders will be considered for export.
 % The xy-plane is exported.
 %
-% CSX: CSX-object created by InitCSX()
-% filename: export filename (e.g. '/tmp/export.gbr')
-% options (optional): struct
-%   .header: (string) add this to the header of the file
-%      comment line must have ';' as the very first character
-%   .exclude: (cell array) ignore these CSX-properties
-%   .include: (cell array) include only these CSX-properties
-%      if neither .exclude or .include is specified, process all properties
+% - CSX: CSX-object created by InitCSX()
+% - filename: export filename (e.g. '/tmp/export.gbr')
+% - options (optional): struct
+%   - .header: (string) add this to the header of the file
+%        comment line must have ';' as the very first character
+%   - .exclude: (cell array) ignore these CSX-properties
+%   - .include: (cell array) include only these CSX-properties
+%        if neither .exclude or .include is specified, process all properties
 %
 % See also InitCSX 
 % CSXCAD matlab interface

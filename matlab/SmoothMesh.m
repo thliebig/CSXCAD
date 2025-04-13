@@ -8,22 +8,23 @@ function [mesh] = SmoothMesh( mesh, max_res, ratio, varargin)
 %       SmoothMeshLines, SmoothMeshLines2 and RecursiveSmoothMesh
 %
 %  arguments:
-%   lines:      given fixed lines to create a smooth mesh in between
-%   max_res:    scalar or vector of desired max. allowed resolution
-%   ratio:      grading ratio: scalar or vector of desired neighboring
+%  - lines:      given fixed lines to create a smooth mesh in between
+%  - max_res:    scalar or vector of desired max. allowed resolution
+%  - ratio:      grading ratio: scalar or vector of desired neighboring
 %                   line-delta ratio (optional, default is 1.5)
 %                   - see also 'allowed_max_ratio' argument
 %
 %  variable arguments ('keyword',value):
-%   algorithm:          define subset of tried algorihm, e.g. [1 3]
-%   symmetric:          0/1 force symmetric mesh (default is input symmetry)
-%   homogeneous:        0/1 force homogeneous mesh
-%   allowed_min_res:    allow a given min resolution only
-%   allowed_max_ratio:  allow only a given max. grading ratio
+%  - algorithm:          define subset of tried algorihm, e.g. [1 3]
+%  - symmetric:          0/1 force symmetric mesh (default is input symmetry)
+%  - homogeneous:        0/1 force homogeneous mesh
+%  - allowed_min_res:    allow a given min resolution only
+%  - allowed_max_ratio:  allow only a given max. grading ratio
 %                           (default --> ratio*1.25)
-%   debug:              0/1 off/on
+%  - debug:              0/1 off/on
 %
 % example:
+%
 %     mesh.x = [-BoundBox 0 BoundBox];
 %     mesh.y = [-BoundBox 0 BoundBox];
 %     mesh.z = [0 BoundBox];

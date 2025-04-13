@@ -6,26 +6,27 @@ function CSX = AddProbe(CSX, name, type, varargin)
 %
 % name:     name of the property and probe file 
 %
-% type:     0 for voltage probing
-%           1 for current probing
-%           2 for E-field probing
-%           3 for H-field probing
-%
-%           10 for waveguide voltage mode matching
-%           11 for waveguide current mode matching
+% type:
+% - 0 for voltage probing
+% - 1 for current probing
+% - 2 for E-field probing
+% - 3 for H-field probing
+% - 10 for waveguide voltage mode matching
+% - 11 for waveguide current mode matching
 %
 % all following parameter are optional key/value parameter:
 %
-% weight:       weighting factor (default is 1)
-% frequency:    dump in the frequency domain at the given samples (in Hz)
-% ModeFunction: A mode function (used only with type 3/4)
-% NormDir:      necessary for current probing box with dimension~=2
-% StartTime/StopTime: Define a start and/or stop time (in seconds) 
+% - weight:       weighting factor (default is 1)
+% - frequency:    dump in the frequency domain at the given samples (in Hz)
+% - ModeFunction: A mode function (used only with type 3/4)
+% - NormDir:      necessary for current probing box with dimension~=2
+% - StartTime/StopTime: Define a start and/or stop time (in seconds) 
 %                     for this probe to be active.
-
+%
 % examples:
-%       CSX = AddProbe(CSX,'ut1',0); %voltate probe
-%       CSX = AddProbe(CSX,'it1',1); %current probe
+%
+%     CSX = AddProbe(CSX,'ut1',0); %voltate probe
+%     CSX = AddProbe(CSX,'it1',1); %current probe
 %
 % See also ReadUI in the openEMS matlab interface, AddDump,
 % AddExcitation, AddMaterial, AddExcitation, AddProbe, AddBox

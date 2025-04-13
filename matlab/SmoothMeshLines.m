@@ -5,20 +5,21 @@ function lines = SmoothMeshLines( lines, max_res, ratio, varargin)
 % 
 %   Warning: This function may not always produce a desired output.
 % 
-%   lines:      given fixed lines to create a smooth mesh in between
-%   max_res:    desired max. resolution
-%   ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
+% - lines:      given fixed lines to create a smooth mesh in between
+% - max_res:    desired max. resolution
+% - ratio:      max. neighboring line-delta ratio, (optional, default is 1.3)
 %
 % optional variable arguments ('key', value)
-%   recursive:          SmoothMeshLines a couple of times recursivly (default is 0)
-%   CheckMesh:          Do a final mesh check (default is true)
-%   allowed_max_ratio:  allow only a given max. grading ratio
-%                           (default --> ratio*1.25)
+% - recursive:          SmoothMeshLines a couple of times recursivly (default is 0)
+% - CheckMesh:          Do a final mesh check (default is true)
+% - allowed_max_ratio:  allow only a given max. grading ratio
+%                       (default --> ratio*1.25)
 %
 % example:
-%   % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
-%   resolution of 5
-%   mesh.x = SmoothMeshLines([0 50 200],5,1.3);
+%
+%     % create a x-mesh with lines at 0, 50 and 200 an a desired mesh
+%     resolution of 5
+%     mesh.x = SmoothMeshLines([0 50 200],5,1.3);
 %
 % See also InitCSX, DefineRectGrid
 % 

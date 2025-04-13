@@ -4,23 +4,25 @@ function [isOct,ver] = isOctave()
 % Function to test if matlab or octave is used.
 %
 % Output:
-%  isOct: bool; true, if interpreter is Octave
-%  version: struct
-%    .major:   number; major version
-%    .minor:   number; minor version
-%    .release: number; release version
+% - isOct: bool; true, if interpreter is Octave
+% - version: struct
+%    - .major:   number; major version
+%    - .minor:   number; minor version
+%    - .release: number; release version
 %
 % example (Octave 3.6.1):
-%   isOct = true
-%   version.major = 3
-%   version.minor = 6
-%   version.release = 1
+%
+%     isOct = true
+%     version.major = 3
+%     version.minor = 6
+%     version.release = 1
 %
 % example (Matlab 7.8.0.347 (R2009a)):
-%   isOct = false
-%   version.major = 7
-%   version.minor = 8
-%   version.release = 0
+%
+%     isOct = false
+%     version.major = 7
+%     version.minor = 8
+%     version.release = 0
 %
 % openEMS matlab/octave interface
 % -----------------------

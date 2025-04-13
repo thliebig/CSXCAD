@@ -3,14 +3,15 @@ function CSX = AddCylinder(CSX, propName, prio, start, stop, rad, varargin)
 %
 % Add a cylinder to CSX and assign to a property with name <propName>.
 %
-%  start:   cylinder axis start coordinates
-%  stop :   cylinder axis box stop  coordinates
-%  rad  :   cylinder radius
-%  prio :   primitive priority
+% - start:   cylinder axis start coordinates
+% - stop :   cylinder axis box stop  coordinates
+% - rad  :   cylinder radius
+% - prio :   primitive priority
 %
-%   example:
-%       CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
-%       CSX = AddCylinder(CSX,'metal',10,[0 0 0],[0 0 200],50);
+% example:
+%
+%     CSX = AddMetal(CSX,'metal'); %create PEC with propName 'metal'
+%     CSX = AddCylinder(CSX,'metal',10,[0 0 0],[0 0 200],50);
 %
 % See also AddBox, AddCylindricalShell, AddSphere, AddSphericalShell,
 % AddCurve, AddWire, AddMetal

@@ -10,18 +10,18 @@ function Convert_VF_DiscMaterial(raw_filesuffix, mat_db_file, out_filename, vara
 % range around the used conversion frequency.
 %
 % required arguments:
-%   raw_filesuffix:     suffix for the virtual family body model files
+% - raw_filesuffix:     suffix for the virtual family body model files
 %                       the files:
 %                       <raw_filesuffix>.txt and <raw_filesuffix>.raw
 %                       must be found!
 %                       example: '/tmp/Ella_26y_V2_1mm'
-%   mat_db_file:        tissue database file (incl. full path if necessary)
+% - mat_db_file:        tissue database file (incl. full path if necessary)
 %                       example: '/tmp/DB_h5_20120711_SEMCADv14.8.h5'
-%   out_filename:       outfile name, e.g. 'Ella_298MHz.h5'
+% - out_filename:       outfile name, e.g. 'Ella_298MHz.h5'
 %
 % variable arguments (key/value):
-%   'Frequency':        specifiy the frequency of interest (required!)
-%   'Center':           0/1 make the model centered around (0,0,0)
+% - 'Frequency':        specifiy the frequency of interest (required!)
+% - 'Center':           0/1 make the model centered around (0,0,0)
 %                       (default is off)
 %
 % Requirements:
@@ -36,10 +36,11 @@ function Convert_VF_DiscMaterial(raw_filesuffix, mat_db_file, out_filename, vara
 %       Download from: http://www.itis.ethz.ch/assets/Downloads/TissueDb/DBh5_20120711_SEMCADv14.8.zip
 %
 % example:
-% Convert_VF_DiscMaterial('/tmp/Ella_26y_V2_1mm', ...
-%                         '/tmp/DB_h5_20120711_SEMCADv14.8.h5', ...
-%                         'Ella_centered_298MHz.h5', ...
-%                         'Frequency', 2.4e9);
+%
+%     Convert_VF_DiscMaterial('/tmp/Ella_26y_V2_1mm', ...
+%                             '/tmp/DB_h5_20120711_SEMCADv14.8.h5', ...
+%                             'Ella_centered_298MHz.h5', ...
+%                             'Frequency', 2.4e9);
 %
 % (c) 2013 Thorsten Liebig
 

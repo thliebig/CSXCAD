@@ -6,17 +6,17 @@ function export_povray( CSX, filename, options )
 % CSX: CSX-object created by InitCSX()
 % filename: export filename (e.g. '/tmp/export.pov')
 % options (optional): struct
-%   .camera: (string) use this as the camera definition line
-%            1 camera on positive x-axis
-%            2 camera on positive y-axis
-%            3 camera on positive z-axis
-%   .light:  (string) use this as the light definition line
-%            1 point light at camera position
-%   .header: (string) add this to the header of the file
-%   .ignore: (cell array) ignore these CSX-properties
-%   .obj_modifier: struct
-%      .<propname>: (string) povray object modifier for corresponding primitives
-%                   example: options.obj_modifier.copper = 'pigment { color rgbt <0.8,0.5,0,0> }';
+% - .camera: (string) use this as the camera definition line
+%   - 1 camera on positive x-axis
+%   - 2 camera on positive y-axis
+%   - 3 camera on positive z-axis
+% - .light:  (string) use this as the light definition line
+%   - 1 point light at camera position
+% - .header: (string) add this to the header of the file
+% - .ignore: (cell array) ignore these CSX-properties
+% - .obj_modifier: struct
+%    -    .<propname>: (string) povray object modifier for corresponding primitives
+%                      example: options.obj_modifier.copper = 'pigment { color rgbt <0.8,0.5,0,0> }';
 %
 % See also InitCSX 
 % CSXCAD matlab interface
