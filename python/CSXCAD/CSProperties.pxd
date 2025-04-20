@@ -40,6 +40,7 @@ cdef extern from "CSXCAD/CSProperties.h":
         DISCRETE_MATERIAL  "CSProperties::DISCRETE_MATERIAL"
         LUMPED_ELEMENT     "CSProperties::LUMPED_ELEMENT"
         CONDUCTINGSHEET    "CSProperties::CONDUCTINGSHEET"
+        ABSORBING_BC       "CSProperties::ABSORBING_BC"
 
 cdef extern from "CSXCAD/CSProperties.h":
     ctypedef struct RGBa:
@@ -118,6 +119,30 @@ cdef extern from "CSXCAD/CSPropMaterial.h":
             bool GetIsotropy()
 
 cdef class CSPropMaterial(CSProperties):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cpdef enum ABCtype "CSPropAbsorbingBC::ABCtype":
+        UNDEFINED   "CSPropAbsorbingBC::UNDEFINED"
+        MUR_1ST     "CSPropAbsorbingBC::MUR_1ST"
+        MUR_1ST_SA  "CSPropAbsorbingBC::MUR_1ST_SA"
+
+cdef extern from "CSXCAD/CSPropAbsorbingBC.h":
+    cdef cppclass _CSPropAbsorbingBC "CSPropAbsorbingBC" (_CSProperties):
+        _CSPropAbsorbingBC(_ParameterSet*) except +
+            
+        # Insert methods here:
+        void SetNormalSignPositive(bool val)
+        bool GetNormalSignPositive()
+        
+        void SetPhaseVelocity(double val)
+        double GetPhaseVelocity()
+        
+        void    SetAbsorbingBoundaryType(ABCtype val)
+        ABCtype  GetAbsorbingBoundaryType()
+            
+cdef class CSPropAbsorbingBC(CSProperties):
     pass
 
 ##############################################################################

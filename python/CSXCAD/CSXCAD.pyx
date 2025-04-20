@@ -37,7 +37,7 @@ cimport CSXCAD.CSXCAD
 
 from CSXCAD.CSProperties import CSPropMaterial, CSPropExcitation
 from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet
-from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox
+from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox, CSPropAbsorbingBC
 from CSXCAD.CSPrimitives import CSPrimPoint, CSPrimBox, CSPrimCylinder, CSPrimCylindricalShell
 from CSXCAD.CSPrimitives import CSPrimSphere, CSPrimSphericalShell
 from CSXCAD.CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
@@ -186,6 +186,18 @@ cdef class ContinuousStructure:
             raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Material', name, **kw)
 
+    def AddAbsorbingBC(self, name, **kw):
+        """ AddAbsorbingBC(name, **kw)
+
+        Add a local absorbing BC with name `name`.
+
+        See Also
+        --------
+        CSXCAD.CSProperties.CSPropAbsorbingBC
+        """
+
+        return self.__CreateProperty('AbsorbingBC', name, **kw)
+    
     def AddLumpedElement(self, name, **kw):
         """ AddLumpedElement(name, **kw)
 
