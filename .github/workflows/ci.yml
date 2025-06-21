@@ -381,7 +381,7 @@ jobs:
           run: |
             echo "Install dependencies..."
             sudo pkg install -y cmake git boost-libs tinyxml vtk9 hdf5 cgal python3 \
-                                py311-cython3
+                                py311-setuptools py311-cython3
                                 # prefix must match FreeBSD's default python
                                 # version. FreeBSD 14.2 uses Python 3.11 so
                                 # use "py311-"
