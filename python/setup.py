@@ -3,10 +3,20 @@ from Cython.Build import cythonize
 
 import os
 
+
+# Strictly speaking we should detect compiler, not platform,
+# unfortunately there's no easy way to do so without implementing
+# full compiler detection logic. This is good enough for 90% of
+# use cases.
+cxxflags = []
+if os.name == "posix":
+    cxxflags.append("-std=c++11")
+
 extensions = [
     Extension("*", [os.path.join(os.path.dirname(__file__), "CSXCAD","*.pyx")],
         language="c++",             # generate C++ code
-        libraries = ['CSXCAD',]),
+        libraries = ['CSXCAD',],
+        extra_compile_args=cxxflags),
 ]
 
 setup(
