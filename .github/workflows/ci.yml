@@ -233,8 +233,8 @@ jobs:
       - if: ${{ matrix.os.ancient }}
         name: Checkout CSXCAD.git (legacy system only)
         run: |
-          echo "Clone $GITHUB_REF_NAME from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
-          git clone -b $GITHUB_REF_NAME $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git CSXCAD
+          echo "Clone $GITHUB_SHA from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+          git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git CSXCAD
           cd $GITHUB_WORKSPACE/CSXCAD
 
           git fetch --force $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git "+refs/heads/*:refs/remotes/origin/*"
@@ -432,9 +432,9 @@ jobs:
                                 # version. FreeBSD 14.2 uses Python 3.11 so
                                 # use "py311-"
 
-            echo "Clone $GITHUB_REF_NAME from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
+            echo "Clone $GITHUB_SHA from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
             cd ~/
-            git clone -b $GITHUB_REF_NAME $GITHUB_SERVER_URL/$GITHUB_REPOSITORY_OWNER/CSXCAD.git CSXCAD
+            git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY_OWNER/CSXCAD.git CSXCAD
 
             cd ~/CSXCAD
             git fetch --force $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git "+refs/heads/*:refs/remotes/origin/*"
