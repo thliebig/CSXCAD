@@ -1,37 +1,44 @@
-function [CSX] = AddDjordjevicSarkarMaterial(varargin)
+function [CSX] = AddDjordjevicSarkarMaterial(CSX, matName, varargin)
+% function [CSX] = AddDjordjevicSarkarMaterial(CSX, matName, varargin)
 %
 % Add a wideband dielectric material to a CSX struct using a multi-term
 % Debye fit of the Djordjevic–Sarkar model.
 %
 % Calculates Debye parameters from a single (eps_r, tanD) measurement via
-% 'calcDjordjevicSarkarApprox' and adds the material to the CSX struct.
+% `calcDjordjevicSarkarApprox` and adds the material to the CSX struct.
 %
-% Input Parameters:
-%   CSX          - CSX struct to which the material will be added
-%   materialName - String name of the material
+% - CSX          : CSX struct to which the material will be added
+% - matName      : String name of the material
 %
-% Name-Value Parameters (passed to `calcDjordjevicSarkarApprox`):
-%   'fMeas'      - Measurement frequency [Hz]
-%   'epsRMeas'   - Relative permittivity ε_r at 'fMeas'
-%   'tandMeas'   - Loss tangent tan(δ) at 'fMeas'
-%   'f2'         - Upper corner frequency of the Djordjevic–Sarkar model [Hz]
-%   'f1'         - Lower corner frequency [Hz] (if `lowFreqEvalType` = 0)
-%   'epsRdc'     - Permittivity at DC (if `lowFreqEvalType` = 1)
-%   'sigmaDC'    - Optional DC conductivity [S/m]
-%   'nTermsPerDec' - Number of Debye terms per frequency decade
+% required name-value pairs:
+% - 'fMeas'     : Measurement frequency [Hz]
+% - 'epsRMeas'  : Relative permittivity ε_r at 'fMeas'
+% - 'tandMeas'  : Loss tangent tan(δ) at 'fMeas'
+% - 'f2'        : Upper corner frequency of the Djordjevic–Sarkar model [Hz]
 %
-% Output:
-%   CSX - Updated CSX struct including the defined wideband dielectric material
+% optional name-value pairs:
+% - 'lowFreqEvalType': Low-frequency behavior:
+%                      0 = use 'f1' (default), typical Djordjevic–Sarkar
+%                      1 = use 'epsRdc'
+% - 'f1'             : Lower corner frequency [Hz] (used if `lowFreqEvalType` = 0)
+% - 'epsRdc'         : Permittivity at DC (used if `lowFreqEvalType` = 1)
+% - 'sigmaDC'        : DC conductivity [S/m]
+% - 'nTermsPerDec'   : Number of Debye terms per frequency decade
+% - 'plotEn'         : Enable/Disable plots of the model
 %
-% Note:
-%   - Internally uses 'calcDjordjevicSarkarApprox' to generate model parameters.
-%   - See 'calcDjordjevicSarkarApprox' for detailed description of the model
-%     fitting.
+% output:
+% - CSX : Updated CSX struct including the defined wideband dielectric material
 %
-% Example:
-%   CSX = AddDjordjevicSarkarMaterial(CSX, 'MyMaterial', ...
-%     'fMeas', 1e9, 'epsRMeas', 4.2, 'tandMeas', 0.02, ...
-%     'f1', 1e6, 'f2', 200e9);
+% note:
+% - Internally uses `calcDjordjevicSarkarApprox` to generate model parameters.
+% - See `calcDjordjevicSarkarApprox` for detailed description of the model
+%   fitting.
+%
+% example:
+%
+%     CSX = AddDjordjevicSarkarMaterial(CSX, 'MyMaterial', ...
+%         'fMeas', 1e9, 'epsRMeas', 4.2, 'tandMeas', 0.02, ...
+%         'f1', 1e6, 'f2', 200e9);
 %
 % See also: calcDjordjevicSarkarApprox, AddDebyeMaterial
 %
@@ -60,7 +67,7 @@ function [CSX] = AddDjordjevicSarkarMaterial(varargin)
   p.addParameter('plotEn',          0,   @isIntegerScalar);   % Enable/Disable plots of the model
 
   % Parse and manually verify required parameters
-  p.parse(varargin{:});
+  p.parse(CSX, matName, varargin{:});
 
   requiredParams = {'fMeas', 'epsRMeas', 'tandMeas', 'f2'};
   for i = 1:numel(requiredParams)
@@ -92,9 +99,6 @@ function [CSX] = AddDjordjevicSarkarMaterial(varargin)
       'sigmaDC', p.Results.sigmaDC,...
       'nTermsPerDec', p.Results.nTermsPerDec,...
       'plotEn', p.Results.plotEn);
-
-      CSX = p.Results.CSX;
-      matName = p.Results.matName;
 
       CSX = AddDebyeMaterial(CSX, matName);
       CSX = SetMaterialProperty(CSX, matName, ...

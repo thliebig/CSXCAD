@@ -1,59 +1,59 @@
-function [paramDebye, paramSarkar] = calcDjordjevicSarkarApprox(varargin)
-% calcDjordjevicSarkarApprox - Approximate Djordjevic–Sarkar model with multi-term Debye model
+function [paramDebye, paramSarkar] = CalcDjordjevicSarkarApprox(varargin)
+%function [paramDebye, paramSarkar] = CalcDjordjevicSarkarApprox(varargin)
+%
+% Approximate Djordjevic–Sarkar model with multi-term Debye model
 %
 % Fits a wideband dielectric model using a single permittivity and loss tangent
 % measurement at one frequency. The Djordjevic–Sarkar [1] model is calculated from
 % these values and approximated using multiple Debye terms. The poles are placed
 % logarithmically between f1 and f2. One term per decade is used by default.
 %
-% INPUT PARAMETERS (Name-Value pairs):
-%   Required:
-%     'fMeas'      - Frequency of the Measurement [Hz]
-%     'epsRMeas'   - Relative permittivity ε_r at 'fMeas'
-%     'tandMeas'   - Loss tangent tan(δ) at 'fMeas'
-%     'f2'         - Upper corner frequency of the Djordjevic–Sarkar model [Hz]
+% required name-value pairs:
+% - 'fMeas'     : Frequency of the measurement [Hz]
+% - 'epsRMeas'  : Relative permittivity ε_r at 'fMeas'
+% - 'tandMeas'  : Loss tangent tan(δ) at 'fMeas'
+% - 'f2'        : Upper corner frequency of the Djordjevic–Sarkar model [Hz]
 %
-%   Depending on 'lowFreqEvalType':
-%     'lowFreqEvalType' - Low-frequency behavior:
-%                         0 = use 'f1' (default), typical Djordjevic–Sarkar
-%                         1 = use 'epsRdc'
-%     'f1'              - Lower corner frequency [Hz], required if lowFreqEvalType = 0
-%     'epsRdc'          - DC permittivity, required if lowFreqEvalType = 1
+% optional name-value pairs:
+% - 'lowFreqEvalType': Low-frequency behavior:
+%                      0 = use 'f1' (default), typical Djordjevic–Sarkar
+%                      1 = use 'epsRdc'
+% - 'f1'             : Lower corner frequency [Hz] (required if `lowFreqEvalType` = 0)
+% - 'epsRdc'         : DC permittivity (required if `lowFreqEvalType` = 1)
+% - 'sigmaDC'        : DC conductivity [S/m], usually neglected, default: 0
+% - 'nTermsPerDec'   : Debye poles per frequency decade, default: 1
+% - 'plotEn'         : Enable plotting (0 = off, 1 = on), default: 0
 %
-%   Optional:
-%     'sigmaDC'      - DC conductivity [S/m], usally neglected, default: 0
-%     'nTermsPerDec' - Debye poles per frequency decade, default: 1
-%     'plotEn'       - Enable plotting (0 = off, 1 = on), default: 0
+% output:
+% - paramDebye  : Struct with multi-term Debye model:
+%     .epsInf     – Permittivity at infinite frequency
+%     .deltaEpsT  – Array of Δε'_i values
+%     .wi         – Array of angular pole frequencies ω_i
+%     .sigmaDC    – DC conductivity [S/m]
 %
-% OUTPUT:
-%   paramDebye  - Struct with multi-term Debye model:
-%       .epsInf     : Permittivity at infinite frequency
-%       .deltaEpsT  : Array of Δε'_i values
-%       .wi         : Array of angular pole frequencies ω_i
-%       .sigmaDC    : DC conductivity [S/m]
+% - paramSarkar : Struct with Djordjevic–Sarkar model parameters:
+%     .epsInf     – High-frequency permittivity
+%     .deltaEpsT  – Total permittivity change (ε_r,DC - ε_inf)
+%     .m1         – log10(lower angular frequency)
+%     .m2         – log10(upper angular frequency)
+%     .sigmaDC    – DC conductivity [S/m]
 %
-%   paramSarkar - Struct with Djordjevic–Sarkar model parameters:
-%       .epsInf     : High-frequency permittivity
-%       .deltaEpsT  : Total permittivity change (eps_r,DC - eps_inf)
-%       .m1         : log10(lower angular freq)
-%       .m2         : log10(upper angular freq)
-%       .sigmaDC    : DC conductivity [S/m]
+% example:
 %
-% EXAMPLE:
-%   [pDebye, pSarkar] = calcDjordjevicSarkarApprox( ...
-%     'fMeas', 1e9, 'epsRMeas', 4.2, 'tandMeas', 0.02, ...
-%     'f1', 1e6, 'f2', 200e9, 'plotEn', 1);
+%     [pDebye, pSarkar] = calcDjordjevicSarkarApprox( ...
+%         'fMeas', 1e9, 'epsRMeas', 4.2, 'tandMeas', 0.02, ...
+%         'f1', 1e6, 'f2', 200e9, 'plotEn', 1);
 %
-% NOTES:
-%   - Either 'f1' or 'epsRdc' must be specified depending on 'lowFreqEvalType'.
-%   - Debye model is matched to the imaginary part of the DS model, sampled at
-%     logarithmically spaced frequencies.
+% notes:
+% - Either `'f1'` or `'epsRdc'` must be specified depending on `'lowFreqEvalType'`.
+% - Debye model is matched to the imaginary part of the DS model, sampled at
+%   logarithmically spaced frequencies.
 %
 % See also: AddDebyeMaterial, AddLorentzMaterial
 %
 % [1] Djordjevic, Antonije R., et al. "Wideband frequency-domain
 %     characterization of FR-4 and time-domain causality." IEEE Transactions
-%     on electromagnetic compatibility 43.4 (2001): 662-667.
+%     on Electromagnetic Compatibility 43.4 (2001): 662–667.
 %
 % -------------------------------------------------------------------------
 % author: Tobias Ammann (2025)
