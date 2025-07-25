@@ -36,9 +36,15 @@ IF(EXISTS ${PROJECT_SOURCE_DIR}/.git )
   execute_process(
     COMMAND ${GIT_EXECUTABLE} describe --tags
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    RESULT_VARIABLE GITRESULT
     OUTPUT_VARIABLE GITREV
+    ERROR_VARIABLE GITERROR
   )
-  set(VERSION ${GITREV})
+  if (GITRESULT EQUAL 0)
+    set(VERSION ${GITREV})
+  else()
+    set(VERSION "no Git tag found")
+  endif()
   string(STRIP ${VERSION} VERSION)
   message(STATUS "Found Git repository, ${PROJECT_NAME} version tag: ${VERSION}")
 ENDIF()
