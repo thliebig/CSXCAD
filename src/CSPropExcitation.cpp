@@ -1,5 +1,6 @@
 /*
-*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2023-2025 Gadi Lahav (gadi@rfwithcare.com)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -20,7 +21,7 @@
 #include "CSPropExcitation.h"
 
 CSPropExcitation::CSPropExcitation(ParameterSet* paraSet,unsigned int number) : CSProperties(paraSet) {Type=EXCITATION;Init();uiNumber=number;}
-CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSProperties(prop, copyPrim)
+CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSProperties(prop,copyPrim)
 {
 	Type=EXCITATION;
 	Init();
@@ -120,13 +121,42 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	coordPara[4]->SetValue(r); //r
 	coordPara[5]->SetValue(alpha);
 	coordPara[6]->SetValue(theta); //theta
-	int EC = WeightFct[ny].Evaluate();
-	if (EC)
-	{
-		std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
-	}
 
-	return WeightFct[ny].GetValue()*GetExcitation(ny);
+
+	// Check if manual weights are set. If so, look for coordinate there
+	float minDr = std::numeric_limits<float>::infinity();	// Container for minimal found dr
+	float dr; 												// Container for distance between requested coordiante and stored coordinate
+	uint minIdx;
+	if (Weights[0].size())
+	{
+		// Check all the coordinates within this excitation to see which is the closest.
+		for (uint coorIdx = 0 ; coorIdx < Weights[0].size() ; coorIdx++)
+		{
+			dr = sqrtf(	powf(coords[0] - WeightCoords[0].at(coorIdx),2.0f) +
+						powf(coords[1] - WeightCoords[1].at(coorIdx),2.0f) +
+						powf(coords[2] - WeightCoords[2].at(coorIdx),2.0f));
+
+			if (dr < minDr)
+			{
+				minDr = dr;
+				minIdx = coorIdx;
+			}
+		}
+
+		// Return weighted excitation for this coordinate
+		return (Weights[ny].at(minIdx))*GetExcitation(ny);
+
+	}
+	else
+	{
+		int EC = WeightFct[ny].Evaluate();
+		if (EC)
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
+		}
+
+		return WeightFct[ny].GetValue()*GetExcitation(ny);
+	}
 }
 
 void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
@@ -154,6 +184,13 @@ void CSPropExcitation::Init()
 		WeightFct[i].SetValue(1.0);
 		WeightFct[i].SetParameterSet(coordParaSet);
 	}
+
+	// Clear all 6 vectors of manual weighting
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
@@ -166,6 +203,63 @@ void CSPropExcitation::SetPropagationDir(const std::string val, int Component)
 {
 	if ((Component<0) || (Component>=3)) return;
 	PropagationDir[Component].SetValue(val);
+}
+
+void CSPropExcitation::SetManualWeights(float * wx,float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength)
+{
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+
+	Weights[0].insert(Weights[0].end(),wx,&wx[listLength]);
+	Weights[1].insert(Weights[1].end(),wy,&wy[listLength]);
+	Weights[2].insert(Weights[2].end(),wz,&wz[listLength]);
+
+	WeightCoords[0].insert(WeightCoords[0].end(),cx,&cx[listLength]);
+	WeightCoords[1].insert(WeightCoords[1].end(),cy,&cy[listLength]);
+	WeightCoords[2].insert(WeightCoords[2].end(),cz,&cz[listLength]);
+
+}
+
+void CSPropExcitation::ClearManualWeights()
+{
+	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+	{
+		Weights[dirIdx].clear();
+		WeightCoords[dirIdx].clear();
+	}
+}
+
+std::vector<float> CSPropExcitation::GetManualWeights(uint dir)
+{
+	if (dir < 3)
+		return Weights[dir];
+	else
+	{
+		std::stringstream stream;
+		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
+
+		std::vector<float> tempVect;
+		tempVect.clear();
+		return tempVect;
+	}
+}
+
+std::vector<float> CSPropExcitation::GetManualWeightCoords(uint dir)
+{
+	if (dir < 3)
+		return WeightCoords[dir];
+	else
+	{
+		std::stringstream stream;
+		stream << std::endl << "Error in obtaining manual coordinates - Wrong direction ";
+
+		std::vector<float> tempVect;
+		tempVect.clear();
+		return tempVect;
+	}
 }
 
 double CSPropExcitation::GetPropagationDir(int Component)
