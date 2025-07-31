@@ -1,8 +1,25 @@
 from setuptools import Extension, setup
 from Cython.Build import cythonize
-
+from pathlib import Path
 import os
 
+def looks_like_openEMS_is_installed_there(path_to_some_folder:Path):
+    path_to_some_folder = Path(path_to_some_folder)
+    FILES_THAT_SHOULD_EXIST = [
+        path_to_some_folder/'bin/openEMS',
+        path_to_some_folder/'include/openEMS/openems.h',
+    ]
+    if any([not p.is_file() for p in FILES_THAT_SHOULD_EXIST]):
+       return False
+    return True
+
+if 'OPENEMS_INSTALL_PATH' not in os.environ:
+    raise SystemExit('Please set the environment variable OPENEMS_INSTALL_PATH to point to where openEMS was installed. ')
+
+path_to_openEMS_installation = Path(os.environ['OPENEMS_INSTALL_PATH']) # Environment variables are always strings, so this should never raise any error.
+
+if not looks_like_openEMS_is_installed_there(path_to_openEMS_installation):
+    raise SystemExit(f'I was expecting to find openEMS installed in {path_to_openEMS_installation}, but it does not look like it is installed there. ')
 
 # Strictly speaking we should detect compiler, not platform,
 # unfortunately there's no easy way to do so without implementing
@@ -13,34 +30,19 @@ if os.name == "posix":
     cxxflags.append("-std=c++11")
 
 extensions = [
-    Extension("*", [os.path.join(os.path.dirname(__file__), "CSXCAD","*.pyx")],
-        language="c++",             # generate C++ code
-        libraries = ['CSXCAD',],
-        extra_compile_args=cxxflags),
+    Extension(
+        '*',
+        ['CSXCAD/*.pyx'],
+        include_dirs = [str(path_to_openEMS_installation/'include')],
+        library_dirs = [str(path_to_openEMS_installation/'lib')],
+        runtime_library_dirs = [str(path_to_openEMS_installation/'lib')],
+        language = 'c++',
+        libraries = ['CSXCAD'],
+        extra_compile_args = cxxflags,
+    )
 ]
 
 setup(
-  name="CSXCAD",
-  version = '0.6.2',
-  description = "Python interface for the CSXCAD library",
-  classifiers = [
-      'Development Status :: 3 - Alpha',
-      'Intended Audience :: Developers',
-      'Intended Audience :: Information Technology',
-      'Intended Audience :: Science/Research',
-      'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
-      'Programming Language :: Python',
-      'Topic :: Scientific/Engineering',
-      'Topic :: Software Development :: Libraries :: Python Modules',
-      'Operating System :: POSIX :: Linux',
-      'Operating System :: Microsoft :: Windows',
-  ],
-  author = 'Thorsten Liebig',
-  author_email = 'Thorsten.Liebig@gmx.de',
-  maintainer = 'Thorsten Liebig',
-  maintainer_email = 'Thorsten.Liebig@gmx.de',
-  url = 'https://openEMS.de',
-  packages=["CSXCAD", ],
-  package_data={'CSXCAD': ['*.pxd']},
-  ext_modules = cythonize(extensions, language_level=3)
- )
+    packages = ['CSXCAD'],
+    ext_modules = cythonize(extensions),
+)
