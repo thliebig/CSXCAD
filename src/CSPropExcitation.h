@@ -19,6 +19,7 @@
 #pragma once
 
 #include "CSProperties.h"
+#include "ModeFileParser.h"
 
 //! Continuous Structure Excitation Property
 /*!
@@ -83,6 +84,9 @@ public:
 	//! Get the weighting function for the given excitation component
 	const std::string GetWeightFunction(int ny);
 
+	void SetModeFile(const std::string fileName);
+	const std::string GetModeFileName();
+
 	double GetWeightedExcitation(int ny, const double* coords);
 
 	//! Set the propagation direction for a given component
@@ -125,5 +129,8 @@ protected:
 	bool WeightsFromFile;				// If the mode shape is derived from a mode file, not an analytical function
 
 	// In case this should be loaded from a file, this will be set to "true"
-	bool m_FieldSourceIsFile;
+	bool 			m_FieldSourceIsFile;
+	std::string 	m_modeFileName;
+
+	ModeFileParser	m_modeFile;
 };

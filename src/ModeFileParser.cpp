@@ -123,6 +123,7 @@ bool ModeFileParser::parseFile()
 	else
 		Ncluster = m_Y.size();
 
+	// In case this is a re-read, clear the containers
 	m_Vx.clear();
 	m_Vy.clear();
 

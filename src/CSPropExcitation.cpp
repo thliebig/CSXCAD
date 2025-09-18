@@ -89,10 +89,27 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 {
 	if ((ny>=0) && (ny<3))
 		return WeightFct[ny].SetValue(fct);
+
+	// If a weight function set, this is not a file
+	m_FieldSourceIsFile = false;
+
 	return 0;
 }
 
 const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
+
+void CSPropExcitation::SetModeFile(const std::string fileName)
+{
+	m_modeFileName = fileName;
+
+	// If the file is set, it can now be parsed.
+	m_modeFile.parseFile(m_modeFileName);
+}
+
+const std::string CSPropExcitation::GetModeFileName()
+{
+	return m_modeFileName;
+}
 
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
@@ -129,8 +146,9 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	float minDr = std::numeric_limits<float>::infinity();	// Container for minimal found dr
 	float dr; 												// Container for distance between requested coordiante and stored coordinate
 	uint minIdx;
-	if (Weights[0].size())
+	if (m_FieldSourceIsFile)
 	{
+		nyp = PropagationDir[1];
 		// Check all the coordinates within this excitation to see which is the closest.
 		for (uint coorIdx = 0 ; coorIdx < Weights[0].size() ; coorIdx++)
 		{
@@ -188,13 +206,6 @@ void CSPropExcitation::Init()
 	}
 
 	m_FieldSourceIsFile = false;
-//
-//	// Clear all 6 vectors of manual weighting
-//	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-//	{
-//		Weights[dirIdx].clear();
-//		WeightCoords[dirIdx].clear();
-//	}
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
