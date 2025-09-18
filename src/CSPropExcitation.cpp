@@ -31,6 +31,8 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	coordInputType=prop->coordInputType;
 	m_Frequency.Copy(&prop->m_Frequency);
 	Delay.Copy(&prop->Delay);
+	m_FieldSourceIsFile = prop->m_FieldSourceIsFile;
+
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=prop->ActiveDir[i];
@@ -185,12 +187,14 @@ void CSPropExcitation::Init()
 		WeightFct[i].SetParameterSet(coordParaSet);
 	}
 
-	// Clear all 6 vectors of manual weighting
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
+	m_FieldSourceIsFile = false;
+//
+//	// Clear all 6 vectors of manual weighting
+//	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+//	{
+//		Weights[dirIdx].clear();
+//		WeightCoords[dirIdx].clear();
+//	}
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
@@ -205,63 +209,6 @@ void CSPropExcitation::SetPropagationDir(const std::string val, int Component)
 	PropagationDir[Component].SetValue(val);
 }
 
-void CSPropExcitation::SetManualWeights(float * wx,float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength)
-{
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
-
-	Weights[0].insert(Weights[0].end(),wx,&wx[listLength]);
-	Weights[1].insert(Weights[1].end(),wy,&wy[listLength]);
-	Weights[2].insert(Weights[2].end(),wz,&wz[listLength]);
-
-	WeightCoords[0].insert(WeightCoords[0].end(),cx,&cx[listLength]);
-	WeightCoords[1].insert(WeightCoords[1].end(),cy,&cy[listLength]);
-	WeightCoords[2].insert(WeightCoords[2].end(),cz,&cz[listLength]);
-
-}
-
-void CSPropExcitation::ClearManualWeights()
-{
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
-}
-
-std::vector<float> CSPropExcitation::GetManualWeights(uint dir)
-{
-	if (dir < 3)
-		return Weights[dir];
-	else
-	{
-		std::stringstream stream;
-		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
-
-		std::vector<float> tempVect;
-		tempVect.clear();
-		return tempVect;
-	}
-}
-
-std::vector<float> CSPropExcitation::GetManualWeightCoords(uint dir)
-{
-	if (dir < 3)
-		return WeightCoords[dir];
-	else
-	{
-		std::stringstream stream;
-		stream << std::endl << "Error in obtaining manual coordinates - Wrong direction ";
-
-		std::vector<float> tempVect;
-		tempVect.clear();
-		return tempVect;
-	}
-}
-
 double CSPropExcitation::GetPropagationDir(int Component)
 {
 	if ((Component<0) || (Component>=3)) return 0;
@@ -273,7 +220,6 @@ const std::string CSPropExcitation::GetPropagationDirString(int Comp)
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return PropagationDir[Comp].GetString();
 }
-
 
 bool CSPropExcitation::Update(std::string *ErrStr)
 {
