@@ -30,9 +30,12 @@
 class ModeFileParser
 {
 public:
-	ModeFileParser(const std::string& fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {this->parseFile();}
+	ModeFileParser() : delimiter(',') {};
+	ModeFileParser(const std::string & fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {this->parseFile();};
 
+	bool parseFile(const std::string & fileName) {this->fileName = fileName; return this->parseFile();};
 	bool parseFile();
+
 
 	std::vector<double> operator()(unsigned int i, unsigned int j) const;
 
