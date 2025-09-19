@@ -84,8 +84,10 @@ public:
 	//! Get the weighting function for the given excitation component
 	const std::string GetWeightFunction(int ny);
 
-	void SetModeFile(const std::string fileName);
-	const std::string GetModeFileName();
+	void	SetModeFileName(const std::string fileName);
+	const 	std::string GetModeFileName();
+	bool	ParseModeFile();
+	void	ClearModeFile();
 
 	double GetWeightedExcitation(int ny, const double* coords);
 

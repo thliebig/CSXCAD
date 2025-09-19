@@ -17,7 +17,7 @@
 
 #include "ModeFileParser.h"
 
-std::vector<double> ModeFileParser::parseLine(const std::string & line)
+std::vector<double> ModeFileParser::parseCSVline(const std::string & line)
 {
 	std::vector<double>	row;
 	std::stringstream	ss(line);
@@ -67,7 +67,7 @@ bool ModeFileParser::parseFile()
 	std::string line;
 	while (std::getline(file, line))
 	{
-		std::vector<double> row = parseLine(line);
+		std::vector<double> row = parseCSVline(line);
 		// If this is the first line, store the line length
 		if (firstLine)
 		{
@@ -168,6 +168,16 @@ bool ModeFileParser::parseFile()
 
 	file.close();
 	return true;
+}
+
+void ModeFileParser::clearData()
+{
+	m_X.clear();
+	m_Y.clear();
+	m_Vx.clear();
+	m_Vy.clear();
+
+	fileName = "";
 }
 
 std::vector<double> ModeFileParser::getCSVcolumn(const std::vector<std::vector<double>> & mat, unsigned int colIdx) const

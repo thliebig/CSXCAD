@@ -30,12 +30,13 @@
 class ModeFileParser
 {
 public:
-	ModeFileParser() : delimiter(',') {};
-	ModeFileParser(const std::string & fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {this->parseFile();};
+	ModeFileParser(char delimiter = ',') : delimiter(delimiter) {clearData();};
+	ModeFileParser(const std::string & fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {clearData(); parseFile();};
 
 	bool parseFile(const std::string & fileName) {this->fileName = fileName; return this->parseFile();};
 	bool parseFile();
 
+	void clearData();
 
 	std::vector<double> operator()(unsigned int i, unsigned int j) const;
 
@@ -50,14 +51,15 @@ public:
 	unsigned int getM() const {return m_M;};
 	unsigned int getN() const {return m_N;};
 
+	// See if mode data was parsed
+	bool hasModeData() {return (m_Vx.size() != 0);};
+
 	// for debug
 	void print();
 
 private:
 	std::string fileName;
-	char delimiter;
-
-	std::vector<double> parseLine(const std::string & line);
+	char 		delimiter;
 
 	// Containers for arranged data
 	std::vector<double>					m_X,m_Y;
@@ -66,11 +68,8 @@ private:
 	unsigned int 	m_M = 0,
 					m_N = 0;
 
-	double			m_minX = -std::numeric_limits<double>::infinity(),
-					m_maxX = std::numeric_limits<double>::infinity(),
-					m_minY = -std::numeric_limits<double>::infinity(),
-					m_maxY = std::numeric_limits<double>::infinity();
-
+	// Helper functions to parse original CSV
+	std::vector<double> parseCSVline(const std::string & line);
 	std::vector<double> getCSVcolumn(const std::vector<std::vector<double>> & mat, unsigned int colIdx) const;
 
 	// This function assumes that the input vector is sorted, for efficiency
