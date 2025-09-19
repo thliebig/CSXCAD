@@ -92,24 +92,33 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 
 	// If a weight function set, this is not a file
 	m_FieldSourceIsFile = false;
+	m_modeFile.clearData();
 
 	return 0;
 }
 
 const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
 
-void CSPropExcitation::SetModeFile(const std::string fileName)
+void CSPropExcitation::SetModeFileName(const std::string fileName)
 {
 	m_modeFileName = fileName;
-
-	// If the file is set, it can now be parsed.
-	m_modeFile.parseFile(m_modeFileName);
 }
 
 const std::string CSPropExcitation::GetModeFileName()
 {
 	return m_modeFileName;
 }
+
+bool CSPropExcitation::ParseModeFile()
+{
+	return m_modeFile.parseFile(m_modeFileName);
+}
+
+void CSPropExcitation::ClearModeFile()
+{
+	m_modeFile.clearData();
+}
+
 
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
@@ -143,29 +152,43 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 
 
 	// Check if manual weights are set. If so, look for coordinate there
-	float minDr = std::numeric_limits<float>::infinity();	// Container for minimal found dr
-	float dr; 												// Container for distance between requested coordiante and stored coordinate
-	uint minIdx;
+	double cWeight;
 	if (m_FieldSourceIsFile)
 	{
-		nyp = PropagationDir[1];
-		// Check all the coordinates within this excitation to see which is the closest.
-		for (uint coorIdx = 0 ; coorIdx < Weights[0].size() ; coorIdx++)
+		// Determine propagation direction from active directions
+		// 0x110 == 6 : XY active, +Z normal
+		// 0x011 == 3 : YZ active, +X normal
+		// 0x101 == 5 : ZX active, +Y normal
+		int dirAsNumber = static_cast<int>(ActiveDir[2]) + 2*static_cast<int>(ActiveDir[1]) + 4*static_cast<int>(ActiveDir[0]),
+			nPy = dirAsNumber/2 - 1;
+
+		// If, due to bad initialization, this resulted in -1 (not 3,5 or 6)
+		if (nPy < 0)
 		{
-			dr = sqrtf(	powf(coords[0] - WeightCoords[0].at(coorIdx),2.0f) +
-						powf(coords[1] - WeightCoords[1].at(coorIdx),2.0f) +
-						powf(coords[2] - WeightCoords[2].at(coorIdx),2.0f));
-
-			if (dr < minDr)
-			{
-				minDr = dr;
-				minIdx = coorIdx;
-			}
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error determining propagation direction (ID: " << this->GetID() << ", ActiveDir = {" << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << "}" << std::endl;
+			return 0.0;
 		}
+		// This part is up to the user that supplied the CSV file
+		//								[ny = 0] [ny = 1]
+		// In case Z normal (nPy == 2): nyp = 0, nypp = 1
+		// In case Y normal (nPy == 1): nyp = 2, nypp = 0
+		// In case X normal (nPy == 0): nyp = 1, nypp = 2
+		int nPyp	= (nPy + 1) % 3,
+			nPypp	= (nPy + 2) % 3;
 
-		// Return weighted excitation for this coordinate
-		return (Weights[ny].at(minIdx))*GetExcitation(ny);
 
+
+		cWeight = 0;
+		// Get the weight only if it's NOT in the propagation direction
+		if (nPy != ny)
+		{
+			// Get weights in both directions
+			double Wny[2] = {0.0,0.0};
+			m_modeFile.linInterp2(loc_coords[0],loc_coords[1],Wny);
+
+			// In case ny == nPyp, access Wny[0]. The case where ny == nPy can't happen.
+			cWeight = Wny[(ny == nPypp)*1];
+		}
 	}
 	else
 	{
@@ -175,8 +198,9 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
 		}
 
-		return WeightFct[ny].GetValue()*GetExcitation(ny);
+		cWeight = WeightFct[ny].GetValue();
 	}
+	return cWeight*GetExcitation(ny);
 }
 
 void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
@@ -316,6 +340,9 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	prop->QueryBoolAttribute("Enabled",&m_enabled);
 
+	if (prop->QueryStringAttribute("ModeFileName", &m_modeFileName) != TIXML_SUCCESS) m_modeFileName.clear();
+
+	m_modeFileName.clear();
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
