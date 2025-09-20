@@ -1054,58 +1054,23 @@ cdef class CSPropExcitation(CSProperties):
             func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
         return func
 
-    def SetManualWeights(self, Weights):
-        """ SetManualWeights(weights,coors)
+    def SetModeFileName(self, fileName):
+        """ SetModeFileName(self, fileName)
         
-        Sets the vectors for manual excitation weights, instead of text expression.
-        
-        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
-        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        Sets the mode file name, to get an arbitrary mode shape from an external file
+        :param fileName: String containing the file name, including path, if necessary
         
         """
         
-        N = Weights.shape[0]
+        assert type(fileName) is str, 'Error, "fileName" parameter must be of type "str"'
         
-        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        (<_CSPropExcitation*>self.thisptr).SetModeFileName(fileName.encode('UTF-8'), n)
         
-        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+    def GetModeFileName(self):
         
-        cdef unsigned int   c_len   = N
+        fileName = (<_CSPropExcitation*>self.thisptr).GetModeFileName(n).decode('UTF-8')
+        return fileName
         
-        cdef int elIdx
-        try:
-            for elIdx in range(N):
-                cx[elIdx] = Weights[elIdx,0]
-                cy[elIdx] = Weights[elIdx,1]
-                cz[elIdx] = Weights[elIdx,2]
-                
-                cwx[elIdx] = Weights[elIdx,3]
-                cwy[elIdx] = Weights[elIdx,4]
-                cwz[elIdx] = Weights[elIdx,5]
-                
-            (<_CSPropExcitation*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
-        finally:
-            # don't forget to fee allocated memory
-            stdlib.free(cx)
-            stdlib.free(cy)
-            stdlib.free(cz)
-            
-            stdlib.free(cwx)
-            stdlib.free(cwy)
-            stdlib.free(cwz)
-        
-    def ClearManualWeights(self):
-        """ ClearManualWeights(weights,coors)
-        
-        Clears the manual weight vectors.
-                
-        """
-        
-        (<_CSPropExcitation*>self.thisptr).ClearManualWeights()
         
     def SetFrequency(self, val):
         """ SetFrequency(val)

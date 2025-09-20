@@ -99,12 +99,12 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 
 const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
 
-void CSPropExcitation::SetModeFileName(const std::string fileName)
+void CSPropExcitation::SetModeFileName(std::string fileName)
 {
 	m_modeFileName = fileName;
 }
 
-const std::string CSPropExcitation::GetModeFileName()
+std::string CSPropExcitation::GetModeFileName()
 {
 	return m_modeFileName;
 }
@@ -160,14 +160,16 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 		// 0x011 == 3 : YZ active, +X normal
 		// 0x101 == 5 : ZX active, +Y normal
 		int dirAsNumber = static_cast<int>(ActiveDir[2]) + 2*static_cast<int>(ActiveDir[1]) + 4*static_cast<int>(ActiveDir[0]),
-			nPy = dirAsNumber/2 - 1;
+			nPy = dirAsNumber;
 
 		// If, due to bad initialization, this resulted in -1 (not 3,5 or 6)
-		if (nPy < 0)
+		if (!((nPy == 3) || (nPy == 5) || (nPy == 6)))
 		{
 			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error determining propagation direction (ID: " << this->GetID() << ", ActiveDir = {" << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << "}" << std::endl;
 			return 0.0;
 		}
+		nPy = nPy/2 - 1;
+
 		// This part is up to the user that supplied the CSV file
 		//								[ny = 0] [ny = 1]
 		// In case Z normal (nPy == 2): nyp = 0, nypp = 1
