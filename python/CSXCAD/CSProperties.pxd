@@ -192,9 +192,9 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             int SetWeightFunction(string fct, int ny)
             string GetWeightFunction(int ny)
 
-            void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, unsigned int listLength)
-            void ClearManualWeights()
-
+            void    SetModeFileName(string fileName);
+            string  GetModeFileName();
+            
             void SetFrequency(double val)
             double GetFrequency()
 
