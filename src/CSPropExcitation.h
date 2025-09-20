@@ -86,6 +86,8 @@ public:
 
 	void		SetModeFileName(std::string fileName);
 	std::string GetModeFileName();
+	bool 		ParseModeFile();
+	void		ClearModeFile();
 
 	double GetWeightedExcitation(int ny, const double* coords);
 

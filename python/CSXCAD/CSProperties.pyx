@@ -1064,11 +1064,11 @@ cdef class CSPropExcitation(CSProperties):
         
         assert type(fileName) is str, 'Error, "fileName" parameter must be of type "str"'
         
-        (<_CSPropExcitation*>self.thisptr).SetModeFileName(fileName.encode('UTF-8'), n)
+        (<_CSPropExcitation*>self.thisptr).SetModeFileName(fileName.encode('UTF-8'))
         
     def GetModeFileName(self):
         
-        fileName = (<_CSPropExcitation*>self.thisptr).GetModeFileName(n).decode('UTF-8')
+        fileName = (<_CSPropExcitation*>self.thisptr).GetModeFileName().decode('UTF-8')
         return fileName
         
         
