@@ -55,7 +55,7 @@ public:
 
 	void		SetModeFileName(std::string fileName);
 	std::string GetModeFileName();
-	bool		GetFieldSourceIsFile() {return (m_modeFileName.length() != 0);};
+	bool		GetFieldSourceIsFile() {return (m_ModeFileName.length() != 0);};
 
 	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
 	void SetProbeType(int type) {ProbeType=type;}
@@ -91,7 +91,7 @@ protected:
 	double startTime, stopTime;
 
 	// In case this should be loaded from a file, this will be set to "true"
-	std::string 	m_modeFileName;
+	std::string 	m_ModeFileName;
 
 
 };
