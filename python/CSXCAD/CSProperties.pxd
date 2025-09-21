@@ -239,11 +239,17 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             void SetWeighting(double weight)
             double GetWeighting()
 
+            void SetExcitation(double val, int Component)
+            double GetExcitation(int Component)
+
             void SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, unsigned int listLength)
             void ClearManualWeights()
 
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()
+
+            void SetModeFileName(string fileName);
+            string GetModeFileName();
 
             size_t CountFDSamples()
             vector[double]* GetFDSamples()
