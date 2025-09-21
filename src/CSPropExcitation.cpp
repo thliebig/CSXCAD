@@ -330,6 +330,7 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 	prop->SetAttribute("Type",iExcitType);
 	WriteVectorTerm(Excitation,*prop,"Excite",parameterised);
 
+
 	if (m_FieldSourceIsFile)
 		prop->SetAttribute("ModeFileName", m_ModeFileName.c_str());
 

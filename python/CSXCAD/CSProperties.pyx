@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
+from hgext.keyword import kw_amend
 
 """
 Module for all Properties like metal, material, propes and dumps
@@ -953,6 +954,7 @@ cdef class CSPropExcitation(CSProperties):
         if 'delay' in kw:
             self.SetDelay(kw['delay'])
             del kw['delay']
+        
         super(CSPropExcitation, self).__init__(pset, *args, **kw)
 
     def SetExcitType(self, val):
@@ -969,7 +971,6 @@ cdef class CSPropExcitation(CSProperties):
         :return: int -- excitation type (see above)
         """
         return (<_CSPropExcitation*>self.thisptr).GetExcitType()
-
 
     def SetEnabled(self, val):
         """ Enable/Disable the excitation"""
@@ -1117,11 +1118,13 @@ cdef class CSPropProbeBox(CSProperties):
     * 10 : for waveguide voltage mode matching
     * 11 : for waveguide current mode matching
 
-    :param p_type:       probe type (default is 0)
-    :param weight:       weighting factor (default is 1)
-    :param frequency:    dump in the frequency domain at the given samples (in Hz)
-    :param mode_function: A mode function (used only with type 3/4 in openEMS)
-    :param norm_dir:     necessary for current probing box with dimension not 2
+    :param p_type:           probe type (default is 0)
+    :param weight:           weighting factor (default is 1)
+    :param frequency:        dump in the frequency domain at the given samples (in Hz)
+    :param mode_function:    A mode function (used only with type 3/4 in openEMS). 
+    :param norm_dir:         Necessary for current probing box with dimension not 2
+    :param mode_file_name:   Optional: Name of the mode file used 
+
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -1145,6 +1148,9 @@ cdef class CSPropProbeBox(CSProperties):
         if 'mode_function' in kw:
             self.SetModeFunction(kw['mode_function'])
             del kw['mode_function']
+        if 'mode_file_name' in kw:
+            self.SetModeFileName(kw['mode_file_name'])
+            del kw['mode_file_name']
         super(CSPropProbeBox, self).__init__(pset, *args, **kw)
 
     def SetProbeType(self, val):
@@ -1232,14 +1238,6 @@ cdef class CSPropProbeBox(CSProperties):
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
         """
-        
-        # Check if this is a numpy array, namely custom mode.
-        if mode_fun.__class__.__name__ == 'ndarray':
-            if not (mode_fun.shape[1] == 6):
-                raise Exception('"E_func" must have 6 columns')
-            
-            self.SetManualWeights(mode_fun)
-            return
         
         assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
         self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
