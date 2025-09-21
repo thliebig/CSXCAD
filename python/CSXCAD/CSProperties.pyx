@@ -1167,60 +1167,23 @@ cdef class CSPropProbeBox(CSProperties):
         """
         return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
 
-    def SetManualWeights(self, Weights):
-        """ SetManualWeights(weights,coors)
+    def SetModeFileName(self, fileName):
+        """ SetModeFileName(self, fileName)
         
-        Sets the vectors for manual excitation weights, instead of text expression.
-        
-        :param weights: 3 x float  list (array) -- Depicting the weights for the excited field in each direction.
-        :param coors: 3 x float list (array) -- Coordinates in which the weights were sampled.   
+        Sets the mode file name, to get an arbitrary mode shape from an external file
+        :param fileName: String containing the file name, including path, if necessary
         
         """
-    
-        N = Weights.shape[0]
         
-        cdef float*         cx      = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cy      = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cz      = <float *> stdlib.malloc(N*sizeof(float))
+        assert type(fileName) is str, 'Error, "fileName" parameter must be of type "str"'
         
-        cdef float*         cwx     = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cwy     = <float *> stdlib.malloc(N*sizeof(float))
-        cdef float*         cwz     = <float *> stdlib.malloc(N*sizeof(float))
+        (<_CSPropProbeBox*>self.thisptr).SetModeFileName(fileName.encode('UTF-8'))
         
-        cdef unsigned int   c_len   = N
+    def GetModeFileName(self):
         
-        cdef int elIdx
-        try:
-            for elIdx in range(N):
-                cx[elIdx] = Weights[elIdx,0]
-                cy[elIdx] = Weights[elIdx,1]
-                cz[elIdx] = Weights[elIdx,2]
-                
-                cwx[elIdx] = Weights[elIdx,3]
-                cwy[elIdx] = Weights[elIdx,4]
-                cwz[elIdx] = Weights[elIdx,5]
+        fileName = (<_CSPropProbeBox*>self.thisptr).GetModeFileName().decode('UTF-8')
+        return fileName
         
-                (<_CSPropProbeBox*>self.thisptr).SetManualWeights(cwx,cwy,cwz,cx,cy,cz,c_len)
-        
-        finally:
-            # don't forget to fee allocated memory
-            stdlib.free(cx)
-            stdlib.free(cy)
-            stdlib.free(cz)
-            
-            stdlib.free(cwx)
-            stdlib.free(cwy)
-            stdlib.free(cwz)
-            
-    def ClearManualWeights(self):
-        """ ClearManualWeights(weights,coors)
-        
-        Clears the manual weight vectors.
-                
-        """
-        
-        (<_CSPropProbeBox*>self.thisptr).ClearManualWeights()
-
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """

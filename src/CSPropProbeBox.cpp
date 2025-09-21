@@ -30,11 +30,8 @@ CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
 	startTime=0;
 	stopTime=0;
 
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
+	m_modeFileName.clear();
+
 }
 
 CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
@@ -48,11 +45,7 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 	stopTime=prop->stopTime;
 	m_FD_Samples=prop->m_FD_Samples;
 
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx] = prop->Weights[dirIdx];
-		WeightCoords[dirIdx] = prop->WeightCoords[dirIdx];
-	}
+	m_modeFileName = prop->m_modeFileName;
 }
 
 CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
@@ -66,73 +59,25 @@ CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSPrope
 	startTime=0;
 	stopTime=0;
 
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
+	m_modeFileName.clear();
+
+
 }
 
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
+
 unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
-void CSPropProbeBox::SetManualWeights(float * wx, float * wy, float * wz, float * cx, float * cy, float * cz, uint listLength)
+void CSPropProbeBox::SetModeFileName(std::string fileName)
 {
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
-
-	Weights[0].insert(Weights[0].end(),wx,&wx[listLength]);
-	Weights[1].insert(Weights[1].end(),wy,&wy[listLength]);
-	Weights[2].insert(Weights[2].end(),wz,&wz[listLength]);
-
-	WeightCoords[0].insert(WeightCoords[0].end(),cx,&cx[listLength]);
-	WeightCoords[1].insert(WeightCoords[1].end(),cy,&cy[listLength]);
-	WeightCoords[2].insert(WeightCoords[2].end(),cz,&cz[listLength]);
-
+	m_modeFileName = fileName;
 }
 
-std::vector<float> CSPropProbeBox::GetManualWeights(uint dir)
+std::string CSPropProbeBox::GetModeFileName()
 {
-	if (dir < 3)
-		return Weights[dir];
-	else
-	{
-		std::stringstream stream;
-		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
-
-		std::vector<float> tempVect;
-		tempVect.clear();
-		return tempVect;
-	}
-}
-
-std::vector<float> CSPropProbeBox::GetManualWeightCoords(uint dir)
-{
-	if (dir < 3)
-		return WeightCoords[dir];
-	else
-	{
-		std::stringstream stream;
-		stream << std::endl << "Error in obtaining manual weights - Wrong direction ";
-
-		std::vector<float> tempVect;
-		tempVect.clear();
-		return tempVect;
-	}
-}
-
-void CSPropProbeBox::ClearManualWeights()
-{
-	for (uint dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
-	{
-		Weights[dirIdx].clear();
-		WeightCoords[dirIdx].clear();
-	}
+	return m_modeFileName;
 }
 
 void CSPropProbeBox::AddFDSample(std::vector<double> *freqs)
@@ -189,6 +134,8 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryIntAttribute("NormDir",&m_NormDir)!=TIXML_SUCCESS) m_NormDir=-1;
 
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
+
+	if (prop->QueryStringAttribute("ModeFileName", &m_modeFileName) != TIXML_SUCCESS) m_modeFileName.clear();
 
 	if (prop->QueryDoubleAttribute("Weight",&m_weight)!=TIXML_SUCCESS) m_weight=1;
 
