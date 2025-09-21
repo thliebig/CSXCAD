@@ -37,6 +37,7 @@ public:
 
 	bool parseFile(const std::string & fileName) {this->fileName = fileName; return this->parseFile();};
 	bool parseFile();
+	bool isFileParsed() {return (m_Vx.size() != 0);};
 
 	void clearData();
 

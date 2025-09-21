@@ -33,8 +33,8 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	Delay.Copy(&prop->Delay);
 
 	m_FieldSourceIsFile = prop->m_FieldSourceIsFile;
-	m_modeFileName = prop->m_modeFileName;
-	m_modeFile = prop->m_modeFile;
+	m_ModeFileName = prop->m_ModeFileName;
+	m_ModeFile = prop->m_ModeFile;
 
 	for (unsigned int i=0;i<3;++i)
 	{
@@ -97,7 +97,7 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 
 	// If a weight function set, this is not a file
 	m_FieldSourceIsFile = false;
-	m_modeFile.clearData();
+	m_ModeFile.clearData();
 
 	return 0;
 }
@@ -106,22 +106,22 @@ const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (n
 
 void CSPropExcitation::SetModeFileName(std::string fileName)
 {
-	m_modeFileName = fileName;
+	m_ModeFileName = fileName;
 }
 
 std::string CSPropExcitation::GetModeFileName()
 {
-	return m_modeFileName;
+	return m_ModeFileName;
 }
 
 bool CSPropExcitation::ParseModeFile()
 {
-	return m_modeFile.parseFile(m_modeFileName);
+	return m_ModeFile.parseFile(m_ModeFileName);
 }
 
 void CSPropExcitation::ClearModeFile()
 {
-	m_modeFile.clearData();
+	m_ModeFile.clearData();
 }
 
 
@@ -160,6 +160,9 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	double cWeight;
 	if (m_FieldSourceIsFile)
 	{
+		// Check if mode file is parsed
+		if(!m_ModeFile.isFileParsed())
+			m_ModeFile.parseFile(m_ModeFileName);
 		// Determine propagation direction from active directions
 		// 0x110 == 6 : XY active, +Z normal
 		// 0x011 == 3 : YZ active, +X normal
@@ -183,15 +186,13 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 		int nPyp	= (nPy + 1) % 3,
 			nPypp	= (nPy + 2) % 3;
 
-
-
 		cWeight = 0;
 		// Get the weight only if it's NOT in the propagation direction
 		if (nPy != ny)
 		{
 			// Get weights in both directions
 			double Wny[2] = {0.0,0.0};
-			m_modeFile.linInterp2(loc_coords[0],loc_coords[1],Wny);
+			m_ModeFile.linInterp2(loc_coords[0],loc_coords[1],Wny);
 
 			// In case ny == nPyp, access Wny[0]. The case where ny == nPy can't happen.
 			cWeight = Wny[(ny == nPypp)*1];
@@ -237,8 +238,8 @@ void CSPropExcitation::Init()
 	}
 
 	m_FieldSourceIsFile = false;
-	m_modeFile.clearData();
-	m_modeFileName.clear();
+	m_ModeFile.clearData();
+	m_ModeFileName.clear();
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
@@ -308,6 +309,10 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
+
+	if(m_ModeFileName.length())
+		m_FieldSourceIsFile = true;
+
 	return bOK;
 }
 
@@ -324,6 +329,9 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 
 	prop->SetAttribute("Type",iExcitType);
 	WriteVectorTerm(Excitation,*prop,"Excite",parameterised);
+
+	if (m_FieldSourceIsFile)
+		prop->SetAttribute("ModeFileName", m_ModeFileName.c_str());
 
 	TiXmlElement Weight("Weight");
 	WriteTerm(WeightFct[0],Weight,"X",parameterised);
@@ -349,9 +357,9 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	prop->QueryBoolAttribute("Enabled",&m_enabled);
 
-	if (prop->QueryStringAttribute("ModeFileName", &m_modeFileName) != TIXML_SUCCESS) m_modeFileName.clear();
+	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS) m_ModeFileName.clear();
 
-	m_modeFileName.clear();
+	m_ModeFileName.clear();
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
