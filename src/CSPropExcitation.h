@@ -86,6 +86,7 @@ public:
 
 	void		SetModeFileName(std::string fileName);
 	std::string GetModeFileName();
+	bool		GetFieldSourceIsFile() {return m_FieldSourceIsFile;};
 	bool 		ParseModeFile();
 	void		ClearModeFile();
 

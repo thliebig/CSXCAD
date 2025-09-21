@@ -31,7 +31,10 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	coordInputType=prop->coordInputType;
 	m_Frequency.Copy(&prop->m_Frequency);
 	Delay.Copy(&prop->Delay);
+
 	m_FieldSourceIsFile = prop->m_FieldSourceIsFile;
+	m_modeFileName = prop->m_modeFileName;
+	m_modeFile = prop->m_modeFile;
 
 	for (unsigned int i=0;i<3;++i)
 	{
@@ -39,6 +42,8 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 		Excitation[i].Copy(&prop->Excitation[i]);
 		WeightFct[i].Copy(&prop->WeightFct[i]);
 	}
+
+
 }
 CSPropExcitation::CSPropExcitation(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=EXCITATION;Init();}
 CSPropExcitation::~CSPropExcitation() {}
@@ -232,6 +237,8 @@ void CSPropExcitation::Init()
 	}
 
 	m_FieldSourceIsFile = false;
+	m_modeFile.clearData();
+	m_modeFileName.clear();
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
