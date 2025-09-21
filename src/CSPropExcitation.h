@@ -133,7 +133,7 @@ protected:
 
 	// In case this should be loaded from a file, this will be set to "true"
 	bool 			m_FieldSourceIsFile;
-	std::string 	m_modeFileName;
+	std::string 	m_ModeFileName;
 
-	ModeFileParser	m_modeFile;
+	ModeFileParser	m_ModeFile;
 };
