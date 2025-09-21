@@ -30,7 +30,7 @@ CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
 	startTime=0;
 	stopTime=0;
 
-	m_modeFileName.clear();
+	m_ModeFileName.clear();
 
 }
 
@@ -45,7 +45,7 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 	stopTime=prop->stopTime;
 	m_FD_Samples=prop->m_FD_Samples;
 
-	m_modeFileName = prop->m_modeFileName;
+	m_ModeFileName = prop->m_ModeFileName;
 }
 
 CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
@@ -59,7 +59,7 @@ CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSPrope
 	startTime=0;
 	stopTime=0;
 
-	m_modeFileName.clear();
+	m_ModeFileName.clear();
 
 
 }
@@ -72,12 +72,12 @@ unsigned int CSPropProbeBox::GetNumber() {return uiNumber;}
 
 void CSPropProbeBox::SetModeFileName(std::string fileName)
 {
-	m_modeFileName = fileName;
+	m_ModeFileName = fileName;
 }
 
 std::string CSPropProbeBox::GetModeFileName()
 {
-	return m_modeFileName;
+	return m_ModeFileName;
 }
 
 void CSPropProbeBox::AddFDSample(std::vector<double> *freqs)
@@ -117,6 +117,10 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 		prop->InsertEndChild(FDS_Elem);
 	}
 
+	if (m_ModeFileName.length())
+		prop->SetAttribute("ModeFileName", m_ModeFileName.c_str());
+
+
 	return true;
 }
 
@@ -135,7 +139,7 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 
 	if (prop->QueryIntAttribute("Type",&ProbeType)!=TIXML_SUCCESS) ProbeType=0;
 
-	if (prop->QueryStringAttribute("ModeFileName", &m_modeFileName) != TIXML_SUCCESS) m_modeFileName.clear();
+	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS) m_ModeFileName.clear();
 
 	if (prop->QueryDoubleAttribute("Weight",&m_weight)!=TIXML_SUCCESS) m_weight=1;
 
