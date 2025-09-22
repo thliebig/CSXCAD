@@ -19,7 +19,7 @@
 
 
 """
-This moduld contains the main class ContinuousStructure (CSX).
+This module contains the main class ContinuousStructure (CSX).
 
 
 Examples
