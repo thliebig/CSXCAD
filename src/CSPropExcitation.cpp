@@ -107,6 +107,7 @@ const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (n
 void CSPropExcitation::SetModeFileName(std::string fileName)
 {
 	m_ModeFileName = fileName;
+	m_FieldSourceIsFile = true;
 }
 
 std::string CSPropExcitation::GetModeFileName()
@@ -163,39 +164,40 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 		// Check if mode file is parsed
 		if(!m_ModeFile.isFileParsed())
 			m_ModeFile.parseFile(m_ModeFileName);
-		// Determine propagation direction from active directions
-		// 0x110 == 6 : XY active, +Z normal
-		// 0x011 == 3 : YZ active, +X normal
-		// 0x101 == 5 : ZX active, +Y normal
-		int dirAsNumber = static_cast<int>(ActiveDir[2]) + 2*static_cast<int>(ActiveDir[1]) + 4*static_cast<int>(ActiveDir[0]),
-			nPy = dirAsNumber;
 
-		// If, due to bad initialization, this resulted in -1 (not 3,5 or 6)
-		if (!((nPy == 3) || (nPy == 5) || (nPy == 6)))
+		int nPy = 0,checkSum = 0;
+
+		for (int dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
 		{
-			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error determining propagation direction (ID: " << this->GetID() << ", ActiveDir = {" << ActiveDir[0] << "," << ActiveDir[1] << "," << ActiveDir[2] << "}" << std::endl;
+			nPy += (PropagationDir[dirIdx].GetValue() != 0)*(dirIdx + 1);
+			checkSum += int(PropagationDir[dirIdx].GetValue() != 0);
+		}
+		nPy--;
+
+		if ((nPy < 0) || (checkSum != 1))
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error determining propagation direction. PropagationDir = (";
+			std::cerr << PropagationDir[0].GetValue() << ",";
+			std::cerr << PropagationDir[1].GetValue() << ",";
+			std::cerr << PropagationDir[2].GetValue() << ") => nPy = ";
+			std::cerr << nPy << "checkSum = " << checkSum << std::endl;
 			return 0.0;
 		}
-		nPy = nPy/2 - 1;
 
-		// This part is up to the user that supplied the CSV file
-		//								[ny = 0] [ny = 1]
-		// In case Z normal (nPy == 2): nyp = 0, nypp = 1
-		// In case Y normal (nPy == 1): nyp = 2, nypp = 0
-		// In case X normal (nPy == 0): nyp = 1, nypp = 2
 		int nPyp	= (nPy + 1) % 3,
 			nPypp	= (nPy + 2) % 3;
 
 		cWeight = 0;
+
 		// Get the weight only if it's NOT in the propagation direction
 		if (nPy != ny)
 		{
 			// Get weights in both directions
 			double Wny[2] = {0.0,0.0};
-			m_ModeFile.linInterp2(loc_coords[0],loc_coords[1],Wny);
+			m_ModeFile.linInterp2(loc_coords[nPyp],loc_coords[nPypp],Wny);
 
 			// In case ny == nPyp, access Wny[0]. The case where ny == nPy can't happen.
-			cWeight = Wny[(ny == nPypp)*1];
+			cWeight = Wny[int(ny == nPypp)];
 		}
 	}
 	else
