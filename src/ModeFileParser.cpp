@@ -134,8 +134,8 @@ bool ModeFileParser::parseFile()
 	// Snip rows one by one
 	for (unsigned int m = 0 ; m < Xcol.size() ; m += Ncluster)
 	{
-		std::vector<double> Vx_temp(Vx.begin() + m,Vx.begin() + m + Ncluster - 1),
-							Vy_temp(Vy.begin() + m,Vy.begin() + m + Ncluster - 1);
+		std::vector<double> Vx_temp(Vx.begin() + m,Vx.begin() + m + Ncluster),
+							Vy_temp(Vy.begin() + m,Vy.begin() + m + Ncluster);
 
 		m_Vx.push_back(Vx_temp);
 		m_Vy.push_back(Vy_temp);
@@ -162,6 +162,11 @@ bool ModeFileParser::parseFile()
 
 		m_Vx = swap_Vx;
 		m_Vy = swap_Vy;
+
+		// Matrix size
+		m_M = m_Y.size();
+		m_N = m_X.size();
+
 	}
 
 
@@ -250,30 +255,39 @@ std::vector<double> ModeFileParser::linInterp2(double x, double y)
 	// Container for interpolated value
 	std::vector<double> Vi2 = {0.0,0.0};
 
-	unsigned int 	n1 = minDistArg(m_X, x),
-					m1 = minDistArg(m_Y, y);
+	unsigned int 	n = minDistArgLHS(m_X, x),
+					m = minDistArgLHS(m_Y, y);
 
 	// If the corner is past the coordinate, it was closer to the RHS. Shift back one.
-	if (m_Y[m1] > y) m1--;
-	if (m_X[n1] > x) n1--;
+	if (m == (getM() - 1)) m--;
+	if (n == (getN() - 1)) n--;
 
 	// Check if this is the end of the matrix. If so,
 	// clamp to the edge (nearest neighbor)
 	if (x <= m_X[0])		x = m_X[0];
-	if (x >= *m_X.end())	x = *m_X.end();
-	if (y <= m_Y[0])		x = m_Y[0];
-	if (y >= *m_Y.end())	x = *m_Y.end();
+	if (x >= m_X.back())	x = m_X.back();;
+	if (y <= m_Y[0])		y = m_Y[0];
+	if (y >= m_Y.back())	y = m_Y.back();
 
-	std::function<double(const std::vector<std::vector<double>> &)> locInterp2 = [&](const std::vector<std::vector<double>> & A)
+	std::function<double(const std::vector<std::vector<double>> &)>
+			locInterp2 = [&](const std::vector<std::vector<double>> & A)
 		{
-			double 	X1 = m_X[n1],
-					X2 = m_X[n1 + 1],
-					Y1 = m_Y[m1],
-					Y2 = m_Y[m1 + 1],
-					f11 = A[m1][n1],
-					f21 = A[m1][n1 + 1],
-					f12 = A[m1 + 1][n1],
-					f22 = A[m1 + 1][n1 + 1];
+			unsigned int 	M = A.size(),
+							N = A.at(0).size();
+
+			if ((n >= (N - 1)) || (m >= (M - 1)))
+			{
+				std::cout << "Attempted to access [" << m + 1 << "][" << n + 1 << "]" << std::endl;
+				return 0.0;
+			}
+			double 	X1 = m_X[n],
+					X2 = m_X[n + 1],
+					Y1 = m_Y[m],
+					Y2 = m_Y[m + 1],
+					f11 = A[m][n],
+					f21 = A[m][n + 1],
+					f12 = A[m + 1][n],
+					f22 = A[m + 1][n + 1];
 
 			double	D = (1/((X2 - X1)*(Y2 - Y1))),
 					I11 = f11*(X2 - x)*(Y2 - y),
@@ -281,7 +295,11 @@ std::vector<double> ModeFileParser::linInterp2(double x, double y)
 					I21 = f21*(x - X1)*(Y2 - y),
 					I22 = f22*(x - X1)*(y - Y1);
 
-			return D*(I11 + I12 + I21 + I22);
+			double I = D*(I11 + I12 + I21 + I22);
+
+			if (std::isinf(I) || std::isnan(I)) I = 0.0;
+
+			return I;
 		};
 
 	// finally, linear interpolation
@@ -305,14 +323,14 @@ void ModeFileParser::linInterp2(double x, double y, double & Vx, double & Vy)
 	Vy = Vi2[1];
 }
 
-unsigned int ModeFileParser::minDistArg(std::vector<double> & A, double a0)
+unsigned int ModeFileParser::minDistArg(std::vector<double> & x, double x0)
 {
 	unsigned int i;
 	double minDist = std::numeric_limits<double>::infinity();
 
-	for(i = 0 ; i < A.size() ; i++)
+	for(i = 0 ; i < x.size() ; i++)
 	{
-		double cDist = std::abs(A[i] - a0);
+		double cDist = std::abs(x[i] - x0);
 
 		if(cDist < minDist)
 			minDist = cDist;
@@ -320,6 +338,24 @@ unsigned int ModeFileParser::minDistArg(std::vector<double> & A, double a0)
 			break;
 
 	}
+
+	if (i == x.size()) i--;
+
+	return i;
+}
+
+
+unsigned int ModeFileParser::minDistArgLHS(std::vector<double> & x, double x0)
+{
+	unsigned int i = minDistArg(x,x0);
+
+	// If this number is on the left hand side of minimum,
+	// clamp to the left. Namely:
+	// x[i-1]------x0--x[i  ]--------x[i+1]
+	// is now considered
+	// x[i  ]------x0--x[i+1]--------x[i+2]
+	if ((x0 < x[i]) && (i > 0)) i--;
+
 	return i;
 }
 
