@@ -360,8 +360,6 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	prop->QueryBoolAttribute("Enabled",&m_enabled);
 
-	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS) m_ModeFileName.clear();
-
 	m_ModeFileName.clear();
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
@@ -370,12 +368,23 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	ReadTerm(m_Frequency,*prop,"Frequency");
 	ReadTerm(Delay,*prop,"Delay");
 
-	TiXmlElement *weight = prop->FirstChildElement("Weight");
-	if (weight!=NULL)
+	// Try this first
+	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS)
 	{
-		ReadTerm(WeightFct[0],*weight,"X");
-		ReadTerm(WeightFct[1],*weight,"Y");
-		ReadTerm(WeightFct[2],*weight,"Z");
+		m_ModeFileName.clear();
+		m_FieldSourceIsFile = true;
+	}
+	// Overload if necessary
+	if (m_ModeFileName.length())
+	{
+		m_FieldSourceIsFile = false;
+		TiXmlElement *weight = prop->FirstChildElement("Weight");
+		if (weight!=NULL)
+		{
+			ReadTerm(WeightFct[0],*weight,"X");
+			ReadTerm(WeightFct[1],*weight,"Y");
+			ReadTerm(WeightFct[2],*weight,"Z");
+		}
 	}
 
 	ReadVectorTerm(PropagationDir,*prop,"PropDir",0.0);
