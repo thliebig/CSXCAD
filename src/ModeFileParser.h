@@ -33,7 +33,7 @@ class ModeFileParser
 {
 public:
 	ModeFileParser(char delimiter = ',') : delimiter(delimiter) {clearData();};
-	ModeFileParser(const std::string & fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {clearData(); parseFile();};
+	ModeFileParser(const std::string & fileName, char delimiter = ',') : fileName(fileName) , delimiter(delimiter) {parseFile();};
 
 	bool parseFile(const std::string & fileName) {this->fileName = fileName; return this->parseFile();};
 	bool parseFile();
@@ -76,6 +76,7 @@ private:
 	std::vector<double> getCSVcolumn(const std::vector<std::vector<double>> & mat, unsigned int colIdx) const;
 
 	// This function assumes that the input vector is sorted, for efficiency
-	unsigned int minDistArg(std::vector<double> & A, double a0);
+	unsigned int minDistArg(std::vector<double> & x, double x0);
+	unsigned int minDistArgLHS(std::vector<double> & x, double x0);
 
 };
