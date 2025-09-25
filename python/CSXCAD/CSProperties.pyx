@@ -44,8 +44,6 @@ from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
 
-from libc cimport stdlib as stdlib
-
 def hex2color(color):
     if not type(color) is str:
         return color
