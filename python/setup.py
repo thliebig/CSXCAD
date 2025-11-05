@@ -159,27 +159,22 @@ extensions = get_modules_list(
 
 setup(
   name="CSXCAD",
-  version = '0.6.2',
-  description = "Python interface for the CSXCAD library",
-  classifiers = [
-      'Development Status :: 3 - Alpha',
-      'Intended Audience :: Developers',
-      'Intended Audience :: Information Technology',
-      'Intended Audience :: Science/Research',
-      'License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)',
-      'Programming Language :: Python',
-      'Topic :: Scientific/Engineering',
-      'Topic :: Software Development :: Libraries :: Python Modules',
-      'Operating System :: POSIX :: Linux',
-      'Operating System :: Microsoft :: Windows',
-  ],
-  author = 'Thorsten Liebig',
-  author_email = 'Thorsten.Liebig@gmx.de',
-  maintainer = 'Thorsten Liebig',
-  maintainer_email = 'Thorsten.Liebig@gmx.de',
-  url = 'https://openEMS.de',
   packages=["CSXCAD", ],
   package_data={'CSXCAD': ['*.pxd']},
-  setup_requires=['cython'],
+  # DO NOT add any new build-time dependency in setup_requires.
+  # We should use pyproject.toml exclusively. The only item
+  # "cython" is meant to activate auto-Cython feature in
+  # setuptools 18.
+  setup_requires=[
+    'cython'
+  ],
+  # DO add new run-time dependencies here to keep it in sync with
+  # pyproject.toml.
+  install_requires=[
+    # BSD 3-Clause (https://github.com/numpy/numpy/blob/main/LICENSE.txt)
+    'numpy',
+    # Matplotlib license (https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
+    "matplotlib >= 2.1.0"
+  ],
   ext_modules=extensions
 )
