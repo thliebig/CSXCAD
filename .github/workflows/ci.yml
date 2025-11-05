@@ -252,7 +252,8 @@ jobs:
         run: |
           source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD/python
-          python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
+          export CSXCAD_INSTALL_PATH="$HOME/opt"
+          python3 setup.py build_ext
           python3 setup.py install --user
 
       - name: Smoketest CSXCAD Python module execution
@@ -365,7 +366,8 @@ jobs:
         run: |
           source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD/python
-          $HOME/opt/bin/python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
+          export CSXCAD_INSTALL_PATH="$HOME/opt"
+          $HOME/opt/bin/python3 setup.py build_ext
           $HOME/opt/bin/python3 setup.py install --user
 
       - name: Smoketest CSXCAD Python module execution
@@ -454,7 +456,8 @@ jobs:
 
             echo "Build and install CSXCAD Python module..."
             cd ~/CSXCAD/python
-            python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
+            export CSXCAD_INSTALL_PATH="$HOME/opt"
+            python3 setup.py build_ext
             python3 setup.py install --user
 
             echo "Smoketest CSXCAD Python module execution..."
