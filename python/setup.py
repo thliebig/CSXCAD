@@ -13,7 +13,7 @@ if os.name == "posix":
     cxxflags.append("-std=c++11")
 
 extensions = [
-    Extension("*", [os.path.join(os.path.dirname(__file__), "CSXCAD","*.pyx")],
+    Extension("*", [os.path.join("CSXCAD","*.pyx")],
         language="c++",             # generate C++ code
         libraries = ['CSXCAD',],
         extra_compile_args=cxxflags),
