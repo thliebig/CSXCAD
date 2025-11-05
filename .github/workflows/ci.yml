@@ -255,6 +255,18 @@ jobs:
           python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
           python3 setup.py install --user
 
+      - name: Smoketest CSXCAD Python module execution
+        run: |
+          source ~/.bash_profile
+          cd /
+          python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+      - name: Unittest CSXCAD Python module execution
+        run: |
+          source ~/.bash_profile
+          cd $GITHUB_WORKSPACE/CSXCAD/python/tests
+          python3 -m unittest
+
   macOS:
     name: "macOS (ARM, latest)"
 
@@ -356,6 +368,16 @@ jobs:
           $HOME/opt/bin/python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
           $HOME/opt/bin/python3 setup.py install --user
 
+      - name: Smoketest CSXCAD Python module execution
+        run: |
+          cd /
+          python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+      - name: Unittest CSXCAD Python module execution
+        run: |
+          cd $GITHUB_WORKSPACE/CSXCAD/python/tests
+          python3 -m unittest
+
   FreeBSD:
     runs-on: ubuntu-latest
 
@@ -434,3 +456,11 @@ jobs:
             cd ~/CSXCAD/python
             python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
             python3 setup.py install --user
+
+            echo "Smoketest CSXCAD Python module execution..."
+            cd /
+            python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+            echo "Unittest CSXCAD Python module execution..."
+            cd ~/CSXCAD/python/tests
+            python3 -m unittest
