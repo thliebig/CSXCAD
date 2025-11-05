@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Dec 13 14:49:46 2015
-
-@author: thorsten
-"""
-
 import numpy as np
 
 from CSXCAD import ParameterObjects

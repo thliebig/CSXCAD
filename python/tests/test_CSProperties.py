@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Dec 10 21:47:29 2015
-
-@author: thorsten
-"""
-
 import numpy as np
 
 from CSXCAD import ParameterObjects
@@ -23,25 +16,25 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual( prop.GetQtyPrimitives(), 1)
         self.assertEqual( id(prop.GetPrimitive(0)), id(box))
 
-        self.assertEqual( prop.GetPrimitive(0).GetType(), CSPrimitives.BOX)
+        self.assertEqual( prop.GetPrimitive(0).GetType(), CSPrimitives.PrimitiveType.BOX)
         self.assertEqual( len(prop.GetAllPrimitives()), 1)
         self.assertEqual( prop.GetAllPrimitives(), [box,])
 
         prim = prop.AddCylinder(start= [0,0,0] , stop=[1,1,1], radius=0.5)
         self.assertEqual( prop.GetQtyPrimitives(), 2)
-        self.assertEqual( prop.GetPrimitive(1).GetType(), CSPrimitives.CYLINDER)
+        self.assertEqual( prop.GetPrimitive(1).GetType(), CSPrimitives.PrimitiveType.CYLINDER)
 
         prim = prop.AddCylindricalShell(start= [0,0,0] , stop=[1,1,1], radius=0.5, shell_width=0.1)
         self.assertEqual( prop.GetQtyPrimitives(), 3)
-        self.assertEqual( prop.GetPrimitive(2).GetType(), CSPrimitives.CYLINDRICALSHELL)
+        self.assertEqual( prop.GetPrimitive(2).GetType(), CSPrimitives.PrimitiveType.CYLINDRICALSHELL)
 
         prim = prop.AddSphere(center=[1,1,1], radius=0.5)
         self.assertEqual( prop.GetQtyPrimitives(), 4)
-        self.assertEqual( prop.GetPrimitive(3).GetType(), CSPrimitives.SPHERE)
+        self.assertEqual( prop.GetPrimitive(3).GetType(), CSPrimitives.PrimitiveType.SPHERE)
 
         prim = prop.AddSphericalShell(center=[1,1,1], radius=0.5, shell_width=0.1)
         self.assertEqual( prop.GetQtyPrimitives(), 5)
-        self.assertEqual( prop.GetPrimitive(4).GetType(), CSPrimitives.SPHERICALSHELL)
+        self.assertEqual( prop.GetPrimitive(4).GetType(), CSPrimitives.PrimitiveType.SPHERICALSHELL)
 
         self.assertEqual( len(prop.GetAllPrimitives()), 5)
 
@@ -62,7 +55,7 @@ class Test_CSPrimMethods(unittest.TestCase):
             self.assertEqual(prim1.GetType(), prim2.GetType())
         
         prim3 = prop3.GetPrimitive(4)
-        self.assertEqual(prim3.GetType(), CSPrimitives.SPHERICALSHELL)
+        self.assertEqual(prim3.GetType(), CSPrimitives.PrimitiveType.SPHERICALSHELL)
         self.assertEqual(prim3.GetRadius(), 0.5)
 
     def test_attributes(self):
@@ -172,18 +165,18 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropMetal(self.pset)
 
         self.assertTrue(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.METAL)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.METAL)
         self.assertEqual( prop.GetTypeString(), 'Metal')
 
         prop2 = prop.copy()
-        self.assertEqual( prop2.GetType(), CSProperties.METAL)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.METAL)
         self.assertEqual( prop2.GetTypeString(), 'Metal')
 
     def test_material(self):
         prop = CSProperties.CSPropMaterial(self.pset, epsilon = 5.0)
 
         self.assertTrue(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.MATERIAL)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.MATERIAL)
         self.assertEqual( prop.GetTypeString(), 'Material')
 
         self.assertEqual( prop.GetMaterialProperty('epsilon'), 5.0)
@@ -218,7 +211,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropLumpedElement(self.pset, R = 50, C=1e-12, caps=True, ny='x')
 
         self.assertFalse(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.LUMPED_ELEMENT)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.LUMPED_ELEMENT)
         self.assertEqual( prop.GetTypeString(), 'LumpedElement')
 
         self.assertEqual( prop.GetResistance(), 50)
@@ -233,7 +226,7 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         prop2 = prop.copy()
         self.assertFalse(prop2.GetMaterial())
-        self.assertEqual( prop2.GetType(), CSProperties.LUMPED_ELEMENT)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.LUMPED_ELEMENT)
         self.assertEqual( prop2.GetTypeString(), 'LumpedElement')
 
         self.assertEqual( prop2.GetResistance(), 55)
@@ -245,7 +238,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropConductingSheet(self.pset, conductivity=56e6, thickness=35e-6)
 
         self.assertTrue(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.CONDUCTINGSHEET + CSProperties.METAL)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.CONDUCTINGSHEET + CSProperties.PropertyType.METAL)
         self.assertEqual( prop.GetTypeString(), 'ConductingSheet')
 
         self.assertEqual( prop.GetConductivity(), 56e6)
@@ -253,7 +246,7 @@ class Test_CSPrimMethods(unittest.TestCase):
 
         prop2 = prop.copy()
         self.assertTrue(prop2.GetMaterial())
-        self.assertEqual( prop2.GetType(), CSProperties.CONDUCTINGSHEET + CSProperties.METAL)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.CONDUCTINGSHEET + CSProperties.PropertyType.METAL)
         self.assertEqual( prop2.GetTypeString(), 'ConductingSheet')
 
         self.assertEqual( prop2.GetConductivity(), 56e6)
@@ -263,7 +256,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropExcitation(self.pset, exc_type=1, exc_val=[-1.0, 0, 1.0], delay=1e-9)
 
         self.assertFalse(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.EXCITATION)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.EXCITATION)
         self.assertEqual( prop.GetTypeString(), 'Excitation')
 
         self.assertEqual( prop.GetExcitType(), 1)
@@ -274,7 +267,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetWeightFunction(), ['y','x','z'])
 
         prop2 = prop.copy()
-        self.assertEqual( prop2.GetType(), CSProperties.EXCITATION)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.EXCITATION)
         self.assertEqual( prop2.GetTypeString(), 'Excitation')
 
         self.assertEqual( prop2.GetExcitType(), 1)
@@ -287,7 +280,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
 
         self.assertFalse(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.PROBEBOX)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.PROBEBOX)
         self.assertEqual( prop.GetTypeString(), 'ProbeBox')
 
         self.assertEqual(prop.GetFrequencyCount(), 2)
@@ -302,7 +295,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetFrequencyCount(), 11)
 
         prop2 = prop.copy()
-        self.assertEqual( prop2.GetType(), CSProperties.PROBEBOX)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.PROBEBOX)
         self.assertEqual( prop2.GetTypeString(), 'ProbeBox')
 
         self.assertEqual(prop2.GetFrequencyCount(), 11)
@@ -314,7 +307,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop = CSProperties.CSPropDumpBox(self.pset, dump_type=10, dump_mode=2, file_type=5, opt_resolution=[10,11.5,12], sub_sampling=[1,2,4])
 
         self.assertFalse(prop.GetMaterial())
-        self.assertEqual( prop.GetType(), CSProperties.DUMPBOX)
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop.GetTypeString(), 'DumpBox')
 
         self.assertEqual(prop.GetDumpType(), 10)
@@ -324,7 +317,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue((prop.GetSubSampling() == [1,2,4]).all())
 
         prop2 = prop.copy()
-        self.assertEqual( prop2.GetType(), CSProperties.DUMPBOX)
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop2.GetTypeString(), 'DumpBox')
 
         self.assertEqual(prop2.GetDumpType(), 10)
@@ -336,7 +329,7 @@ class Test_CSPrimMethods(unittest.TestCase):
     def test_lorentz(self):
         prop = CSProperties.CSPropLorentzMaterial(self.pset, order=2)
         self.assertTrue(prop.GetMaterial())
-        self.assertEqual(prop.GetType(), CSProperties.LORENTZMATERIAL + CSProperties.DISPERSIVEMATERIAL + CSProperties.MATERIAL)
+        self.assertEqual(prop.GetType(), CSProperties.PropertyType.LORENTZMATERIAL + CSProperties.PropertyType.DISPERSIVEMATERIAL + CSProperties.PropertyType.MATERIAL)
         self.assertEqual(prop.GetTypeString(), 'LorentzMaterial')
 
         self.assertEqual(prop.GetDispersionOrder(), 2)
@@ -390,7 +383,7 @@ class Test_CSPrimMethods(unittest.TestCase):
     def test_debye(self):
         prop = CSProperties.CSPropDebyeMaterial(self.pset, order=2)
         self.assertTrue(prop.GetMaterial())
-        self.assertEqual(prop.GetType(), CSProperties.DEBYEMATERIAL + CSProperties.DISPERSIVEMATERIAL + CSProperties.MATERIAL)
+        self.assertEqual(prop.GetType(), CSProperties.PropertyType.DEBYEMATERIAL + CSProperties.PropertyType.DISPERSIVEMATERIAL + CSProperties.PropertyType.MATERIAL)
         self.assertEqual(prop.GetTypeString(), 'DebyeMaterial')
 
         self.assertEqual(prop.GetDispersionOrder(), 2)

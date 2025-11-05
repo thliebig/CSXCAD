@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Dec 12 22:04:58 2015
-
-@author: thorsten
-"""
-
 import numpy as np
 
 from CSXCAD import CSRectGrid

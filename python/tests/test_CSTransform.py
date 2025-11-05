@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep  2 21:42:50 2016
-
-@author: thorsten
-"""
-
 from CSXCAD import CSTransform
 import numpy as np
 
