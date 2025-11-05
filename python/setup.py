@@ -1,5 +1,5 @@
 from setuptools import Extension, setup
-from Cython.Build import cythonize
+from setuptools import __version__ as setuptools_version
 
 import sys
 import math
@@ -7,6 +7,7 @@ import os
 import platform
 import subprocess
 import pathlib
+import glob
 
 
 def normalize_incorrect_path(path_str):
@@ -117,16 +118,44 @@ def determine_build_options():
     return build_options
 
 
-build_options = determine_build_options()
-extensions = [
-    Extension(
-        name="*",
-        sources=[os.path.join("CSXCAD", "*.pyx")],
-        language="c++",
-        libraries=['CSXCAD'],
-        **build_options
-    ),
-]
+def get_modules_list(module_prefix, path_glob_pattern, build_options):
+    output_list = []
+
+    if int(setuptools_version.split(".")[0]) < 18:
+        from Cython.Build import cythonize
+        output_list = cythonize(
+            Extension(name="*", sources=[path_glob_pattern], **build_options)
+        )
+    else:
+        # Above setuptools 18, setuptools contains a special case for `.pyx`
+        # files if setup_requires=["cython"] is set, pyx sources are auto-
+        # Cythonized. This is recommended since setup.py / pip still runs
+        # even if Cython is not installed. But wildcards are not supported,
+        # we collect modules by hand.
+
+        # e.g. [CSXCAD/CSPrimitives.pyx, CSXCAD/CSXCAD.pyx, ...]
+        filepath_list = glob.glob(path_glob_pattern)
+        for filepath in filepath_list:
+            # e.g. CSXCAD/CSPrimitives.pyx
+            filename = os.path.basename(filepath)
+            # e.g. CSXCAD.CSPrimitives
+            module_name = module_prefix + filename.replace(".pyx", "")
+
+            output_list.append(
+                Extension(name=module_name, sources=[filepath], **build_options)
+            )
+    return output_list
+
+
+build_opt = determine_build_options()
+build_opt["language"] = "c++"
+build_opt["libraries"] = ["CSXCAD"]
+
+extensions = get_modules_list(
+    module_prefix="CSXCAD.",
+    path_glob_pattern="CSXCAD/*.pyx",
+    build_options=build_opt
+)
 
 setup(
   name="CSXCAD",
@@ -151,5 +180,6 @@ setup(
   url = 'https://openEMS.de',
   packages=["CSXCAD", ],
   package_data={'CSXCAD': ['*.pxd']},
-  ext_modules = cythonize(extensions, language_level=3)
- )
+  setup_requires=['cython'],
+  ext_modules=extensions
+)
