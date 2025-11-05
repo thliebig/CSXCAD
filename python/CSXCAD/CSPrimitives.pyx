@@ -301,9 +301,9 @@ cdef class CSPrimitives:
         CSXCAD.CSRectGrid.CSRectGrid.SetMeshType
 
         """
-        assert cs_type in [CSRectGrid.CARTESIAN, CSRectGrid.CYLINDRICAL, None], 'Unknown coordinate system: {}'.format(cs_type)
+        assert cs_type in [CSRectGrid.CoordinateSystem.CARTESIAN, CSRectGrid.CoordinateSystem.CYLINDRICAL, None], 'Unknown coordinate system: {}'.format(cs_type)
         if cs_type is None:
-            cs_type = CSRectGrid.UNDEFINED_CS
+            cs_type = CSRectGrid.CoordinateSystem.UNDEFINED_CS
         self.thisptr.SetCoordinateSystem(cs_type)
 
     def GetCoordinateSystem(self):
@@ -312,7 +312,7 @@ cdef class CSPrimitives:
         :returns: coordinate system (0 : Cartesian, 1 : Cylindrical) or None
         """
         cs_type = self.thisptr.GetCoordinateSystem()
-        if cs_type == CSRectGrid.UNDEFINED_CS:
+        if cs_type == CSRectGrid.CoordinateSystem.UNDEFINED_CS:
             return None
         return cs_type
 

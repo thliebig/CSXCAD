@@ -103,7 +103,7 @@ cdef class ContinuousStructure:
         file = Path(file) # Check that whatever we receive can be interpreted as a path.
         if not file.parent.is_dir():
             raise FileNotFoundError(f'Directory in which file is to be saved does not exist. ')
-        self.thisptr.Write2XML(str(file).encode('UTF-8'))
+        return self.thisptr.Write2XML(str(file).encode('UTF-8'))
 
     def ReadFromXML(self, fn):
         """ ReadFromXML(fn)
