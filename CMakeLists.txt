@@ -141,24 +141,6 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math" )
 endif()
 
-# TODO what are the needed libs?
-find_package(Boost 1.46 COMPONENTS
-  thread
-  date_time
-  serialization
-  chrono
-  REQUIRED
-  )
-if (${Boost_MINOR_VERSION} LESS 69)
-  # Since Boost 1.69, "system" is header only, so a check
-  # is needed only in Boost 1.68 and earlier.
-  find_package(Boost 1.46 COMPONENTS system REQUIRED)
-endif()
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-endif()
-
-
 # vtk 9.1 needs MPI find to fail?????
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   find_package(MPI QUIET)
