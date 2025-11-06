@@ -101,21 +101,21 @@ jobs:
 
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
-            dnf install -y gcc gcc-c++ cmake git boost-devel tinyxml-devel vtk-devel hdf5-devel \
+            dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
                            CGAL-devel python3-setuptools python3-Cython
           elif grep -q 'ID="almalinux"' /etc/os-release; then
             dnf install -y epel-release
             dnf config-manager --set-enabled powertools || dnf config-manager --set-enabled crb
 
             dnf install -y git
-            dnf install -y gcc gcc-c++ cmake git boost-devel tinyxml-devel vtk-devel hdf5-devel \
+            dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
                            CGAL-devel python3-Cython
           elif grep -q "ID=debian" /etc/os-release || grep -q "ID=ubuntu" /etc/os-release; then
             # retry failed downloads 3 times
             echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
             apt-get update
             apt-get install -y build-essential git \
-                               libhdf5-dev libtinyxml-dev \
+                               libcgal-dev libhdf5-dev libtinyxml-dev \
                                python3-setuptools
 
             # VTK9 or VTK7, at least one must succeed (depending on Debian version)
@@ -128,19 +128,6 @@ jobs:
               # Ubuntu 14.04 has CMake 2 by default, but we require CMake 3
               apt-get install -y cmake3
 
-              # Ubuntu 14.04 ships Boost 1.54 and is required by libcgal-dev,
-              # but we need Boost 1.55, so we install Boost 1.55 first, then
-              # install CGAL from source.
-              apt-get install -y boost1.55 boost1.55-dev
-
-              # CGAL v4.14.3 was old enough to be compatible with GCC 4.8. Otherwise,
-              # you get: The compiler feature "cxx_decltype_auto" is not known
-              # to CXX compiler "GNU" version 4.8.5.
-              apt-get install -y libgmp-dev libmpfr-dev
-              git clone $GITHUB_SERVER_URL/CGAL/cgal.git --depth=1 --branch=v4.14.3
-              cd cgal && mkdir build && cd build
-              cmake ../ && make && make install
-
               # Ubuntu 14.04's cython3 package is ancient, install via pip instead
               apt-get install -y python3-pip
 
@@ -148,15 +135,13 @@ jobs:
               # incompatible with Python 3.4.
               pip3 install "cython<3.1"
             else
-              apt-get install -y libboost-all-dev
-              apt-get install -y libcgal-dev
               apt-get install -y cmake
               apt-get install -y cython3
             fi
           elif grep -q "ID=alpine" /etc/os-release; then
             apk add bash \
                     build-base gmp-dev mpfr-dev git cmake \
-                    boost-dev tinyxml-dev hdf5-dev cgal-dev vtk-dev \
+                    tinyxml-dev hdf5-dev cgal-dev vtk-dev \
                     python3-dev cython \
                     py3-setuptools
           elif [ -f /etc/centos-release ]; then
@@ -192,18 +177,9 @@ jobs:
             # alternatives --install /usr/local/bin/gcc gcc /opt/rh/devtoolset-7/root/usr/bin/gcc 99
             # alternatives --install /usr/local/bin/g++ g++ /opt/rh/devtoolset-7/root/usr/bin/g++ 99
 
-            # boost-predef is only available on Boost 1.55 and later.
-            #   /usr/local/include/CGAL/config.h:210:10: fatal error: boost/predef.h:
-            #   No such file or directory
-            # We borrow a copy of Boost 1.58 from rh repo's mariadb backport package.
-            yum install -y rh-mariadb101-boost-devel
-
-            # copy rh repo's Boost to /usr/local because CMake doesn't support CPATH
-            ln -s /opt/rh/rh-mariadb101/root/usr/include/boost /usr/local/include/boost
-            mkdir /usr/local/lib64 && cd /usr/local/lib64
-            for i in /opt/rh/rh-mariadb101/root/usr/lib64/libboost*; do
-                ln -s $i /usr/local/lib64/
-            done
+            # This is a very old Boost incompatible with openEMS, but good enough
+            # for CGAL. See openEMS.git for the alternative solution.
+            yum install -y boost-devel
 
             # not package on CentOS
             # CGAL v4.14.3 was old enough to be compatible with GCC 4.8. Otherwise,
@@ -287,9 +263,7 @@ jobs:
       - name: Install dependencies
         shell: sh
         run: |
-          echo 'export CXXFLAGS="-std=c++11"' >> ~/.zprofile
-
-          brew install cmake boost hdf5 cgal vtk python3
+          brew install cmake hdf5 cgal vtk python3
 
           # TinyXML has been disabled by Homebrew at it's unmaintained
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
@@ -430,7 +404,7 @@ jobs:
           version: ${{ matrix.machine.version }}
           run: |
             echo "Install dependencies..."
-            sudo pkg install -y cmake git boost-libs tinyxml vtk9 hdf5 cgal python3 \
+            sudo pkg install -y cmake git tinyxml vtk9 hdf5 cgal python3 \
                                 py311-setuptools py311-cython3
                                 # prefix must match FreeBSD's default python
                                 # version. FreeBSD 14.2 uses Python 3.11 so
