@@ -144,10 +144,16 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   find_package(MPI QUIET)
 endif()
 
-find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE)
+# vtk
+find_package(VTK COMPONENTS vtkCommonCore NO_MODULE QUIET)
+if (${VTK_VERSION} VERSION_GREATER "9")
+    find_package(VTK REQUIRED COMPONENTS IOGeometry IOPLY NO_MODULE REQUIRED)
+else()
+    find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE REQUIRED)
+    include(${VTK_USE_FILE})
+endif()
 
 message(STATUS "Found package VTK. Using version " ${VTK_VERSION})
-include(${VTK_USE_FILE})
 INCLUDE_DIRECTORIES (${VTK_INCLUDE_DIR})
 set( vtk_LIBS ${VTK_LIBRARIES} )
 message(STATUS "vtk libraries " ${vtk_LIBS})
