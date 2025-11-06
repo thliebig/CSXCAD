@@ -117,6 +117,25 @@ ADD_DEFINITIONS( -DH5_USE_16_API )
 find_package(CGAL REQUIRED)
 INCLUDE_DIRECTORIES (${CGAL_INCLUDE_DIR})
 
+# CGAL may be complied as headers, or as shared objects, which we must link
+if (${CGAL_VERSION} VERSION_GREATER 5.0)
+    set(CSXCAD_CGAL_LIBRARIES CGAL::CGAL)
+    message(STATUS "Found package CGAL v5+. Using version " ${CGAL_VERSION})
+else()
+    # The "proper" way is to call include(${CGAL_USE_FILE}), but this is
+    # buggy on older systems. Instead, link to CGAL_LIBRARIES_DIR and
+    # CGAL_3RD_PARTY_LIBRARIES_DIRS manually.
+    set(CSXCAD_CGAL_LIBRARIES "CGAL")
+    link_directories(${CGAL_LIBRARIES_DIR} ${CGAL_3RD_PARTY_LIBRARIES_DIRS})
+    if("${CGAL_3RD_PARTY_LIBRARIES}" STREQUAL "")
+      set(CSXCAD_CGAL_LIBRARIES "CGAL")
+    else()
+      set(CSXCAD_CGAL_LIBRARIES "CGAL ${CGAL_3RD_PARTY_LIBRARIES}")
+    endif()
+    message(STATUS "Found package CGAL v4 or lower. Using version " ${CGAL_VERSION})
+endif()
+message(STATUS "CGAL libraries " ${CSXCAD_CGAL_LIBRARIES})
+
 # cgal needs, fail on Linux otherwise
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -frounding-math" )
