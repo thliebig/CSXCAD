@@ -97,8 +97,7 @@ jobs:
       - name: Install dependencies
         shell: sh
         run: |
-          touch ~/.bash_profile
-          echo 'export CXXFLAGS="-std=c++11"' >> ~/.bash_profile
+          touch ~/.bash_profile  # set environmental variables here
 
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
