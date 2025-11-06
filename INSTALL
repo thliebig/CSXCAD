@@ -7,7 +7,6 @@ Install instructions for the CSXCAD library:
   - tinyxml (http://www.grinninglizard.com/tinyxml/)
   - hdf5 (http://www.hdfgroup.org/HDF5/)
   - vtk (http://www.vtk.org/)
-  - boost (http://www.boost.org/)
   - cgal (http://www.cgal.org/)
 
 2) Build:
