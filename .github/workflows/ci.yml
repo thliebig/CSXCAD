@@ -3,11 +3,10 @@ name: "CI"
 on:
   push:
     branches:
-        - master
-        - CI_testing
+        - '**'
   pull_request:
     branches:
-        - master
+        - '**'
 
 jobs:
   Linux:
