@@ -32,6 +32,9 @@ python/CSXCAD.egg-info/*
 CMakeLists.txt.user
 python/doc/_build
 !python/doc/Makefile
+# auto-generated version from git or pyproject.toml
+python/CSXCAD/__version__.py
+python/CSXCAD/__fallback_version__.py
 
 #cmake
 **CMakeFiles

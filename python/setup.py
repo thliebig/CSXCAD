@@ -10,6 +10,25 @@ import pathlib
 import glob
 
 
+def get_fallback_version(pyproject_toml, fallback_file):
+    try:
+        # pyproject.toml is respected by new pip, which calls setuptools_scm
+        # to inject a version automatically.
+        import setuptools_scm
+        return None
+    except ImportError:
+        with open(pyproject_toml, 'r') as toml:
+            matching_list = [
+                line for line in toml if line.startswith("fallback_version")
+            ]
+            version_quoted = matching_list[0].split("=")[1]
+            version = version_quoted.replace('"', "").strip()
+
+        with open(fallback_file, "w+") as fallback_file:
+            fallback_file.write("__fallback_version__ = '%s'" % version)
+        return version
+
+
 def normalize_incorrect_path(path_str):
     path = pathlib.Path(path_str)
     if path.stem == "bin" and (path / "../include/CSXCAD").exists():
@@ -159,6 +178,9 @@ extensions = get_modules_list(
 
 setup(
   name="CSXCAD",
+  version=get_fallback_version(
+      "pyproject.toml", "CSXCAD/__fallback_version__.py"
+  ),
   packages=["CSXCAD", ],
   package_data={'CSXCAD': ['*.pxd']},
   # DO NOT add any new build-time dependency in setup_requires.

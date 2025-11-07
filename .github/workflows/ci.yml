@@ -285,6 +285,7 @@ jobs:
           source ~/.bash_profile
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+          python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
       - name: Unittest CSXCAD Python module execution
         run: |
@@ -338,6 +339,7 @@ jobs:
           source ~/venv/bin/activate
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+          python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
       - name: Unittest CSXCAD Python module execution in venv
         run: |
@@ -451,6 +453,7 @@ jobs:
         run: |
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+          python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
       - name: Unittest CSXCAD Python module execution
         run: |
@@ -475,6 +478,7 @@ jobs:
           source ~/venv/bin/activate
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+          python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
       - name: Unittest CSXCAD Python module execution in venv
         run: |
@@ -565,6 +569,7 @@ jobs:
             echo "Smoketest CSXCAD Python module execution..."
             cd /
             python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+            python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
             echo "Unittest CSXCAD Python module execution..."
             cd ~/CSXCAD/python/tests
@@ -583,6 +588,7 @@ jobs:
             echo "Smoketest CSXCAD Python module execution in venv..."
             cd /
             python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+            python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
             echo "Unittest CSXCAD Python module execution in venv..."
             cd ~/CSXCAD/python/tests
