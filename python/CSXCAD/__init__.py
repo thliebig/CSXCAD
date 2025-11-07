@@ -16,4 +16,13 @@ if os.name == 'nt' and 'OPENEMS_INSTALL_PATH' in os.environ and os.path.exists(o
     
     AppCSXCAD_BIN = os.path.join(os.environ['OPENEMS_INSTALL_PATH'], 'AppCSXCAD')
 
+try:
+    from CSXCAD.__version__ import __version__
+except ImportError:
+    try:
+        from CSXCAD.__fallback_version__ import __fallback_version__
+        __version__ = __fallback_version__
+    except ImportError:
+        __version__ = "0.0.0"
+
 from CSXCAD.CSXCAD import ContinuousStructure

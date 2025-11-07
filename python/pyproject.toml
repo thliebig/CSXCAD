@@ -1,10 +1,33 @@
 [build-system]
-requires = ["setuptools", "cython"]
-build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools",
+    "cython",
+]
+
+# A thin wrapper above setuptools.build_meta, which inserts an
+# additional dependency dynamically (because we can't use any
+# any environment variables in "requires"). Currently we only
+# insert one dependency:
+#
+#     'setuptools_scm >= 8; python_version >= "3.9"'
+#
+# To disable it, use "export CSXCAD_NOSCM=1".
+build-backend = "setuptools_build_meta_custom"
+backend-path = ["bootstrap"]
+
+[tool.setuptools_scm]
+root = "../"
+version_file = "CSXCAD/__version__.py"
+
+# Make sure the following line can be understood by the brute-force
+# parser in setup.py, which finds "fallback_version" and reads everything
+# after the equal (=) sign, on legacy usage without setuptools_scm (e.g.
+# calling setup.py directly).
+fallback_version = "0.6.4"
 
 [project]
 name = "CSXCAD"
-version = "0.6.2"
+dynamic = ["version"]
 dependencies = [
     # BSD 3-Clause (https://github.com/numpy/numpy/blob/main/LICENSE.txt)
     "numpy",
