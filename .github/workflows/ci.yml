@@ -101,21 +101,22 @@ jobs:
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel python3-setuptools python3-Cython
+                           CGAL-devel python3-pip python3-setuptools python3-Cython python3-numpy \
+                           python3-matplotlib
           elif grep -q 'ID="almalinux"' /etc/os-release; then
             dnf install -y epel-release
             dnf config-manager --set-enabled powertools || dnf config-manager --set-enabled crb
 
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel python3-Cython
+                           CGAL-devel python3-pip python3-Cython python3-numpy python3-matplotlib
           elif grep -q "ID=debian" /etc/os-release || grep -q "ID=ubuntu" /etc/os-release; then
             # retry failed downloads 3 times
             echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
             apt-get update
             apt-get install -y build-essential git \
                                libcgal-dev libhdf5-dev libtinyxml-dev \
-                               python3-setuptools
+                               python3-pip python3-setuptools python3-numpy
 
             # VTK9 or VTK7, at least one must succeed (depending on Debian version)
             # VTK9,  VTK7, or VTK6, at least one must succeed (depending on Debian version)
@@ -133,16 +134,33 @@ jobs:
               # Must use Cython 3.0 or lower, since 3.1 uses f-string which is
               # incompatible with Python 3.4.
               pip3 install "cython<3.1"
+
+              # Ubuntu 14.04's matplotlib package is ancient, install the
+              # minimum version and its dependencies via pip. Note that the
+              # native build uses Python 3.4 while the venv build (tested
+              # later) uses Python 3.5 without these problems.
+              #
+              # pip's pyparsing is incompatible with Python 3.4
+              apt-get install -y python3-pyparsing
+              # same, newer cycler has incompatible type annotation
+              pip3 install "cycler==0.10.0"
+              pip3 install "matplotlib==2.1.0"
+
+              # venv is not installed here. See special case in the step
+              # "Create Python venv and install dependencies"
             else
               apt-get install -y cmake
-              apt-get install -y cython3
+              apt-get install -y cython3 python3-matplotlib
+
+              # testing Python packages in isolated venv
+              apt-get install -y python3-venv
             fi
           elif grep -q "ID=alpine" /etc/os-release; then
             apk add bash \
                     build-base gmp-dev mpfr-dev git cmake \
                     tinyxml-dev hdf5-dev cgal-dev vtk-dev \
                     python3-dev cython \
-                    py3-setuptools
+                    py3-pip py3-setuptools py3-numpy py3-matplotlib
           elif [ -f /etc/centos-release ]; then
             # IPv6 on GitHub Actions is broken, causing random network failures
             # if a CDN rosolves to IPv6.
@@ -164,7 +182,9 @@ jobs:
             yum install -y git
             yum install -y gcc gcc-c++ gmp-devel mpfr-devel \
                            cmake3 git tinyxml-devel vtk-devel hdf5-devel \
-                           python3-devel python3-setuptools python3-Cython
+                           python3-devel \
+                           python3-pip python3-setuptools python3-Cython \
+                           python3-numpy
             # use cmake3 instead of default cmake2
             alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 99
 
@@ -179,6 +199,10 @@ jobs:
             # This is a very old Boost incompatible with openEMS, but good enough
             # for CGAL. See openEMS.git for the alternative solution.
             yum install -y boost-devel
+
+            # CentOS didn't package matplotlib for Python 3, install the minimum
+            # requirement here.
+            pip3 install "matplotlib==2.1.0"
 
             # not package on CentOS
             # CGAL v4.14.3 was old enough to be compatible with GCC 4.8. Otherwise,
@@ -253,8 +277,8 @@ jobs:
           source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
-          python3 setup.py build_ext
-          python3 setup.py install --user
+          pip3 install . --user --verbose || \
+              pip3 install . --user --break-system-packages --verbose
 
       - name: Smoketest CSXCAD Python module execution
         run: |
@@ -268,6 +292,60 @@ jobs:
           cd $GITHUB_WORKSPACE/CSXCAD/python/tests
           python3 -m unittest
 
+      - name: Create Python venv and install dependencies
+        run: |
+          source ~/.bash_profile
+          cd ~/
+
+          if grep -q "ID=ubuntu" /etc/os-release && \
+            grep -q 'VERSION_ID="14.04"' /etc/os-release; then
+              # Use Python 3.5 instead of the default Python 3.4 because
+              # 3.5 is the latest available version on Ubuntu 14.04, and
+              # also because Python 3.5 is the first Python that supported
+              # type annotation, while Python 3.4 is locked out from most
+              # modern packages.
+              apt-get install -y curl python3.5-dev
+
+              # Ubuntu 14.04 is ancient, and the python3.5-venv package is
+              # broken. So the best approach is to install a bare Python 3.5
+              # interpreter from apt, and bootstrapping pip ourselves.
+              python3.5 -m venv ~/venv --without-pip
+              curl -O https://bootstrap.pypa.io/pip/3.5/get-pip.py
+              source ~/venv/bin/activate
+              python3.5 get-pip.py
+          else
+            python3 -m venv ~/venv
+            source ~/venv/bin/activate
+          fi
+
+          pip install --upgrade pip
+
+          if [ -f /etc/centos-release ]; then
+            pip3 install "cython<3.1"
+          fi
+
+      - name: Build and install CSXCAD Python module in venv
+        run: |
+          source ~/.bash_profile
+          source ~/venv/bin/activate
+          cd $GITHUB_WORKSPACE/CSXCAD/python
+          export CSXCAD_INSTALL_PATH="$HOME/opt"
+          pip3 install . --verbose
+
+      - name: Smoketest CSXCAD Python module execution in venv
+        run: |
+          source ~/.bash_profile
+          source ~/venv/bin/activate
+          cd /
+          python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+      - name: Unittest CSXCAD Python module execution in venv
+        run: |
+          source ~/.bash_profile
+          source ~/venv/bin/activate
+          cd $GITHUB_WORKSPACE/CSXCAD/python/tests
+          python3 -m unittest
+
   macOS:
     name: "macOS (ARM, latest)"
 
@@ -276,9 +354,9 @@ jobs:
       - name: Install dependencies
         shell: sh
         run: |
-          brew install cmake hdf5 cgal vtk python3
-
           echo "export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')" >> ~/.zprofile
+
+          brew install cmake hdf5 cgal vtk python3 numpy python-matplotlib
 
           # TinyXML has been disabled by Homebrew at it's unmaintained
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
@@ -367,8 +445,7 @@ jobs:
           source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
-          $HOME/opt/bin/python3 setup.py build_ext
-          $HOME/opt/bin/python3 setup.py install --user
+          pip3 install . --break-system-packages --verbose
 
       - name: Smoketest CSXCAD Python module execution
         run: |
@@ -377,6 +454,31 @@ jobs:
 
       - name: Unittest CSXCAD Python module execution
         run: |
+          cd $GITHUB_WORKSPACE/CSXCAD/python/tests
+          python3 -m unittest
+
+      - name: Create Python venv and install dependencies
+        run: |
+          python3 -m venv ~/venv
+          source ~/venv/bin/activate
+          pip install --upgrade pip
+
+      - name: Build and install CSXCAD Python module in venv
+        run: |
+          source ~/venv/bin/activate
+          cd $GITHUB_WORKSPACE/CSXCAD/python
+          export CSXCAD_INSTALL_PATH="$HOME/opt"
+          pip3 install . --verbose
+
+      - name: Smoketest CSXCAD Python module execution in venv
+        run: |
+          source ~/venv/bin/activate
+          cd /
+          python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+      - name: Unittest CSXCAD Python module execution in venv
+        run: |
+          source ~/venv/bin/activate
           cd $GITHUB_WORKSPACE/CSXCAD/python/tests
           python3 -m unittest
 
@@ -414,7 +516,8 @@ jobs:
           run: |
             echo "Install dependencies..."
             sudo pkg install -y cmake git tinyxml vtk9 hdf5 cgal python3 \
-                                py311-setuptools py311-cython3
+                                py311-pip py311-setuptools py311-cython3 py311-numpy \
+                                py311-matplotlib
                                 # prefix must match FreeBSD's default python
                                 # version. FreeBSD 14.2 uses Python 3.11 so
                                 # use "py311-"
@@ -457,13 +560,30 @@ jobs:
             echo "Build and install CSXCAD Python module..."
             cd ~/CSXCAD/python
             export CSXCAD_INSTALL_PATH="$HOME/opt"
-            python3 setup.py build_ext
-            python3 setup.py install --user
+            pip install . --user --break-system-packages --verbose
 
             echo "Smoketest CSXCAD Python module execution..."
             cd /
             python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
 
             echo "Unittest CSXCAD Python module execution..."
+            cd ~/CSXCAD/python/tests
+            python3 -m unittest
+
+            echo "Create Python venv and install dependencies..."
+            python3 -m venv ~/venv
+            . ~/venv/bin/activate
+            pip install --upgrade pip
+
+            echo "Build and install CSXCAD Python module in venv..."
+            cd ~/CSXCAD/python
+            export CSXCAD_INSTALL_PATH="$HOME/opt"
+            pip install . --verbose
+
+            echo "Smoketest CSXCAD Python module execution in venv..."
+            cd /
+            python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
+
+            echo "Unittest CSXCAD Python module execution in venv..."
             cd ~/CSXCAD/python/tests
             python3 -m unittest
