@@ -310,26 +310,6 @@ jobs:
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
           make -j`nproc` && make install
 
-          # cython is keg-only, which means it was not symlinked into /opt/homebrew,
-          # because this formula is mainly used internally by other formulae.
-          # Users are advised to use `pip` to install cython.
-          #
-          # So Python will NOT be able to find cython from "site-package", nor
-          # will the shell finds a cython executable from "bin"
-          #
-          # But then, `pip` can't be used directly due to PEP 668, which asks us
-          # to install cython via the system's package manager, buh Howebrew does
-          # not provide a fully-function package (unless you hack the symlinks
-          # manually).
-          #
-          # So, the real solution is creating a virtualenv specifically for openEMS
-          # usage.
-          #
-          # TODO: completely update openEMS documentation and scripts to enable and
-          # teach users about virtualenv
-          python3 -m venv $HOME/opt
-          $HOME/opt/bin/pip3 install setuptools cython
-
       - name: Checkout CSXCAD.git
         uses: actions/checkout@v4
         with:
