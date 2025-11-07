@@ -265,6 +265,8 @@ jobs:
         run: |
           brew install cmake hdf5 cgal vtk python3
 
+          echo "export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')" >> ~/.zprofile
+
           # TinyXML has been disabled by Homebrew at it's unmaintained
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
           # build from source.
@@ -307,7 +309,7 @@ jobs:
 
           mkdir build && cd build
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
-          make -j`nproc` && make install
+          make -j$NCPUS && make install
 
       - name: Checkout CSXCAD.git
         uses: actions/checkout@v4
@@ -326,10 +328,11 @@ jobs:
 
       - name: Build and install fparser
         run: |
+          source ~/.zprofile
           cd $GITHUB_WORKSPACE/fparser
           mkdir build && cd build
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
-          make -j`nproc` && make install
+          make -j$NCPUS && make install
 
       - name: Build and install CSXCAD
         run: |
@@ -340,13 +343,15 @@ jobs:
           #
           # MPI may also fail, but this error is not fatal. The real error is often
           # the error above! There's no need to install MPI.
+          source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD
           mkdir build && cd build
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
-          make -j`nproc` && make install
+          make -j$NCPUS && make install
 
       - name: Build and install CSXCAD Python module
         run: |
+          source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           $HOME/opt/bin/python3 setup.py build_ext -I $HOME/opt/include -L $HOME/opt/lib -R $HOME/opt/lib
           $HOME/opt/bin/python3 setup.py install --user
@@ -390,6 +395,8 @@ jobs:
                                 # version. FreeBSD 14.2 uses Python 3.11 so
                                 # use "py311-"
 
+            export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')
+
             echo "Clone $GITHUB_SHA from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
             cd ~/
             git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY_OWNER/CSXCAD.git CSXCAD
@@ -406,7 +413,7 @@ jobs:
             cd ~/fparser
             mkdir build && cd build
             cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
-            make -j`nproc` && make install
+            make -j$NCPUS && make install
 
             echo "Build and install CSXCAD..."
             # cmake may fail with "fatal: No names found, cannot describe anything."
@@ -421,7 +428,7 @@ jobs:
 
             mkdir build && cd build
             cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
-            make -j`nproc` && make install
+            make -j$NCPUS && make install
 
             echo "Build and install CSXCAD Python module..."
             cd ~/CSXCAD/python
