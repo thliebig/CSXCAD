@@ -73,7 +73,7 @@ def determine_build_options():
             "No environment variable CSXCAD_INSTALL_PATH or VIRTUAL_ENV found, "
             "installation may fail due to missing headers and libraries! "
             "Please set the environment variable CSXCAD_INSTALL_PATH to the path "
-            "of CSXCAD/openEMS installation, check documentation for details."
+            "of CSXCAD/openEMS installation, check documentation for details. "
             "If you know what you're doing, set CSXCAD_INSTALL_PATH_IGNORE=1 to "
             "suppress this error."
         )
