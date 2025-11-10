@@ -45,7 +45,7 @@ def determine_build_options():
     use_prefix = True
     user_entered_prefix = False
 
-    if "CSXCAD_INSTALL_PATH_IGNORE" is os.environ:
+    if "CSXCAD_INSTALL_PATH_IGNORE" in os.environ:
         use_prefix = False
 
     if use_prefix and 'CSXCAD_INSTALL_PATH' in os.environ:
