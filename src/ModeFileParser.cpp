@@ -142,19 +142,19 @@ bool ModeFileParser::parseFile()
 	}
 
 	// Matrix size
-	m_M = m_Y.size();
 	m_N = m_X.size();
+	m_M = m_Y.size();
 
 	// In case this is Y primary, transpose
 	if (!Xprimary)
 	{
 
-		std::vector<std::vector<double>> 	swap_Vx(m_N,std::vector<double>(m_M)),
-											swap_Vy(m_N,std::vector<double>(m_M));
+		std::vector<std::vector<double>> 	swap_Vx(m_M,std::vector<double>(m_N)),
+											swap_Vy(m_M,std::vector<double>(m_N));
 
 
-		for (unsigned int m = 0 ; m < m_N ; m++)
-			for (unsigned int n = 0 ; n < m_M ; n++)
+		for (unsigned int m = 0 ; m < m_M ; m++)
+			for (unsigned int n = 0 ; n < m_N ; n++)
 			{
 				swap_Vx[m][n] = m_Vx[n][m];
 				swap_Vy[m][n] = m_Vy[n][m];
@@ -162,11 +162,6 @@ bool ModeFileParser::parseFile()
 
 		m_Vx = swap_Vx;
 		m_Vy = swap_Vy;
-
-		// Matrix size
-		m_M = m_Y.size();
-		m_N = m_X.size();
-
 	}
 
 
