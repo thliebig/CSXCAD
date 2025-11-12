@@ -18,12 +18,13 @@ backend-path = ["bootstrap"]
 [tool.setuptools_scm]
 root = "../"
 version_file = "CSXCAD/__version__.py"
+version_scheme = "no-guess-dev"
 
 # Make sure the following line can be understood by the brute-force
 # parser in setup.py, which finds "fallback_version" and reads everything
 # after the equal (=) sign, on legacy usage without setuptools_scm (e.g.
 # calling setup.py directly).
-fallback_version = "0.6.4"
+fallback_version = "0.6.3"
 
 [project]
 name = "CSXCAD"
