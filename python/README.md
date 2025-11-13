@@ -35,7 +35,7 @@ source $HOME/opt/physics/venv/bin/activate
 # build CSXCAD Python extension (CSXCAD_INSTALL_PATH must be set!)
 # Only CSXCAD is needed here, openEMS itself is optional
 export CSXCAD_INSTALL_PATH=$HOME/opt/physics
-pip install .
+pip3 install .
 ```
 
 Replace `$HOME/opt/physics` with the path prefix to CSXCAD.
@@ -167,7 +167,7 @@ Assuming that the correct `CSXCAD_INSTALL_PATH` have already been set, and a
 `venv` has been activated, run:
 
 ```bash
-pip install .
+pip3 install .
 ```
 
 When installing packages inside a `venv`, avoid using `--user` because
@@ -287,7 +287,7 @@ a system's own package manager, risking dependency conflicts.
 The new option `--break-system-packages` is required.
 
 ```bash
-pip install . --user --break-system-packages
+pip3 install . --user --break-system-packages
 ```
 
 This is still the default behavior of CSXCAD and openEMS when using
@@ -301,7 +301,7 @@ from the system and from `pip`. Using `--break-system-packages` is
 only considered safe if all Python dependencies are installed via
 your system's package manager (e.g. `apt`, `dnf`), as recommended in
 the [documentation](https://openems.readthedocs.io/en/latest/install/requirements.html),
-prior to running `pip install .`. Otherwise, `pip` may attempt to
+prior to running `pip3 install .`. Otherwise, `pip` may attempt to
 install dependent packages on its own, risking dependency conflicts
 with system packages.
 
@@ -356,7 +356,7 @@ Both behaviors can disabled via:
 
 ```bash
 export CSXCAD_NOSCM=1
-pip install . --no-build-isolation
+pip3 install . --no-build-isolation
 ```
 
 The variable `CSXCAD_NOSCM` is specific to CSXCAD.
@@ -377,7 +377,7 @@ export CSXCAD_INSTALL_PATH=$HOME/opt/physics
 python setup.py build_ext
 
 # install to user's home directory, equivalent to
-# pip install . --user --break-system-packages
+# pip3 install . --user --break-system-packages
 python setup.py install --user
 
 # if using a venv, remove --user so the venv path is respected
@@ -431,7 +431,7 @@ verbose mode.
 ```bash
 export CSXCAD_INSTALL_PATH="$HOME/opt/physics"
 
-pip install . --verbose
+pip3 install . --verbose
 ```
 
 The `setup.py` method can also be used for troubleshooting.
