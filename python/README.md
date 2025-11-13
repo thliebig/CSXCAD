@@ -28,9 +28,9 @@ If the CSXCAD library was installed into `~/opt/physics`, install this
 package with:
 
 ```bash
-# create an isolated venv and activate it
-python3 -m venv $HOME/opt/physics/
-source $HOME/opt/physics/bin/activate
+# create an isolated venv in ~/opt/physics/venv and activate it
+python3 -m venv $HOME/opt/physics/venv
+source $HOME/opt/physics/venv/bin/activate
 
 # build CSXCAD Python extension (CSXCAD_INSTALL_PATH must be set!)
 # Only CSXCAD is needed here, openEMS itself is optional
@@ -53,6 +53,31 @@ $ cd / && python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
 $ cd / && python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 0.6.4.dev76+gccb4c218e
 ```
+
+## Environment Variables
+
+The following environment variables control the behaviors of the
+Python extension installation.
+
+1. **(Required)** `CSXCAD_INSTALL_PATH`:
+path prefix of the CSXCAD installation. Without these
+variables, installation is terminated with an error.
+
+3. **(Optional)** `VIRTUAL_ENV`: path prefix of the Python `venv`,
+set automatically if a Python `venv` is activated. If `venv` exists
+in the C++ path prefix's `/venv` subdirectory
+(`VIRTUAL_ENV=$CSXCAD_INSTALL_PATH/venv`), or overlaps
+(`VIRTUAL_ENV=$CSXCAD_INSTALL_PATH`),
+`CSXCAD_INSTALL_PATH` can be omitted, activating the venv is sufficient.
+
+4. **(Optional)** `CSXCAD_INSTALL_PATH_IGNORE`:
+disable `CSXCAD_INSTALL_PATH` usages and error checking. Useful
+only if their installation paths are specified manually through
+other methods, such as `CXXFLAGS` or `LDFLAGS`.
+
+5. **(Optional)** `CSXCAD_NOSCM`: pip no
+longer downloads `setuptools_scm`, git-based version numbers are
+no longer generated.
 
 ## Basic Install
 
@@ -112,13 +137,12 @@ If you have never created your own `venv` before, create a
 `venv` specifically for CSXCAD (and optionally openEMS) now:
 
 ```bash
-python3 -m venv $HOME/opt/physics
+python3 -m venv $HOME/opt/physics/venv/
 ```
 
-This overlaps C++ and Python installation in the same path
-(avoiding the management of two non-standard paths). But
-if you prefer separation, you can use a different path, such
-as `~/venvs/openems`, or activate an existing `venv` you already
+This creates the Python venv in a subdirectory of `$CSXCAD_INSTALL_PATH`.
+But if you prefer separation, you can use a different path, such
+as `~/venvs/csxcad`, or activate an existing `venv` you already
 have.
 
 Remember, if the Python extension has been installed to an
@@ -130,7 +154,7 @@ seen.
 The venv can be entered via:
 
 ```bash
-source $HOME/opt/physics/bin/activate
+source $HOME/opt/physics/venv/bin/activate
 
 # leave the venv with "deactivate"
 ```
@@ -249,7 +273,7 @@ the `venv`, but system-wide packages are also available. Activation
 is still needed prior to using CSXCAD in Python.
 
 ```bash
-source $HOME/opt/physics/bin/activate
+source $HOME/opt/physics/venv/bin/activate
 ```
 
 ### Install Python Extension to Home Directory Instead of venv
@@ -397,7 +421,7 @@ source code instead of the complied Python extension.
 ```bash
 cd /
 
-source $HOME/opt/physics/bin/activate
+source $HOME/opt/physics/venv/bin/activate
 python3 -m "import CSXCAD"
 ```
 

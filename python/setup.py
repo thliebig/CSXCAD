@@ -29,10 +29,14 @@ def get_fallback_version(pyproject_toml, fallback_file):
         return version
 
 
-def normalize_incorrect_path(path_str):
+def normalize_path_subdir(path_str, subdir):
+    # We want to find the correct $CSXCAD_INSTALL_PATH even if the
+    # user input is slightly "incorrect".
+    #
+    # /home/opt/physics/venv -> /home/opt/physics (subdir == "venv")
+    # /home/opt/physics/bin -> /home/opt/physics (subdir == "bin")
     path = pathlib.Path(path_str)
-    if path.stem == "bin" and (path / "../include/CSXCAD").exists():
-        # user error
+    if path.stem == subdir and (path / "../include/CSXCAD").exists():
         return (path / "../").resolve()
     else:
         return path
@@ -56,7 +60,7 @@ def determine_build_options():
         # is unpredictable), users should set CSXCAD_INSTALL_PATH to ensure a
         # successful installation.
         local_prefix_list.append(
-            normalize_incorrect_path(os.environ["CSXCAD_INSTALL_PATH"])
+            normalize_path_subdir(os.environ["CSXCAD_INSTALL_PATH"], "bin")
         )
         user_entered_prefix = True
     if 'VIRTUAL_ENV' in os.environ:
@@ -64,7 +68,7 @@ def determine_build_options():
         # path as CSXCAD_INSTALL_PATH, so that the custom C++ and Python prefix
         # overlaps.
         local_prefix_list.append(
-            pathlib.Path(os.environ["VIRTUAL_ENV"])
+            normalize_path_subdir(os.environ["VIRTUAL_ENV"], "venv")
         )
         user_entered_prefix = True
 
