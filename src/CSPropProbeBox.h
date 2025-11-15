@@ -18,7 +18,7 @@
 #pragma once
 
 #include "CSProperties.h"
-
+#include "ModeFileParser.h"
 
 //! Continuous Structure Probe Property for calculating integral properties
 /*!
@@ -53,6 +53,10 @@ public:
 	//! Get the probe weighting \sa GetWeighting
 	double GetWeighting() {return m_weight;}
 
+	void		SetModeFileName(std::string fileName);
+	std::string GetModeFileName();
+	bool		GetFieldSourceIsFile() {return (m_ModeFileName.length() != 0);};
+
 	//! Define the probe type (e.g. type=0 for a charge integration, can/must be defined by the user interface) \sa GetProbeType
 	void SetProbeType(int type) {ProbeType=type;}
 	//! Get the probe type \sa SetProbeType
@@ -85,5 +89,10 @@ protected:
 	int ProbeType;
 	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
+
+	// In case this should be loaded from a file, this will be set to "true"
+	std::string 	m_ModeFileName;
+
+
 };
 
