@@ -220,7 +220,7 @@ setup(
   version=get_fallback_version(
       "pyproject.toml", "CSXCAD/__fallback_version__.py"
   ),
-  packages=["CSXCAD", ],
+  packages=["CSXCAD", "CSXCAD/qtViewer"],
   package_data={'CSXCAD': ['*.pxd']},
   # DO NOT add any new build-time dependency in setup_requires.
   # We should use pyproject.toml exclusively. The only item
