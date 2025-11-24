@@ -1,5 +1,13 @@
 import os
-from setuptools import build_meta as _orig
+
+try:
+    from setuptools import build_meta as _orig
+except:
+    raise RuntimeError(
+        "setuptools is not installed. If pip --no-build-isolation "
+        "is used, install setuptools and cython manually before using "
+        "pip!"
+    )
 
 # This "import all" is intentional, since we're selectively
 # overriding setuptools while keeping most things unchanged,
