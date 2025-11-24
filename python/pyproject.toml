@@ -28,7 +28,7 @@ fallback_version = "0.6.3"
 
 [project]
 name = "CSXCAD"
-dynamic = ["version"]
+dynamic = ["version", "license"]
 dependencies = [
     # BSD 3-Clause (https://github.com/numpy/numpy/blob/main/LICENSE.txt)
     "numpy",
@@ -45,7 +45,6 @@ maintainers = [
 ]
 description = "Python interface for the CSXCAD library"
 readme = "README.md"
-license = "LGPL-3.0-or-later"
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
