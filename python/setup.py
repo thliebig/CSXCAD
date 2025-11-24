@@ -10,6 +10,17 @@ import pathlib
 import glob
 
 
+LICENSE = "LGPL-3.0-or-later"
+
+
+def get_license():
+    # mutually exclusive "license" and "license_expression"
+    if int(setuptools_version.split(".")[0]) < 77:
+        return {"license": LICENSE}
+    else:
+        return {"license_expression": LICENSE}
+
+
 def get_fallback_version(pyproject_toml, fallback_file):
     try:
         # pyproject.toml is respected by new pip, which calls setuptools_scm
@@ -202,5 +213,6 @@ setup(
     # Matplotlib license (https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
     "matplotlib >= 2.1.0"
   ],
-  ext_modules=extensions
+  ext_modules=extensions,
+  **get_license()
 )
