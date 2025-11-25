@@ -84,6 +84,8 @@ jobs:
 
     container:
       image: ${{ matrix.os.docker-image }}
+      # allow mount/netns
+      options: "--cap-add CAP_SYS_ADMIN --cap-add NET_ADMIN --security-opt apparmor=unconfined"
 
     name: "${{ matrix.os.libc }}/Linux (${{ matrix.os.name }})"
 
@@ -101,28 +103,41 @@ jobs:
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel python3-pip python3-setuptools python3-Cython python3-numpy \
-                           python3-matplotlib
+                           CGAL-devel python3-pip \
+                           python3-setuptools python3-setuptools_scm \
+                           python3-Cython python3-numpy python3-matplotlib
+
+            # only for CI/CD test builds without networks.
+            dnf install -y iproute
           elif grep -q 'ID="almalinux"' /etc/os-release; then
             dnf install -y epel-release
             dnf config-manager --set-enabled powertools || dnf config-manager --set-enabled crb
 
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
-                           CGAL-devel python3-pip python3-Cython python3-numpy python3-matplotlib
+                           CGAL-devel python3-pip \
+                           python3-setuptools python3-setuptools_scm \
+                           python3-Cython python3-numpy python3-matplotlib
+
+            # only for CI/CD test builds without networks.
+            dnf install -y iproute
           elif grep -q "ID=debian" /etc/os-release || grep -q "ID=ubuntu" /etc/os-release; then
             # retry failed downloads 3 times
             echo 'Acquire::Retries "3";' > /etc/apt/apt.conf.d/80-retries
             apt-get update
             apt-get install -y build-essential git \
                                libcgal-dev libhdf5-dev libtinyxml-dev \
-                               python3-pip python3-setuptools python3-numpy
+                               python3-pip \
+                               python3-setuptools python3-numpy
 
             # VTK9 or VTK7, at least one must succeed (depending on Debian version)
             # VTK9,  VTK7, or VTK6, at least one must succeed (depending on Debian version)
             apt-get install -y libvtk9-dev || \
                 apt-get install -y libvtk7-dev || \
                   apt-get install -y libvtk6-dev
+
+            # only for CI/CD test builds without networks.
+            apt-get install -y iproute2
 
             if grep -q 'VERSION_ID="14.04"' /etc/os-release; then
               # Ubuntu 14.04 has CMake 2 by default, but we require CMake 3
@@ -150,7 +165,7 @@ jobs:
               # "Create Python venv and install dependencies"
             else
               apt-get install -y cmake
-              apt-get install -y cython3 python3-matplotlib
+              apt-get install -y python3-setuptools-scm cython3 python3-matplotlib
 
               # testing Python packages in isolated venv
               apt-get install -y python3-venv
@@ -159,8 +174,12 @@ jobs:
             apk add bash \
                     build-base gmp-dev mpfr-dev git cmake \
                     tinyxml-dev hdf5-dev cgal-dev vtk-dev \
-                    python3-dev cython \
-                    py3-pip py3-setuptools py3-numpy py3-matplotlib
+                    python3-dev py3-pip \
+                    py3-setuptools py3-setuptools_scm cython \
+                    py3-numpy py3-matplotlib
+
+            # only for CI/CD test builds without networks.
+            apk add iproute2
           elif [ -f /etc/centos-release ]; then
             # IPv6 on GitHub Actions is broken, causing random network failures
             # if a CDN rosolves to IPv6.
@@ -183,8 +202,13 @@ jobs:
             yum install -y gcc gcc-c++ gmp-devel mpfr-devel \
                            cmake3 git tinyxml-devel vtk-devel hdf5-devel \
                            python3-devel \
-                           python3-pip python3-setuptools python3-Cython \
+                           python3-pip \
+                           python3-setuptools python3-setuptools_scm python3-Cython \
                            python3-numpy
+
+            # only for CI/CD test builds without networks.
+            yum install -y iproute
+
             # use cmake3 instead of default cmake2
             alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 99
 
@@ -272,13 +296,27 @@ jobs:
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
           make -j`nproc` && make install
 
-      - name: Build and install CSXCAD Python module
+      - name: Build and install CSXCAD Python module with --no-build-isolation
         run: |
           source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
-          pip3 install . --user --verbose || \
-              pip3 install . --user --break-system-packages --verbose
+
+          pip_opts=( "--user" "--verbose" )
+
+          # some systems don't have --no-build-isolation, some systems don't have
+          # --break-system-packages, the oldest systems don't have both.
+          if pip3 install --help | grep -q no-build-isolation; then
+            pip_opts+=( "--no-build-isolation" )
+          fi
+          if pip3 install --help | grep -q break-system-packages; then
+            pip_opts+=( "--break-system-packages" )
+          fi
+
+          # run in an isolated container without network, ensure
+          # pip install really works without auto-downloads.
+          ip netns add no-network
+          ip netns exec no-network pip3 install . "${pip_opts[@]}"
 
       - name: Smoketest CSXCAD Python module execution
         run: |
@@ -358,7 +396,7 @@ jobs:
         run: |
           echo "export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')" >> ~/.zprofile
 
-          brew install cmake hdf5 cgal vtk python3 numpy python-matplotlib
+          brew install cmake hdf5 cgal vtk python3 python-setuptools numpy cython python-matplotlib
 
           # TinyXML has been disabled by Homebrew at it's unmaintained
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
@@ -447,7 +485,7 @@ jobs:
           source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
-          pip3 install . --break-system-packages --verbose
+          pip3 install . --user --break-system-packages --no-build-isolation --verbose
 
       - name: Smoketest CSXCAD Python module execution
         run: |
@@ -462,11 +500,15 @@ jobs:
 
       - name: Create Python venv and install dependencies
         run: |
+          # remove Python dependencies to see if venv really works
+          pip3 uninstall -y CSXCAD --break-system-packages
+          brew remove python-setuptools cython numpy python-matplotlib
+
           python3 -m venv ~/venv
           source ~/venv/bin/activate
-          pip install --upgrade pip
+          pip3 install --upgrade pip
 
-      - name: Build and install CSXCAD Python module in venv
+      - name: Build and install CSXCAD Python module in venv with --no-build-isolation
         run: |
           source ~/venv/bin/activate
           cd $GITHUB_WORKSPACE/CSXCAD/python
@@ -520,8 +562,9 @@ jobs:
           run: |
             echo "Install dependencies..."
             sudo pkg install -y cmake git tinyxml vtk9 hdf5 cgal python3 \
-                                py311-pip py311-setuptools py311-cython3 py311-numpy \
-                                py311-matplotlib
+                                py311-pip \
+                                py311-setuptools py311-wheel py311-setuptools-scm \
+                                py311-cython3 py311-numpy py311-matplotlib
                                 # prefix must match FreeBSD's default python
                                 # version. FreeBSD 14.2 uses Python 3.11 so
                                 # use "py311-"
@@ -561,10 +604,10 @@ jobs:
             cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
             make -j$NCPUS && make install
 
-            echo "Build and install CSXCAD Python module..."
+            echo "Build and install CSXCAD Python module with --no-build-isolation..."
             cd ~/CSXCAD/python
             export CSXCAD_INSTALL_PATH="$HOME/opt"
-            pip install . --user --break-system-packages --verbose
+            pip install . --user --break-system-packages --no-build-isolation --verbose
 
             echo "Smoketest CSXCAD Python module execution..."
             cd /
@@ -576,6 +619,12 @@ jobs:
             python3 -m unittest
 
             echo "Create Python venv and install dependencies..."
+            # remove Python dependencies to see if venv really works
+            pip uninstall -y CSXCAD --break-system-packages
+            sudo pkg remove -y py311-pip \
+                               py311-setuptools py311-wheel py-setuptools-scm \
+                               py311-cython3 py311-numpy py311-matplotlib
+
             python3 -m venv ~/venv
             . ~/venv/bin/activate
             pip install --upgrade pip
