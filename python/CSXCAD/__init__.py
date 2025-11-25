@@ -17,7 +17,8 @@ if os.name == 'nt' and 'CSXCAD_INSTALL_PATH' in os.environ and os.path.exists(os
     AppCSXCAD_BIN = os.path.join(os.environ['CSXCAD_INSTALL_PATH'], 'AppCSXCAD')
 
 try:
-    from CSXCAD.__version__ import __version__
+    from importlib.metadata import version
+    __version__ = version("CSXCAD")
 except ImportError:
     try:
         from CSXCAD.__fallback_version__ import __fallback_version__

@@ -17,7 +17,6 @@ backend-path = ["bootstrap"]
 
 [tool.setuptools_scm]
 root = "../"
-version_file = "CSXCAD/__version__.py"
 version_scheme = "no-guess-dev"
 
 # Make sure the following line can be understood by the brute-force
