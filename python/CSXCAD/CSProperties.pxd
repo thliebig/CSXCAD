@@ -217,6 +217,9 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             int SetWeightFunction(string fct, int ny)
             string GetWeightFunction(int ny)
 
+            void    SetModeFileName(string fileName);
+            string  GetModeFileName();
+            
             void SetFrequency(double val)
             double GetFrequency()
 
@@ -236,8 +239,14 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             void SetWeighting(double weight)
             double GetWeighting()
 
+            void SetExcitation(double val, int Component)
+            double GetExcitation(int Component)
+
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()
+
+            void SetModeFileName(string fileName);
+            string GetModeFileName();
 
             size_t CountFDSamples()
             vector[double]* GetFDSamples()
