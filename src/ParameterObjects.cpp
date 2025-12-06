@@ -24,8 +24,6 @@
 
 bool ReadTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, double val)
 {
-	double dHelp;
-
 	PS.SetValue(val); // set default value
 	const char* chHelp=elem.Attribute(attr);
 	if (chHelp==NULL)
