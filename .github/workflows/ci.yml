@@ -108,6 +108,7 @@ jobs:
         shell: sh
         run: |
           touch ~/.bash_profile  # set environmental variables here
+          echo 'export CXXFLAGS="-Wall -Wextra -Wno-error"' >> ~/.bash_profile
 
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
@@ -404,6 +405,7 @@ jobs:
         shell: sh
         run: |
           echo "export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')" >> ~/.zprofile
+          echo 'export CXXFLAGS="-Wall -Wextra -Wno-error"' >> ~/.zprofile
 
           brew install cmake hdf5 cgal vtk python3 python-setuptools numpy cython python-matplotlib
 
@@ -558,8 +560,23 @@ jobs:
     name: "${{ matrix.machine.name }}"
 
     steps:
-      - name: Checkout repo
+      - name: Checkout fparser.git
         uses: actions/checkout@v4
+        with:
+          repository: "${{ github.repository_owner }}/fparser"
+          path: fparser
+          # checkout must be deep, not shallow.
+          # We need tags for "git describe", otherwise build fails.
+          fetch-depth: 0
+
+      - name: Checkout CSXCAD.git
+        uses: actions/checkout@v4
+        with:
+          repository: "${{ github.repository_owner }}/CSXCAD"
+          path: CSXCAD
+          # checkout must be deep, not shallow.
+          # We need tags for "git describe", otherwise build fails.
+          fetch-depth: 0
 
       - name: Test in FreeBSD ${{ matrix.machine.version }} ${{ matrix.machine.arch }}
         uses: cross-platform-actions/action@v0.26.0
@@ -579,21 +596,10 @@ jobs:
                                 # use "py311-"
 
             export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')
-
-            echo "Clone $GITHUB_SHA from $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git"
-            cd ~/
-            git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY_OWNER/CSXCAD.git CSXCAD
-
-            cd ~/CSXCAD
-            git fetch --force $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git "+refs/heads/*:refs/remotes/origin/*"
-            git fetch --force $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git "+refs/pull/*/merge:refs/remotes/origin/pr/*"
-            git checkout $GITHUB_SHA
-
-            cd ~/
-            git clone $GITHUB_SERVER_URL/$GITHUB_REPOSITORY_OWNER/fparser.git
+            export CXXFLAGS="-Wall -Wextra -Wno-error"
 
             echo "Build and install fparser..."
-            cd ~/fparser
+            cd $GITHUB_WORKSPACE/fparser
             mkdir build && cd build
             cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
             make -j$NCPUS && make install
@@ -606,15 +612,13 @@ jobs:
             #
             # MPI may also fail, but this error is not fatal. The real error is often
             # the error above! There's no need to install MPI.
-            cd ~/CSXCAD
-            git checkout $GITHUB_SHA
-
+            cd $GITHUB_WORKSPACE/CSXCAD
             mkdir build && cd build
             cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
             make -j$NCPUS && make install
 
             echo "Build and install CSXCAD Python module with --no-build-isolation..."
-            cd ~/CSXCAD/python
+            cd $GITHUB_WORKSPACE/CSXCAD/python
             export CSXCAD_INSTALL_PATH="$HOME/opt"
             pip install . --user --break-system-packages --no-build-isolation --verbose
 
@@ -624,7 +628,7 @@ jobs:
             python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
             echo "Unittest CSXCAD Python module execution..."
-            cd ~/CSXCAD/python/tests
+            cd $GITHUB_WORKSPACE/CSXCAD/python/tests
             python3 -m unittest
 
             echo "Create Python venv and install dependencies..."
@@ -639,7 +643,7 @@ jobs:
             pip install --upgrade pip
 
             echo "Build and install CSXCAD Python module in venv..."
-            cd ~/CSXCAD/python
+            cd $GITHUB_WORKSPACE/CSXCAD/python
             export CSXCAD_INSTALL_PATH="$HOME/opt"
             pip install . --verbose
 
@@ -649,5 +653,5 @@ jobs:
             python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
             echo "Unittest CSXCAD Python module execution in venv..."
-            cd ~/CSXCAD/python/tests
+            cd $GITHUB_WORKSPACE/CSXCAD/python/tests
             python3 -m unittest
