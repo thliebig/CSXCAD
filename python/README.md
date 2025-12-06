@@ -265,7 +265,7 @@ be seen. Optionally, one can expose external system-wide packages to a
 ```bash
 # create venv, expose system packages
 # (run once during installation)
-python3 -m venv --system-site-packages $HOME/opt/physics
+python3 -m venv --system-site-packages $HOME/opt/physics/venv/
 ```
 
 In this `venv`, the packages within `venv` stays within
@@ -450,6 +450,22 @@ There could be an old copy of CSXCAD inside your system somewhere, which
 is built with a newer Python extension that uses then non-existent properties.
 Delete all older copies of CSXCAD from your system, and reinstall CSXCAD and
 the Python extension.
+
+### error: invalid command `bdist_wheel`
+
+Under `--no-build-isolation`, one may encounter the following error:
+
+    creating '/tmp/pip-modern-metadata-laicgdq2/CSXCAD.dist-info'
+    error: invalid command 'bdist_wheel'
+    Preparing metadata (pyproject.toml) ... error
+
+On some systems, the command `bdist_wheel` is not provided by `setuptools`
+but an additional package named `wheel`, such as `python3-wheel`.
+
+This shouldn't happen if all dependencies listed in the latest documentation
+have been correctly installed. If you need to manually install the package
+`wheel` not already mentioned by the documentation, it means the documentation
+is outdated, please submit a bug report.
 
 ## Tests
 
