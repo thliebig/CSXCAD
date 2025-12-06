@@ -72,10 +72,19 @@ jobs:
             ancient: false
             docker-image: "almalinux:8"
 
-          - name: "AlmaLinux Latest"
+          - name: "AlmaLinux 9"
             libc: "GNU"
             ancient: false
-            docker-image: "almalinux:latest"
+            docker-image: "almalinux:9"
+
+          # Waiting for upstream packages:
+          # https://bugzilla.redhat.com/show_bug.cgi?id=2374130
+          # https://bugzilla.redhat.com/show_bug.cgi?id=2419727
+          #
+          #- name: "AlmaLinux Latest"
+          #  libc: "GNU"
+          #  ancient: false
+          #  docker-image: "almalinux:latest"
 
           - name: "Alpine"
             libc: "musl"
@@ -116,7 +125,7 @@ jobs:
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
                            CGAL-devel python3-pip \
-                           python3-setuptools python3-setuptools_scm \
+                           python3-setuptools python3-wheel python3-setuptools_scm \
                            python3-Cython python3-numpy python3-matplotlib
 
             # only for CI/CD test builds without networks.
@@ -480,7 +489,7 @@ jobs:
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
           make -j$NCPUS && make install
 
-      - name: Build and install CSXCAD Python module
+      - name: Build and install CSXCAD Python module with --no-build-isolation
         run: |
           source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD/python
@@ -508,7 +517,7 @@ jobs:
           source ~/venv/bin/activate
           pip3 install --upgrade pip
 
-      - name: Build and install CSXCAD Python module in venv with --no-build-isolation
+      - name: Build and install CSXCAD Python module in venv
         run: |
           source ~/venv/bin/activate
           cd $GITHUB_WORKSPACE/CSXCAD/python
