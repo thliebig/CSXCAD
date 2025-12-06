@@ -63,6 +63,7 @@ bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const 
 		else if (p[1]>std::max(start[1],stop[1]))
 			while (p[1]>std::max(start[1],stop[1]))
 				p[1]-=2*PI;
+		// fallthrough
 	case CARTESIAN:
 	default:
 		for (int n=0;n<3;++n)
