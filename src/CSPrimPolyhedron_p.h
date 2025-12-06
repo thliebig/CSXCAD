@@ -5,7 +5,13 @@
 #include <CGAL/Polyhedron_incremental_builder_3.h>
 #include <CGAL/Polyhedron_3.h>
 #include <CGAL/AABB_tree.h>
-#include <CGAL/AABB_traits.h>
+
+#if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(6,0,0)
+    #include <CGAL/AABB_traits_3.h>
+#else
+    #include <CGAL/AABB_traits.h>
+#endif
+
 #if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(4,6,0)
     #include <CGAL/AABB_face_graph_triangle_primitive.h>
 #else
@@ -28,12 +34,19 @@ protected:
 };
 
 typedef Kernel::Point_3                                             Point;
+
 #if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(4,6,0)
 typedef CGAL::AABB_face_graph_triangle_primitive<Polyhedron>        Primitive;
 #else
 typedef CGAL::AABB_polyhedron_triangle_primitive<Kernel,Polyhedron> Primitive;
 #endif
+
+#if CGAL_VERSION_NR >= CGAL_VERSION_NUMBER(6,0,0)
+typedef CGAL::AABB_traits_3<Kernel, Primitive>                      Traits;
+#else
 typedef CGAL::AABB_traits<Kernel, Primitive>                        Traits;
+#endif
+
 typedef CGAL::Simple_cartesian<double>::Ray_3                       Ray;
 typedef Kernel::Segment_3                                           Segment;
 
