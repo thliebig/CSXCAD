@@ -338,7 +338,7 @@ void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, 
 bool CSPropDiscMaterial::ReadHDF5( std::string filename )
 {
 	m_Filename = filename;
-	cout << __func__ << ": Reading \"" << filename << "\"" << std::endl;
+	std::cout << __func__ << ": Reading \"" << filename << "\"" << std::endl;
 
 	// open hdf5 file
 	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
