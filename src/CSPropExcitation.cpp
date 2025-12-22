@@ -21,7 +21,7 @@
 #include "CSPropExcitation.h"
 
 CSPropExcitation::CSPropExcitation(ParameterSet* paraSet,unsigned int number) : CSProperties(paraSet) {Type=EXCITATION;Init();uiNumber=number;}
-CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSProperties(prop,copyPrim)
+CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSProperties(prop, copyPrim)
 {
 	Type=EXCITATION;
 	Init();
@@ -42,8 +42,6 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 		Excitation[i].Copy(&prop->Excitation[i]);
 		WeightFct[i].Copy(&prop->WeightFct[i]);
 	}
-
-
 }
 CSPropExcitation::CSPropExcitation(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=EXCITATION;Init();}
 CSPropExcitation::~CSPropExcitation() {}
