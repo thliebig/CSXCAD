@@ -85,10 +85,15 @@ public:
 	const std::string GetWeightFunction(int ny);
 
 	void		SetModeFileName(std::string fileName);
-	std::string GetModeFileName();
+	std::string 	GetModeFileName();
 	bool		GetFieldSourceIsFile() {return m_FieldSourceIsFile;};
+	
 	bool 		ParseModeFile();
 	void		ClearModeFile();
+
+	//! Manually get values from mode file parser
+	double GetModeLinInterp2(double x, double y, unsigned int comp);
+	double GetModeNearestNeighbor(double x, double y, unsigned int comp);
 
 	double GetWeightedExcitation(int ny, const double* coords);
 

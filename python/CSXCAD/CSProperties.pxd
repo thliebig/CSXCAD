@@ -217,9 +217,18 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             int SetWeightFunction(string fct, int ny)
             string GetWeightFunction(int ny)
 
-            void    SetModeFileName(string fileName);
-            string  GetModeFileName();
+            void    SetModeFileName(string fileName)
+            string  GetModeFileName()
+
+            bool    ParseModeFile()
+            void    ClearModeFile()
             
+            double  GetModeLinInterp2(double x, double y, unsigned int comp)
+            double  GetModeLinInterp2(double x, double y, unsigned int comp)
+
+            double  GetModeLinInterp2(double x, double y, unsigned int comp)
+            double  GetModeNearestNeighbor(double x, double y, unsigned int comp)
+
             void SetFrequency(double val)
             double GetFrequency()
 
