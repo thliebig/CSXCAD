@@ -135,7 +135,7 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	}
 	if (zero_count == 2)
 	{
-		for (unsigned int i=0; i<3; ++i)
+		for (int i=0; i<3; ++i)
 		{
 			if (i == vnonzero)
 			{
@@ -155,7 +155,7 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 
 		// some unit vector perpendicular to cylinder axis
 		double a[3];
-		for (unsigned int i=0; i<3; ++i)
+		for (int i=0; i<3; ++i)
 		{
 			if (i == vnonzero)
 			{
