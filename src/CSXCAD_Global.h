@@ -25,7 +25,7 @@
 #define _CSXCAD_VERSION_ GIT_VERSION
 #define _CSXCAD_LICENSE_ "LGPL v3"
 
-#if defined(WIN32)
+#if defined(_WIN32)
 	#ifdef BUILD_CSXCAD_LIB
 	#pragma warning(disable:4251)
 	#define CSXCAD_EXPORT __declspec(dllexport)
