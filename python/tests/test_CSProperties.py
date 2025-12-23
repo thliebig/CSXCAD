@@ -1,10 +1,21 @@
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 
 from CSXCAD import ParameterObjects
 from CSXCAD import CSProperties, CSPrimitives
 
 import unittest
 
+def testCsvGen(fileName):
+    Xm,Ym = np.meshgrid(np.array([0,0.1,0.2,0.3]),np.array([0,0.4,0.8,1.2]))
+    Xc = 0.15
+    Yc = 0.6
+    Fx = np.cos(np.arctan2(Ym - Yc,Xm - Xc))*np.sqrt((Xm - Xc)**2.0 + (Ym - Yc)**2.0)*3
+    Fy = np.sin(np.arctan2(Ym - Yc,Xm - Xc))*np.sqrt((Xm - Xc)**2.0 + (Ym - Yc)**2.0)*3
+    modeMat = np.concatenate((Xm.reshape(-1,1),Ym.reshape(-1,1),Fx.reshape(-1,1),Fy.reshape(-1,1)),axis=1)
+    np.savetxt(fileName,data,delimiter=',')
+    return Xm,Ym,Fx,Fy
+    
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
         self.pset  = ParameterObjects.ParameterSet()
@@ -275,7 +286,25 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual( prop2.GetDelay(),1e-9)
 
         self.assertEqual(prop2.GetWeightFunction(), ['y','x','z'])
-
+        
+        prop3 = prop.copy()
+        modeFileName = 'test_mode.csv' 
+        Xm,Ym,Fx,Fy = testCsvGen(modeFileName)
+        self.SetModeFileName(modeFileName)
+        self.assertEqual(self.GetModeFileName(),modeFileName)
+        
+        self.ParseModeFile()
+               
+        linInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fx, method='linear')
+        linInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fy, method='linear')
+        nnbInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fx, method='nearest')
+        nnbInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fy, method='nearest')
+        
+        self.assertTrue(np.abs(self.GetModeLinInterp2(0.25,0.25,0) - linInterpFx(0.25,0.25)) < 1e-4)
+        self.assertTrue(np.abs(self.GetModeLinInterp2(0.25,0.25,1) - linInterpFy(0.25,0.25)) < 1e-4)
+        self.assertTrue(np.abs(self.GetModeNearestNeighbor(0.25,0.25,0) - nnbInterpFx(0.25,0.25)) < 1e-4)
+        self.assertTrue(np.abs(self.GetModeNearestNeighbor(0.25,0.25,1) - nnbInterpFy(0.25,0.25)) < 1e-4)
+                
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
 

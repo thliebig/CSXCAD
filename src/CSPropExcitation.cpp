@@ -123,6 +123,30 @@ void CSPropExcitation::ClearModeFile()
 	m_ModeFile.clearData();
 }
 
+double CSPropExcitation::GetModeLinInterp2(double x, double y, unsigned int comp)
+{
+	if(comp > 1) 
+	{
+		std::cerr << "CSPropExcitation::GetModeLinInterp2: comp should be 0 for X or 1 for Y";
+		return 0;
+	}
+
+	std::vector<double> fVal = m_ModeFile.linInterp2(x,y);
+	return fVal[comp];
+}
+
+double CSPropExcitation::GetModeNearestNeighbor(double x, double y, unsigned int comp)
+{
+	if(comp > 1) 
+	{
+		std::cerr << "CSPropExcitation::GetModeNearestNeighbor: comp should be 0 for X or 1 for Y";
+		return 0;
+	}
+
+	std::vector<double> fVal = m_ModeFile.getNearestNeighbor(x,y);
+	return fVal[comp];
+}
+
 
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {

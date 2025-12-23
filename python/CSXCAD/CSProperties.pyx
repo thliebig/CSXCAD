@@ -1069,7 +1069,21 @@ cdef class CSPropExcitation(CSProperties):
         fileName = (<_CSPropExcitation*>self.thisptr).GetModeFileName().decode('UTF-8')
         return fileName
         
+    def ParseModeFile(self):
+        parsingSuccess = (<_CSPropExcitation*>self.thisptr).ParseModeFile()
+        return parsingSuccess
         
+    def ClearModeFile(self):
+        (<_CSPropExcitation*>self.thisptr).ClearModeFile()
+                
+    def GetModeLinInterp2(self, x, y, comp):
+        fVal = (<_CSPropExcitation*>self.thisptr).GetModeLinInterp2(x,y,comp)
+        return fVal
+    
+    def GetModeNearestNeighbor(self, x, y, comp):
+        fVal = (<_CSPropExcitation*>self.thisptr).GetModeNearestNeighbor(x,y,comp)
+        return fVal
+    
     def SetFrequency(self, val):
         """ SetFrequency(val)
 
