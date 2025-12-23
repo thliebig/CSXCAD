@@ -7,14 +7,15 @@ from CSXCAD import CSProperties, CSPrimitives
 import unittest
 
 def testCsvGen(fileName):
-    Xm,Ym = np.meshgrid(np.array([0,0.1,0.2,0.3]),np.array([0,0.4,0.8,1.2]))
+    Xm, Ym = np.meshgrid(np.array([0, 0.1, 0.2, 0.3]), np.array([0, 0.4, 0.8, 1.2]))
     Xc = 0.15
     Yc = 0.6
-    Fx = np.cos(np.arctan2(Ym - Yc,Xm - Xc))*np.sqrt((Xm - Xc)**2.0 + (Ym - Yc)**2.0)*3
-    Fy = np.sin(np.arctan2(Ym - Yc,Xm - Xc))*np.sqrt((Xm - Xc)**2.0 + (Ym - Yc)**2.0)*3
-    modeMat = np.concatenate((Xm.reshape(-1,1),Ym.reshape(-1,1),Fx.reshape(-1,1),Fy.reshape(-1,1)),axis=1)
-    np.savetxt(fileName,data,delimiter=',')
-    return Xm,Ym,Fx,Fy
+    Fx = np.cos(np.arctan2(Ym - Yc, Xm - Xc)) * np.sqrt((Xm - Xc) ** 2.0 + (Ym - Yc) ** 2.0) * 3
+    Fy = np.sin(np.arctan2(Ym - Yc, Xm - Xc)) * np.sqrt((Xm - Xc) ** 2.0 + (Ym - Yc) ** 2.0) * 3
+    modeMat = np.concatenate((Xm.reshape(-1, 1), Ym.reshape(-1, 1), Fx.reshape(-1, 1), Fy.reshape(-1, 1)), axis=1)
+    np.savetxt(fileName, modeMat, delimiter=',')
+    return Xm, Ym, Fx, Fy
+
     
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
@@ -289,21 +290,20 @@ class Test_CSPrimMethods(unittest.TestCase):
         
         prop3 = prop.copy()
         modeFileName = 'test_mode.csv' 
-        Xm,Ym,Fx,Fy = testCsvGen(modeFileName)
-        self.SetModeFileName(modeFileName)
-        self.assertEqual(self.GetModeFileName(),modeFileName)
+        Xm, Ym, Fx, Fy = testCsvGen(modeFileName)
+        prop3.SetModeFileName(modeFileName)
+        self.assertEqual(prop3.GetModeFileName(), modeFileName)
         
         self.ParseModeFile()
                
-        linInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fx, method='linear')
-        linInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fy, method='linear')
-        nnbInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fx, method='nearest')
-        nnbInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:,0]), Fy, method='nearest')
+        linInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fx, method='linear')
+        linInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fy, method='linear')
+        nnbInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fx, method='nearest')
+        nnbInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fy, method='nearest')
         
-        self.assertTrue(np.abs(self.GetModeLinInterp2(0.25,0.25,0) - linInterpFx(0.25,0.25)) < 1e-4)
-        self.assertTrue(np.abs(self.GetModeLinInterp2(0.25,0.25,1) - linInterpFy(0.25,0.25)) < 1e-4)
-        self.assertTrue(np.abs(self.GetModeNearestNeighbor(0.25,0.25,0) - nnbInterpFx(0.25,0.25)) < 1e-4)
-        self.assertTrue(np.abs(self.GetModeNearestNeighbor(0.25,0.25,1) - nnbInterpFy(0.25,0.25)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeLinInterp2(0.25, 0.25, 0) - linInterpFx(0.25, 0.25)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeLinInterp2(0.25, 0.25, 1) - linInterpFy(0.25, 0.25)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(0.25, 0.25, 0) - nnbInterpFx(0.25, 0.25)) < 1e-4)
                 
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
@@ -334,27 +334,27 @@ class Test_CSPrimMethods(unittest.TestCase):
 
     def test_dump(self):
         prop = CSProperties.CSPropDumpBox(self.pset, dump_type=10, dump_mode=2, file_type=5, opt_resolution=[10,11.5,12], sub_sampling=[1,2,4])
-
+        
         self.assertFalse(prop.GetMaterial())
         self.assertEqual( prop.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop.GetTypeString(), 'DumpBox')
-
+        
         self.assertEqual(prop.GetDumpType(), 10)
         self.assertEqual(prop.GetDumpMode(), 2)
         self.assertEqual(prop.GetFileType(), 5)
         self.assertTrue((prop.GetOptResolution() == [10,11.5,12]).all())
         self.assertTrue((prop.GetSubSampling() == [1,2,4]).all())
-
+        
         prop2 = prop.copy()
         self.assertEqual( prop2.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop2.GetTypeString(), 'DumpBox')
-
+        
         self.assertEqual(prop2.GetDumpType(), 10)
         self.assertEqual(prop2.GetDumpMode(), 2)
         self.assertEqual(prop2.GetFileType(), 5)
         self.assertTrue((prop2.GetOptResolution() == [10,11.5,12]).all())
         self.assertTrue((prop2.GetSubSampling() == [1,2,4]).all())
-
+    
     def test_lorentz(self):
         prop = CSProperties.CSPropLorentzMaterial(self.pset, order=2)
         self.assertTrue(prop.GetMaterial())
