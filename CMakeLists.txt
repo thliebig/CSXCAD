@@ -118,7 +118,7 @@ find_package(CGAL REQUIRED)
 INCLUDE_DIRECTORIES (${CGAL_INCLUDE_DIR})
 
 # CGAL may be complied as headers, or as shared objects, which we must link
-if (${CGAL_VERSION} VERSION_GREATER 5.0)
+if ("${CGAL_VERSION}" VERSION_GREATER 5.0)
     set(CSXCAD_CGAL_LIBRARIES CGAL::CGAL)
     message(STATUS "Found package CGAL v5+. Using version " ${CGAL_VERSION})
 else()
@@ -148,7 +148,7 @@ endif()
 
 # vtk
 find_package(VTK COMPONENTS vtkCommonCore NO_MODULE QUIET)
-if (${VTK_VERSION} VERSION_GREATER "9")
+if ("${VTK_VERSION}" VERSION_GREATER "9")
     find_package(VTK REQUIRED COMPONENTS IOGeometry IOPLY NO_MODULE REQUIRED)
 else()
     find_package(VTK REQUIRED COMPONENTS vtkIOGeometry vtkIOPLY NO_MODULE REQUIRED)
