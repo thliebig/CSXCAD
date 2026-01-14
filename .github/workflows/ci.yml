@@ -402,7 +402,9 @@ jobs:
           echo "export NCPUS=$(python3 -c 'import os; print(os.cpu_count())')" >> ~/.zprofile
           echo 'export CXXFLAGS="-Wall -Wextra -Wno-error"' >> ~/.zprofile
 
-          brew install cmake hdf5 cgal vtk python3 python-setuptools numpy cython python-matplotlib
+          # already installed on the CI/CD system, disable to avoid warning fatigue
+          # brew install python3 cmake
+          brew install hdf5 cgal vtk python-setuptools numpy cython python-matplotlib
 
           # TinyXML has been disabled by Homebrew at it's unmaintained
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
