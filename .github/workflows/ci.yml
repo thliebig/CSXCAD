@@ -98,6 +98,13 @@ jobs:
 
     name: "${{ matrix.os.libc }}/Linux (${{ matrix.os.name }})"
 
+    env:
+      # Wno-error is needed because any third-party dependencies
+      # like compiler version changes or even Python libraries
+      # installed by pip can block the pipeline, this is not what
+      # we want.
+      CXXFLAGS: "-Wall -Wextra -Wno-error"
+
     steps:
       - name: Check for dockerenv file
         # bash is not installed on Alpine at this point
@@ -107,9 +114,6 @@ jobs:
       - name: Install dependencies
         shell: sh
         run: |
-          touch ~/.bash_profile  # set environmental variables here
-          echo 'export CXXFLAGS="-Wall -Wextra -Wno-error"' >> ~/.bash_profile
-
           if grep -q "ID=fedora" /etc/os-release; then
             dnf install -y git
             dnf install -y gcc gcc-c++ cmake git tinyxml-devel vtk-devel hdf5-devel \
@@ -285,7 +289,6 @@ jobs:
 
       - name: Build and install fparser
         run: |
-          source ~/.bash_profile
           cd $GITHUB_WORKSPACE/fparser
           mkdir build && cd build
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
@@ -300,7 +303,6 @@ jobs:
           #
           # MPI may also fail, but this error is not fatal. The real error is often
           # the error above! There's no need to install MPI.
-          source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD
           mkdir build && cd build
           cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
@@ -308,7 +310,6 @@ jobs:
 
       - name: Build and install CSXCAD Python module with --no-build-isolation
         run: |
-          source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
 
@@ -330,20 +331,17 @@ jobs:
 
       - name: Smoketest CSXCAD Python module execution
         run: |
-          source ~/.bash_profile
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
           python3 -c "import CSXCAD; print(CSXCAD.__version__)"
 
       - name: Unittest CSXCAD Python module execution
         run: |
-          source ~/.bash_profile
           cd $GITHUB_WORKSPACE/CSXCAD/python/tests
           python3 -m unittest
 
       - name: Create Python venv and install dependencies
         run: |
-          source ~/.bash_profile
           cd ~/
 
           if grep -q "ID=ubuntu" /etc/os-release && \
@@ -375,7 +373,6 @@ jobs:
 
       - name: Build and install CSXCAD Python module in venv
         run: |
-          source ~/.bash_profile
           source ~/venv/bin/activate
           cd $GITHUB_WORKSPACE/CSXCAD/python
           export CSXCAD_INSTALL_PATH="$HOME/opt"
@@ -383,7 +380,6 @@ jobs:
 
       - name: Smoketest CSXCAD Python module execution in venv
         run: |
-          source ~/.bash_profile
           source ~/venv/bin/activate
           cd /
           python3 -c "import CSXCAD; print(CSXCAD.ContinuousStructure())"
@@ -391,7 +387,6 @@ jobs:
 
       - name: Unittest CSXCAD Python module execution in venv
         run: |
-          source ~/.bash_profile
           source ~/venv/bin/activate
           cd $GITHUB_WORKSPACE/CSXCAD/python/tests
           python3 -m unittest
