@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "boost",
+    "cgal",
+    "hdf5",
+    "tinyxml",
+    "vtk"
+  ]
+}
