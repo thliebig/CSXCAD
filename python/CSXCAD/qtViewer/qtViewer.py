@@ -21,6 +21,7 @@ import vtk
 from vtkmodules.qt.QVTKRenderWindowInteractor import PyQtImpl, QVTKRenderWindowInteractor
 
 from CSXCAD import CSProperties, CSRectGrid
+from CSXCAD.CSProperties import PropertyType
 from CSXCAD.qtViewer.vtkPrimitives import renderPrimitives
 
 def array2vtkFloat(a):
@@ -67,10 +68,18 @@ class TreeRenderItem(QTreeWidgetItem):
     #     return QTreeWidgetItem.data(self, col, role)
 
 class PropertyRootItem(TreeRenderItem):
-    def __init__(self, viewer, **kw):
+    def __init__(self, viewer, category, **kw):
         self.prop_items = {}
         TreeRenderItem.__init__(self, viewer, **kw)
-        self.setText(0, 'Properties')
+        self.category = category
+        if category == 0:
+            self.setText(0, "Materials")
+        elif category == 1:
+            self.setText(0, "Port-Properties")
+        elif category == 2:
+            self.setText(0, "Field-Recordings")
+        else:
+            self.setText(0, "Generic Properties")
         self.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsAutoTristate | Qt.ItemIsEnabled)
 
     def clear(self):
@@ -92,9 +101,26 @@ class PropertyRootItem(TreeRenderItem):
         for prop in self.viewer.CSX.GetAllProperties():
             if force:
                 self.removeProperty(prop)
+            ptype = prop.GetType()
+            is_mat  = ptype & PropertyType.MATERIAL   or ptype & PropertyType.METAL
+            is_port = ptype & PropertyType.EXCITATION or ptype & PropertyType.PROBEBOX or ptype & PropertyType.LUMPED_ELEMENT
+            is_dump = ptype & PropertyType.DUMPBOX
+            if self.category == 0 and not is_mat:
+                continue
+            elif self.category == 1 and not is_port:
+                continue
+            elif self.category == 2 and not is_dump:
+                continue
+            elif self.category > 2 and (is_mat or is_port or is_dump):
+                continue
+
             item = PropertyItem(prop, self.viewer)
             self.prop_items[prop] = item
             self.addChild(item)
+
+        # hide this item if it has no entries
+        self.setHidden(self.childCount()==0 and not self.category == 0)
+        self.setExpanded(True)
 
     def setData(self, col, role, val):
         do_block_ren = False
@@ -216,6 +242,7 @@ class RectGridRootItem(TreeRenderItem):
             self.grid_items[n] = GridDirItem(n, self.rect_grid, self.viewer)
             self.addChild(self.grid_items[n])
         self.setGridOpacity(30)
+        self.setExpanded(True)
 
 
     def setGridOpacity(self, val, render=False):
@@ -346,11 +373,15 @@ class Viewer(QMainWindow):
             "QTreeView::indicator:indeterminate { image: url(" + ICON_PATH + "/bulb.png); }"
             )
 
-        self.prop_root = PropertyRootItem(self)
-        self.grid_root = RectGridRootItem(self)
+        self.prop_root_items = []
+        for cat in range(4):
+            item = PropertyRootItem(self, category=cat)
+            self.prop_root_items.append(item)
+            self.nav_tree.addTopLevelItem(item)
 
-        self.nav_tree.addTopLevelItem(self.prop_root)
+        self.grid_root = RectGridRootItem(self)
         self.nav_tree.addTopLevelItem(self.grid_root)
+
         self.nav_tree.setHeaderHidden(True)
         self.nav_dock = QDockWidget('Navigation Tree')
         self.nav_dock.setWidget(self.nav_tree)
@@ -506,13 +537,15 @@ class Viewer(QMainWindow):
         self.ren.AddActor(actor)
 
     def clear(self):
-        self.prop_root.clear()
+        for item in self.prop_root_items:
+            item.clear()
         self.grid_root.clear()
 
     def renderCSX(self, CSX):
         self.clear()
         self.CSX = CSX
-        self.prop_root.updateCSX()
+        for item in self.prop_root_items:
+            item.updateCSX()
         self.grid_root.renderGrid()
 
     def setGridOpacity(self, val, render=True):
