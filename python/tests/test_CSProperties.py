@@ -309,7 +309,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 0) - nnbInterpFx(test_xy)) < 1e-4)
         self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 1) - nnbInterpFy(test_xy)) < 1e-4)
                 
-        __import__('os').remove(modeFileName))
+        __import__('os').remove(modeFileName)
                 
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
