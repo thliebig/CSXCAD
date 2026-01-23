@@ -334,9 +334,7 @@ unsigned int ModeFileParser::minDistArg(std::vector<double> & x, double x0)
 
 	}
 
-	if (i == x.size()) i--;
-
-	return i;
+	return --i;
 }
 
 

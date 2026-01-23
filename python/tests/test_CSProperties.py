@@ -294,16 +294,22 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop3.SetModeFileName(modeFileName)
         self.assertEqual(prop3.GetModeFileName(), modeFileName)
         
-        self.ParseModeFile()
-               
-        linInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fx, method='linear')
-        linInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fy, method='linear')
-        nnbInterpFx = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fx, method='nearest')
-        nnbInterpFy = RegularGridInterpolator((Xm[0,:], Ym[:, 0]), Fy, method='nearest')
+        self.assertTrue(prop3.ParseModeFile())
         
-        self.assertTrue(np.abs(prop3.GetModeLinInterp2(0.25, 0.25, 0) - linInterpFx(0.25, 0.25)) < 1e-4)
-        self.assertTrue(np.abs(prop3.GetModeLinInterp2(0.25, 0.25, 1) - linInterpFy(0.25, 0.25)) < 1e-4)
-        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(0.25, 0.25, 0) - nnbInterpFx(0.25, 0.25)) < 1e-4)
+        linInterpFx = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fx, method='linear')
+        linInterpFy = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fy, method='linear')
+        nnbInterpFx = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fx, method='nearest')
+        nnbInterpFy = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fy, method='nearest')
+        
+        test_x = 0.26
+        test_y = 0.26
+        test_xy = [test_x, test_y]
+        self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 0) - linInterpFx(test_xy)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 1) - linInterpFy(test_xy)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 0) - nnbInterpFx(test_xy)) < 1e-4)
+        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 1) - nnbInterpFy(test_xy)) < 1e-4)
+                
+        __import__('os').remove(modeFileName))
                 
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
