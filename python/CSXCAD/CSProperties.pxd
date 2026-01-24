@@ -224,9 +224,6 @@ cdef extern from "CSXCAD/CSPropExcitation.h":
             void    ClearModeFile()
             
             double  GetModeLinInterp2(double x, double y, unsigned int comp)
-            double  GetModeLinInterp2(double x, double y, unsigned int comp)
-
-            double  GetModeLinInterp2(double x, double y, unsigned int comp)
             double  GetModeNearestNeighbor(double x, double y, unsigned int comp)
 
             void SetFrequency(double val)
