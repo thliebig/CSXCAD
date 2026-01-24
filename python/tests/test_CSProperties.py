@@ -1,9 +1,7 @@
-import numpy as np
-from scipy.interpolate import RegularGridInterpolator
-
 from CSXCAD import ParameterObjects
 from CSXCAD import CSProperties, CSPrimitives
 
+import numpy as np
 import unittest
 
 def testCsvGen(fileName):
@@ -16,7 +14,45 @@ def testCsvGen(fileName):
     np.savetxt(fileName, modeMat, delimiter=',')
     return Xm, Ym, Fx, Fy
 
+def interp2d(x_vec, y_vec, values, xi, yi, interp_method = 'linear'):
     
+    # Find index of closest coordinate
+    j = np.abs(x_vec - xi).argmin()
+    i = np.abs(y_vec - yi).argmin()
+    
+    if interp_method == 'nearest':
+        return values[i, j]
+    elif interp_method == 'linear':
+        # Clip indices to stay within array bounds
+        j = np.clip(j, 0, len(x_vec) - 2)
+        i = np.clip(i, 0, len(y_vec) - 2)
+        
+        # 2. Get the coordinates and values of the 4 corners
+        x1, x2 = x_vec[j], x_vec[j+1]
+        y1, y2 = y_vec[i], y_vec[i+1]
+        
+        # Values at corners: Q11(bottom-left), Q21(bottom-right), etc.
+        # Note: values is indexed [row, col] -> [y, x]
+        f11 = values[i, j]
+        f21 = values[i, j+1]
+        f12 = values[i+1, j]
+        f22 = values[i+1, j+1]
+        
+        # 3. Calculate weights (normalized distances)
+        dx = (xi - x1) / (x2 - x1)
+        dy = (yi - y1) / (y2 - y1)
+        
+        # 4. Interpolate
+        # First along X
+        f_y1 = f11 * (1 - dx) + f21 * dx
+        f_y2 = f12 * (1 - dx) + f22 * dx
+        
+        # Then along Y
+        return f_y1 * (1 - dy) + f_y2 * dy
+        
+    else:
+        return 0
+
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
         self.pset  = ParameterObjects.ParameterSet()
@@ -296,19 +332,19 @@ class Test_CSPrimMethods(unittest.TestCase):
         
         self.assertTrue(prop3.ParseModeFile())
         
-        linInterpFx = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fx, method='linear')
-        linInterpFy = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fy, method='linear')
-        nnbInterpFx = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fx, method='nearest')
-        nnbInterpFy = RegularGridInterpolator((Ym[:, 0], Xm[0, :]), Fy, method='nearest')
+        dx = (Xm[0,1] - Xm[0,0])/10
+        dy = (Ym[1,0] - Ym[0,0])/10
         
-        test_x = 0.26
-        test_y = 0.26
-        test_xy = [test_x, test_y]
-        self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 0) - linInterpFx(test_xy)) < 1e-4)
-        self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 1) - linInterpFy(test_xy)) < 1e-4)
-        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 0) - nnbInterpFx(test_xy)) < 1e-4)
-        self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 1) - nnbInterpFy(test_xy)) < 1e-4)
+        for test_x in np.arange(Xm[0,0], Xm[0,-1] + dx, dx):
+            for test_y in np.arange(Ym[0,0], Ym[-1,0] + dy, dy):
                 
+                self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 0) - interp2d(Xm[0, :], Ym[:, 0], Fx, test_x, test_y)) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 1) - interp2d(Xm[0, :], Ym[:, 0], Fy, test_x, test_y)) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 0) - interp2d(Xm[0, :], Ym[:, 0], Fx, test_x, test_y, 'nearest')) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 1) - interp2d(Xm[0, :], Ym[:, 0], Fy, test_x, test_y, 'nearest')) < 1e-4)
+                
+        prop3.ClearModeFile()
+        
         __import__('os').remove(modeFileName)
                 
     def test_probe(self):
