@@ -27,9 +27,9 @@
 #include <cmath>
 #include <functional>
 
-//#include "CSProperties.h"
+#include "CSXCAD_Global.h"
 
-class ModeFileParser
+class CSXCAD_EXPORT ModeFileParser
 {
 public:
 	ModeFileParser(char delimiter = ',') : delimiter(delimiter) {clearData();};
