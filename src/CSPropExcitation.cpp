@@ -1,5 +1,6 @@
 /*
-*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2023-2025 Gadi Lahav (gadi@rfwithcare.com)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -30,6 +31,11 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	coordInputType=prop->coordInputType;
 	m_Frequency.Copy(&prop->m_Frequency);
 	Delay.Copy(&prop->Delay);
+
+	m_FieldSourceIsFile = prop->m_FieldSourceIsFile;
+	m_ModeFileName = prop->m_ModeFileName;
+	m_ModeFile = prop->m_ModeFile;
+
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=prop->ActiveDir[i];
@@ -86,10 +92,61 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 {
 	if ((ny>=0) && (ny<3))
 		return WeightFct[ny].SetValue(fct);
+
+	// If a weight function set, this is not a file
+	m_FieldSourceIsFile = false;
+	m_ModeFile.clearData();
+
 	return 0;
 }
 
 const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
+
+void CSPropExcitation::SetModeFileName(std::string fileName)
+{
+	m_ModeFileName = fileName;
+	m_FieldSourceIsFile = true;
+}
+
+std::string CSPropExcitation::GetModeFileName()
+{
+	return m_ModeFileName;
+}
+
+bool CSPropExcitation::ParseModeFile()
+{
+	return m_ModeFile.parseFile(m_ModeFileName);
+}
+
+void CSPropExcitation::ClearModeFile()
+{
+	m_ModeFile.clearData();
+}
+
+double CSPropExcitation::GetModeLinInterp2(double x, double y, unsigned int comp)
+{
+	if(comp > 1) 
+	{
+		std::cerr << "CSPropExcitation::GetModeLinInterp2: comp should be 0 for X or 1 for Y";
+		return 0;
+	}
+
+	std::vector<double> fVal = m_ModeFile.linInterp2(x,y);
+	return fVal[comp];
+}
+
+double CSPropExcitation::GetModeNearestNeighbor(double x, double y, unsigned int comp)
+{
+	if(comp > 1) 
+	{
+		std::cerr << "CSPropExcitation::GetModeNearestNeighbor: comp should be 0 for X or 1 for Y";
+		return 0;
+	}
+
+	std::vector<double> fVal = m_ModeFile.getNearestNeighbor(x,y);
+	return fVal[comp];
+}
+
 
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
@@ -120,13 +177,62 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	coordPara[4]->SetValue(r); //r
 	coordPara[5]->SetValue(alpha);
 	coordPara[6]->SetValue(theta); //theta
-	int EC = WeightFct[ny].Evaluate();
-	if (EC)
-	{
-		std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
-	}
 
-	return WeightFct[ny].GetValue()*GetExcitation(ny);
+
+	// Check if manual weights are set. If so, look for coordinate there
+	double cWeight;
+	if (m_FieldSourceIsFile)
+	{
+		// Check if mode file is parsed
+		if(!m_ModeFile.isFileParsed())
+			m_ModeFile.parseFile(m_ModeFileName);
+
+		int nPy = 0,checkSum = 0;
+
+		for (int dirIdx = 0 ; dirIdx < 3 ; dirIdx++)
+		{
+			nPy += (PropagationDir[dirIdx].GetValue() != 0)*(dirIdx + 1);
+			checkSum += int(PropagationDir[dirIdx].GetValue() != 0);
+		}
+		nPy--;
+
+		if ((nPy < 0) || (checkSum != 1))
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error determining propagation direction. PropagationDir = (";
+			std::cerr << PropagationDir[0].GetValue() << ",";
+			std::cerr << PropagationDir[1].GetValue() << ",";
+			std::cerr << PropagationDir[2].GetValue() << ") => nPy = ";
+			std::cerr << nPy << "checkSum = " << checkSum << std::endl;
+			return 0.0;
+		}
+
+		int nPyp	= (nPy + 1) % 3,
+			nPypp	= (nPy + 2) % 3;
+
+		cWeight = 0;
+
+		// Get the weight only if it's NOT in the propagation direction
+		if (nPy != ny)
+		{
+			// Get weights in both directions
+			double Wny[2] = {0.0,0.0};
+			m_ModeFile.linInterp2(loc_coords[nPyp],loc_coords[nPypp],Wny);
+
+			// In case ny == nPyp, access Wny[0]. The case where ny == nPy can't happen.
+			cWeight = Wny[int(ny == nPypp)];
+		}
+	}
+	else
+	{
+		int EC = WeightFct[ny].Evaluate();
+		if (EC)
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
+		}
+
+		cWeight = WeightFct[ny].GetValue();
+	}
+	return cWeight*GetExcitation(ny);
 }
 
 void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
@@ -154,6 +260,10 @@ void CSPropExcitation::Init()
 		WeightFct[i].SetValue(1.0);
 		WeightFct[i].SetParameterSet(coordParaSet);
 	}
+
+	m_FieldSourceIsFile = false;
+	m_ModeFile.clearData();
+	m_ModeFileName.clear();
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
@@ -179,7 +289,6 @@ const std::string CSPropExcitation::GetPropagationDirString(int Comp)
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return PropagationDir[Comp].GetString();
 }
-
 
 bool CSPropExcitation::Update(std::string *ErrStr)
 {
@@ -224,6 +333,10 @@ bool CSPropExcitation::Update(std::string *ErrStr)
 		ErrStr->append(stream.str());
 		PSErrorCode2Msg(EC,ErrStr);
 	}
+
+	if(m_ModeFileName.length())
+		m_FieldSourceIsFile = true;
+
 	return bOK;
 }
 
@@ -240,6 +353,10 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 
 	prop->SetAttribute("Type",iExcitType);
 	WriteVectorTerm(Excitation,*prop,"Excite",parameterised);
+
+
+	if (m_FieldSourceIsFile)
+		prop->SetAttribute("ModeFileName", m_ModeFileName.c_str());
 
 	TiXmlElement Weight("Weight");
 	WriteTerm(WeightFct[0],Weight,"X",parameterised);
@@ -265,6 +382,7 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	prop->QueryBoolAttribute("Enabled",&m_enabled);
 
+	m_ModeFileName.clear();
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
@@ -272,12 +390,23 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	ReadTerm(m_Frequency,*prop,"Frequency");
 	ReadTerm(Delay,*prop,"Delay");
 
-	TiXmlElement *weight = prop->FirstChildElement("Weight");
-	if (weight!=NULL)
+	// Try this first
+	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS)
 	{
-		ReadTerm(WeightFct[0],*weight,"X");
-		ReadTerm(WeightFct[1],*weight,"Y");
-		ReadTerm(WeightFct[2],*weight,"Z");
+		m_ModeFileName.clear();
+		m_FieldSourceIsFile = true;
+	}
+	// Overload if necessary
+	if (m_ModeFileName.length())
+	{
+		m_FieldSourceIsFile = false;
+		TiXmlElement *weight = prop->FirstChildElement("Weight");
+		if (weight!=NULL)
+		{
+			ReadTerm(WeightFct[0],*weight,"X");
+			ReadTerm(WeightFct[1],*weight,"Y");
+			ReadTerm(WeightFct[2],*weight,"Z");
+		}
 	}
 
 	ReadVectorTerm(PropagationDir,*prop,"PropDir",0.0);

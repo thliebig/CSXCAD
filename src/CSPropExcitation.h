@@ -1,5 +1,6 @@
 /*
-*	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2008-2012 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2023-2025 Gadi Lahav (gadi@rfwithcare.com)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -18,6 +19,7 @@
 #pragma once
 
 #include "CSProperties.h"
+#include "ModeFileParser.h"
 
 //! Continuous Structure Excitation Property
 /*!
@@ -82,6 +84,17 @@ public:
 	//! Get the weighting function for the given excitation component
 	const std::string GetWeightFunction(int ny);
 
+	void		SetModeFileName(std::string fileName);
+	std::string 	GetModeFileName();
+	bool		GetFieldSourceIsFile() {return m_FieldSourceIsFile;};
+	
+	bool 		ParseModeFile();
+	void		ClearModeFile();
+
+	//! Manually get values from mode file parser
+	double GetModeLinInterp2(double x, double y, unsigned int comp);
+	double GetModeNearestNeighbor(double x, double y, unsigned int comp);
+
 	double GetWeightedExcitation(int ny, const double* coords);
 
 	//! Set the propagation direction for a given component
@@ -120,4 +133,12 @@ protected:
 	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
 	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
 	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
+
+	bool WeightsFromFile;				// If the mode shape is derived from a mode file, not an analytical function
+
+	// In case this should be loaded from a file, this will be set to "true"
+	bool 			m_FieldSourceIsFile;
+	std::string 	m_ModeFileName;
+
+	ModeFileParser	m_ModeFile;
 };
