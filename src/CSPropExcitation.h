@@ -19,7 +19,7 @@
 #pragma once
 
 #include "CSProperties.h"
-#include "ModeFileParser.h"
+#include "CSModeFileParser.h"
 
 //! Continuous Structure Excitation Property
 /*!
@@ -85,7 +85,7 @@ public:
 	const std::string GetWeightFunction(int ny);
 
 	void		SetModeFileName(std::string fileName);
-	std::string 	GetModeFileName();
+	std::string GetModeFileName();
 	bool		GetFieldSourceIsFile() {return m_FieldSourceIsFile;};
 	
 	bool 		ParseModeFile();
@@ -134,11 +134,9 @@ protected:
 	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
 	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
 
-	bool WeightsFromFile;				// If the mode shape is derived from a mode file, not an analytical function
 
-	// In case this should be loaded from a file, this will be set to "true"
-	bool 			m_FieldSourceIsFile;
-	std::string 	m_ModeFileName;
+	bool 				m_FieldSourceIsFile;	// In case this should be loaded from a file, this will be set to "true"
+	std::string 		m_ModeFileName;			// Name of the mode file
 
-	ModeFileParser	m_ModeFile;
+	CSModeFileParser	m_ModeFile;
 };

@@ -18,7 +18,7 @@
 #pragma once
 
 #include "CSProperties.h"
-#include "ModeFileParser.h"
+#include "CSModeFileParser.h"
 
 //! Continuous Structure Probe Property for calculating integral properties
 /*!

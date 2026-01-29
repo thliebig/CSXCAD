@@ -15,9 +15,9 @@
 *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "ModeFileParser.h"
+#include "CSModeFileParser.h"
 
-std::vector<double> ModeFileParser::parseCSVline(const std::string & line)
+std::vector<double> CSModeFileParser::ParseCSVline(const std::string & line)
 {
 	std::vector<double>	row;
 	std::stringstream	ss(line);
@@ -25,7 +25,7 @@ std::vector<double> ModeFileParser::parseCSVline(const std::string & line)
 	std::string			temp;
 	double				val;
 
-	while (std::getline(ss, cell, delimiter))
+	while (std::getline(ss, cell, m_delimiter))
 	{
 		// If cell is empty, push a zero and move forward
 		if (cell.empty())
@@ -53,9 +53,9 @@ std::vector<double> ModeFileParser::parseCSVline(const std::string & line)
 	return row;
 }
 
-bool ModeFileParser::parseFile()
+bool CSModeFileParser::ParseFile()
 {
-	std::ifstream file(fileName);
+	std::ifstream file(m_fileName);
 	if (!file.is_open())
 		return false;
 
@@ -67,7 +67,7 @@ bool ModeFileParser::parseFile()
 	std::string line;
 	while (std::getline(file, line))
 	{
-		std::vector<double> row = parseCSVline(line);
+		std::vector<double> row = ParseCSVline(line);
 		// If this is the first line, store the line length
 		if (firstLine)
 		{
@@ -83,15 +83,11 @@ bool ModeFileParser::parseFile()
 		csvData.push_back(row);
 	}
 
-
-
-
-
 	if ((csvData.size() <= 4) || (cN != 4))
 		return false;
 
-	std::vector<double> Xcol = getCSVcolumn(csvData,0),
-						Ycol = getCSVcolumn(csvData,1);
+	std::vector<double> Xcol = GetCSVcolumn(csvData,0),
+						Ycol = GetCSVcolumn(csvData,1);
 
 	/****************************************
 	* Arrange data in matrices (or vectors) *
@@ -103,7 +99,6 @@ bool ModeFileParser::parseFile()
 	// First, make vectors of only unique X and Y values. No need to store meshgrid matrices
 	std::sort(m_X.begin(),m_X.end());
 	std::sort(m_Y.begin(),m_Y.end());
-
 
 	// Mark unique elements
 	std::vector<double>::iterator 	Xcol_last = std::unique(m_X.begin(),m_X.end()),
@@ -128,8 +123,8 @@ bool ModeFileParser::parseFile()
 	m_Vy.clear();
 
 	// Get data to snip from
-	std::vector<double>	Vx = getCSVcolumn(csvData,2),
-						Vy = getCSVcolumn(csvData,3);
+	std::vector<double>	Vx = GetCSVcolumn(csvData,2),
+						Vy = GetCSVcolumn(csvData,3);
 
 	// Snip rows one by one
 	for (unsigned int m = 0 ; m < Xcol.size() ; m += Ncluster)
@@ -152,7 +147,6 @@ bool ModeFileParser::parseFile()
 		std::vector<std::vector<double>> 	swap_Vx(m_M,std::vector<double>(m_N)),
 											swap_Vy(m_M,std::vector<double>(m_N));
 
-
 		for (unsigned int m = 0 ; m < m_M ; m++)
 			for (unsigned int n = 0 ; n < m_N ; n++)
 			{
@@ -164,23 +158,21 @@ bool ModeFileParser::parseFile()
 		m_Vy = swap_Vy;
 	}
 
-
-
 	file.close();
 	return true;
 }
 
-void ModeFileParser::clearData()
+void CSModeFileParser::ClearData()
 {
 	m_X.clear();
 	m_Y.clear();
 	m_Vx.clear();
 	m_Vy.clear();
 
-	fileName = "";
+	m_fileName = "";
 }
 
-std::vector<double> ModeFileParser::getCSVcolumn(const std::vector<std::vector<double>> & mat, unsigned int colIdx) const
+std::vector<double> CSModeFileParser::GetCSVcolumn(const std::vector<std::vector<double>> & mat, unsigned int colIdx) const
 {
 	std::vector<double> column;
 	if (mat.size() > 0)
@@ -200,7 +192,7 @@ std::vector<double> ModeFileParser::getCSVcolumn(const std::vector<std::vector<d
 	return {};
 }
 
-std::vector<double> ModeFileParser::operator() (unsigned int i, unsigned int j) const
+std::vector<double> CSModeFileParser::operator() (unsigned int i, unsigned int j) const
 {
 	std::vector<double> Vij = {0.0,0.0};
 
@@ -214,14 +206,14 @@ std::vector<double> ModeFileParser::operator() (unsigned int i, unsigned int j) 
 	return Vij;
 }
 
-std::vector<double> ModeFileParser::getNearestNeighbor(double x, double y)
+std::vector<double> CSModeFileParser::NearestNeighbor(double x, double y)
 {
 
 	// Nearest neighbor values found
 	std::vector<double> Vnn = {0.0,0.0};
 
-	unsigned int 	min_n = minDistArg(m_X,x),
-					min_m = minDistArg(m_Y,y);
+	unsigned int 	min_n = MinDistArg(m_X,x),
+					min_m = MinDistArg(m_Y,y);
 
 	// Store nearest neighbor
 	Vnn[0] = m_Vx[min_m][min_n];
@@ -229,33 +221,35 @@ std::vector<double> ModeFileParser::getNearestNeighbor(double x, double y)
 
 	return Vnn;
 }
-void ModeFileParser::getNearestNeighbor(double x, double y, double * const V)
+
+void CSModeFileParser::NearestNeighbor(double x, double y, double * const V)
 {
-	std::vector<double> Vnn = getNearestNeighbor(x,y);
+	std::vector<double> Vnn = NearestNeighbor(x,y);
 
 	V[0] = Vnn[0];
 	V[1] = Vnn[1];
 }
-void ModeFileParser::getNearestNeighbor(double x, double y, double & Vx, double & Vy)
+
+void CSModeFileParser::NearestNeighbor(double x, double y, double & Vx, double & Vy)
 {
-	std::vector<double> Vnn = getNearestNeighbor(x,y);
+	std::vector<double> Vnn = NearestNeighbor(x,y);
 
 	Vx = Vnn[0];
 	Vy = Vnn[1];
 }
 
-std::vector<double> ModeFileParser::linInterp2(double x, double y)
+std::vector<double> CSModeFileParser::LinInterp2(double x, double y)
 {
 
 	// Container for interpolated value
 	std::vector<double> Vi2 = {0.0,0.0};
 
-	unsigned int 	n = minDistArgLHS(m_X, x),
-					m = minDistArgLHS(m_Y, y);
+	unsigned int 	n = MinDistArgLHS(m_X, x),
+					m = MinDistArgLHS(m_Y, y);
 
 	// If the corner is past the coordinate, it was closer to the RHS. Shift back one.
-	if (m == (getM() - 1)) m--;
-	if (n == (getN() - 1)) n--;
+	if (m == (GetM() - 1)) m--;
+	if (n == (GetN() - 1)) n--;
 
 	// Check if this is the end of the matrix. If so,
 	// clamp to the edge (nearest neighbor)
@@ -303,22 +297,24 @@ std::vector<double> ModeFileParser::linInterp2(double x, double y)
 
 	return Vi2;
 }
-void ModeFileParser::linInterp2(double x, double y, double * const V)
+
+void CSModeFileParser::LinInterp2(double x, double y, double * const V)
 {
-	std::vector<double> Vi2 = linInterp2(x,y);
+	std::vector<double> Vi2 = LinInterp2(x,y);
 
 	V[0] = Vi2[0];
 	V[1] = Vi2[1];
 }
-void ModeFileParser::linInterp2(double x, double y, double & Vx, double & Vy)
+
+void CSModeFileParser::LinInterp2(double x, double y, double & Vx, double & Vy)
 {
-	std::vector<double> Vi2 = linInterp2(x,y);
+	std::vector<double> Vi2 = LinInterp2(x,y);
 
 	Vx = Vi2[0];
 	Vy = Vi2[1];
 }
 
-unsigned int ModeFileParser::minDistArg(std::vector<double> & x, double x0)
+unsigned int CSModeFileParser::MinDistArg(std::vector<double> & x, double x0)
 {
 	unsigned int i;
 	double minDist = std::numeric_limits<double>::infinity();
@@ -337,10 +333,9 @@ unsigned int ModeFileParser::minDistArg(std::vector<double> & x, double x0)
 	return --i;
 }
 
-
-unsigned int ModeFileParser::minDistArgLHS(std::vector<double> & x, double x0)
+unsigned int CSModeFileParser::MinDistArgLHS(std::vector<double> & x, double x0)
 {
-	unsigned int i = minDistArg(x,x0);
+	unsigned int i = MinDistArg(x,x0);
 
 	// If this number is on the left hand side of minimum,
 	// clamp to the left. Namely:
@@ -352,7 +347,7 @@ unsigned int ModeFileParser::minDistArgLHS(std::vector<double> & x, double x0)
 	return i;
 }
 
-void ModeFileParser::print()
+void CSModeFileParser::Print()
 {
 	std::cout << std::endl << "X = " << std::endl << std::endl;
 	for (unsigned int m = 0 ; m < m_M ; m++)

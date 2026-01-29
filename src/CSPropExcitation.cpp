@@ -50,6 +50,7 @@ void CSPropExcitation::SetNumber(unsigned int val) {uiNumber=val;}
 unsigned int CSPropExcitation::GetNumber() {return uiNumber;}
 
 void CSPropExcitation::SetExcitType(int val) {iExcitType=val;}
+
 int CSPropExcitation::GetExcitType() {return iExcitType;}
 
 void CSPropExcitation::SetExcitation(double val, int Component)
@@ -95,7 +96,7 @@ int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 
 	// If a weight function set, this is not a file
 	m_FieldSourceIsFile = false;
-	m_ModeFile.clearData();
+	m_ModeFile.ClearData();
 
 	return 0;
 }
@@ -115,12 +116,12 @@ std::string CSPropExcitation::GetModeFileName()
 
 bool CSPropExcitation::ParseModeFile()
 {
-	return m_ModeFile.parseFile(m_ModeFileName);
+	return m_ModeFile.ParseFile(m_ModeFileName);
 }
 
 void CSPropExcitation::ClearModeFile()
 {
-	m_ModeFile.clearData();
+	m_ModeFile.ClearData();
 }
 
 double CSPropExcitation::GetModeLinInterp2(double x, double y, unsigned int comp)
@@ -131,7 +132,7 @@ double CSPropExcitation::GetModeLinInterp2(double x, double y, unsigned int comp
 		return 0;
 	}
 
-	std::vector<double> fVal = m_ModeFile.linInterp2(x,y);
+	std::vector<double> fVal = m_ModeFile.LinInterp2(x,y);
 	return fVal[comp];
 }
 
@@ -143,7 +144,7 @@ double CSPropExcitation::GetModeNearestNeighbor(double x, double y, unsigned int
 		return 0;
 	}
 
-	std::vector<double> fVal = m_ModeFile.getNearestNeighbor(x,y);
+	std::vector<double> fVal = m_ModeFile.NearestNeighbor(x,y);
 	return fVal[comp];
 }
 
@@ -184,8 +185,8 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 	if (m_FieldSourceIsFile)
 	{
 		// Check if mode file is parsed
-		if(!m_ModeFile.isFileParsed())
-			m_ModeFile.parseFile(m_ModeFileName);
+		if(!m_ModeFile.IsFileParsed())
+			m_ModeFile.ParseFile(m_ModeFileName);
 
 		int nPy = 0,checkSum = 0;
 
@@ -216,7 +217,7 @@ double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 		{
 			// Get weights in both directions
 			double Wny[2] = {0.0,0.0};
-			m_ModeFile.linInterp2(loc_coords[nPyp],loc_coords[nPypp],Wny);
+			m_ModeFile.LinInterp2(loc_coords[nPyp],loc_coords[nPypp],Wny);
 
 			// In case ny == nPyp, access Wny[0]. The case where ny == nPy can't happen.
 			cWeight = Wny[int(ny == nPypp)];
@@ -262,7 +263,7 @@ void CSPropExcitation::Init()
 	}
 
 	m_FieldSourceIsFile = false;
-	m_ModeFile.clearData();
+	m_ModeFile.ClearData();
 	m_ModeFileName.clear();
 }
 
