@@ -1,15 +1,7 @@
-function CSX = SetExcitationWeight(CSX, name, fileName)
-% function CSX = SetExcitationWeight(CSX, name, fileName)
+function CSX = SetExcitationWeight(CSX, name, fileName, propDir)
+% function CSX = SetExcitationWeight(CSX, name, fileName, propDir)
 %
 % Define the mode file source of the excitation
-%
-% example:
-%
-%     start=[0 0 0];
-%     stop=[width height 0];
-%     CSX = AddExcitation(CSX,'excite',0,[1 1 0]);
-%     CSX = SetExcitationWeight(CSX,'excite','modeFile_E.csv');
-%     CSX = AddBox(CSX,'excite',0 ,start,stop);
 %
 % See also AddExcitation, InitCSX, DefineRectGrid
 %
@@ -37,3 +29,4 @@ if (pos==0)
 end
 
 CSX.Properties.Excitation{pos}.ATTRIBUTE.ModeFileName = fileName;
+CSX.Properties.Excitation{pos}.ATTRIBUTE.PropDir = propDir;

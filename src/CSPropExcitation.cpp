@@ -395,10 +395,13 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	if (prop->QueryStringAttribute("ModeFileName", &m_ModeFileName) != TIXML_SUCCESS)
 	{
 		m_ModeFileName.clear();
-		m_FieldSourceIsFile = true;
+		m_FieldSourceIsFile = false;
 	}
-	// Overload if necessary
-	if (m_ModeFileName.length())
+	else
+		m_FieldSourceIsFile = true;
+
+	// Sanity check: See that file name exists and is not an empty string.
+	if (!m_ModeFileName.length())
 	{
 		m_FieldSourceIsFile = false;
 		TiXmlElement *weight = prop->FirstChildElement("Weight");
