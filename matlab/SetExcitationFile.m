@@ -36,6 +36,4 @@ if (pos==0)
     return;
 end
 
-CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.X = weight{1};
-CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Y = weight{2};
-CSX.Properties.Excitation{pos}.Weight.ATTRIBUTE.Z = weight{3};
+CSX.Properties.Excitation{pos}.ATTRIBUTE.ModeFileName = fileName;
