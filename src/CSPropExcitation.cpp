@@ -148,7 +148,6 @@ double CSPropExcitation::GetModeNearestNeighbor(double x, double y, unsigned int
 	return fVal[comp];
 }
 
-
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
