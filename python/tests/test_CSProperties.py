@@ -1,9 +1,57 @@
-import numpy as np
-
 from CSXCAD import ParameterObjects
 from CSXCAD import CSProperties, CSPrimitives
 
+import numpy as np
 import unittest
+
+def testCsvGen(fileName):
+    Xm, Ym = np.meshgrid(np.array([0, 0.1, 0.2, 0.3]), np.array([0, 0.4, 0.8, 1.2]))
+    Xc = 0.15
+    Yc = 0.6
+    Fx = np.cos(np.arctan2(Ym - Yc, Xm - Xc)) * np.sqrt((Xm - Xc) ** 2.0 + (Ym - Yc) ** 2.0) * 3
+    Fy = np.sin(np.arctan2(Ym - Yc, Xm - Xc)) * np.sqrt((Xm - Xc) ** 2.0 + (Ym - Yc) ** 2.0) * 3
+    modeMat = np.concatenate((Xm.reshape(-1, 1), Ym.reshape(-1, 1), Fx.reshape(-1, 1), Fy.reshape(-1, 1)), axis=1)
+    np.savetxt(fileName, modeMat, delimiter=',')
+    return Xm, Ym, Fx, Fy
+
+def interp2d(x_vec, y_vec, values, xi, yi, interp_method = 'linear'):
+    
+    # Find index of closest coordinate
+    j = np.abs(x_vec - xi).argmin()
+    i = np.abs(y_vec - yi).argmin()
+    
+    if interp_method == 'nearest':
+        return values[i, j]
+    elif interp_method == 'linear':
+        # Clip indices to stay within array bounds
+        j = np.clip(j, 0, len(x_vec) - 2)
+        i = np.clip(i, 0, len(y_vec) - 2)
+        
+        # 2. Get the coordinates and values of the 4 corners
+        x1, x2 = x_vec[j], x_vec[j+1]
+        y1, y2 = y_vec[i], y_vec[i+1]
+        
+        # Values at corners: Q11(bottom-left), Q21(bottom-right), etc.
+        # Note: values is indexed [row, col] -> [y, x]
+        f11 = values[i, j]
+        f21 = values[i, j+1]
+        f12 = values[i+1, j]
+        f22 = values[i+1, j+1]
+        
+        # 3. Calculate weights (normalized distances)
+        dx = (xi - x1) / (x2 - x1)
+        dy = (yi - y1) / (y2 - y1)
+        
+        # 4. Interpolate
+        # First along X
+        f_y1 = f11 * (1 - dx) + f21 * dx
+        f_y2 = f12 * (1 - dx) + f22 * dx
+        
+        # Then along Y
+        return f_y1 * (1 - dy) + f_y2 * dy
+        
+    else:
+        return 0
 
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
@@ -275,7 +323,30 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual( prop2.GetDelay(),1e-9)
 
         self.assertEqual(prop2.GetWeightFunction(), ['y','x','z'])
-
+        
+        prop3 = prop.copy()
+        modeFileName = 'test_mode.csv' 
+        Xm, Ym, Fx, Fy = testCsvGen(modeFileName)
+        prop3.SetModeFileName(modeFileName)
+        self.assertEqual(prop3.GetModeFileName(), modeFileName)
+        
+        self.assertTrue(prop3.ParseModeFile())
+        
+        dx = (Xm[0,1] - Xm[0,0])/10
+        dy = (Ym[1,0] - Ym[0,0])/10
+        
+        for test_x in np.arange(Xm[0,0], Xm[0,-1] + dx, dx):
+            for test_y in np.arange(Ym[0,0], Ym[-1,0] + dy, dy):
+                
+                self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 0) - interp2d(Xm[0, :], Ym[:, 0], Fx, test_x, test_y)) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeLinInterp2(test_x, test_y, 1) - interp2d(Xm[0, :], Ym[:, 0], Fy, test_x, test_y)) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 0) - interp2d(Xm[0, :], Ym[:, 0], Fx, test_x, test_y, 'nearest')) < 1e-4)
+                self.assertTrue(np.abs(prop3.GetModeNearestNeighbor(test_x, test_y, 1) - interp2d(Xm[0, :], Ym[:, 0], Fy, test_x, test_y, 'nearest')) < 1e-4)
+                
+        prop3.ClearModeFile()
+        
+        __import__('os').remove(modeFileName)
+                
     def test_probe(self):
         prop = CSProperties.CSPropProbeBox(self.pset, frequency=[1e9, 2.4e9])
 
@@ -305,27 +376,27 @@ class Test_CSPrimMethods(unittest.TestCase):
 
     def test_dump(self):
         prop = CSProperties.CSPropDumpBox(self.pset, dump_type=10, dump_mode=2, file_type=5, opt_resolution=[10,11.5,12], sub_sampling=[1,2,4])
-
+        
         self.assertFalse(prop.GetMaterial())
         self.assertEqual( prop.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop.GetTypeString(), 'DumpBox')
-
+        
         self.assertEqual(prop.GetDumpType(), 10)
         self.assertEqual(prop.GetDumpMode(), 2)
         self.assertEqual(prop.GetFileType(), 5)
         self.assertTrue((prop.GetOptResolution() == [10,11.5,12]).all())
         self.assertTrue((prop.GetSubSampling() == [1,2,4]).all())
-
+        
         prop2 = prop.copy()
         self.assertEqual( prop2.GetType(), CSProperties.PropertyType.DUMPBOX)
         self.assertEqual( prop2.GetTypeString(), 'DumpBox')
-
+        
         self.assertEqual(prop2.GetDumpType(), 10)
         self.assertEqual(prop2.GetDumpMode(), 2)
         self.assertEqual(prop2.GetFileType(), 5)
         self.assertTrue((prop2.GetOptResolution() == [10,11.5,12]).all())
         self.assertTrue((prop2.GetSubSampling() == [1,2,4]).all())
-
+    
     def test_lorentz(self):
         prop = CSProperties.CSPropLorentzMaterial(self.pset, order=2)
         self.assertTrue(prop.GetMaterial())

@@ -22,6 +22,8 @@ function CSX = AddProbe(CSX, name, type, varargin)
 % - NormDir:      necessary for current probing box with dimension~=2
 % - StartTime/StopTime: Define a start and/or stop time (in seconds) 
 %                     for this probe to be active.
+% - ModeFileName: (Optional) add this in case a mode file is used, instead of a
+%                 parsed function.
 %
 % examples:
 %
@@ -60,6 +62,9 @@ for n=1:2:numel(varargin)
         prop_args{end+1} = varargin{n+1};
     elseif (strcmpi(varargin{n},'StopTime')==1);
         prop_args{end+1} = 'StopTime';
+        prop_args{end+1} = varargin{n+1};
+    elseif (strcmpi(varargin{n},'ModeFileName')==1);
+        prop_args{end+1} = 'ModeFileName';
         prop_args{end+1} = varargin{n+1};
     else
         warning('CSXCAD:AddProbe',['variable argument key: "' varargin{n+1} '" unknown']);
