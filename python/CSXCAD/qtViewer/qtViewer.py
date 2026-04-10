@@ -12,6 +12,7 @@ from CSXCAD.qtViewer.qtSettings import QToolBar, QAction
 
 from CSXCAD.qtViewer.qtSettings import QTreeWidget, QTreeWidgetItem, QDockWidget
 from CSXCAD.qtViewer.qtSettings import QIcon, QColor
+from CSXCAD.qtViewer.qtSettings import QFileDialog
 
 # # load implementations for rendering and interaction factory classes
 import vtkmodules.vtkRenderingOpenGL2
@@ -419,6 +420,14 @@ class Viewer(QMainWindow):
         self.actions[f'PP'] = act
         self.toolbars['View'].addAction(act)
 
+        self.toolbars['Export'] = QToolBar("Export")
+        self.addToolBar(self.toolbars['Export'])
+        act = QAction('Img', self)
+        act.triggered.connect(lambda: self.saveImage())
+        self.actions[f'Img'] = act
+        self.toolbars['Export'].addAction(act)
+
+
     def start(self):
         self.ren_widget.Initialize()
         self.ren_widget.Start()
@@ -560,6 +569,27 @@ class Viewer(QMainWindow):
         self.grid_root.setGridOpacity(val, render=False)
         if render:
             self.render()
+
+    def saveImage(self, fn=None, scale=1):
+        if fn is None:
+            fn, sel_filter = QFileDialog.getSaveFileName(self, "Save Image", "image.png", "PNG Files (*.png);;JPEG Files (*.jpg)")
+        if fn is None or fn=='':
+            return
+        if 'PNG' in sel_filter:
+            writer = vtk.vtkPNGWriter()
+        elif 'JPEG' in sel_filter:
+            writer = vtk.vtkJPEGWriter()
+        else:
+            return
+
+        image_flt = vtk.vtkWindowToImageFilter()
+        image_flt.SetInput(self.ren_win)
+        image_flt.SetScale(scale)
+        image_flt.Update()
+
+        writer.SetFileName(fn)
+        writer.SetInputConnection(image_flt.GetOutputPort())
+        writer.Write()
 
 def showCSX(CSX):
     app = createApp(sys.argv)
