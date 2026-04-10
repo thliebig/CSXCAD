@@ -221,7 +221,7 @@ setup(
       "pyproject.toml", "CSXCAD/__fallback_version__.py"
   ),
   packages=["CSXCAD", "CSXCAD/qtViewer"],
-  package_data={'CSXCAD': ['*.pxd', 'qtViewer/icons/*.png']},
+  package_data={'CSXCAD': ['*.pxd', 'qtViewer/icons/*.png', 'qtViewer/icons/*.svg']},
   # DO NOT add any new build-time dependency in setup_requires.
   # We should use pyproject.toml exclusively. The only item
   # "cython" is meant to activate auto-Cython feature in
