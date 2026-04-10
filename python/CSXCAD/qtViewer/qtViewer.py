@@ -36,10 +36,13 @@ def array2vtkFloat(a):
 ICON_PATH = os.path.join(os.path.dirname(__file__), 'icons')
 
 def getIcon(icon):
+    fn = os.path.join(ICON_PATH, icon + '.svg')
+    if os.path.exists(fn):
+        return QIcon(fn)
     fn = os.path.join(ICON_PATH, icon + '.png')
-    if not os.path.exists(fn):
-        return None
-    return QIcon(fn)
+    if os.path.exists(fn):
+        return QIcon(fn)
+    return None
 
 class TreeRenderItem(QTreeWidgetItem):
     def __init__(self, viewer, **kw):
@@ -440,7 +443,12 @@ class Viewer(QMainWindow):
         fp = list(cam.GetFocalPoint())
         fp[d]+=1
         cam.SetPosition(fp)
-        cam.SetRoll(0)
+        if d==0:
+            cam.SetRoll(-90)
+        elif d==1:
+            cam.SetRoll(90)
+        else:
+            cam.SetRoll(0)
         if render:
             self.resetView()
 

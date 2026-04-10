@@ -1,0 +1,18 @@
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://w3.org">
+    <!-- Marker definitions -->
+    <defs>
+        <marker id="head-blue" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#0000FF" />
+        </marker>
+        <marker id="head-green" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#00D000" />
+        </marker>
+    </defs>
+    <!-- Y-Axis (Green) -->
+    <line x1="15" y1="85" x2="70" y2="85" stroke="#00D000" stroke-width="5" marker-end="url(#head-green)" />
+    <text x="75" y="70" fill="#00D000" font-family="Arial, sans-serif" font-size="32" font-weight="bold">Y</text>
+
+    <!-- Z-Axis (Blue) -->
+    <line x1="15" y1="85" x2="15" y2="30" stroke="#0000FF" stroke-width="5" marker-end="url(#head-blue)" />
+    <text x="30" y="25" fill="#0000FF" font-family="Arial, sans-serif" font-size="32" font-weight="bold">Z</text>
+</svg>
