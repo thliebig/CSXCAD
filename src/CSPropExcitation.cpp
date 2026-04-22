@@ -35,6 +35,7 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 		ActiveDir[i]=prop->ActiveDir[i];
 		Excitation[i].Copy(&prop->Excitation[i]);
 		WeightFct[i].Copy(&prop->WeightFct[i]);
+		PropagationDir[i].Copy(&prop->PropagationDir[i]);
 	}
 }
 CSPropExcitation::CSPropExcitation(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=EXCITATION;Init();}

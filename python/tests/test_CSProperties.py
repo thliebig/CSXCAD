@@ -406,5 +406,97 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop2.GetDispersiveMaterialWeight('eps_delta', order=0), 'sin(x)')
         self.assertEqual(prop2.GetDispersiveMaterialWeight('eps_relax', order=0), 'cos(x)')
 
+    def test_property_id(self):
+        from CSXCAD.CSXCAD import ContinuousStructure
+        csx = ContinuousStructure()
+        prop1 = csx.AddMetal('m1')
+        prop2 = csx.AddMaterial('m2')
+        self.assertIsInstance(prop1.GetID(), int)
+        self.assertIsInstance(prop2.GetID(), int)
+        self.assertNotEqual(prop1.GetID(), prop2.GetID())
+
+    def test_absorbing_bc(self):
+        prop = CSProperties.CSPropAbsorbingBC(self.pset)
+
+        self.assertFalse(prop.GetMaterial())
+        self.assertEqual(prop.GetType(), CSProperties.PropertyType.ABSORBING_BC)
+        self.assertEqual(prop.GetTypeString(), 'AbsorbingBC')
+
+        prop.SetNormalSignPositive(True)
+        self.assertTrue(prop.GetNormalSignPositive())
+        prop.SetNormalSignPositive(False)
+        self.assertFalse(prop.GetNormalSignPositive())
+
+        prop.SetPhaseVelocity(3e8)
+        self.assertAlmostEqual(prop.GetPhaseVelocity(), 3e8)
+
+        prop.SetAbsorbingBoundaryType(CSProperties.ABCtype.MUR_1ST)
+        self.assertEqual(prop.GetAbsorbingBoundaryType(), CSProperties.ABCtype.MUR_1ST)
+        prop.SetAbsorbingBoundaryType(CSProperties.ABCtype.MUR_1ST_SA)
+        self.assertEqual(prop.GetAbsorbingBoundaryType(), CSProperties.ABCtype.MUR_1ST_SA)
+
+        prop2 = prop.copy()
+        self.assertEqual(prop2.GetType(), CSProperties.PropertyType.ABSORBING_BC)
+        self.assertFalse(prop2.GetNormalSignPositive())
+        self.assertAlmostEqual(prop2.GetPhaseVelocity(), 3e8)
+        self.assertEqual(prop2.GetAbsorbingBoundaryType(), CSProperties.ABCtype.MUR_1ST_SA)
+
+    def test_absorbing_bc_kwargs(self):
+        prop = CSProperties.CSPropAbsorbingBC(
+            self.pset,
+            NormalSignPositive=True,
+            PhaseVelocity=2e8,
+            AbsorbingBoundaryType=CSProperties.ABCtype.MUR_1ST,
+        )
+        self.assertTrue(prop.GetNormalSignPositive())
+        self.assertAlmostEqual(prop.GetPhaseVelocity(), 2e8)
+        self.assertEqual(prop.GetAbsorbingBoundaryType(), CSProperties.ABCtype.MUR_1ST)
+
+    def test_probe_full(self):
+        prop = CSProperties.CSPropProbeBox(self.pset, p_type=2, weight=0.5, norm_dir=1)
+
+        self.assertEqual(prop.GetProbeType(), 2)
+        prop.SetProbeType(3)
+        self.assertEqual(prop.GetProbeType(), 3)
+
+        self.assertAlmostEqual(prop.GetWeighting(), 0.5)
+        prop.SetWeighting(2.0)
+        self.assertAlmostEqual(prop.GetWeighting(), 2.0)
+
+        self.assertEqual(prop.GetNormalDir(), 1)
+        prop.SetNormalDir(2)
+        self.assertEqual(prop.GetNormalDir(), 2)
+
+        prop.SetModeFunction(['sin(x)', 'cos(y)', '0'])
+        self.assertEqual(prop.GetAttributeValue('ModeFunctionX'), 'sin(x)')
+        self.assertEqual(prop.GetAttributeValue('ModeFunctionY'), 'cos(y)')
+        self.assertEqual(prop.GetAttributeValue('ModeFunctionZ'), '0')
+
+        prop2 = prop.copy()
+        self.assertEqual(prop2.GetProbeType(), 3)
+        self.assertAlmostEqual(prop2.GetWeighting(), 2.0)
+        self.assertEqual(prop2.GetNormalDir(), 2)
+
+    def test_excitation_full(self):
+        prop = CSProperties.CSPropExcitation(self.pset, exc_type=0, exc_val=[1.0, 0, 0])
+
+        prop.SetEnabled(False)
+        self.assertFalse(prop.GetEnabled())
+        prop.SetEnabled(True)
+        self.assertTrue(prop.GetEnabled())
+
+        prop.SetPropagationDir([0, 0, 1])
+        pd = prop.GetPropagationDir()
+        self.assertTrue((pd == [0, 0, 1]).all())
+
+        prop.SetFrequency(2.4e9)
+        self.assertAlmostEqual(prop.GetFrequency(), 2.4e9)
+
+        prop2 = prop.copy()
+        self.assertTrue(prop2.GetEnabled())
+        self.assertTrue((prop2.GetPropagationDir() == [0, 0, 1]).all())
+        self.assertAlmostEqual(prop2.GetFrequency(), 2.4e9)
+
+
 if __name__ == '__main__':
     unittest.main()

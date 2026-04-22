@@ -40,7 +40,7 @@ def CheckNyDir(ny):
 def GetMultiDirs(dirs):
     assert type(dirs)==str, 'GetMultiDirs: dirs must be of type str'
     dirs = ''.join(sorted(dirs))
-    if dirs == 'all' or dirs == 'xyz' or dirs == 'raz':
+    if dirs == 'all' or dirs == 'xyz' or dirs == 'arz':
         return [0, 1, 2]
     elif dirs == 'x' or dirs == 'r':
         return [0,]
@@ -48,7 +48,7 @@ def GetMultiDirs(dirs):
         return [1,]
     elif dirs == 'z':
         return [2,]
-    elif dirs == 'xy' or dirs == 'ra':
+    elif dirs == 'xy' or dirs == 'ar':
         return [0, 1]
     elif dirs == 'yz' or dirs == 'az':
         return [1, 2]

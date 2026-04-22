@@ -40,6 +40,8 @@ public:
 
 	virtual void Init();
 
+	virtual CSProperties* GetCopy(bool incl_prim=false) {return new CSPropAbsorbingBC(this, incl_prim);}
+
 	//! Get PropertyType as a xml element name \sa PropertyType and GetType
 	virtual const std::string GetTypeXMLString() const {return std::string("AbsorbingBC");}
 
