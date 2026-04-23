@@ -42,3 +42,10 @@ CMakeCache.txt
 cmake_install.cmake
 install_manifest.txt
 localConfig.cmake
+
+# AI assistant configuration files (each contributor may maintain their own)
+CLAUDE.md
+.claude*
+.cursor*
+.windsurf*
+.copilot*
