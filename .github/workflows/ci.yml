@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Resolve repo dependencies
         id: resolve-dependencies
@@ -191,7 +191,7 @@ jobs:
       # annoying).
       - if: ${{ ! matrix.os.ancient }}
         name: Checkout CSXCAD.git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: CSXCAD
           # checkout must be deep, not shallow.
@@ -200,7 +200,7 @@ jobs:
 
       - if: ${{ ! matrix.os.ancient }}
         name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: "${{ needs.Dependencies.outputs.fparser_repo }}"
           ref: "${{ needs.Dependencies.outputs.fparser_branch }}"
@@ -514,7 +514,7 @@ jobs:
       # race conditions due to force pushes (they are harmless but
       # annoying).
       - name: Checkout CSXCAD.git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: CSXCAD
           # checkout must be deep, not shallow.
@@ -522,7 +522,7 @@ jobs:
           fetch-depth: 0
 
       - name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: "${{ needs.Dependencies.outputs.fparser_repo }}"
           ref: "${{ needs.Dependencies.outputs.fparser_branch }}"
@@ -688,7 +688,7 @@ jobs:
       # race conditions due to force pushes (they are harmless but
       # annoying).
       - name: Checkout CSXCAD.git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: CSXCAD
           # checkout must be deep, not shallow.
@@ -696,14 +696,14 @@ jobs:
           fetch-depth: 0
 
       - name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: "${{ needs.Dependencies.outputs.fparser_repo }}"
           ref: "${{ needs.Dependencies.outputs.fparser_branch }}"
           path: fparser
 
       - name: Test in FreeBSD ${{ matrix.machine.version }} ${{ matrix.machine.arch }}
-        uses: cross-platform-actions/action@v0.26.0
+        uses: cross-platform-actions/action@v1
         with:
           cpu_count: 4
           architecture: ${{ matrix.machine.arch }}
@@ -834,7 +834,7 @@ jobs:
       # race conditions due to force pushes (they are harmless but
       # annoying).
       - name: Checkout CSXCAD.git
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: CSXCAD
           # checkout must be deep, not shallow.
@@ -842,7 +842,7 @@ jobs:
           fetch-depth: 0
 
       - name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: "${{ needs.Dependencies.outputs.fparser_repo }}"
           ref: "${{ needs.Dependencies.outputs.fparser_branch }}"
