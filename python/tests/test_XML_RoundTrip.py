@@ -41,7 +41,7 @@ class TestXMLRoundTrip(unittest.TestCase):
     def _prop(self, csx, name):
         props = csx.GetPropertiesByName(name)
         self.assertEqual(len(props), 1,
-                         f'Expected exactly one property named "{name}", got {len(props)}')
+                         'Expected exactly one property named "{}", got {}'.format(name, len(props)))
         return props[0]
 
     # ==================================================================
@@ -422,6 +422,61 @@ class TestXMLRoundTrip(unittest.TestCase):
 
         b2 = self._prop(self._roundtrip(), 'cs').GetPrimitive(0)
         self.assertEqual(b2.GetCoordinateSystem(), CSRectGrid.CoordinateSystem.CYLINDRICAL)
+
+
+    # ==================================================================
+    # Grid disc-lines
+    # ==================================================================
+
+    def test_grid_roundtrip(self):
+        grid = self.csx.GetGrid()
+        grid.SetDeltaUnit(1e-3)
+        grid.AddLine('x', -10.0)
+        grid.AddLine('x',   0.0)
+        grid.AddLine('x',  10.0)
+        grid.AddLine('y',  -5.0)
+        grid.AddLine('y',   5.0)
+        grid.AddLine('z',   0.0)
+        grid.AddLine('z',   2.0)
+
+        csx2 = self._roundtrip()
+        g2 = csx2.GetGrid()
+        self.assertAlmostEqual(g2.GetDeltaUnit(), 1e-3)
+        self.assertEqual(g2.GetQtyLines('x'), 3)
+        self.assertEqual(g2.GetQtyLines('y'), 2)
+        self.assertEqual(g2.GetQtyLines('z'), 2)
+        np.testing.assert_array_almost_equal(g2.GetLines('x'), [-10.0, 0.0, 10.0])
+        np.testing.assert_array_almost_equal(g2.GetLines('y'), [-5.0, 5.0])
+        np.testing.assert_array_almost_equal(g2.GetLines('z'), [0.0, 2.0])
+
+    # ==================================================================
+    # Primitive transform — RotateAxis
+    # ==================================================================
+
+    def test_prim_transform_rotate_axis(self):
+        box = self.csx.AddMetal('rot').AddBox([0, 0, 0], [1, 1, 1])
+        box.AddTransform('RotateAxis', 'z', 45.0)  # degrees
+
+        b2 = self._prop(self._roundtrip(), 'rot').GetPrimitive(0)
+        self.assertTrue(b2.HasTransform())
+        m = b2.GetTransform().GetMatrix()
+        c = math.cos(math.radians(45.0))
+        s = math.sin(math.radians(45.0))
+        self.assertAlmostEqual(m[0, 0],  c, places=5)
+        self.assertAlmostEqual(m[0, 1], -s, places=5)
+        self.assertAlmostEqual(m[1, 0],  s, places=5)
+        self.assertAlmostEqual(m[1, 1],  c, places=5)
+
+    # ==================================================================
+    # DumpBox NormalDir
+    # ==================================================================
+
+    def test_dump_normal_dir(self):
+        dump = self.csx.AddDump('dump_nd', dump_type=2)
+        dump.SetNormalDir(2)            # non-default (-1)
+
+        p2 = self._prop(self._roundtrip(), 'dump_nd')
+        self.assertEqual(p2.GetNormalDir(), 2)
 
 
 if __name__ == '__main__':
