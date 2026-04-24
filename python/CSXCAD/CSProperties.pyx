@@ -1503,6 +1503,7 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
             CSPropDispersiveMaterial._GetDispersiveMaterialWeightDir(self, prop_name, order, ny)
 
     def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
+        val = val.encode('UTF-8')
         if prop_name == 'eps_plasma':
             return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreqWeightFunction(order, val, ny)
         elif prop_name == 'eps_pole_freq':

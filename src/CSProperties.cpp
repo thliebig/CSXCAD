@@ -216,6 +216,8 @@ bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	prop->SetAttribute("ID",uiID);
 	prop->SetAttribute("Name",sName.c_str());
+	if (!bVisisble)
+		prop->SetAttribute("Visible",0);
 
 	if (!sparse)
 	{
@@ -380,6 +382,10 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 	const char* cHelp=prop->Attribute("Name");
 	if (cHelp!=NULL) sName=std::string(cHelp);
 	else sName.clear();
+
+	int iVisible;
+	if (prop->QueryIntAttribute("Visible",&iVisible)==TIXML_SUCCESS)
+		bVisisble = (iVisible != 0);
 
 	TiXmlElement* FC = root.FirstChildElement("FillColor");
 	if (FC!=NULL)
