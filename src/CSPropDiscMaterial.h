@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <hdf5.h>
 #include "CSProperties.h"
 #include "CSPropMaterial.h"
 
@@ -110,6 +109,5 @@ protected:
 
 	void EnsureFileLoaded();
 	bool ReadHDF5(std::string filename);
-	void* ReadDataSet(std::string filename, std::string d_name, hid_t type_id, int &rank, unsigned int &size, bool debug=false);
 };
 

@@ -26,6 +26,89 @@
 #include "ParameterCoord.h"
 #include "CSPropDiscMaterial.h"
 
+namespace {
+void* ReadDataSet(std::string filename, std::string d_name, hid_t type_id, int &rank, unsigned int &size, bool debug=false)
+{
+	herr_t status;
+	H5T_class_t class_id;
+	size_t type_size;
+	rank = -1;
+
+	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
+	if (file_id < 0)
+	{
+		if (debug)
+			std::cerr << __func__ << ": Failed to open file, skipping..." << std::endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	if (H5Lexists(file_id, d_name.c_str(), H5P_DEFAULT)<=0)
+	{
+		if (debug)
+			std::cerr << __func__ << ": Warning, dataset: \"" << d_name << "\" not found... skipping" << std::endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	status = H5LTget_dataset_ndims(file_id, d_name.c_str(), &rank);
+	if (status < 0)
+	{
+		if (debug)
+			std::cerr << __func__ << ": Warning, failed to read dimension for dataset: \"" << d_name << "\" skipping..." << std::endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	hsize_t* dims = new hsize_t[rank];
+	status = H5LTget_dataset_info( file_id, d_name.c_str(), dims, &class_id, &type_size);
+	if (status < 0)
+	{
+		if (debug)
+			std::cerr << __func__ << ": Warning, failed to read dataset info: \"" << d_name << "\" skipping..." << std::endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	size = 1;
+	for (int n=0;n<rank;++n)
+		size*=dims[n];
+	delete[] dims; dims = NULL;
+
+	void* data;
+	if (type_id==H5T_NATIVE_FLOAT)
+		data = (void*) new float[size];
+	else if (type_id==H5T_NATIVE_INT)
+		data = (void*) new int[size];
+	else if (type_id==H5T_NATIVE_UINT8)
+		data = (void*) new uint8[size];
+	else
+	{
+		std::cerr << __func__ << ": Error, unknown data type" << std::endl;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	status = H5LTread_dataset( file_id, d_name.c_str(), type_id, data );
+	if (status < 0)
+	{
+		if (debug)
+			std::cerr << __func__ << ": Warning, failed to read dataset: \"" << d_name << "\" skipping..." << std::endl;
+		if (type_id==H5T_NATIVE_FLOAT)
+			delete[] (float*)data;
+		else if (type_id==H5T_NATIVE_INT)
+			delete[] (int*)data;
+		else if (type_id==H5T_NATIVE_UINT8)
+			delete[] (uint8*)data;
+		H5Fclose(file_id);
+		return NULL;
+	}
+
+	H5Fclose(file_id);
+	return data;
+}
+} // namespace
+
 CSPropDiscMaterial::CSPropDiscMaterial(ParameterSet* paraSet) : CSPropMaterial(paraSet)
 {
 	Type=(CSProperties::PropertyType)(DISCRETE_MATERIAL | MATERIAL);
@@ -278,88 +361,6 @@ bool CSPropDiscMaterial::ReadFile()
 	else
 		std::cerr << "CSPropDiscMaterial::ReadFile: Unknown file type or no filename given." << std::endl;
 	return false;
-}
-
-void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, hid_t type_id, int &rank, unsigned int &size, bool debug)
-{
-	herr_t status;
-	H5T_class_t class_id;
-	size_t type_size;
-	rank = -1;
-
-	// open hdf5 file
-	hid_t file_id = H5Fopen( filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT );
-	if (file_id < 0)
-	{
-		if (debug)
-			std::cerr << __func__ << ": Failed to open file, skipping..." << std::endl;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	if (H5Lexists(file_id, d_name.c_str(), H5P_DEFAULT)<=0)
-	{
-		if (debug)
-			std::cerr << __func__ << ": Warning, dataset: \"" << d_name << "\" not found... skipping" << std::endl;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	status = H5LTget_dataset_ndims(file_id, d_name.c_str(), &rank);
-	if (status < 0)
-	{
-		if (debug)
-			std::cerr << __func__ << ": Warning, failed to read dimension for dataset: \"" << d_name << "\" skipping..." << std::endl;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	hsize_t* dims = new hsize_t[rank];
-	status = H5LTget_dataset_info( file_id, d_name.c_str(), dims, &class_id, &type_size);
-	if (status < 0)
-	{
-		if (debug)
-			std::cerr << __func__ << ": Warning, failed to read dataset info: \"" << d_name << "\" skipping..." << std::endl;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	size = 1;
-	for (int n=0;n<rank;++n)
-		size*=dims[n];
-	delete[] dims; dims = NULL;
-
-	void* data;
-	if (type_id==H5T_NATIVE_FLOAT)
-		data = (void*) new float[size];
-	else if (type_id==H5T_NATIVE_INT)
-		data = (void*) new int[size];
-	else if (type_id==H5T_NATIVE_UINT8)
-		data = (void*) new uint8[size];
-	else
-	{
-		std::cerr << __func__ << ": Error, unknown data type" << std::endl;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	status = H5LTread_dataset( file_id, d_name.c_str(), type_id, data );
-	if (status < 0)
-	{
-		if (debug)
-			std::cerr << __func__ << ": Warning, failed to read dataset: \"" << d_name << "\" skipping..." << std::endl;
-		if (type_id==H5T_NATIVE_FLOAT)
-			delete[] (float*)data;
-		else if (type_id==H5T_NATIVE_INT)
-			delete[] (int*)data;
-		else if (type_id==H5T_NATIVE_UINT8)
-			delete[] (uint8*)data;
-		H5Fclose(file_id);
-		return NULL;
-	}
-
-	H5Fclose(file_id);
-	return data;
 }
 
 bool CSPropDiscMaterial::ReadHDF5( std::string filename )
