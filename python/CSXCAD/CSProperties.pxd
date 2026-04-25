@@ -22,6 +22,7 @@ from libcpp cimport bool
 
 from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
 from CSXCAD.CSPrimitives cimport _CSPrimitives, CSPrimitives
+from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.CSXCAD cimport ContinuousStructure
 
 cdef extern from "CSXCAD/CSProperties.h":
@@ -380,6 +381,8 @@ cdef extern from "CSXCAD/CSPropDiscMaterial.h":
         void SetUseDataBaseForBackground(bool val)
         bool GetUseDataBaseForBackground()
         bool ReadFile()
+        _CSTransform* GetTransform()
+        void SetTransform(_CSTransform* transform)
         double GetEpsilonWeighted(int ny, const double* coords)
         double GetMueWeighted(int ny, const double* coords)
         double GetKappaWeighted(int ny, const double* coords)

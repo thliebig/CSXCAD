@@ -622,5 +622,69 @@ class TestDiscMaterialData(unittest.TestCase):
         self.assertAlmostEqual(mat2.GetEpsilonWeighted(0, [15, 5, 5]), self.EPS_R[1])
 
 
+class TestDiscMaterialTransform(unittest.TestCase):
+    def setUp(self):
+        self.csx = ContinuousStructure()
+        self.mat = CSPropDiscMaterial(self.csx.GetParameterSet())
+        self.csx.AddProperty(self.mat)
+
+    def test_no_transform_by_default(self):
+        self.assertIsNone(self.mat.GetTransform())
+
+    def test_set_transform_get_returns_same_wrapper(self):
+        from CSXCAD.CSTransform import CSTransform
+        t = CSTransform()
+        t.Translate([1, 2, 3])
+        self.mat.SetTransform(t)
+        self.assertIs(self.mat.GetTransform(), t)
+
+    def test_get_transform_repeated_calls_same_wrapper(self):
+        from CSXCAD.CSTransform import CSTransform
+        t = CSTransform()
+        self.mat.SetTransform(t)
+        self.assertIs(self.mat.GetTransform(), self.mat.GetTransform())
+
+    def test_set_transform_none_removes_transform(self):
+        from CSXCAD.CSTransform import CSTransform
+        self.mat.SetTransform(CSTransform())
+        self.mat.SetTransform(None)
+        self.assertIsNone(self.mat.GetTransform())
+
+    def test_set_transform_replaces_previous(self):
+        from CSXCAD.CSTransform import CSTransform
+        t1 = CSTransform()
+        t1.Translate([1, 0, 0])
+        t2 = CSTransform()
+        t2.Translate([0, 2, 0])
+        self.mat.SetTransform(t1)
+        self.mat.SetTransform(t2)
+        self.assertIs(self.mat.GetTransform(), t2)
+
+    def test_set_same_transform_twice_is_safe(self):
+        from CSXCAD.CSTransform import CSTransform
+        t = CSTransform()
+        t.Translate([1, 0, 0])
+        self.mat.SetTransform(t)
+        self.mat.SetTransform(t)          # must not delete-then-use
+        self.assertIs(self.mat.GetTransform(), t)
+
+    def test_set_transform_from_get_is_safe(self):
+        from CSXCAD.CSTransform import CSTransform
+        self.mat.SetTransform(CSTransform())
+        self.mat.SetTransform(self.mat.GetTransform())   # SetTransform(GetTransform())
+        self.assertIsNotNone(self.mat.GetTransform())
+
+    def test_copy_preserves_transform(self):
+        from CSXCAD.CSTransform import CSTransform
+        t = CSTransform()
+        t.Translate([3, 0, 0])
+        self.mat.SetTransform(t)
+        mat2 = self.mat.GetCopy()
+        tr2 = mat2.GetTransform()
+        self.assertIsNotNone(tr2)
+        self.assertIsNot(tr2, t)
+        self.assertTrue((tr2.GetMatrix() == t.GetMatrix()).all())
+
+
 if __name__ == '__main__':
     unittest.main()

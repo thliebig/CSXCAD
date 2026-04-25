@@ -59,8 +59,21 @@ public:
 	void SetFileType(int type) {m_FileType=type;}
 	int GetFileType() const {return m_FileType;}
 
+	//! Get the affine transform applied to lookup coordinates before the scale factor.
+	/*! Returns NULL if no transform has been set.
+	 *  Coordinate lookup order: InvertTransform(coord) -> divide by Scale -> look up in mesh. */
 	CSTransform* GetTransform() {return m_Transform;}
 
+	//! Set (and take ownership of) an affine transform applied to lookup coordinates.
+	/*! The transform is applied before the scale factor: coords are first
+	 *  inverse-transformed, then divided by Scale, then looked up in the mesh.
+	 *  Any previously set transform is deleted. Pass NULL to remove the transform. */
+	void SetTransform(CSTransform* transform);
+
+	//! Set the isotropic scale factor applied to lookup coordinates after the transform.
+	/*! Coordinates are divided by Scale before the mesh lookup, so Scale acts as
+	 *  a unit conversion: e.g. Scale=1e-3 if the mesh is in mm but coords are in m.
+	 *  Applied after the optional affine transform (see SetTransform). */
 	void SetScale(double val) {m_Scale=val;}
 	double GetScale() {return m_Scale;}
 

@@ -40,6 +40,7 @@ from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
 cimport CSXCAD.CSProperties
 cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
+from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
 
@@ -1647,6 +1648,21 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
     def GetUseDataBaseForBackground(self):
         """Get whether database index 0 is used as background material."""
         return (<_CSPropDiscMaterial*>self.thisptr).GetUseDataBaseForBackground()
+
+    def GetTransform(self):
+        """Return the affine transform applied to lookup coordinates, or None if not set."""
+        return CSTransform.fromPtr((<_CSPropDiscMaterial*>self.thisptr).GetTransform())
+
+    def SetTransform(self, CSTransform transform):
+        """Set the affine transform applied to lookup coordinates before the scale factor.
+
+        Ownership is transferred to the property. Use transform.copy() first if
+        you need to keep an independent copy. Pass None to remove the transform.
+        """
+        if transform is None:
+            (<_CSPropDiscMaterial*>self.thisptr).SetTransform(NULL)
+        else:
+            (<_CSPropDiscMaterial*>self.thisptr).SetTransform(transform.thisptr)
 
     def ReadFile(self):
         """Read the material data from the HDF5 file. Returns True on success."""
