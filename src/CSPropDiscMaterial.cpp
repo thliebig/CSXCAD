@@ -125,6 +125,7 @@ int CSPropDiscMaterial::GetDBPos(const double* coords)
 
 double CSPropDiscMaterial::GetEpsilonWeighted(int ny, const double* inCoords)
 {
+	EnsureFileLoaded();
 	if (m_Disc_epsR==NULL)
 		return CSPropMaterial::GetEpsilonWeighted(ny,inCoords);
 	int pos = GetDBPos(inCoords);
@@ -135,6 +136,7 @@ double CSPropDiscMaterial::GetEpsilonWeighted(int ny, const double* inCoords)
 
 double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 {
+	EnsureFileLoaded();
 	if (m_Disc_kappa==NULL)
 		return CSPropMaterial::GetKappaWeighted(ny,inCoords);
 	int pos = GetDBPos(inCoords);
@@ -145,6 +147,7 @@ double CSPropDiscMaterial::GetKappaWeighted(int ny, const double* inCoords)
 
 double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
 {
+	EnsureFileLoaded();
 	if (m_Disc_mueR==NULL)
 		return CSPropMaterial::GetMueWeighted(ny,inCoords);
 	int pos = GetDBPos(inCoords);
@@ -155,6 +158,7 @@ double CSPropDiscMaterial::GetMueWeighted(int ny, const double* inCoords)
 
 double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
 {
+	EnsureFileLoaded();
 	if (m_Disc_sigma==NULL)
 		return CSPropMaterial::GetSigmaWeighted(ny,inCoords);
 	int pos = GetDBPos(inCoords);
@@ -165,6 +169,7 @@ double CSPropDiscMaterial::GetSigmaWeighted(int ny, const double* inCoords)
 
 double CSPropDiscMaterial::GetDensityWeighted(const double* inCoords)
 {
+	EnsureFileLoaded();
 	if (m_Disc_Density==NULL)
 		return CSPropMaterial::GetDensityWeighted(inCoords);
 	int pos = GetDBPos(inCoords);
@@ -191,6 +196,7 @@ void CSPropDiscMaterial::Init()
 	m_Disc_Density=NULL;
 
 	m_Scale=1;
+	m_FileRead=false;
 	m_Transform=NULL;
 
 	CSPropMaterial::Init();
@@ -205,8 +211,8 @@ bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool spa
 	TiXmlElement filename("DiscFile");
 	filename.SetAttribute("Type",m_FileType);
 	filename.SetAttribute("File",m_Filename.c_str());
-	filename.SetAttribute("UseDBBackground",m_DB_Background);
-	filename.SetAttribute("Scale",m_Scale);
+	filename.SetAttribute("UseDBBackground",(int)m_DB_Background);
+	filename.SetDoubleAttribute("Scale",m_Scale);
 
 	if (m_Transform)
 		m_Transform->Write2XML(prop);
@@ -223,37 +229,48 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 	if (prop==NULL) return false;
 
-	m_FileType = 0;
-	prop->QueryIntAttribute("Type",&m_FileType);
-	if (prop->QueryStringAttribute("File",&m_Filename)!=TIXML_SUCCESS)
-		m_Filename.clear();
-
-	int help;
-	if (prop->QueryIntAttribute("UseDBBackground",&help)==TIXML_SUCCESS)
-		SetUseDataBaseForBackground(help!=0);
-
 	delete m_Transform;
 	m_Transform = CSTransform::New(prop, clParaSet);
 
-	if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
-		m_Scale=1;
+	TiXmlElement* dfElem = prop->FirstChildElement("DiscFile");
+	if (dfElem)
+	{
+		m_FileType = 0;
+		dfElem->QueryIntAttribute("Type",&m_FileType);
+		if (dfElem->QueryStringAttribute("File",&m_Filename)!=TIXML_SUCCESS)
+			m_Filename.clear();
 
-	return this->ReadFile();
+		int help;
+		if (dfElem->QueryIntAttribute("UseDBBackground",&help)==TIXML_SUCCESS)
+			SetUseDataBaseForBackground(help!=0);
+
+		if (dfElem->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
+			m_Scale=1;
+	}
+
+	return true;
+}
+
+void CSPropDiscMaterial::EnsureFileLoaded()
+{
+	if (!m_FileRead)
+		ReadFile();
 }
 
 bool CSPropDiscMaterial::ReadFile()
 {
+	m_FileRead = true;
 	if (m_Filename.empty())
 		return false;
 
 	if (m_FileType==0)
 		return ReadHDF5(m_Filename);
 	else
-		std::cerr << "CSPropDiscMaterial::ReadFromXML: Unknown file type or no filename given." << std::endl;
+		std::cerr << "CSPropDiscMaterial::ReadFile: Unknown file type or no filename given." << std::endl;
 	return false;
 }
 
-void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, int type_id, int &rank, unsigned int &size, bool debug)
+void *CSPropDiscMaterial::ReadDataSet(std::string filename, std::string d_name, hid_t type_id, int &rank, unsigned int &size, bool debug)
 {
 	herr_t status;
 	H5T_class_t class_id;

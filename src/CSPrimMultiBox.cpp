@@ -28,7 +28,7 @@
 CSPrimMultiBox::CSPrimMultiBox(unsigned int ID, ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(ID,paraSet,prop)
 {
 	Type=MULTIBOX;
-	PrimTypeName = std::string("Multi Box");
+	PrimTypeName = std::string("MultiBox");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : CSPrimitives(multiBox, prop)
@@ -36,13 +36,13 @@ CSPrimMultiBox::CSPrimMultiBox(CSPrimMultiBox* multiBox, CSProperties *prop) : C
 	Type=MULTIBOX;
 	for (size_t i=0;i<multiBox->vCoords.size();++i)
 		vCoords.push_back(new ParameterScalar(multiBox->vCoords.at(i)));
-	PrimTypeName = std::string("Multi Box");
+	PrimTypeName = std::string("MultiBox");
 }
 
 CSPrimMultiBox::CSPrimMultiBox(ParameterSet* paraSet, CSProperties* prop) : CSPrimitives(paraSet,prop)
 {
 	Type=MULTIBOX;
-	PrimTypeName = std::string("Multi Box");
+	PrimTypeName = std::string("MultiBox");
 }
 
 CSPrimMultiBox::~CSPrimMultiBox()

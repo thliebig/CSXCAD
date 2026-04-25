@@ -35,10 +35,12 @@ Examples
 """
 
 cimport CSXCAD.CSXCAD
+from CSXCAD.CSXCAD cimport _CSBackgroundMaterial
 
 from CSXCAD.CSProperties import CSPropMaterial, CSPropExcitation
 from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet
 from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox, CSPropAbsorbingBC
+from CSXCAD.CSProperties import CSPropDiscMaterial
 from CSXCAD.CSPrimitives import CSPrimPoint, CSPrimBox, CSPrimCylinder, CSPrimCylindricalShell
 from CSXCAD.CSPrimitives import CSPrimSphere, CSPrimSphericalShell
 from CSXCAD.CSPrimitives import CSPrimPolygon, CSPrimLinPoly, CSPrimRotPoly
@@ -52,6 +54,68 @@ from CSXCAD.ParameterObjects import ParameterSet
 from CSXCAD.SmoothMeshLines import SmoothMeshLines
 
 from pathlib import Path
+
+
+cdef class CSBackgroundMaterial:
+    """Background material for the continuous structure.
+
+    Holds the EM properties (epsilon, mue, kappa, sigma) of the simulation
+    background. Obtained via ``ContinuousStructure.GetBackgroundMaterial()``.
+
+    :param epsilon: relative electric permittivity (default 1)
+    :param mue:     relative magnetic permeability (default 1)
+    :param kappa:   electric conductivity in S/m (default 0)
+    :param sigma:   magnetic conductivity in Ohm/m (default 0)
+    """
+
+    @staticmethod
+    cdef fromPtr(_CSBackgroundMaterial *ptr):
+        cdef CSBackgroundMaterial obj = CSBackgroundMaterial.__new__(CSBackgroundMaterial)
+        obj.thisptr = ptr
+        return obj
+
+    def __cinit__(self):
+        self.thisptr = NULL
+
+    def __init__(self):
+        raise TypeError('CSBackgroundMaterial cannot be instantiated directly; use ContinuousStructure.GetBackgroundMaterial()')
+
+    def GetEpsilon(self):
+        """Get relative electric permittivity."""
+        return self.thisptr.GetEpsilon()
+
+    def SetEpsilon(self, val):
+        """Set relative electric permittivity."""
+        self.thisptr.SetEpsilon(val)
+
+    def GetMue(self):
+        """Get relative magnetic permeability."""
+        return self.thisptr.GetMue()
+
+    def SetMue(self, val):
+        """Set relative magnetic permeability."""
+        self.thisptr.SetMue(val)
+
+    def GetKappa(self):
+        """Get electric conductivity in S/m."""
+        return self.thisptr.GetKappa()
+
+    def SetKappa(self, val):
+        """Set electric conductivity in S/m."""
+        self.thisptr.SetKappa(val)
+
+    def GetSigma(self):
+        """Get (artificial) magnetic conductivity in Ohm/m."""
+        return self.thisptr.GetSigma()
+
+    def SetSigma(self, val):
+        """Set (artificial) magnetic conductivity in Ohm/m."""
+        self.thisptr.SetSigma(val)
+
+    def Reset(self):
+        """Reset all material parameters to their defaults (vacuum)."""
+        self.thisptr.Reset()
+
 
 cdef class ContinuousStructure:
     """ ContinuousStructure
@@ -131,6 +195,13 @@ cdef class ContinuousStructure:
         """
         return CSRectGrid.fromPtr(self.thisptr.GetGrid())
 
+    def GetBackgroundMaterial(self):
+        """Get the background material of this structure.
+
+        :returns: CSBackgroundMaterial -- background EM material (epsilon, mue, kappa, sigma)
+        """
+        return CSBackgroundMaterial.fromPtr(self.thisptr.GetBackgroundMaterial())
+
     @property
     def grid(self):
         """Get the CSRectGrid, same as calling the `GetGrid` method."""
@@ -186,6 +257,19 @@ cdef class ContinuousStructure:
         if not isinstance(name, str):
             raise TypeError(f'`name` must be a str, received object of type {type(name)}. ')
         return self.__CreateProperty('Material', name, **kw)
+
+    def AddDiscMaterial(self, name, **kw):
+        """Add a discrete material property with name `name`.
+
+        :param filename: str -- path to the HDF5 file containing the material data
+        :param scale:    float -- spatial scale factor applied to the mesh coordinates (default 1)
+        :param use_db_background: bool -- use database index 0 as background (default True)
+
+        See Also
+        --------
+        CSXCAD.CSProperties.CSPropDiscMaterial
+        """
+        return self.__CreateProperty('DiscMaterial', name, **kw)
 
     def AddAbsorbingBC(self, name, **kw):
         """ AddAbsorbingBC(name, **kw)

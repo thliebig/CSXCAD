@@ -6,9 +6,10 @@ import unittest
 
 import numpy as np
 
+
 from CSXCAD.CSXCAD import ContinuousStructure
 from CSXCAD import CSRectGrid
-from CSXCAD.CSProperties import CSPropLorentzMaterial, CSPropDebyeMaterial
+from CSXCAD.CSProperties import CSPropLorentzMaterial, CSPropDebyeMaterial, CSPropDiscMaterial
 
 
 def _decode(s):
@@ -477,6 +478,132 @@ class TestXMLRoundTrip(unittest.TestCase):
 
         p2 = self._prop(self._roundtrip(), 'dump_nd')
         self.assertEqual(p2.GetNormalDir(), 2)
+
+
+class TestBackgroundMaterial(unittest.TestCase):
+    def setUp(self):
+        self.csx = ContinuousStructure()
+        self.fn  = os.path.join(tempfile.gettempdir(), 'test_bgmat.xml')
+
+    def tearDown(self):
+        if os.path.exists(self.fn):
+            os.remove(self.fn)
+
+    def test_defaults(self):
+        bg = self.csx.GetBackgroundMaterial()
+        self.assertAlmostEqual(bg.GetEpsilon(), 1.0)
+        self.assertAlmostEqual(bg.GetMue(),     1.0)
+        self.assertAlmostEqual(bg.GetKappa(),   0.0)
+        self.assertAlmostEqual(bg.GetSigma(),   0.0)
+
+    def test_roundtrip(self):
+        bg = self.csx.GetBackgroundMaterial()
+        bg.SetEpsilon(2.5)
+        bg.SetMue(1.5)
+        bg.SetKappa(0.01)
+        bg.SetSigma(0.02)
+
+        self.assertTrue(self.csx.Write2XML(self.fn))
+        csx2 = ContinuousStructure()
+        self.assertEqual(csx2.ReadFromXML(self.fn), '')
+        bg2 = csx2.GetBackgroundMaterial()
+        self.assertAlmostEqual(bg2.GetEpsilon(), 2.5)
+        self.assertAlmostEqual(bg2.GetMue(),     1.5)
+        self.assertAlmostEqual(bg2.GetKappa(),   0.01)
+        self.assertAlmostEqual(bg2.GetSigma(),   0.02)
+
+    def test_reset(self):
+        bg = self.csx.GetBackgroundMaterial()
+        bg.SetEpsilon(3.0)
+        bg.Reset()
+        self.assertAlmostEqual(bg.GetEpsilon(), 1.0)
+
+    def test_direct_instantiation_raises(self):
+        from CSXCAD.CSXCAD import CSBackgroundMaterial
+        self.assertRaises(TypeError, CSBackgroundMaterial)
+
+
+class TestDiscMaterial(unittest.TestCase):
+    def setUp(self):
+        self.csx = ContinuousStructure()
+        self.fn  = os.path.join(tempfile.gettempdir(), 'test_disc.xml')
+
+    def tearDown(self):
+        if os.path.exists(self.fn):
+            os.remove(self.fn)
+
+    def test_roundtrip_attributes(self):
+        disc = self.csx.AddDiscMaterial('disc',
+                                        filename='materials.h5',
+                                        scale=1e-3,
+                                        use_db_background=False)
+        self.assertEqual(disc.GetTypeString(), 'DiscMaterial')
+        self.assertEqual(disc.GetFilename(),   'materials.h5')
+        self.assertAlmostEqual(disc.GetScale(), 1e-3)
+        self.assertFalse(disc.GetUseDataBaseForBackground())
+
+        self.assertTrue(self.csx.Write2XML(self.fn))
+        csx2 = ContinuousStructure()
+        # ReadFromXML will warn that materials.h5 is missing — that is expected
+        csx2.ReadFromXML(self.fn)
+        props = csx2.GetPropertiesByName('disc')
+        self.assertEqual(len(props), 1)
+        d2 = props[0]
+        self.assertEqual(d2.GetTypeString(), 'DiscMaterial')
+        self.assertEqual(d2.GetFilename(),   'materials.h5')
+        self.assertAlmostEqual(d2.GetScale(), 1e-3)
+        self.assertFalse(d2.GetUseDataBaseForBackground())
+
+
+class TestMultiBox(unittest.TestCase):
+    def setUp(self):
+        self.csx = ContinuousStructure()
+        self.fn  = os.path.join(tempfile.gettempdir(), 'test_multibox.xml')
+
+    def tearDown(self):
+        if os.path.exists(self.fn):
+            os.remove(self.fn)
+
+    def _roundtrip(self):
+        self.assertTrue(self.csx.Write2XML(self.fn))
+        csx2 = ContinuousStructure()
+        self.assertEqual(csx2.ReadFromXML(self.fn), '')
+        return csx2
+
+    def test_add_and_get(self):
+        m  = self.csx.AddMetal('mb')
+        mb = m.AddMultiBox(boxes=[([0, 0, 0], [1, 1, 1]),
+                                  ([2, 2, 2], [3, 3, 3])])
+        self.assertEqual(mb.GetTypeName(),  'MultiBox')
+        self.assertEqual(mb.GetQtyBoxes(), 2)
+        s0, e0 = mb.GetBox(0)
+        np.testing.assert_array_almost_equal(s0, [0, 0, 0])
+        np.testing.assert_array_almost_equal(e0, [1, 1, 1])
+        s1, e1 = mb.GetBox(1)
+        np.testing.assert_array_almost_equal(s1, [2, 2, 2])
+        np.testing.assert_array_almost_equal(e1, [3, 3, 3])
+
+    def test_roundtrip(self):
+        m  = self.csx.AddMetal('mb')
+        m.AddMultiBox(boxes=[([0, 0, 0], [1, 1, 1]),
+                             ([2, 2, 2], [3, 3, 3])], priority=2)
+        csx2 = self._roundtrip()
+        mb2  = csx2.GetPropertiesByName('mb')[0].GetPrimitive(0)
+        self.assertEqual(mb2.GetTypeName(),  'MultiBox')
+        self.assertEqual(mb2.GetQtyBoxes(), 2)
+        self.assertEqual(mb2.GetPriority(), 2)
+        s0, e0 = mb2.GetBox(0)
+        np.testing.assert_array_almost_equal(s0, [0, 0, 0])
+        np.testing.assert_array_almost_equal(e0, [1, 1, 1])
+
+    def test_delete_box(self):
+        m  = self.csx.AddMetal('mb2')
+        mb = m.AddMultiBox(boxes=[([0, 0, 0], [1, 1, 1]),
+                                  ([2, 2, 2], [3, 3, 3]),
+                                  ([4, 4, 4], [5, 5, 5])])
+        self.assertEqual(mb.GetQtyBoxes(), 3)
+        mb.DeleteBox(1)
+        self.assertEqual(mb.GetQtyBoxes(), 2)
 
 
 if __name__ == '__main__':

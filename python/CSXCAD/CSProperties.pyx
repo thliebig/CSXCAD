@@ -89,6 +89,8 @@ cdef class CSProperties:
             prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
         elif p_type == ABSORBING_BC:
             prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
+        elif p_type == DISCRETE_MATERIAL + MATERIAL:
+            prop = CSPropDiscMaterial(pset, no_init=no_init, **kw)
 
         return prop
 
@@ -125,7 +127,11 @@ cdef class CSProperties:
             prop = CSPropDebyeMaterial(pset, no_init=no_init, **kw)
         elif type_str=='AbsorbingBC':
             prop = CSPropAbsorbingBC(pset, no_init=no_init, **kw)
-        
+        elif type_str=='Discrete-Material':
+            prop = CSPropDiscMaterial(pset, no_init=no_init, **kw)
+        elif type_str=='DiscMaterial':
+            prop = CSPropDiscMaterial(pset, no_init=no_init, **kw)
+
         return prop
 
     @staticmethod
@@ -137,6 +143,9 @@ cdef class CSProperties:
         if prop is not None:
             return prop
         prop = CSProperties.fromType(ptr.GetType(), pset=None, no_init=True)
+        if prop is None:
+            prop = CSProperties.__new__(CSProperties)
+            prop.thisptr = NULL
         prop._SetPtr(ptr)
         return prop
 
@@ -498,6 +507,19 @@ cdef class CSProperties:
         CSXCAD.CSPrimitives.CSPrimPolyhedronReader : See here for details on primitive arguments
         """
         return self.__CreatePrimitive(c_CSPrimitives.POLYHEDRONREADER, filename=filename, **kw)
+
+    def AddMultiBox(self, boxes=None, **kw):
+        """Add a multi-box primitive to this property.
+
+        :param boxes: list of (start, stop) pairs, each a length-3 array
+
+        See Also
+        --------
+        CSXCAD.CSPrimitives.CSPrimMultiBox
+        """
+        if boxes is not None:
+            kw['boxes'] = boxes
+        return self.__CreatePrimitive(c_CSPrimitives.MULTIBOX, **kw)
 
     def __CreatePrimitive(self, prim_type, **kw):
         pset = self.GetParameterSet()
@@ -1562,4 +1584,101 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
             (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
         else:
             CSPropDispersiveMaterial._SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val)
+
+###############################################################################
+cdef class CSPropDiscMaterial(CSPropMaterial):
+    """Discrete material property loaded from an HDF5 file.
+
+    The file encodes a voxel grid of material indices that map to epsilon,
+    mue, kappa, sigma, and density values.
+
+    :param filename:          str  -- path to the HDF5 material file
+    :param scale:             float -- spatial scale factor (default 1)
+    :param use_db_background: bool  -- index 0 maps to background (default True)
+    """
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPropDiscMaterial, self).__init__(pset, no_init=True)
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropDiscMaterial(pset.thisptr)
+        if 'filename' in kw:
+            self.SetFilename(kw['filename'])
+            del kw['filename']
+        if 'filetype' in kw:
+            self.SetFileType(kw['filetype'])
+            del kw['filetype']
+        if 'scale' in kw:
+            self.SetScale(kw['scale'])
+            del kw['scale']
+        if 'use_db_background' in kw:
+            self.SetUseDataBaseForBackground(kw['use_db_background'])
+            del kw['use_db_background']
+        super(CSPropDiscMaterial, self).__init__(pset, *args, **kw)
+
+    def SetFilename(self, fn):
+        """Set the HDF5 material file path."""
+        (<_CSPropDiscMaterial*>self.thisptr).SetFilename(fn.encode('UTF-8'))
+
+    def GetFilename(self):
+        """Get the HDF5 material file path."""
+        return (<_CSPropDiscMaterial*>self.thisptr).GetFilename().decode('UTF-8')
+
+    def SetFileType(self, ftype):
+        """Set the file type (0 = HDF5)."""
+        (<_CSPropDiscMaterial*>self.thisptr).SetFileType(ftype)
+
+    def GetFileType(self):
+        """Get the file type (0 = HDF5)."""
+        return (<_CSPropDiscMaterial*>self.thisptr).GetFileType()
+
+    def SetScale(self, val):
+        """Set the spatial scale factor applied to mesh coordinates."""
+        (<_CSPropDiscMaterial*>self.thisptr).SetScale(val)
+
+    def GetScale(self):
+        """Get the spatial scale factor."""
+        return (<_CSPropDiscMaterial*>self.thisptr).GetScale()
+
+    def SetUseDataBaseForBackground(self, val):
+        """Set whether database index 0 is used as background material."""
+        (<_CSPropDiscMaterial*>self.thisptr).SetUseDataBaseForBackground(val)
+
+    def GetUseDataBaseForBackground(self):
+        """Get whether database index 0 is used as background material."""
+        return (<_CSPropDiscMaterial*>self.thisptr).GetUseDataBaseForBackground()
+
+    def ReadFile(self):
+        """Read the material data from the HDF5 file. Returns True on success."""
+        return (<_CSPropDiscMaterial*>self.thisptr).ReadFile()
+
+    def GetEpsilonWeighted(self, int ny, coords):
+        """Return epsilon at the given coordinates for direction ny (0/1/2)."""
+        cdef double c[3]
+        c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
+        return (<_CSPropDiscMaterial*>self.thisptr).GetEpsilonWeighted(ny, c)
+
+    def GetMueWeighted(self, int ny, coords):
+        """Return mue at the given coordinates for direction ny (0/1/2)."""
+        cdef double c[3]
+        c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
+        return (<_CSPropDiscMaterial*>self.thisptr).GetMueWeighted(ny, c)
+
+    def GetKappaWeighted(self, int ny, coords):
+        """Return kappa at the given coordinates for direction ny (0/1/2)."""
+        cdef double c[3]
+        c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
+        return (<_CSPropDiscMaterial*>self.thisptr).GetKappaWeighted(ny, c)
+
+    def GetSigmaWeighted(self, int ny, coords):
+        """Return sigma at the given coordinates for direction ny (0/1/2)."""
+        cdef double c[3]
+        c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
+        return (<_CSPropDiscMaterial*>self.thisptr).GetSigmaWeighted(ny, c)
+
+    def GetDensityWeighted(self, coords):
+        """Return density at the given coordinates."""
+        cdef double c[3]
+        c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
+        return (<_CSPropDiscMaterial*>self.thisptr).GetDensityWeighted(c)
 

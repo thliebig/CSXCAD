@@ -1,9 +1,19 @@
+import os
+import tempfile
+import unittest
+
 import numpy as np
 
 from CSXCAD import ParameterObjects
 from CSXCAD import CSProperties, CSPrimitives
+from CSXCAD.CSProperties import CSPropDiscMaterial
+from CSXCAD.CSXCAD import ContinuousStructure
 
-import unittest
+try:
+    import h5py
+    HAS_H5PY = True
+except ImportError:
+    HAS_H5PY = False
 
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
@@ -496,6 +506,120 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue(prop2.GetEnabled())
         self.assertTrue((prop2.GetPropagationDir() == [0, 0, 1]).all())
         self.assertAlmostEqual(prop2.GetFrequency(), 2.4e9)
+
+
+@unittest.skipUnless(HAS_H5PY, 'h5py not available')
+class TestDiscMaterialData(unittest.TestCase):
+    """Test CSPropDiscMaterial coordinate-based material queries.
+
+    File layout (3x3x3 mesh points -> 2x2x2 cells, 3 materials):
+
+      Material 0: epsR=1.0  mueR=1.0  kappa=0.00  sigma=0.000  density=   0.0
+      Material 1: epsR=4.0  mueR=1.5  kappa=0.10  sigma=0.010  density=1000.0
+      Material 2: epsR=9.0  mueR=2.0  kappa=0.50  sigma=0.020  density=2000.0
+
+    Cell assignment indices[iz, iy, ix]:
+      (0,0,0)=0  (0,0,1)=1  (0,1,0)=2  (0,1,1)=1
+      (1,0,0)=2  (1,0,1)=0  (1,1,0)=1  (1,1,1)=2
+    """
+
+    EPS_R   = [1.0, 4.0, 9.0]
+    MUE_R   = [1.0, 1.5, 2.0]
+    KAPPA   = [0.0, 0.1, 0.5]
+    SIGMA   = [0.0, 0.01, 0.02]
+    DENSITY = [0.0, 1000.0, 2000.0]
+
+    # cell centres: mesh is [0,10,20] in each axis, centres at 5 and 15
+    CELLS = {
+        (5,  5,  5 ): 0,
+        (15, 5,  5 ): 1,
+        (5,  15, 5 ): 2,
+        (15, 15, 5 ): 1,
+        (5,  5,  15): 2,
+        (15, 5,  15): 0,
+        (5,  15, 15): 1,
+        (15, 15, 15): 2,
+    }
+
+    def setUp(self):
+        self.csx = ContinuousStructure()
+        self.fn  = os.path.join(tempfile.gettempdir(), 'test_discmat_data.h5')
+        self._write_hdf5()
+        self.mat = CSPropDiscMaterial(self.csx.GetParameterSet(),
+                                      filename=self.fn, filetype=0)
+        self.csx.AddProperty(self.mat)
+
+    def tearDown(self):
+        if os.path.exists(self.fn):
+            os.remove(self.fn)
+
+    def _write_hdf5(self):
+        with h5py.File(self.fn, 'w') as f:
+            f.attrs.create('Version', data=np.float64(2.0))
+
+            mesh = np.array([0.0, 10.0, 20.0], dtype=np.float32)
+            f.create_dataset('/mesh/x', data=mesh)
+            f.create_dataset('/mesh/y', data=mesh)
+            f.create_dataset('/mesh/z', data=mesh)
+
+            # shape (nz-1, ny-1, nx-1); indices[iz, iy, ix]
+            indices = np.array([[[0, 1], [2, 1]],
+                                 [[2, 0], [1, 2]]], dtype=np.uint8)
+            ds = f.create_dataset('/DiscData', data=indices)
+            ds.attrs.create('DB_Size',  data=np.int32(3))
+            ds.attrs.create('epsR',     data=np.array(self.EPS_R,   dtype=np.float32))
+            ds.attrs.create('mueR',     data=np.array(self.MUE_R,   dtype=np.float32))
+            ds.attrs.create('kappa',    data=np.array(self.KAPPA,   dtype=np.float32))
+            ds.attrs.create('sigma',    data=np.array(self.SIGMA,   dtype=np.float32))
+            ds.attrs.create('density',  data=np.array(self.DENSITY, dtype=np.float32))
+
+    def test_read_file_succeeds(self):
+        self.assertTrue(self.mat.ReadFile())
+
+    def test_epsilon_at_all_cells(self):
+        for (x, y, z), mat_idx in self.CELLS.items():
+            with self.subTest(coords=(x, y, z)):
+                self.assertAlmostEqual(self.mat.GetEpsilonWeighted(0, [x, y, z]),
+                                       self.EPS_R[mat_idx], places=5)
+
+    def test_mue_at_all_cells(self):
+        for (x, y, z), mat_idx in self.CELLS.items():
+            with self.subTest(coords=(x, y, z)):
+                self.assertAlmostEqual(self.mat.GetMueWeighted(0, [x, y, z]),
+                                       self.MUE_R[mat_idx], places=5)
+
+    def test_kappa_at_all_cells(self):
+        for (x, y, z), mat_idx in self.CELLS.items():
+            with self.subTest(coords=(x, y, z)):
+                self.assertAlmostEqual(self.mat.GetKappaWeighted(0, [x, y, z]),
+                                       self.KAPPA[mat_idx], places=5)
+
+    def test_sigma_at_all_cells(self):
+        for (x, y, z), mat_idx in self.CELLS.items():
+            with self.subTest(coords=(x, y, z)):
+                self.assertAlmostEqual(self.mat.GetSigmaWeighted(0, [x, y, z]),
+                                       self.SIGMA[mat_idx], places=5)
+
+    def test_density_at_all_cells(self):
+        for (x, y, z), mat_idx in self.CELLS.items():
+            with self.subTest(coords=(x, y, z)):
+                self.assertAlmostEqual(self.mat.GetDensityWeighted([x, y, z]),
+                                       self.DENSITY[mat_idx], places=3)
+
+    def test_outside_mesh_falls_back_to_material_defaults(self):
+        self.assertAlmostEqual(self.mat.GetEpsilonWeighted(0, [100, 5, 5]), 1.0)
+        self.assertAlmostEqual(self.mat.GetMueWeighted(0,     [5, 100, 5]), 1.0)
+        self.assertAlmostEqual(self.mat.GetKappaWeighted(0,   [5, 5, 100]), 0.0)
+
+    def test_index0_as_background_when_db_background_false(self):
+        mat2 = CSPropDiscMaterial(self.csx.GetParameterSet(),
+                                  filename=self.fn, filetype=0,
+                                  use_db_background=False)
+        self.csx.AddProperty(mat2)
+        # cell (0,0,0) has index 0 -> falls back to CSPropMaterial defaults
+        self.assertAlmostEqual(mat2.GetEpsilonWeighted(0, [5, 5, 5]), 1.0)
+        # cell (1,0,0) has index 1 -> from database
+        self.assertAlmostEqual(mat2.GetEpsilonWeighted(0, [15, 5, 5]), self.EPS_R[1])
 
 
 if __name__ == '__main__':

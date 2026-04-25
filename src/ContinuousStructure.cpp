@@ -543,7 +543,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		const char* cProp=PropNode->Value();
 		if (strcmp(cProp,"Unknown")==0) newProp = new CSPropUnknown(clParaSet);
 		else if (strcmp(cProp,"Material")==0) newProp = new CSPropMaterial(clParaSet);
-		else if (strcmp(cProp,"DiscMaterial")==0) newProp = new CSPropDiscMaterial(clParaSet);
+		else if (strcmp(cProp,"DiscMaterial")==0 || strcmp(cProp,"Discrete-Material")==0) newProp = new CSPropDiscMaterial(clParaSet);
 		else if (strcmp(cProp,"LorentzMaterial")==0) newProp = new CSPropLorentzMaterial(clParaSet);
 		else if (strcmp(cProp,"DebyeMaterial")==0) newProp = new CSPropDebyeMaterial(clParaSet);
 		else if (strcmp(cProp,"LumpedElement")==0) newProp = new CSPropLumpedElement(clParaSet);

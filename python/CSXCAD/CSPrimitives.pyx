@@ -72,7 +72,7 @@ cdef class CSPrimitives:
         elif prim_type == BOX:
             prim = CSPrimBox(pset, prop, no_init=no_init, **kw)
         elif prim_type == MULTIBOX:
-            raise Exception('Primitive type "MULTIBOX" not yet implemented!')
+            prim = CSPrimMultiBox(pset, prop, no_init=no_init, **kw)
         elif prim_type == SPHERE:
             prim = CSPrimSphere(pset, prop, no_init=no_init, **kw)
         elif prim_type == SPHERICALSHELL:
@@ -1295,5 +1295,76 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
         ptr = <_CSPrimPolyhedronReader*>self.thisptr
         success = ptr.ReadFile()
         if success != True:
-            raise RuntimeError(f'Cannot read file {self.GetFilename().decode()}. Check file name, file location, or its content.')
+            raise RuntimeError('Cannot read file {}. Check file name, file location, or its content.'.format(self.GetFilename().decode()))
         return success
+
+###############################################################################
+cdef class CSPrimMultiBox(CSPrimitives):
+    """Multi-Box (Multi-Cube) Primitive.
+
+    A collection of axis-aligned boxes defined by (start, stop) pairs.
+    Mostly used for already-discretized objects.
+
+    Use :meth:`AddBox` to add individual boxes, or pass them via the
+    ``boxes`` keyword argument.
+
+    :param boxes: list of (start, stop) pairs, each a length-3 array
+    """
+    def __init__(self, ParameterSet pset, CSProperties prop, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPrimMultiBox, self).__init__(pset, prop, no_init=True)
+            return
+        if not self.thisptr:
+            self.thisptr = new _CSPrimMultiBox(pset.thisptr, prop.thisptr)
+        if 'boxes' in kw:
+            for start, stop in kw['boxes']:
+                self.AddBox(start, stop)
+            del kw['boxes']
+        super(CSPrimMultiBox, self).__init__(pset, prop, *args, **kw)
+
+    def AddBox(self, start, stop):
+        """Add a box defined by start and stop coordinates.
+
+        :param start: (3,) array -- lower corner
+        :param stop:  (3,) array -- upper corner
+        :returns: self (for chaining)
+        """
+        assert len(start) == 3 and len(stop) == 3, \
+            'CSPrimMultiBox.AddBox: start and stop must have length 3'
+        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self.thisptr
+        cdef int idx = ptr.GetQtyBoxes()
+        ptr.AddBox(-1)
+        for n in range(3):
+            ptr.SetCoord(idx * 6 + 2 * n,     start[n])
+            ptr.SetCoord(idx * 6 + 2 * n + 1, stop[n])
+        return self
+
+    def GetBox(self, idx):
+        """Get the start and stop coordinates of box *idx*.
+
+        :param idx: int -- box index (0-based)
+        :returns: (start, stop) tuple of (3,) ndarrays
+        """
+        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self.thisptr
+        assert idx < ptr.GetQtyBoxes(), 'CSPrimMultiBox.GetBox: index out of range'
+        start = np.zeros(3)
+        stop  = np.zeros(3)
+        for n in range(3):
+            start[n] = ptr.GetCoord(idx * 6 + 2 * n)
+            stop[n]  = ptr.GetCoord(idx * 6 + 2 * n + 1)
+        return start, stop
+
+    def GetQtyBoxes(self):
+        """Return the number of boxes."""
+        return (<_CSPrimMultiBox*>self.thisptr).GetQtyBoxes()
+
+    def DeleteBox(self, idx):
+        """Delete box at index *idx*.
+
+        :param idx: int -- box index (0-based)
+        """
+        (<_CSPrimMultiBox*>self.thisptr).DeleteBox(idx)
+
+    def ClearOverlap(self):
+        """Remove any overlapping boxes."""
+        (<_CSPrimMultiBox*>self.thisptr).ClearOverlap()

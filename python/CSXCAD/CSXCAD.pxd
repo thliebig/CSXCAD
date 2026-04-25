@@ -28,6 +28,18 @@ from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
 from CSXCAD.CSProperties cimport _CSProperties, CSProperties, PropertyType
 from CSXCAD.CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
 
+cdef extern from "CSXCAD/CSBackgroundMaterial.h":
+    cdef cppclass _CSBackgroundMaterial "CSBackgroundMaterial":
+        double GetEpsilon()
+        void SetEpsilon(double val)
+        double GetMue()
+        void SetMue(double val)
+        double GetKappa()
+        void SetKappa(double val)
+        double GetSigma()
+        void SetSigma(double val)
+        void Reset()
+
 cdef extern from "CSXCAD/ContinuousStructure.h":
     cdef cppclass _ContinuousStructure "ContinuousStructure":
             _ContinuousStructure() except +
@@ -36,6 +48,7 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             _ParameterSet* GetParameterSet()
 
             _CSRectGrid* GetGrid()
+            _CSBackgroundMaterial* GetBackgroundMaterial()
 
             void SetCoordInputType(CoordinateSystem cs_type)
             CoordinateSystem GetCoordInputType()
@@ -56,6 +69,11 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
             void clear()
             string Update()
+
+cdef class CSBackgroundMaterial:
+    cdef _CSBackgroundMaterial *thisptr
+    @staticmethod
+    cdef fromPtr(_CSBackgroundMaterial *ptr)
 
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping

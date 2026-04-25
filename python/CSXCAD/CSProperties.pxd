@@ -366,3 +366,25 @@ cdef extern from "CSXCAD/CSPropDebyeMaterial.h":
 
 cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
     pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropDiscMaterial.h":
+    cdef cppclass _CSPropDiscMaterial "CSPropDiscMaterial" (_CSPropMaterial):
+        _CSPropDiscMaterial(_ParameterSet*) except +
+        void SetFilename(string fn)
+        string GetFilename()
+        void SetFileType(int type)
+        int GetFileType()
+        void SetScale(double val)
+        double GetScale()
+        void SetUseDataBaseForBackground(bool val)
+        bool GetUseDataBaseForBackground()
+        bool ReadFile()
+        double GetEpsilonWeighted(int ny, const double* coords)
+        double GetMueWeighted(int ny, const double* coords)
+        double GetKappaWeighted(int ny, const double* coords)
+        double GetSigmaWeighted(int ny, const double* coords)
+        double GetDensityWeighted(const double* coords)
+
+cdef class CSPropDiscMaterial(CSPropMaterial):
+    pass

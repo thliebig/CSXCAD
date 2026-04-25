@@ -226,6 +226,21 @@ cdef class CSPrimPolyhedron(CSPrimitives):
     pass
 
 ###############################################################################
+cdef extern from "CSXCAD/CSPrimMultiBox.h":
+    cdef cppclass _CSPrimMultiBox "CSPrimMultiBox" (_CSPrimitives):
+        _CSPrimMultiBox(_ParameterSet*, _CSProperties*) except +
+        void SetCoord(int index, double val)
+        double GetCoord(int index)
+        void AddCoord(double val)
+        void AddBox(int initBox)
+        void DeleteBox(size_t box)
+        unsigned int GetQtyBoxes()
+        void ClearOverlap()
+
+cdef class CSPrimMultiBox(CSPrimitives):
+    pass
+
+###############################################################################
 cdef extern from "CSXCAD/CSPrimPolyhedronReader.h":
     ctypedef enum FileType "CSPrimPolyhedronReader::FileType":
         UNKNOWN "CSPrimPolyhedronReader::UNKNOWN"
