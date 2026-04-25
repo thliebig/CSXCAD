@@ -100,6 +100,17 @@ class Test_CSTransform(unittest.TestCase):
         # post-multiply: translation applied before rotation → translate [1,0,0] → [2,0,0] then rotate → [0,2,0]
         self.assertTrue(compare_coords(self.tr.Transform([1, 0, 0]), [0, 2, 0]))
 
+    def test_copy_is_independent(self):
+        self.tr.Translate([1, 2, 3])
+        t2 = self.tr.copy()
+        # same matrix values
+        self.assertTrue((t2.GetMatrix() == self.tr.GetMatrix()).all())
+        # distinct Python and C++ objects
+        self.assertIsNot(t2, self.tr)
+        # modifying the copy does not affect the original
+        t2.Translate([10, 0, 0])
+        self.assertFalse((t2.GetMatrix() == self.tr.GetMatrix()).all())
+
 
 if __name__ == '__main__':
     unittest.main()

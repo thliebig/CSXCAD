@@ -64,6 +64,13 @@ cdef class CSTransform:
         self.thisptr = ptr
         CSTransform._instances[<uintptr_t>self.thisptr] = self
 
+    def copy(self):
+        """Return an independent copy of this transform."""
+        cdef CSTransform obj = CSTransform.__new__(CSTransform)
+        obj.thisptr = new _CSTransform(self.thisptr)
+        obj._SetPtr(obj.thisptr)
+        return obj
+
     def Reset(self):
         """
         Reset all transformations.

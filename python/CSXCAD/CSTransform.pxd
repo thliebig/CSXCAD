@@ -24,6 +24,7 @@ cdef extern from "CSXCAD/CSTransform.h":
         cdef cppclass _CSTransform "CSTransform":
             _CSTransform() except +
             _CSTransform(_ParameterSet*) except +
+            _CSTransform(_CSTransform*) except +
 
             void Reset()
 
