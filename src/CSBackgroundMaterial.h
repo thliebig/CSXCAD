@@ -22,7 +22,7 @@
 
 class TiXmlNode;
 
-class CSBackgroundMaterial
+class CSXCAD_EXPORT CSBackgroundMaterial
 {
 public:
 	CSBackgroundMaterial();
