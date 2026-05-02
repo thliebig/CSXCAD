@@ -92,7 +92,7 @@ python3 -m unittest test_CSPrimitives.TestCSPrimitives.test_box
 
 ## Matlab / Octave Interface
 
-The `matlab/` directory contains a pure M-file interface (no compilation required). It builds the CSX data structure as a Matlab/Octave struct and writes it to XML for consumption by openEMS.
+The `matlab/` directory contains a pure M-file interface (no compilation required). It builds the CSX data structure as a Matlab/Octave struct and writes it to XML for consumption by CSXCAD.
 
 Add the `matlab/` directory to your Matlab/Octave path:
 
@@ -106,7 +106,7 @@ Basic usage:
 CSX = InitCSX();
 CSX = AddMetal(CSX, 'copper');
 CSX = AddBox(CSX, 'copper', 10, [-1 -1 -1], [1 1 1]);
-WriteOpenEMS('my_structure.xml', struct(), CSX);
+WriteCSX('my_structure.xml', CSX);
 ```
 
 ---

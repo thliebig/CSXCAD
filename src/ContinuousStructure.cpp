@@ -526,8 +526,8 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		}
 
 	TiXmlNode* grid = root->FirstChild("RectilinearGrid");
-	if (grid==NULL) { ErrString.append("Error: No RectilinearGrid found!!!\n"); return ErrString.c_str();}
-	if (clGrid.ReadFromXML(*grid)==false) { ErrString.append("Error: RectilinearGrid invalid!!!\n"); return ErrString.c_str();}
+	if (grid!=NULL)
+		if (clGrid.ReadFromXML(*grid)==false) { ErrString.append("Error: RectilinearGrid invalid!!!\n"); return ErrString.c_str();}
 
 	TiXmlNode* paraSet = root->FirstChild("ParameterSet");
 	if (paraSet!=NULL) if (clParaSet->ReadFromXML(*paraSet)==false) { ErrString.append("Warning: ParameterSet reading failed!!!\n");}
