@@ -42,7 +42,7 @@ void CSPropLumpedElement::Init()
 	m_C.SetValue(NAN);
 	m_L.SetValue(NAN);
 
-	m_LEtype = LEtype::INVALID;
+	m_LEtype = LEtype::PARALLEL;
 }
 
 bool CSPropLumpedElement::Update(std::string *ErrStr)
@@ -142,12 +142,15 @@ bool CSPropLumpedElement::ReadFromXML(TiXmlNode &root)
 	{
 		int i_RLCtype = (int)(s_LEtype.GetValue());
 
-		if (i_RLCtype == 0)
-			m_LEtype = PARALLEL;
-		else if (i_RLCtype == 1)
+		if (i_RLCtype == 1)
 			m_LEtype = SERIES;
 		else
-			m_LEtype = INVALID;
+		{
+			if (i_RLCtype != 0)
+				std::cerr << "CSPropLumpedElement::ReadFromXML(): Warning: unknown LEtype value "
+				          << i_RLCtype << ", defaulting to parallel." << std::endl;
+			m_LEtype = PARALLEL;
+		}
 	}
 
 	return true;
@@ -169,9 +172,6 @@ void CSPropLumpedElement::ShowPropertyStatus(std::ostream& stream)
 			break;
 		case SERIES:
 			s_type = "Series";
-			break;
-		case INVALID:
-			s_type = "Invalid";
 			break;
 	}
 	stream << "  Type: " << s_type << std::endl;

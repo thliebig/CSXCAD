@@ -774,15 +774,23 @@ cdef class CSPropLumpedElement(CSProperties):
 
     A lumped element can consist of a resistor `R`, capacitor `C` and inductance
     `L` active in a given direction `ny`.
-    If Caps are enable, a small PEC plate is added to each
-    end of the lumped element to ensure contact to a connecting line
+    If Caps are enabled, a small PEC plate is added to each end of the lumped
+    element to ensure contact to a connecting line.
 
-    :param ny: int or str -- direction:  0,1,2 or 'x','y','z' for the orientation of the lumped element
-    :param caps: bool     -- enable/disable caps
-    :param R:  float      -- lumped resistance value
-    :param C:  float      -- lumped capacitance value
-    :param L:  float      -- lumped inductance values
-    :param LEtype:  int      -- lumped element type
+    :param ny:     int or str -- direction: 0,1,2 or 'x','y','z'
+    :param caps:   bool       -- enable/disable end caps (default: True)
+    :param R:      float      -- lumped resistance in Ohm
+    :param C:      float      -- lumped capacitance in Farad
+    :param L:      float      -- lumped inductance in Henry
+    :param LEtype: int        -- circuit topology: 0 = parallel (default), 1 = series
+                                 Parallel: R, C and L are all in parallel.
+                                 Series: R, L and C are in series (use this for a
+                                 series inductor, e.g. to tune antenna length).
+
+    Example — series inductor::
+
+        ind = CSX.AddLumpedElement('Inductor', ny=0, caps=True, L=10e-9, LEtype=1)
+        ind.AddBox([0, 0, 0], [1e-3, 1e-3, 1e-3])
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:

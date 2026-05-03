@@ -30,7 +30,6 @@ public:
 	{
 		PARALLEL = 0,
 		SERIES = 1,
-		INVALID = -1
 	};
 
 	CSPropLumpedElement(ParameterSet* paraSet);
