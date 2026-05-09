@@ -1,5 +1,6 @@
 /*
 *	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2023-2025 Gadi Lahav (gadi@rfwithcare.com)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -30,6 +31,11 @@ CSPropExcitation::CSPropExcitation(CSPropExcitation* prop, bool copyPrim) : CSPr
 	coordInputType=prop->coordInputType;
 	m_Frequency.Copy(&prop->m_Frequency);
 	Delay.Copy(&prop->Delay);
+
+	m_WeightFile     = prop->m_WeightFile;
+	m_WeightFileData = prop->m_WeightFileData;
+	for (int n=0; n<3; ++n) m_WeightOrigin[n] = prop->m_WeightOrigin[n];
+
 	for (unsigned int i=0;i<3;++i)
 	{
 		ActiveDir[i]=prop->ActiveDir[i];
@@ -86,48 +92,110 @@ bool CSPropExcitation::GetActiveDir(int Component)
 int CSPropExcitation::SetWeightFunction(const std::string fct, int ny)
 {
 	if ((ny>=0) && (ny<3))
+	{
+		m_WeightFile.clear();
+		m_WeightFileData.Clear();
+		if (fct.empty())
+		{
+			WeightFct[ny].SetValue(0.0);
+			return 0;
+		}
 		return WeightFct[ny].SetValue(fct);
+	}
 	return 0;
 }
 
 const std::string CSPropExcitation::GetWeightFunction(int ny) {if ((ny>=0) && (ny<3)) {return WeightFct[ny].GetString();} else return std::string();}
 
+void CSPropExcitation::SetWeightFile(std::string fileName)
+{
+	m_WeightFile = fileName;
+	m_WeightFileData.Clear();
+}
+
+std::string CSPropExcitation::GetWeightFile()
+{
+	return m_WeightFile;
+}
+
 double CSPropExcitation::GetWeightedExcitation(int ny, const double* coords)
 {
 	if ((ny<0) || (ny>=3)) return 0;
 	//Warning: this is not reentrant....!!!!
+	// Convert input to Cartesian, then apply weight origin shift
 	double loc_coords[3] = {coords[0],coords[1],coords[2]};
-	double r,rho,alpha,theta;
 	if (coordInputType==1)
 	{
 		loc_coords[0] = coords[0]*cos(coords[1]);
 		loc_coords[1] = coords[0]*sin(coords[1]);
-		rho = coords[0];
-		alpha=coords[1];
-		r = sqrt(pow(coords[0],2)+pow(coords[2],2));
-		theta=asin(1)-atan(coords[2]/rho);
+	}
+	loc_coords[0] -= m_WeightOrigin[0];
+	loc_coords[1] -= m_WeightOrigin[1];
+	loc_coords[2] -= m_WeightOrigin[2];
+
+	double rho   = sqrt(loc_coords[0]*loc_coords[0] + loc_coords[1]*loc_coords[1]);
+	double alpha = atan2(loc_coords[1], loc_coords[0]);
+	double r     = sqrt(loc_coords[0]*loc_coords[0] + loc_coords[1]*loc_coords[1] + loc_coords[2]*loc_coords[2]);
+	double theta = asin(1) - atan(loc_coords[2] / rho);
+
+	double cWeight;
+	if (!m_WeightFile.empty())
+	{
+		if (!m_WeightFileData.IsLoaded())
+			m_WeightFileData.ReadFromHDF5(m_WeightFile);
+
+		if (!m_WeightFileData.IsLoaded())
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: weight file '" << m_WeightFile << "' could not be loaded\n";
+			return 0.0;
+		}
+
+		int nPy = 0, checkSum = 0;
+		for (int dirIdx = 0; dirIdx < 3; dirIdx++)
+		{
+			nPy      += (PropagationDir[dirIdx].GetValue() != 0) * (dirIdx + 1);
+			checkSum += (PropagationDir[dirIdx].GetValue() != 0);
+		}
+		nPy--;
+
+		if ((nPy < 0) || (checkSum != 1))
+		{
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: cannot determine propagation direction, "
+			             "PropagationDir = ("
+			          << PropagationDir[0].GetValue() << ", "
+			          << PropagationDir[1].GetValue() << ", "
+			          << PropagationDir[2].GetValue() << ")\n";
+			return 0.0;
+		}
+
+		const int nPyp  = (nPy + 1) % 3;
+		const int nPypp = (nPy + 2) % 3;
+
+		cWeight = 0.0;
+		if (nPy != ny)
+		{
+			// fields[0]=Ex (first transverse), fields[1]=Ey (second transverse)
+			auto fields = m_WeightFileData.LinInterp2(loc_coords[nPyp], loc_coords[nPypp]);
+			cWeight = fields[int(ny == nPypp)];
+		}
 	}
 	else
 	{
-		alpha=atan2(coords[1],coords[0]);
-		rho = sqrt(pow(coords[0],2)+pow(coords[1],2));
-		r = sqrt(pow(coords[0],2)+pow(coords[1],2)+pow(coords[2],2));
-		theta=asin(1)-atan(coords[2]/rho);
-	}
-	coordPara[0]->SetValue(loc_coords[0]);
-	coordPara[1]->SetValue(loc_coords[1]);
-	coordPara[2]->SetValue(loc_coords[2]);
-	coordPara[3]->SetValue(rho); //rho
-	coordPara[4]->SetValue(r); //r
-	coordPara[5]->SetValue(alpha);
-	coordPara[6]->SetValue(theta); //theta
-	int EC = WeightFct[ny].Evaluate();
-	if (EC)
-	{
-		std::cerr << "CSPropExcitation::GetWeightedExcitation: Error evaluating the weighting function (ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << std::endl;
-	}
+		coordPara[0]->SetValue(loc_coords[0]);
+		coordPara[1]->SetValue(loc_coords[1]);
+		coordPara[2]->SetValue(loc_coords[2]);
+		coordPara[3]->SetValue(rho); //rho
+		coordPara[4]->SetValue(r); //r
+		coordPara[5]->SetValue(alpha);
+		coordPara[6]->SetValue(theta); //theta
 
-	return WeightFct[ny].GetValue()*GetExcitation(ny);
+		int EC = WeightFct[ny].Evaluate();
+		if (EC)
+			std::cerr << "CSPropExcitation::GetWeightedExcitation: error evaluating weight function "
+			             "(ID: " << this->GetID() << ", n=" << ny << "): " << PSErrorCode2Msg(EC) << "\n";
+		cWeight = WeightFct[ny].GetValue();
+	}
+	return cWeight * GetExcitation(ny);
 }
 
 void CSPropExcitation::SetDelay(double val)	{Delay.SetValue(val);}
@@ -155,6 +223,10 @@ void CSPropExcitation::Init()
 		WeightFct[i].SetValue(1.0);
 		WeightFct[i].SetParameterSet(coordParaSet);
 	}
+
+	m_WeightFile.clear();
+	m_WeightFileData.Clear();
+	m_WeightOrigin[0] = m_WeightOrigin[1] = m_WeightOrigin[2] = 0.0;
 }
 
 void CSPropExcitation::SetPropagationDir(double val, int Component)
@@ -180,7 +252,6 @@ const std::string CSPropExcitation::GetPropagationDirString(int Comp)
 	if ((Comp<0) || (Comp>=3)) return NULL;
 	return PropagationDir[Comp].GetString();
 }
-
 
 bool CSPropExcitation::Update(std::string *ErrStr)
 {
@@ -242,6 +313,18 @@ bool CSPropExcitation::Write2XML(TiXmlNode& root, bool parameterised, bool spars
 	prop->SetAttribute("Type",iExcitType);
 	WriteVectorTerm(Excitation,*prop,"Excite",parameterised);
 
+
+	if (!m_WeightFile.empty())
+		prop->SetAttribute("WeightFile", m_WeightFile.c_str());
+	if (m_WeightOrigin[0]!=0.0 || m_WeightOrigin[1]!=0.0 || m_WeightOrigin[2]!=0.0)
+	{
+		TiXmlElement WO("WeightOrigin");
+		WO.SetDoubleAttribute("X", m_WeightOrigin[0]);
+		WO.SetDoubleAttribute("Y", m_WeightOrigin[1]);
+		WO.SetDoubleAttribute("Z", m_WeightOrigin[2]);
+		prop->InsertEndChild(WO);
+	}
+
 	TiXmlElement Weight("Weight");
 	WriteTerm(WeightFct[0],Weight,"X",parameterised);
 	WriteTerm(WeightFct[1],Weight,"Y",parameterised);
@@ -266,6 +349,7 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 
 	prop->QueryBoolAttribute("Enabled",&m_enabled);
 
+	m_WeightFile.clear();
 	if (prop->QueryIntAttribute("Type",&iExcitType)!=TIXML_SUCCESS) return false;
 
 	if (ReadVectorTerm(Excitation,*prop,"Excite",0.0)==false) return false;
@@ -273,12 +357,27 @@ bool CSPropExcitation::ReadFromXML(TiXmlNode &root)
 	ReadTerm(m_Frequency,*prop,"Frequency");
 	ReadTerm(Delay,*prop,"Delay");
 
-	TiXmlElement *weight = prop->FirstChildElement("Weight");
-	if (weight!=NULL)
+	if (prop->QueryStringAttribute("WeightFile", &m_WeightFile) != TIXML_SUCCESS)
+		m_WeightFile.clear();
+
+	m_WeightOrigin[0] = m_WeightOrigin[1] = m_WeightOrigin[2] = 0.0;
+	TiXmlElement* wo = prop->FirstChildElement("WeightOrigin");
+	if (wo)
 	{
-		ReadTerm(WeightFct[0],*weight,"X");
-		ReadTerm(WeightFct[1],*weight,"Y");
-		ReadTerm(WeightFct[2],*weight,"Z");
+		wo->QueryDoubleAttribute("X", &m_WeightOrigin[0]);
+		wo->QueryDoubleAttribute("Y", &m_WeightOrigin[1]);
+		wo->QueryDoubleAttribute("Z", &m_WeightOrigin[2]);
+	}
+
+	if (m_WeightFile.empty())
+	{
+		TiXmlElement *weight = prop->FirstChildElement("Weight");
+		if (weight!=NULL)
+		{
+			ReadTerm(WeightFct[0],*weight,"X");
+			ReadTerm(WeightFct[1],*weight,"Y");
+			ReadTerm(WeightFct[2],*weight,"Z");
+		}
 	}
 
 	ReadVectorTerm(PropagationDir,*prop,"PropDir",0.0);

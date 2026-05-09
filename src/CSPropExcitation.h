@@ -1,5 +1,6 @@
 /*
 *	Copyright (C) 2008-2025 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+*	Copyright (C) 2023-2025 Gadi Lahav (gadi@rfwithcare.com)
 *
 *	This program is free software: you can redistribute it and/or modify
 *	it under the terms of the GNU Lesser General Public License as published
@@ -18,6 +19,7 @@
 #pragma once
 
 #include "CSProperties.h"
+#include "CSModeData.h"
 
 //! Continuous Structure Excitation Property
 /*!
@@ -82,6 +84,16 @@ public:
 	//! Get the weighting function for the given excitation component
 	const std::string GetWeightFunction(int ny);
 
+	//! Set an HDF5 file to use as the spatial weight profile (alternative to SetWeightFunction)
+	void SetWeightFile(std::string fileName);
+	//! Get the weight file path
+	std::string GetWeightFile();
+
+	//! Set the coordinate origin used when evaluating the weight function or weight file
+	void SetWeightOrigin(double ox, double oy, double oz) { m_WeightOrigin[0]=ox; m_WeightOrigin[1]=oy; m_WeightOrigin[2]=oz; }
+	//! Get one component of the weight origin (0=x, 1=y, 2=z)
+	double GetWeightOrigin(int n) const { return (n>=0 && n<3) ? m_WeightOrigin[n] : 0.0; }
+
 	double GetWeightedExcitation(int ny, const double* coords);
 
 	//! Set the propagation direction for a given component
@@ -120,4 +132,8 @@ protected:
 	ParameterScalar WeightFct[3];		// excitation amplitude weighting function
 	ParameterScalar PropagationDir[3];	// direction of propagation (should be a unit vector), needed for plane wave excitations
 	ParameterScalar Delay;				// excitation delay only, for time-domain solver e.g. FDTD
+
+	std::string m_WeightFile;
+	CSModeData  m_WeightFileData;
+	double      m_WeightOrigin[3];
 };

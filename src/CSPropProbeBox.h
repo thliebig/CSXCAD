@@ -18,6 +18,7 @@
 #pragma once
 
 #include "CSProperties.h"
+#include <string>
 
 
 //! Continuous Structure Probe Property for calculating integral properties
@@ -75,6 +76,21 @@ public:
 	void AddFDSample(std::vector<double> *freqs);
 	void AddFDSample(std::string freqs);
 
+	//! Set the HDF5 mode file for this probe (used by the simulator for mode matching)
+	void SetModeFile(std::string fileName) { m_ModeFile = fileName; }
+	//! Get the mode file path
+	std::string GetModeFile() const { return m_ModeFile; }
+
+	//! Set the mode function string for direction ny (0=x,1=y,2=z, used by the simulator for mode matching)
+	void SetModeFunction(int ny, std::string fct) { if (ny>=0 && ny<3) m_ModeFunction[ny]=fct; }
+	//! Get the mode function string for direction ny
+	std::string GetModeFunction(int ny) const { return (ny>=0 && ny<3) ? m_ModeFunction[ny] : std::string(); }
+
+	//! Set the coordinate origin for mode function/file evaluation (used by the simulator for mode matching)
+	void SetModeOrigin(double ox, double oy, double oz) { m_ModeOrigin[0]=ox; m_ModeOrigin[1]=oy; m_ModeOrigin[2]=oz; }
+	//! Get one component of the mode origin (0=x, 1=y, 2=z)
+	double GetModeOrigin(int n) const { return (n>=0 && n<3) ? m_ModeOrigin[n] : 0.0; }
+
 	virtual bool Write2XML(TiXmlNode& root, bool parameterised=true, bool sparse=false);
 	virtual bool ReadFromXML(TiXmlNode &root);
 
@@ -85,5 +101,8 @@ protected:
 	int ProbeType;
 	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
+	std::string m_ModeFile;
+	std::string m_ModeFunction[3];
+	double m_ModeOrigin[3];
 };
 

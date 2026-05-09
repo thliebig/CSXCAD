@@ -982,6 +982,9 @@ cdef class CSPropExcitation(CSProperties):
         if 'delay' in kw:
             self.SetDelay(kw['delay'])
             del kw['delay']
+        if 'weight_file' in kw:
+            self.SetWeightFile(kw['weight_file'])
+            del kw['weight_file']
         super(CSPropExcitation, self).__init__(pset, *args, **kw)
 
     def SetExcitType(self, val):
@@ -998,7 +1001,6 @@ cdef class CSPropExcitation(CSProperties):
         :return: int -- excitation type (see above)
         """
         return (<_CSPropExcitation*>self.thisptr).GetExcitType()
-
 
     def SetEnabled(self, val):
         """ Enable/Disable the excitation"""
@@ -1083,6 +1085,57 @@ cdef class CSPropExcitation(CSProperties):
             func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
         return func
 
+    def SetWeightFile(self, fileName):
+        """ SetWeightFile(fileName)
+
+        Set an HDF5 file as the spatial weight profile for this excitation
+        (alternative to SetWeightFunction). The file must contain datasets
+        /x, /y (axis vectors) and /Vx, /Vy (transverse field components,
+        shape nx x ny).
+
+        :param fileName: str -- path to the HDF5 weight file
+        """
+        assert type(fileName) is str, '"fileName" must be a str'
+        (<_CSPropExcitation*>self.thisptr).SetWeightFile(fileName.encode('UTF-8'))
+
+    def GetWeightFile(self):
+        """ GetWeightFile() -> str """
+        return (<_CSPropExcitation*>self.thisptr).GetWeightFile().decode('UTF-8')
+
+    def SetWeightOrigin(self, origin):
+        """ SetWeightOrigin(origin)
+
+        Set the coordinate origin used when evaluating the weight function or
+        weight file. Coordinates are shifted by this offset before evaluation,
+        so the weight can be defined relative to a port corner (0,0,0) rather
+        than the global simulation origin.
+
+        :param origin: (3,) array -- [x, y, z] in drawing units
+        """
+        assert len(origin) == 3, 'origin must have 3 elements'
+        (<_CSPropExcitation*>self.thisptr).SetWeightOrigin(origin[0], origin[1], origin[2])
+
+    def GetWeightOrigin(self):
+        """ GetWeightOrigin() -> [float, float, float] """
+        return [(<_CSPropExcitation*>self.thisptr).GetWeightOrigin(n) for n in range(3)]
+
+    def GetWeightedExcitation(self, int ny, coords):
+        """ GetWeightedExcitation(ny, coords)
+
+        Evaluate the weighted excitation amplitude for component ny at the
+        given coordinates, combining excitation vector, weight function, and
+        mode file (if set).
+
+        :param ny:     int -- field component (0=x, 1=y, 2=z)
+        :param coords: (3,) array -- Cartesian coordinates [x, y, z]
+        :returns:      float
+        """
+        cdef double c[3]
+        c[0] = coords[0]
+        c[1] = coords[1]
+        c[2] = coords[2]
+        return (<_CSPropExcitation*>self.thisptr).GetWeightedExcitation(ny, c)
+
     def SetFrequency(self, val):
         """ SetFrequency(val)
 
@@ -1128,11 +1181,12 @@ cdef class CSPropProbeBox(CSProperties):
     * 10 : for waveguide voltage mode matching
     * 11 : for waveguide current mode matching
 
-    :param p_type:       probe type (default is 0)
-    :param weight:       weighting factor (default is 1)
-    :param frequency:    dump in the frequency domain at the given samples (in Hz)
-    :param mode_function: A mode function (used only with type 3/4 in openEMS)
-    :param norm_dir:     necessary for current probing box with dimension not 2
+    :param p_type:           probe type (default is 0)
+    :param weight:           weighting factor (default is 1)
+    :param frequency:        dump in the frequency domain at the given samples (in Hz)
+    :param mode_function:    A mode function (used only with probe type 10/11).
+    :param norm_dir:         Necessary for current probing box with dimension not 2
+
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -1225,11 +1279,49 @@ cdef class CSPropProbeBox(CSProperties):
 
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
+
+        Set the spatial mode function strings for mode-matching (list of 3 strings,
+        one per Cartesian component).
         """
         assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
-        self.AddAttribute('ModeFunctionX', str(mode_fun[0]))
-        self.AddAttribute('ModeFunctionY', str(mode_fun[1]))
-        self.AddAttribute('ModeFunctionZ', str(mode_fun[2]))
+        for n in range(3):
+            (<_CSPropProbeBox*>self.thisptr).SetModeFunction(n, str(mode_fun[n]).encode('UTF-8'))
+
+    def GetModeFunction(self):
+        """ GetModeFunction() -> list of 3 strings """
+        return [(<_CSPropProbeBox*>self.thisptr).GetModeFunction(n).decode('UTF-8') for n in range(3)]
+
+    def SetModeFile(self, fileName):
+        """ SetModeFile(fileName)
+
+        Set an HDF5 file as the mode profile for this probe
+        (alternative to SetModeFunction). Stored and serialized by CSXCAD;
+        the coordinate evaluation and mode-matching is performed by the simulator.
+
+        :param fileName: str -- path to the HDF5 mode file
+        """
+        assert type(fileName) is str, '"fileName" must be a str'
+        (<_CSPropProbeBox*>self.thisptr).SetModeFile(fileName.encode('UTF-8'))
+
+    def GetModeFile(self):
+        """ GetModeFile() -> str """
+        return (<_CSPropProbeBox*>self.thisptr).GetModeFile().decode('UTF-8')
+
+    def SetModeOrigin(self, origin):
+        """ SetModeOrigin(origin)
+
+        Set the coordinate origin for mode function/file evaluation.
+        Stored and serialized by CSXCAD; applied by the simulator during
+        mode-matching integration.
+
+        :param origin: (3,) array -- [x, y, z] in drawing units
+        """
+        assert len(origin) == 3, 'origin must have 3 elements'
+        (<_CSPropProbeBox*>self.thisptr).SetModeOrigin(origin[0], origin[1], origin[2])
+
+    def GetModeOrigin(self):
+        """ GetModeOrigin() -> [float, float, float] """
+        return [(<_CSPropProbeBox*>self.thisptr).GetModeOrigin(n) for n in range(3)]
 
 ###############################################################################
 cdef class CSPropDumpBox(CSPropProbeBox):

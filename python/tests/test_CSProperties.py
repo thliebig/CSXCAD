@@ -15,6 +15,23 @@ try:
 except ImportError:
     HAS_H5PY = False
 
+try:
+    from scipy.interpolate import RegularGridInterpolator
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+
+
+def write_mode_hdf5(path, x, y, Vx, Vy):
+    """Write a mode HDF5 file. Vx/Vy must have shape (nx, ny)."""
+    with h5py.File(path, 'w') as f:
+        f.attrs['Version'] = 1.0
+        f.create_dataset('x', data=x)
+        f.create_dataset('y', data=y)
+        f.create_dataset('Vx', data=Vx)
+        f.create_dataset('Vy', data=Vy)
+
+
 class Test_CSPrimMethods(unittest.TestCase):
     def setUp(self):
         self.pset  = ParameterObjects.ParameterSet()
@@ -313,6 +330,118 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop2.GetFrequencyCount(), 12)
         self.assertEqual(prop.GetFrequencyCount(), 11)
 
+    @unittest.skipUnless(HAS_H5PY, 'h5py not available')
+    def test_excitation_weight_file(self):
+        # Grid axes
+        x = np.array([0.0, 0.1, 0.2, 0.3])
+        y = np.array([0.0, 0.4, 0.8, 1.2])
+        xv, yv = np.meshgrid(x, y, indexing='ij')  # shape (nx, ny)
+
+        # Linear fields so bilinear interpolation is exact
+        Vx = xv.copy()   # Vx[i,j] = x[i]
+        Vy = yv.copy()   # Vy[i,j] = y[j]
+
+        fd, path = tempfile.mkstemp(suffix='.h5')
+        os.close(fd)
+        try:
+            write_mode_hdf5(path, x, y, Vx, Vy)
+
+            # Unit excitation amplitudes so GetWeightedExcitation == interpolated field
+            prop = CSProperties.CSPropExcitation(self.pset, exc_type=0,
+                                                 exc_val=[1.0, 1.0, 1.0])
+            prop.SetPropagationDir([0, 0, 1])   # z-propagation: transverse plane is x-y
+            prop.SetWeightFile(path)
+            self.assertEqual(prop.GetWeightFile(), path)
+
+            for xi in np.linspace(x[0], x[-1], 7):
+                for yi in np.linspace(y[0], y[-1], 7):
+                    coords = [xi, yi, 0.0]
+                    # ny=0 (x-component): should equal Vx(xi,yi) = xi
+                    self.assertAlmostEqual(prop.GetWeightedExcitation(0, coords), xi, places=10)
+                    # ny=1 (y-component): should equal Vy(xi,yi) = yi
+                    self.assertAlmostEqual(prop.GetWeightedExcitation(1, coords), yi, places=10)
+                    # ny=2 (propagation direction): always zero
+                    self.assertAlmostEqual(prop.GetWeightedExcitation(2, coords), 0.0, places=10)
+        finally:
+            os.remove(path)
+
+    @unittest.skipUnless(HAS_H5PY and HAS_SCIPY, 'h5py and scipy required')
+    def test_excitation_weight_file_te10(self):
+        # TE10 mode of a WR-90 rectangular waveguide (a=22.86mm, b=10.16mm),
+        # propagating in z.  Transverse E-field: Vx=0, Vy=sin(pi*x/a).
+        # The sinusoidal variation is non-linear, so this is a genuine test
+        # of bilinear interpolation accuracy verified against scipy.
+        a = 22.86e-3   # width  (x-direction)
+        b = 10.16e-3   # height (y-direction)
+
+        # Coarse mesh — intentionally sparse so interpolation error is visible
+        x = np.linspace(0, a, 7)
+        y = np.linspace(0, b, 5)
+        xv, yv = np.meshgrid(x, y, indexing='ij')   # shape (nx, ny)
+        Vx = np.zeros_like(xv)
+        Vy = np.sin(np.pi * xv / a)
+
+        fd, path = tempfile.mkstemp(suffix='.h5')
+        os.close(fd)
+        try:
+            write_mode_hdf5(path, x, y, Vx, Vy)
+
+            prop = CSProperties.CSPropExcitation(self.pset, exc_type=0,
+                                                 exc_val=[1.0, 1.0, 1.0])
+            prop.SetPropagationDir([0, 0, 1])
+            prop.SetWeightFile(path)
+
+            # scipy reference — same linear method, independent implementation
+            ref_Vx = RegularGridInterpolator((x, y), Vx, method='linear')
+            ref_Vy = RegularGridInterpolator((x, y), Vy, method='linear')
+
+            # Fine test mesh offset from coarse grid so points fall between nodes
+            x_test = np.linspace(x[0] + 0.3*(x[1]-x[0]), x[-1] - 0.3*(x[-1]-x[-2]), 17)
+            y_test = np.linspace(y[0] + 0.3*(y[1]-y[0]), y[-1] - 0.3*(y[-1]-y[-2]), 11)
+
+            for xi in x_test:
+                for yi in y_test:
+                    coords = [xi, yi, 0.0]
+                    self.assertAlmostEqual(
+                        prop.GetWeightedExcitation(0, coords),
+                        ref_Vx([[xi, yi]]).item(), places=10)
+                    self.assertAlmostEqual(
+                        prop.GetWeightedExcitation(1, coords),
+                        ref_Vy([[xi, yi]]).item(), places=10)
+        finally:
+            os.remove(path)
+
+    @unittest.skipUnless(HAS_H5PY, 'h5py not available')
+    def test_excitation_weight_file_copy(self):
+        # Verify that copying a CSPropExcitation deep-copies the loaded mode data.
+        # After the source file is deleted the copy must still interpolate correctly.
+        x = np.array([0.0, 0.1, 0.2, 0.3])
+        y = np.array([0.0, 0.4, 0.8, 1.2])
+        xv, yv = np.meshgrid(x, y, indexing='ij')
+        Vx = xv.copy()   # linear so bilinear interpolation is exact
+        Vy = yv.copy()
+
+        fd, path = tempfile.mkstemp(suffix='.h5')
+        os.close(fd)
+        write_mode_hdf5(path, x, y, Vx, Vy)
+
+        prop = CSProperties.CSPropExcitation(self.pset, exc_type=0, exc_val=[1.0, 1.0, 1.0])
+        prop.SetPropagationDir([0, 0, 1])
+        prop.SetWeightFile(path)
+        # trigger loading of the mode data into memory
+        prop.GetWeightedExcitation(0, [0.05, 0.2, 0.0])
+
+        prop2 = prop.copy()
+        os.remove(path)   # source file gone — copy must rely on its own in-memory data
+
+        self.assertEqual(prop2.GetWeightFile(), path)
+        for xi in np.linspace(x[0], x[-1], 5):
+            for yi in np.linspace(y[0], y[-1], 5):
+                coords = [xi, yi, 0.0]
+                self.assertAlmostEqual(prop2.GetWeightedExcitation(0, coords), xi, places=10)
+                self.assertAlmostEqual(prop2.GetWeightedExcitation(1, coords), yi, places=10)
+                self.assertAlmostEqual(prop2.GetWeightedExcitation(2, coords), 0.0, places=10)
+
     def test_dump(self):
         prop = CSProperties.CSPropDumpBox(self.pset, dump_type=10, dump_mode=2, file_type=5, opt_resolution=[10,11.5,12], sub_sampling=[1,2,4])
 
@@ -478,14 +607,26 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetNormalDir(), 2)
 
         prop.SetModeFunction(['sin(x)', 'cos(y)', '0'])
-        self.assertEqual(prop.GetAttributeValue('ModeFunctionX'), 'sin(x)')
-        self.assertEqual(prop.GetAttributeValue('ModeFunctionY'), 'cos(y)')
-        self.assertEqual(prop.GetAttributeValue('ModeFunctionZ'), '0')
+        self.assertEqual(prop.GetModeFunction(), ['sin(x)', 'cos(y)', '0'])
+
+        prop.SetModeFile('/path/to/mode.h5')
+        self.assertEqual(prop.GetModeFile(), '/path/to/mode.h5')
+
+        prop.SetModeOrigin([1.0, 2.0, 3.0])
+        self.assertEqual(prop.GetModeOrigin(), [1.0, 2.0, 3.0])
 
         prop2 = prop.copy()
         self.assertEqual(prop2.GetProbeType(), 3)
         self.assertAlmostEqual(prop2.GetWeighting(), 2.0)
         self.assertEqual(prop2.GetNormalDir(), 2)
+        self.assertEqual(prop2.GetModeFunction(), ['sin(x)', 'cos(y)', '0'])
+        self.assertEqual(prop2.GetModeFile(), '/path/to/mode.h5')
+        self.assertEqual(prop2.GetModeOrigin(), [1.0, 2.0, 3.0])
+
+    def test_probe_mode_function_kwarg(self):
+        prop = CSProperties.CSPropProbeBox(self.pset, p_type=10,
+                                           mode_function=['x', 'y', '0'])
+        self.assertEqual(prop.GetModeFunction(), ['x', 'y', '0'])
 
     def test_excitation_full(self):
         prop = CSProperties.CSPropExcitation(self.pset, exc_type=0, exc_val=[1.0, 0, 0])
@@ -502,10 +643,43 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop.SetFrequency(2.4e9)
         self.assertAlmostEqual(prop.GetFrequency(), 2.4e9)
 
+        prop.SetWeightFile('/mode.h5')
+        self.assertEqual(prop.GetWeightFile(), '/mode.h5')
+
+        prop.SetWeightOrigin([1.0, 2.5, 3.0])
+        self.assertEqual(prop.GetWeightOrigin(), [1.0, 2.5, 3.0])
+
         prop2 = prop.copy()
         self.assertTrue(prop2.GetEnabled())
         self.assertTrue((prop2.GetPropagationDir() == [0, 0, 1]).all())
         self.assertAlmostEqual(prop2.GetFrequency(), 2.4e9)
+        self.assertEqual(prop2.GetWeightFile(), '/mode.h5')
+        self.assertEqual(prop2.GetWeightOrigin(), [1.0, 2.5, 3.0])
+
+    def test_excitation_zero_weight_function_roundtrip(self):
+        # '0' is parsed as numeric 0.0 by ParameterScalar; GetWeightFunction()
+        # returns '' for numeric components.  SetWeightFunction('') must treat
+        # '' as 0.0 so that a get/set round-trip preserves zero weights.
+        exc = CSProperties.CSPropExcitation(self.pset, exc_type=0,
+                                             exc_val=[1.0, 1.0, 1.0])
+        exc.SetPropagationDir([0, 0, 1])
+        exc.SetWeightFunction(['cos(x)', '0', '0'])
+
+        funcs = exc.GetWeightFunction()
+        self.assertEqual(funcs[1], '')  # '0' stored numeric; GetString() returns ''
+
+        exc2 = CSProperties.CSPropExcitation(self.pset, exc_type=0,
+                                              exc_val=[1.0, 1.0, 1.0])
+        exc2.SetPropagationDir([0, 0, 1])
+        exc2.SetWeightFunction(funcs)   # feeds '' for components 1 and 2
+
+        self.assertAlmostEqual(exc2.GetWeightedExcitation(1, [1.0, 1.0, 0.0]), 0.0)
+
+    def test_excitation_weight_file_kwarg(self):
+        prop = CSProperties.CSPropExcitation(self.pset, exc_type=0,
+                                             exc_val=[1.0, 0, 0],
+                                             weight_file='/kwarg_mode.h5')
+        self.assertEqual(prop.GetWeightFile(), '/kwarg_mode.h5')
 
 
 @unittest.skipUnless(HAS_H5PY, 'h5py not available')

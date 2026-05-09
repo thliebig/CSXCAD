@@ -4,7 +4,7 @@ function CSX = AddProbe(CSX, name, type, varargin)
 % Add a probe property to CSX with the given name.
 % Remember to add a geometrical primitive to any property.
 %
-% name:     name of the property and probe file 
+% name:     name of the property and probe file
 %
 % type:
 % - 0 for voltage probing
@@ -18,10 +18,14 @@ function CSX = AddProbe(CSX, name, type, varargin)
 %
 % - weight:       weighting factor (default is 1)
 % - frequency:    dump in the frequency domain at the given samples (in Hz)
-% - ModeFunction: A mode function (used only with type 3/4)
+% - ModeFunction: A mode function (used only with type 10/11)
 % - NormDir:      necessary for current probing box with dimension~=2
-% - StartTime/StopTime: Define a start and/or stop time (in seconds) 
+% - StartTime/StopTime: Define a start and/or stop time (in seconds)
 %                     for this probe to be active.
+% - ModeFile:     (Optional) path to an HDF5 mode file, used instead of
+%                 a parsed ModeFunction.
+% - ModeOrigin:   (Optional) [x,y,z] coordinate origin for mode function/file
+%                 evaluation (3-element vector, in drawing units).
 %
 % examples:
 %
@@ -37,6 +41,8 @@ function CSX = AddProbe(CSX, name, type, varargin)
 
 FD_samples = [];
 ModeFunction = {};
+ModeFile = '';
+ModeOrigin = [];
 
 if ~ischar(name)
     error('CSXCAD::AddProbe: name must be a string');
@@ -61,6 +67,10 @@ for n=1:2:numel(varargin)
     elseif (strcmpi(varargin{n},'StopTime')==1);
         prop_args{end+1} = 'StopTime';
         prop_args{end+1} = varargin{n+1};
+    elseif (strcmpi(varargin{n},'ModeFile')==1);
+        ModeFile = varargin{n+1};
+    elseif (strcmpi(varargin{n},'ModeOrigin')==1);
+        ModeOrigin = varargin{n+1};
     else
         warning('CSXCAD:AddProbe',['variable argument key: "' varargin{n+1} '" unknown']);
     end
@@ -73,8 +83,18 @@ if (numel(FD_samples)>0)
 end
 
 if (numel(ModeFunction)>0)
-    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionX = ModeFunction{1};
-    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionY = ModeFunction{2};
-    CSX.Properties.ProbeBox{pos}.Attributes.ATTRIBUTE.ModeFunctionZ = ModeFunction{3};
+    CSX.Properties.ProbeBox{pos}.ModeFunction.ATTRIBUTE.X = ModeFunction{1};
+    CSX.Properties.ProbeBox{pos}.ModeFunction.ATTRIBUTE.Y = ModeFunction{2};
+    CSX.Properties.ProbeBox{pos}.ModeFunction.ATTRIBUTE.Z = ModeFunction{3};
+end
+
+if (~isempty(ModeFile))
+    CSX.Properties.ProbeBox{pos}.ATTRIBUTE.ModeFile = ModeFile;
+end
+
+if (~isempty(ModeOrigin))
+    CSX.Properties.ProbeBox{pos}.ModeOrigin.ATTRIBUTE.X = num2str(ModeOrigin(1), 15);
+    CSX.Properties.ProbeBox{pos}.ModeOrigin.ATTRIBUTE.Y = num2str(ModeOrigin(2), 15);
+    CSX.Properties.ProbeBox{pos}.ModeOrigin.ATTRIBUTE.Z = num2str(ModeOrigin(3), 15);
 end
 

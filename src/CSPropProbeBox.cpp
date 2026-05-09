@@ -19,7 +19,11 @@
 
 #include "CSPropProbeBox.h"
 
-CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
+{
+	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisisble=false; startTime=0; stopTime=0;
+	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
+}
 CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
 {
 	Type=PROBEBOX;
@@ -30,8 +34,15 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 	startTime=prop->startTime;
 	stopTime=prop->stopTime;
 	m_FD_Samples=prop->m_FD_Samples;
+	m_ModeFile=prop->m_ModeFile;
+	for (int n=0;n<3;++n) m_ModeFunction[n]=prop->m_ModeFunction[n];
+	for (int n=0;n<3;++n) m_ModeOrigin[n]=prop->m_ModeOrigin[n];
 }
-CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=PROBEBOX;uiNumber=0;m_NormDir=-1;ProbeType=0;m_weight=1;bVisisble=false;startTime=0;stopTime=0;}
+CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
+{
+	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisisble=false; startTime=0; stopTime=0;
+	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
+}
 CSPropProbeBox::~CSPropProbeBox() {}
 
 void CSPropProbeBox::SetNumber(unsigned int val) {uiNumber=val;}
@@ -74,6 +85,29 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 		prop->InsertEndChild(FDS_Elem);
 	}
 
+	if (!m_ModeFile.empty())
+		prop->SetAttribute("ModeFile", m_ModeFile.c_str());
+
+	bool hasFunc = false;
+	for (int n=0; n<3; ++n) if (!m_ModeFunction[n].empty()) hasFunc=true;
+	if (hasFunc)
+	{
+		TiXmlElement MF("ModeFunction");
+		const char* xyz[3] = {"X","Y","Z"};
+		for (int n=0; n<3; ++n)
+			MF.SetAttribute(xyz[n], m_ModeFunction[n].c_str());
+		prop->InsertEndChild(MF);
+	}
+
+	if (m_ModeOrigin[0]!=0.0 || m_ModeOrigin[1]!=0.0 || m_ModeOrigin[2]!=0.0)
+	{
+		TiXmlElement MO("ModeOrigin");
+		MO.SetDoubleAttribute("X", m_ModeOrigin[0]);
+		MO.SetDoubleAttribute("Y", m_ModeOrigin[1]);
+		MO.SetDoubleAttribute("Z", m_ModeOrigin[2]);
+		prop->InsertEndChild(MO);
+	}
+
 	return true;
 }
 
@@ -107,6 +141,41 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 			if (text)
 				this->AddFDSample(text->Value());
 		}
+	}
+
+	m_ModeFile.clear();
+	prop->QueryStringAttribute("ModeFile", &m_ModeFile);
+
+	m_ModeFunction[0] = m_ModeFunction[1] = m_ModeFunction[2] = "";
+	TiXmlElement* mf = prop->FirstChildElement("ModeFunction");
+	if (mf)
+	{
+		const char* v;
+		if ((v = mf->Attribute("X"))) m_ModeFunction[0] = v;
+		if ((v = mf->Attribute("Y"))) m_ModeFunction[1] = v;
+		if ((v = mf->Attribute("Z"))) m_ModeFunction[2] = v;
+	}
+	else
+	{
+		// Compat: old Matlab stored mode functions in the generic <Attributes> element
+		const char* dirs[3] = {"ModeFunctionX","ModeFunctionY","ModeFunctionZ"};
+		for (int n=0; n<3; ++n)
+		{
+			if (ExistAttribute(dirs[n]))
+			{
+				m_ModeFunction[n] = GetAttributeValue(dirs[n]);
+				RemoveAttribute(dirs[n]);
+			}
+		}
+	}
+
+	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
+	TiXmlElement* mo = prop->FirstChildElement("ModeOrigin");
+	if (mo)
+	{
+		mo->QueryDoubleAttribute("X", &m_ModeOrigin[0]);
+		mo->QueryDoubleAttribute("Y", &m_ModeOrigin[1]);
+		mo->QueryDoubleAttribute("Z", &m_ModeOrigin[2]);
 	}
 
 	return true;

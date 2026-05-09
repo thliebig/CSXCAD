@@ -172,6 +172,22 @@ class TestXMLRoundTrip(unittest.TestCase):
         self.assertAlmostEqual(p2.GetDelay(),     1e-9)
         self.assertFalse(p2.GetEnabled())
 
+    def test_excitation_weight_file(self):
+        exc = self.csx.AddExcitation('exc_mode', 0, [0.0, 1.0, 0.0])
+        exc.SetWeightFile('/path/to/mode.h5')
+
+        p2 = self._prop(self._roundtrip(), 'exc_mode')
+        self.assertEqual(p2.GetWeightFile(), '/path/to/mode.h5')
+
+    def test_excitation_weight_origin(self):
+        exc = self.csx.AddExcitation('exc_orig', 0, [1.0, 0.0, 0.0])
+        exc.SetWeightFunction(['sin(x)', 'cos(y)', 'z'])
+        exc.SetWeightOrigin([1.0, 2.0, 3.0])
+
+        p2 = self._prop(self._roundtrip(), 'exc_orig')
+        self.assertEqual(p2.GetWeightFunction(), ['sin(x)', 'cos(y)', 'z'])
+        self.assertEqual(p2.GetWeightOrigin(), [1.0, 2.0, 3.0])
+
     # ==================================================================
     # CSPropProbeBox
     # ==================================================================
@@ -187,9 +203,34 @@ class TestXMLRoundTrip(unittest.TestCase):
         self.assertAlmostEqual(p2.GetWeighting(), 2.5)
         self.assertEqual(p2.GetNormalDir(), 1)
         np.testing.assert_array_almost_equal(p2.GetFrequency(), [1e9, 2e9, 3e9])
-        self.assertEqual(p2.GetAttributeValue('ModeFunctionX'), 'sin(x)')
-        self.assertEqual(p2.GetAttributeValue('ModeFunctionY'), 'cos(y)')
-        self.assertEqual(p2.GetAttributeValue('ModeFunctionZ'), '1')
+        self.assertEqual(p2.GetModeFunction(), ['sin(x)', 'cos(y)', '1'])
+
+    def test_probe_mode_file(self):
+        probe = self.csx.AddProbe('probe_mode', 10)
+        probe.SetModeFile('/path/to/mode.h5')
+        probe.SetModeOrigin([1.0, 2.0, 3.0])
+
+        p2 = self._prop(self._roundtrip(), 'probe_mode')
+        self.assertEqual(p2.GetModeFile(), '/path/to/mode.h5')
+        self.assertEqual(p2.GetModeOrigin(), [1.0, 2.0, 3.0])
+
+    def test_probe_legacy_generic_mode_function(self):
+        # Simulate old Matlab-written XML: ModeFunctionX/Y/Z were stored as
+        # generic CSProperties attributes (<Attributes> child element) rather
+        # than as direct element attributes on <ProbeBox>.
+        # ReadFromXML must migrate them into m_ModeFunction and remove them
+        # from the generic attribute store.
+        probe = self.csx.AddProbe('probe_legacy', 10)
+        probe.SetAttributeValue('ModeFunctionX', 'sin(x)')
+        probe.SetAttributeValue('ModeFunctionY', 'cos(y)')
+        probe.SetAttributeValue('ModeFunctionZ', '0')
+
+        p2 = self._prop(self._roundtrip(), 'probe_legacy')
+        self.assertEqual(p2.GetModeFunction(), ['sin(x)', 'cos(y)', '0'])
+        # After migration the generic attributes must be gone
+        self.assertFalse(p2.ExistAttribute('ModeFunctionX'))
+        self.assertFalse(p2.ExistAttribute('ModeFunctionY'))
+        self.assertFalse(p2.ExistAttribute('ModeFunctionZ'))
 
     # ==================================================================
     # CSPropDumpBox
