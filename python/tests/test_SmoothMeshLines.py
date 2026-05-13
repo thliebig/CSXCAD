@@ -55,7 +55,7 @@ class Test_SmoothMeshLines(unittest.TestCase):
                 self.assertLessEqual(np.max(dl), 0.1 * (1 + 1e-9))
                 self.assertTrue(
                     np.allclose(dl, dl[0], rtol=1e-9),
-                    msg=f'mesh not uniform: max={np.max(dl):.6g}, min={np.min(dl):.6g}'
+                    msg='mesh not uniform: max={:.6g}, min={:.6g}'.format(np.max(dl), np.min(dl))
                 )
 
 
