@@ -44,6 +44,20 @@ class Test_SmoothMeshLines(unittest.TestCase):
         result = SmoothMeshLines(lines, max_res=2)
         self.assertTrue(np.all(np.diff(result) > 0))
 
+    def test_two_lines_produce_uniform_mesh(self):
+        # Two input lines with no neighbouring context must yield a uniform mesh.
+        # A floating-point glitch in np.linspace can cause spacings of max_res+eps
+        # which, if not tolerated, triggers ceil(1+eps)=2 and splits cells in half.
+        for ratio in [1.1, 1.3, 1.5, 2.0]:
+            with self.subTest(ratio=ratio):
+                result = SmoothMeshLines([0.0, 10.0], max_res=0.1, ratio=ratio)
+                dl = np.diff(result)
+                self.assertLessEqual(np.max(dl), 0.1 * (1 + 1e-9))
+                self.assertTrue(
+                    np.allclose(dl, dl[0], rtol=1e-9),
+                    msg=f'mesh not uniform: max={np.max(dl):.6g}, min={np.min(dl):.6g}'
+                )
+
 
 class Test_CSRectGrid_Smooth(unittest.TestCase):
     def test_smooth_mesh_lines(self):

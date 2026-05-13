@@ -211,7 +211,7 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
 
     dl = np.diff(out_l)
 
-    while len(np.where(dl>max_res)[0])>0:
+    while len(np.where(dl > max_res * (1 + 1e-10))[0]) > 0:
         N = len(out_l)
         dl[dl<=max_res] = np.max(dl)*2
         idx = np.argmin(dl)
