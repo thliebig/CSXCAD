@@ -25,6 +25,8 @@ from CSXCAD.CSPrimitives cimport _CSPrimitives, CSPrimitives
 from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.CSXCAD cimport ContinuousStructure
 
+from CSXCAD.CSRectGrid cimport CoordinateSystem
+
 cdef extern from "CSXCAD/CSProperties.h":
     cpdef enum PropertyType "CSProperties::PropertyType":
         ANY                "CSProperties::ANY"
@@ -79,6 +81,9 @@ cdef extern from "CSXCAD/CSProperties.h":
 
             bool GetVisibility()
             void SetVisibility(bool val)
+
+            void SetCoordInputType(CoordinateSystem ctype)
+            int  GetCoordInputType()
 
 cdef class CSProperties:
     cdef  _CSProperties *thisptr

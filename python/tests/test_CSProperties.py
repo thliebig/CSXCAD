@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 
 from CSXCAD import ParameterObjects
-from CSXCAD import CSProperties, CSPrimitives
+from CSXCAD import CSProperties, CSPrimitives, CSRectGrid
 from CSXCAD.CSProperties import CSPropDiscMaterial
 from CSXCAD.CSXCAD import ContinuousStructure
 
@@ -408,6 +408,59 @@ class Test_CSPrimMethods(unittest.TestCase):
                     self.assertAlmostEqual(
                         prop.GetWeightedExcitation(1, coords),
                         ref_Vy([[xi, yi]]).item(), places=10)
+        finally:
+            os.remove(path)
+
+    def test_excitation_cylindrical_analytic(self):
+        # With cylindrical input (rho, alpha, z), the analytic weight function
+        # receives the converted Cartesian coords and also rho/a/r/theta.
+        prop = CSProperties.CSPropExcitation(self.pset, exc_type=0, exc_val=[1.0, 1.0, 1.0])
+        prop.SetPropagationDir([0, 0, 1])
+        prop.SetCoordInputType(int(CSRectGrid.CoordinateSystem.CYLINDRICAL))
+        self.assertEqual(prop.GetCoordInputType(), 1)
+
+        prop.SetWeightFunction(['rho', 'a', '0'])   # rho and alpha (a) in drawing coords
+
+        rho, alpha = 2.0, np.pi / 4
+        # ny=0: weight = rho, returned as rho * exc_val[0] = rho
+        self.assertAlmostEqual(prop.GetWeightedExcitation(0, [rho, alpha, 0.0]), rho)
+        # ny=1: weight = a (alpha), returned as alpha * exc_val[1]
+        self.assertAlmostEqual(prop.GetWeightedExcitation(1, [rho, alpha, 0.0]), alpha)
+
+        # x = rho*cos(alpha), y = rho*sin(alpha) — weight 'x' should give that
+        prop.SetWeightFunction(['x', 'y', '0'])
+        self.assertAlmostEqual(prop.GetWeightedExcitation(0, [rho, alpha, 0.0]),
+                               rho * np.cos(alpha))
+        self.assertAlmostEqual(prop.GetWeightedExcitation(1, [rho, alpha, 0.0]),
+                               rho * np.sin(alpha))
+
+    @unittest.skipUnless(HAS_H5PY, 'h5py not available')
+    def test_excitation_cylindrical_weight_file(self):
+        # With cylindrical input and an HDF5 weight file the cylindrical coords
+        # must be converted to Cartesian before interpolation.
+        x = np.linspace(-1.0, 1.0, 9)
+        y = np.linspace(-1.0, 1.0, 9)
+        xv, yv = np.meshgrid(x, y, indexing='ij')
+        Vx = xv.copy()   # Vx(x,y) = x
+        Vy = yv.copy()   # Vy(x,y) = y
+
+        fd, path = tempfile.mkstemp(suffix='.h5')
+        os.close(fd)
+        try:
+            write_mode_hdf5(path, x, y, Vx, Vy)
+
+            prop = CSProperties.CSPropExcitation(self.pset, exc_type=0, exc_val=[1.0, 1.0, 1.0])
+            prop.SetPropagationDir([0, 0, 1])
+            prop.SetCoordInputType(int(CSRectGrid.CoordinateSystem.CYLINDRICAL))
+            prop.SetWeightFile(path)
+
+            for rho in [0.3, 0.6]:
+                for alpha in [0.0, np.pi/4, np.pi/2]:
+                    cx = [rho, alpha, 0.0]   # cylindrical input
+                    ex = rho * np.cos(alpha)  # expected Cartesian x
+                    ey = rho * np.sin(alpha)  # expected Cartesian y
+                    self.assertAlmostEqual(prop.GetWeightedExcitation(0, cx), ex, places=10)
+                    self.assertAlmostEqual(prop.GetWeightedExcitation(1, cx), ey, places=10)
         finally:
             os.remove(path)
 

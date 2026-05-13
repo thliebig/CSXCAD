@@ -314,6 +314,21 @@ cdef class CSProperties:
     def SetVisibility(self, val):
         self.thisptr.SetVisibility(val)
 
+    def SetCoordInputType(self, int ctype):
+        """ SetCoordInputType(ctype)
+
+        Set the coordinate system used when evaluating weight functions.
+        Use ``CSRectGrid.CoordinateSystem.CARTESIAN`` (0) or ``CSRectGrid.CoordinateSystem.CYLINDRICAL`` (1).
+        """
+        self.thisptr.SetCoordInputType(<CoordinateSystem>ctype)
+
+    def GetCoordInputType(self):
+        """ GetCoordInputType() -> int
+
+        Return the active coordinate system (0=Cartesian, 1=Cylindrical).
+        """
+        return self.thisptr.GetCoordInputType()
+
     def ExistAttribute(self, name):
         """ ExistAttribute(name)
 
