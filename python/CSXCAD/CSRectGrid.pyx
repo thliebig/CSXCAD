@@ -140,13 +140,13 @@ cdef class CSRectGrid:
         ny = CheckNyDir(ny)
         return self.thisptr.GetLine(ny, idx)
 
-    def GetLines(self, ny, do_sort=False):
-        """ GetLines(ny, do_sort=False)
+    def GetLines(self, ny, do_sort=True):
+        """ GetLines(ny, do_sort=True)
 
         Get all lines in a given direction `ny`.
 
         :param ny: int or str -- direction definition
-        :param do_sort: bool  -- sort lines
+        :param do_sort: bool  -- sort lines (default True)
         """
         ny = CheckNyDir(ny)
         cdef unsigned int N = 0

@@ -21,7 +21,7 @@ class Test_CSRectGrid(unittest.TestCase):
         self.assertEqual( grid.GetQtyLines('y'), 4 )
         grid.AddLine('y',[4, 2, 5])
         self.assertEqual( grid.GetQtyLines('y'), 7 )
-        self.assertTrue( (grid.GetLines('y')==np.array([-2.,  0.,  1.,  4.,  4., 2.,  5.])).all() )  # check unsorted lines
+        self.assertTrue( (grid.GetLines('y', do_sort=False)==np.array([-2.,  0.,  1.,  4.,  4., 2.,  5.])).all() )  # check unsorted lines
         grid.Sort('y')
         self.assertTrue( (grid.GetLines('y')==np.array([-2.,  0.,  1.,  2.,  4.,  5.])).all() )
         self.assertEqual( grid.GetQtyLines('y'), 6 )
