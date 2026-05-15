@@ -529,7 +529,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetDispersionOrder(), 3)
 
         with self.assertRaises(IndexError):
-            self.assertRaises(prop.SetDispersiveMaterialProperty(order=3, eps_plasma=1.2e9))
+            prop.SetDispersiveMaterialProperty(order=3, eps_plasma=1.2e9)
 
         prop.SetDispersiveMaterialProperty(order=0, eps_plasma=1.2e9)
         self.assertEqual(prop.GetDispersiveMaterialProperty('eps_plasma', order=0), 1.2e9)
@@ -583,7 +583,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetDispersionOrder(), 1)
 
         with self.assertRaises(IndexError):
-            self.assertRaises(prop.SetDispersiveMaterialProperty(order=1, eps_delta=1.2))
+            prop.SetDispersiveMaterialProperty(order=1, eps_delta=1.2)
 
         prop.SetDispersiveMaterialProperty(order=0, eps_delta=1.2)
         self.assertEqual(prop.GetDispersiveMaterialProperty('eps_delta', order=0), 1.2)

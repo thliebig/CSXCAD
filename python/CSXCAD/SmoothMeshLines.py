@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2015,20016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+# Copyright (C) 2015,2016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
@@ -28,7 +28,7 @@ def MeshLinesSymmetric(l, rel_tol=1e-6):
     if N%2==0: # even
         mid_val = 0.5*(l[0] + l[-1])
     else:      # off
-        mid_val = l[(N-1)/2]
+        mid_val = l[(N-1)//2]
 
     for n in range(int(N/2)):
         if np.abs(mid_val - np.sum((l[n], l[N-n-1])))>rng*rel_tol:

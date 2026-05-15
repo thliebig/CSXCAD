@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # cython: language_level=3
 #
-# Copyright (C) 2015,20016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
+# Copyright (C) 2015,2016 Thorsten Liebig (Thorsten.Liebig@gmx.de)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published
