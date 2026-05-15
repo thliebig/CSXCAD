@@ -66,6 +66,7 @@ void* ReadDataSet(std::string filename, std::string d_name, hid_t type_id, int &
 	{
 		if (debug)
 			std::cerr << __func__ << ": Warning, failed to read dataset info: \"" << d_name << "\" skipping..." << std::endl;
+		delete[] dims;
 		H5Fclose(file_id);
 		return NULL;
 	}
@@ -414,6 +415,7 @@ bool CSPropDiscMaterial::ReadHDF5( std::string filename )
 	}
 
 	// read database
+	delete[] m_Disc_epsR;
 	if (H5LTfind_attribute(dataset, "epsR")==1)
 	{
 		m_Disc_epsR = new float[db_size];
@@ -473,6 +475,7 @@ bool CSPropDiscMaterial::ReadHDF5( std::string filename )
 		m_Disc_Density=NULL;
 	}
 
+	H5Dclose(dataset);
 	H5Fclose(file_id);
 
 	// read mesh
@@ -486,7 +489,6 @@ bool CSPropDiscMaterial::ReadHDF5( std::string filename )
 		if ((m_mesh[n]==NULL) || (rank!=1) || (size<=1))
 		{
 			std::cerr << __func__ << ": Error, failed to read or invalid mesh, abort..." << std::endl;
-			H5Fclose(file_id);
 			return false;
 		}
 		m_Size[n]=size;

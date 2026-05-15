@@ -64,6 +64,7 @@ void Polyhedron_Builder::operator()(HalfedgeDS &hds)
 				if (B.error())
 				{
 					std::cerr << "Polyhedron_Builder::operator(): Error in polyhedron construction" << std::endl;
+					delete[] help;
 					break;
 				}
 				std::cerr << "success" << std::endl;

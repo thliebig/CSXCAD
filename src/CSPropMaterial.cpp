@@ -23,7 +23,7 @@ CSPropMaterial::CSPropMaterial(ParameterSet* paraSet) : CSProperties(paraSet)
 {
 	Type=MATERIAL;
 	Init();
-	bVisisble=true;
+	bVisible=true;
 	FillColor.a=EdgeColor.a=123; // default opacity for materials
 }
 CSPropMaterial::CSPropMaterial(CSPropMaterial* prop, bool copyPrim) : CSProperties(prop, copyPrim)
@@ -49,7 +49,7 @@ CSPropMaterial::CSPropMaterial(unsigned int ID, ParameterSet* paraSet) : CSPrope
 {
 	Type=MATERIAL;
 	Init();
-	bVisisble=true;
+	bVisible=true;
 	FillColor.a=EdgeColor.a=123; // default opacity for materials
 }
 CSPropMaterial::~CSPropMaterial() {}
@@ -64,7 +64,7 @@ double CSPropMaterial::GetValue(ParameterScalar *ps, int ny)
 std::string CSPropMaterial::GetTerm(ParameterScalar *ps, int ny)
 {
 	if (bIsotropy) ny=0;
-	if ((ny>2) || (ny<0)) return 0;
+	if ((ny>2) || (ny<0)) return std::string();
 	return ps[ny].GetString();
 }
 

@@ -295,7 +295,7 @@ bool CSTransform::RotateOrigin(std::string XYZ_A, bool concatenate)
 
 void CSTransform::RotateXYZ(int dir, double angle, bool concatenate)
 {
-	if ((dir<0) || (dir>3))
+	if ((dir<0) || (dir>2))
 		return;
 
 	double vec[4]={0,0,0,angle};
@@ -312,7 +312,7 @@ void CSTransform::RotateXYZ(int dir, double angle, bool concatenate)
 
 bool CSTransform::RotateXYZ(int dir, std::string angle, bool concatenate)
 {
-	if ((dir<0) || (dir>3))
+	if ((dir<0) || (dir>2))
 		return false;
 
 	ParameterScalar ps_angle(m_ParaSet, angle);
@@ -735,7 +735,8 @@ bool CSTransform::ReadFromXML(TiXmlNode* root)
 	TiXmlElement* PropNode = prop->FirstChildElement();
 	while (PropNode!=NULL)
 	{
-		std::string argument(PropNode->Attribute("Argument"));
+		const char* arg_attr = PropNode->Attribute("Argument");
+		std::string argument(arg_attr ? arg_attr : "");
 		if (TransformByString(PropNode->Value(),argument,true)==false)
 			std::cerr << "CSTransform::ReadFromXML: Warning: Reading of \"" << PropNode->Value() << "\" with arguments: \""  << argument << "\" failed." << std::endl;
 		PropNode=PropNode->NextSiblingElement();

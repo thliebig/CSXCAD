@@ -123,8 +123,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 bool CSPrimWire::Update(std::string *ErrStr)
 {
 	int EC=0;
-	bool bOK=true;
-	CSPrimCurve::Update(ErrStr);
+	bool bOK=CSPrimCurve::Update(ErrStr);
 
 	EC=wireRadius.Evaluate();
 	if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;

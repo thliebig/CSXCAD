@@ -39,7 +39,7 @@ CSPrimPolygon::CSPrimPolygon(CSPrimPolygon* primPolygon, CSProperties *prop) : C
 	m_NormDir = primPolygon->m_NormDir;
 	Elevation.Copy(&primPolygon->Elevation);
 	for (size_t i=0;i<primPolygon->vCoords.size();++i)
-		vCoords.push_back(new ParameterScalar(primPolygon->vCoords.at(i)));
+		vCoords.push_back(primPolygon->vCoords.at(i));
 	PrimTypeName = std::string("Polygon");
 }
 
@@ -124,7 +124,7 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	if (vCoords.size()<2)
 	{
 		for (int i=0;i<6;++i) dBoundBox[i]=0;
-		return dBoundBox;
+		return false;
 	}
 	double xmin = vCoords.at(0).GetValue(), xmax = vCoords.at(0).GetValue();
 	double ymin = vCoords.at(1).GetValue(), ymax = vCoords.at(1).GetValue();
@@ -225,9 +225,10 @@ bool CSPrimPolygon::Update(std::string *ErrStr)
 	if (! ((m_PrimCoordSystem==CARTESIAN) || (m_PrimCoordSystem==UNDEFINED_CS && m_MeshType==CARTESIAN)))
 	{
 		std::cerr << "CSPrimPolygon::Update: Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected..." << std::endl;
-		ErrStr->append("Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected...\n");
+		if (ErrStr!=NULL)
+			ErrStr->append("Warning: CSPrimPolygon can not be defined in non Cartesian coordinate systems! Result may be unexpected...\n");
 	}
-	for (size_t i=1;i<vCoords.size();++i)
+	for (size_t i=0;i<vCoords.size();++i)
 	{
 		EC=vCoords[i].Evaluate();
 		if (EC!=ParameterScalar::PS_NO_ERROR) bOK=false;

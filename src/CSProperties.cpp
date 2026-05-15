@@ -44,7 +44,7 @@ CSProperties::CSProperties(CSProperties* prop, bool copyPrim)
 	clParaSet=prop->clParaSet;
 	FillColor=prop->FillColor;
 	EdgeColor=prop->EdgeColor;
-	bVisisble=prop->bVisisble;
+	bVisible=prop->bVisible;
 	sName=std::string(prop->sName);
 	if (copyPrim)
 		for (size_t i=0;i<prop->vPrimitives.size();++i)
@@ -66,7 +66,7 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 	EdgeColor.G=FillColor.G;
 	EdgeColor.B=FillColor.B;
 	FillColor.a=EdgeColor.a=255;
-	bVisisble=true;
+	bVisible=true;
 	Type=ANY;
 	InitCoordParameter();
 }
@@ -83,7 +83,7 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 	EdgeColor.G=FillColor.G;
 	EdgeColor.B=FillColor.B;
 	FillColor.a=EdgeColor.a=255;
-	bVisisble=true;
+	bVisible=true;
 	Type=ANY;
 	InitCoordParameter();
 }
@@ -192,8 +192,8 @@ RGBa CSProperties::GetEdgeColor() {return EdgeColor;}
 void CSProperties::SetEdgeColor(RGBa color) {EdgeColor.R=color.R;EdgeColor.G=color.G;EdgeColor.B=color.B;EdgeColor.a=color.a;}
 void CSProperties::SetEdgeColor(unsigned char R, unsigned char G, unsigned char B, unsigned char a) {EdgeColor.R=R;EdgeColor.G=G;EdgeColor.B=B;EdgeColor.a=a;}
 
-bool CSProperties::GetVisibility() {return bVisisble;}
-void CSProperties::SetVisibility(bool val) {bVisisble=val;}
+bool CSProperties::GetVisibility() {return bVisible;}
+void CSProperties::SetVisibility(bool val) {bVisible=val;}
 
 CSPropUnknown* CSProperties::ToUnknown() { return dynamic_cast<CSPropUnknown*>(this); }
 CSPropMaterial* CSProperties::ToMaterial() { return dynamic_cast<CSPropMaterial*>(this); }
@@ -216,7 +216,7 @@ bool CSProperties::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 
 	prop->SetAttribute("ID",uiID);
 	prop->SetAttribute("Name",sName.c_str());
-	if (!bVisisble)
+	if (!bVisible)
 		prop->SetAttribute("Visible",0);
 
 	if (!sparse)
@@ -385,7 +385,7 @@ bool CSProperties::ReadFromXML(TiXmlNode &root)
 
 	int iVisible;
 	if (prop->QueryIntAttribute("Visible",&iVisible)==TIXML_SUCCESS)
-		bVisisble = (iVisible != 0);
+		bVisible = (iVisible != 0);
 
 	TiXmlElement* FC = root.FirstChildElement("FillColor");
 	if (FC!=NULL)

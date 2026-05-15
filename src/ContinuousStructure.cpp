@@ -111,9 +111,9 @@ void ContinuousStructure::RemoveProperty(CSProperties* prop)
 		if (*iter==prop)
 		{
 			vProperties.erase(iter);
+			this->UpdateIDs();
 			return;
 		}
-	this->UpdateIDs();
 }
 
 void ContinuousStructure::DeleteProperty(size_t index)
@@ -134,9 +134,10 @@ void ContinuousStructure::DeleteProperty(CSProperties* prop)
 		{
 			delete *iter;
 			vProperties.erase(iter);
+			this->UpdateIDs();
+			return;
 		}
 	}
-	this->UpdateIDs();
 }
 
 int ContinuousStructure::GetIndex(CSProperties* prop)
@@ -284,7 +285,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 	{
 		if ((type==CSProperties::ANY) || (vProperties.at(i)->GetType() & type))
 		{
-			locPrim = vProperties.at(i)->CheckCoordInPrimitive(coord,locPrio,dDrawingTol);
+			locPrim = vProperties.at(i)->CheckCoordInPrimitive(coord,locPrio,false,dDrawingTol);
 			if (locPrim)
 			{
 				if (winProp==NULL)
@@ -497,7 +498,6 @@ bool ContinuousStructure::Write2XML(std::string file, bool parameterised, bool s
 
 	if (Write2XML(&doc,parameterised,sparse)==false) return false;
 
-	doc.SaveFile();
 	return doc.SaveFile();
 }
 

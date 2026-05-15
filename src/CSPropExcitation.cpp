@@ -73,7 +73,7 @@ double CSPropExcitation::GetExcitation(int Component)
 
 const std::string CSPropExcitation::GetExcitationString(int Comp)
 {
-	if ((Comp<0) || (Comp>=3)) return NULL;
+	if ((Comp<0) || (Comp>=3)) return std::string();
 	return Excitation[Comp].GetString();
 }
 
@@ -249,7 +249,7 @@ double CSPropExcitation::GetPropagationDir(int Component)
 
 const std::string CSPropExcitation::GetPropagationDirString(int Comp)
 {
-	if ((Comp<0) || (Comp>=3)) return NULL;
+	if ((Comp<0) || (Comp>=3)) return std::string();
 	return PropagationDir[Comp].GetString();
 }
 

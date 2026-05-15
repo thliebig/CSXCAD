@@ -27,16 +27,13 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 #include "ParameterObjects.h"
 #include "CSTransform.h"
 #include "CSXCAD_Global.h"
 #include "CSUseful.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 
 class CSPrimitives;
 
@@ -226,7 +223,7 @@ protected:
 	RGBa FillColor;
 	RGBa EdgeColor;
 
-	bool bVisisble;
+	bool bVisible;
 
 	std::vector<CSPrimitives*> vPrimitives;
 

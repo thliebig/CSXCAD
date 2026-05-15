@@ -19,8 +19,8 @@
 
 #include "CSPropUnknown.h"
 
-CSPropUnknown::CSPropUnknown(ParameterSet* paraSet) : CSProperties(paraSet) {Type=UNKNOWN;bVisisble=false;}
-CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=UNKNOWN;bVisisble=false;}
+CSPropUnknown::CSPropUnknown(ParameterSet* paraSet) : CSProperties(paraSet) {Type=UNKNOWN;bVisible=false;}
+CSPropUnknown::CSPropUnknown(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=UNKNOWN;bVisible=false;}
 CSPropUnknown::CSPropUnknown(CSPropUnknown* prop, bool copyPrim) : CSProperties(prop, copyPrim)
 {
 	Type=UNKNOWN;

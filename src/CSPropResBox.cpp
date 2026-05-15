@@ -19,13 +19,13 @@
 
 #include "CSPropResBox.h"
 
-CSPropResBox::CSPropResBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
+CSPropResBox::CSPropResBox(ParameterSet* paraSet) : CSProperties(paraSet) {Type=RESBOX;uiFactor=1;bVisible=false;}
 CSPropResBox::CSPropResBox(CSPropResBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
 {
 	Type=RESBOX;
 	uiFactor=prop->uiFactor;
 }
-CSPropResBox::CSPropResBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=RESBOX;uiFactor=1;bVisisble=false;}
+CSPropResBox::CSPropResBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet) {Type=RESBOX;uiFactor=1;bVisible=false;}
 CSPropResBox::~CSPropResBox() {};
 
 void CSPropResBox::SetResFactor(unsigned int val)  {uiFactor=val;}

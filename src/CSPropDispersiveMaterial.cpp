@@ -56,8 +56,8 @@ double CSPropDispersiveMaterial::GetValue3(ParameterScalar **ps, int order, int 
 
 std::string CSPropDispersiveMaterial::GetTerm3(ParameterScalar **ps, int order, int ny)
 {
-	if ((ny>2) || (ny<0)) return 0;
-	if ((order>=m_Order) || (order<0)) return 0;
+	if ((ny>2) || (ny<0)) return std::string();
+	if ((order>=m_Order) || (order<0)) return std::string();
 	return this->GetTerm(ps[order], ny);
 }
 

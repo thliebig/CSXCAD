@@ -21,7 +21,7 @@
 
 CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
 {
-	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisisble=false; startTime=0; stopTime=0;
+	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisible=false; startTime=0; stopTime=0;
 	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
 }
 CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
@@ -40,7 +40,7 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 }
 CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
 {
-	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisisble=false; startTime=0; stopTime=0;
+	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisible=false; startTime=0; stopTime=0;
 	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
 }
 CSPropProbeBox::~CSPropProbeBox() {}
@@ -67,8 +67,6 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	if (prop==NULL) return false;
 
 	prop->SetAttribute("Number",(int)uiNumber);
-	if ((m_NormDir>0) && (m_NormDir<3))
-			prop->SetAttribute("NormDir",(int)uiNumber);
 	prop->SetAttribute("Type",ProbeType);
 	prop->SetDoubleAttribute("Weight",m_weight);
 	prop->SetAttribute("NormDir",m_NormDir);

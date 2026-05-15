@@ -96,7 +96,7 @@ bool CSPrimPoint::IsInside(const double* /*Coord*/, double /*tol*/)
 bool CSPrimPoint::Update(std::string *ErrStr)
 {
 	bool bOK=m_Coords.Evaluate(ErrStr);
-	if (bOK==false)
+	if (bOK==false && ErrStr!=NULL)
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Point (ID: " << uiID << "): ";

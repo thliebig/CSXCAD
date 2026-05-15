@@ -133,7 +133,7 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 bool CSPrimBox::Update(std::string *ErrStr)
 {
 	bool bOK=m_Coords[0].Evaluate(ErrStr) && m_Coords[1].Evaluate(ErrStr);
-	if (bOK==false)
+	if (bOK==false && ErrStr!=NULL)
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in Box (ID: " << uiID << "): ";

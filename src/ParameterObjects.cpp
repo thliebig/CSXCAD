@@ -38,7 +38,7 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 		elem.SetAttribute(attr,PS.GetString().c_str());
 	else
 	{
-		if (PS.GetValue()==NAN)
+		if (std::isnan(PS.GetValue()))
 			return;
 		if (scientific)
 		{
@@ -98,7 +98,7 @@ void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr
 	{
 		if (PS[i].GetMode() && mode)
 			ss << PS[i].GetString();
-		else if (PS[i].GetValue()==NAN)
+		else if (std::isnan(PS[i].GetValue()))
 			ss << "NAN" << std::endl;
 		else
 			ss << PS[i].GetValue();
@@ -292,8 +292,9 @@ size_t ParameterSet::LinkParameter(Parameter* newPara)
 size_t ParameterSet::DeleteParameter(size_t index)
 {
 	if (index>=vParameter.size()) return vParameter.size();
-	std::vector<Parameter*>::iterator pIter=vParameter.begin();
-	vParameter.erase(pIter+index);
+	std::vector<Parameter*>::iterator pIter=vParameter.begin()+index;
+	delete *pIter;
+	vParameter.erase(pIter);
 
 	return vParameter.size();
 }
@@ -305,6 +306,7 @@ size_t ParameterSet::DeleteParameter(Parameter* para)
 	{
 		if (*pIter==para)
 		{
+			delete *pIter;
 			vParameter.erase(pIter);
 			return vParameter.size();
 		}
@@ -501,7 +503,10 @@ bool ParameterSet::ReadFromXML(TiXmlNode &root)
 				else if (strcmp(att,"Linear")==0) newPara = new LinearParameter();
 				if (newPara!=NULL)
 				{
-					if (newPara->ReadFromXML(*elem)==true) this->InsertParameter(newPara);
+					if (newPara->ReadFromXML(*elem)==true)
+						this->LinkParameter(newPara);
+					else
+						delete newPara;
 				}
 			}
 		}
@@ -626,7 +631,7 @@ double ParameterScalar::GetEvaluated(double* ParaValues, int &EC)
 {
 	if (ParameterMode==false) return dValue;
 	CSFunctionParser fParse;
-	fParse.Parse(sValue,clParaSet->GetParameterString());
+	fParse.Parse(sValue, clParaSet ? clParaSet->GetParameterString() : std::string());
 	if (fParse.GetParseErrorType()!=FunctionParser::FP_NO_ERROR)
 	{
 		EC = fParse.GetParseErrorType()+100;

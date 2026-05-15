@@ -118,24 +118,27 @@ bool CSPrimPolyhedronReader::ReadFromXML(TiXmlNode &root)
 
 bool CSPrimPolyhedronReader::ReadFile()
 {
+	vtkObject *readerObj = NULL;
 	vtkPolyData *polydata = NULL;
 	switch (m_filetype)
 	{
 	case STL_FILE:
 	{
 		vtkSTLReader* reader = vtkSTLReader::New();
+		readerObj = reader;
 		reader->SetFileName(m_filename.c_str());
 		reader->SetMerging(1);
-		polydata = reader->GetOutput(0);
 		reader->Update();
+		polydata = reader->GetOutput(0);
 		break;
 	}
 	case PLY_FILE:
 	{
 		vtkPLYReader* reader = vtkPLYReader::New();
+		readerObj = reader;
 		reader->SetFileName(m_filename.c_str());
-		polydata = reader->GetOutput(0);
 		reader->Update();
+		polydata = reader->GetOutput(0);
 		break;
 	}
 	case UNKNOWN:
@@ -143,19 +146,20 @@ bool CSPrimPolyhedronReader::ReadFile()
 	{
 		std::cerr << "CSPrimPolyhedronReader::ReadFile: unknown filetype, skipping..." << std::endl;
 		return false;
-		break;
 	}
 	}
-	//polydata->Update(); // not availabe for vtk 6.x, now done only on reader?
-	if ((polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
+	//polydata->Update(); // not available for vtk 6.x, now done only on reader?
+	if ((polydata==NULL) || (polydata->GetNumberOfPoints()==0) || (polydata->GetNumberOfCells()==0))
 	{
 		std::cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << std::endl;
+		readerObj->Delete();
 		return false;
 	}
 	vtkCellArray *verts = polydata->GetPolys();
 	if (verts->GetNumberOfCells()==0)
 	{
 		std::cerr << "CSPrimPolyhedronReader::ReadFile: file invalid or empty, skipping ..." << std::endl;
+		readerObj->Delete();
 		return false;
 	}
 
@@ -179,5 +183,6 @@ bool CSPrimPolyhedronReader::ReadFile()
 			f.vertices[np]=vertices[np];
 		AddFace(f);
 	}
+	readerObj->Delete();
 	return true;
 }

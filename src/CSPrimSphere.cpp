@@ -117,7 +117,7 @@ bool CSPrimSphere::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=m_Center.Evaluate(ErrStr);
-	if (bOK==false)
+	if (bOK==false && ErrStr!=NULL)
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in " << PrimTypeName << " Center Point (ID: " << uiID << "): ";

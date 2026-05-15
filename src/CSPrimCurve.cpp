@@ -48,6 +48,8 @@ CSPrimCurve::CSPrimCurve(ParameterSet* paraSet, CSProperties* prop) : CSPrimitiv
 
 CSPrimCurve::~CSPrimCurve()
 {
+	for (size_t i=0;i<points.size();++i)
+		delete points.at(i);
 	points.clear();
 }
 
@@ -97,6 +99,8 @@ bool CSPrimCurve::GetPoint(size_t point_index, double* point, CoordinateSystem c
 void CSPrimCurve::ClearPoints()
 {
 	Invalidate();
+	for (size_t i=0;i<points.size();++i)
+		delete points.at(i);
 	points.clear();
 }
 
@@ -144,7 +148,7 @@ bool CSPrimCurve::Update(std::string *ErrStr)
 	for (size_t i=0;i<GetNumberOfPoints();++i)
 	{
 		bool isOK = points.at(i)->Evaluate(ErrStr);
-		if (isOK==false)
+		if (isOK==false && ErrStr!=NULL)
 		{
 			std::stringstream stream;
 			stream << std::endl << "Error in " << PrimTypeName << " (ID: " << uiID << "): ";
@@ -185,6 +189,8 @@ bool CSPrimCurve::ReadFromXML(TiXmlNode &root)
 		newPoint = new ParameterCoord(clParaSet);
 		if (newPoint->ReadFromXML(VT))
 			points.push_back(newPoint);
+		else
+			delete newPoint;
 		VT=VT->NextSiblingElement("Vertex");
 	};
 

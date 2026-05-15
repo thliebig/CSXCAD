@@ -217,7 +217,7 @@ CoordinateSystem CSRectGrid::GetMeshType() {return m_meshType;}
 void CSRectGrid::IncreaseResolution(int nu, int factor)
 {
 	if ((nu<0) || (nu>=GetDimension())) return;
-	if ((factor<=1) && (factor>9)) return;
+	if ((factor<=1) || (factor>9)) return;
 	size_t size=Lines[nu].size();
 	for (size_t i=0;i<size-1;++i)
 	{

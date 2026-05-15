@@ -243,7 +243,7 @@ bool CSPrimCylinder::Update(std::string *ErrStr)
 {
 	int EC=0;
 	bool bOK=m_AxisCoords[0].Evaluate(ErrStr) && m_AxisCoords[1].Evaluate(ErrStr);
-	if (bOK==false)
+	if (bOK==false && ErrStr!=NULL)
 	{
 		std::stringstream stream;
 		stream << std::endl << "Error in " << PrimTypeName << " Coord (ID: " << uiID << "): ";

@@ -217,7 +217,7 @@ public:
 	ParameterScalar();
 	ParameterScalar(ParameterSet* ParaSet, double value);
 	ParameterScalar(ParameterSet* ParaSet, const std::string value);
-	ParameterScalar(ParameterScalar* ps);
+	explicit ParameterScalar(ParameterScalar* ps);
 	~ParameterScalar();
 
 	void SetParameterSet(ParameterSet *paraSet);
