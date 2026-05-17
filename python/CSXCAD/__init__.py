@@ -2,19 +2,22 @@
 #
 # Shortcut CSXCAD import
 
-from __future__ import absolute_import
-
 AppCSXCAD_BIN = 'AppCSXCAD'
 
 import os
-if os.name == 'nt' and 'CSXCAD_INSTALL_PATH' in os.environ and os.path.exists(os.environ['CSXCAD_INSTALL_PATH']):
-    try:  # to use Python 3.8's DLL handling
-        os.add_dll_directory(os.environ['CSXCAD_INSTALL_PATH'])
-    except AttributeError:  # <3.8, use PATH
-        if os.environ['CSXCAD_INSTALL_PATH'] not in os.environ['PATH']:
-            os.environ['PATH'] += os.pathsep + os.environ['CSXCAD_INSTALL_PATH']
-    
-    AppCSXCAD_BIN = os.path.join(os.environ['CSXCAD_INSTALL_PATH'], 'AppCSXCAD')
+if os.name == 'nt':
+    _install_path = os.environ.get('CSXCAD_INSTALL_PATH', None)
+    if _install_path is None:
+        # openEMS is the primary user of CSXCAD, check if it has set an install path (fallback)
+        _install_path = os.environ.get('OPENEMS_INSTALL_PATH', None)
+    if _install_path and os.path.exists(_install_path):
+        try:  # to use Python 3.8's DLL handling
+            os.add_dll_directory(_install_path)
+        except AttributeError:  # <3.8, use PATH
+            if _install_path not in os.environ['PATH']:
+                os.environ['PATH'] += os.pathsep + _install_path
+
+        AppCSXCAD_BIN = os.path.join(_install_path, 'AppCSXCAD')
 
 try:
     from importlib.metadata import version
