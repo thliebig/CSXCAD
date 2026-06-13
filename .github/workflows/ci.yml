@@ -542,8 +542,8 @@ jobs:
           # since 2011, TinyXML2 is not API-compatible. As a stop-gap,
           # build from source.
           #
-          # -L: follow redirect, REQUIRED!
-          curl -L https://sourceforge.net/projects/tinyxml/files/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz -o tinyxml-2.6.2.tar.gz
+          # SourceForge is unreliable in CI; use the Debian mirror instead.
+          curl -L "https://deb.debian.org/debian/pool/main/t/tinyxml/tinyxml_2.6.2.orig.tar.gz" -o tinyxml-2.6.2.tar.gz
           tar -xf tinyxml-2.6.2.tar.gz
           cd tinyxml
 
@@ -806,7 +806,6 @@ jobs:
             CXX: "clang-cl"
 
     env:
-      VS_ROOT_DIR: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/"
       CC: "${{ matrix.toolchain.CC }}"
       CXX: "${{ matrix.toolchain.CXX }}"
       CFLAGS: "/D_WIN32_WINNT=0x0601"
@@ -821,6 +820,15 @@ jobs:
     name: "Windows (${{ matrix.toolchain.name }}, latest)"
 
     steps:
+      - name: Locate Visual Studio installation
+        shell: pwsh
+        run: |
+          $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+            -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          if (-not $vsPath) { throw "Visual Studio with VC tools not found via vswhere" }
+          echo "VS_ROOT_DIR=$vsPath" >> $env:GITHUB_ENV
+
       - name: Show checkout sources
         run: |
           echo "$env:FPARSER_CHECKOUT_TITLE"
