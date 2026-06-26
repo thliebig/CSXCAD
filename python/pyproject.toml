@@ -23,7 +23,7 @@ version_scheme = "no-guess-dev"
 # parser in setup.py, which finds "fallback_version" and reads everything
 # after the equal (=) sign, on legacy usage without setuptools_scm (e.g.
 # calling setup.py directly).
-fallback_version = "0.6.3"
+fallback_version = "0.7.0"
 
 [project]
 name = "CSXCAD"
