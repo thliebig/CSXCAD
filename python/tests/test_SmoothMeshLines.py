@@ -39,6 +39,36 @@ class Test_SmoothMeshLines(unittest.TestCase):
         for n in range(N // 2):
             self.assertAlmostEqual(center - result[n], result[N - n - 1] - center, places=6)
 
+    def test_symmetric_domain_preserves_fixed_lines(self):
+        # Regression test for openEMS-Project issue #470.
+        # An (accidentally) symmetric input used to discard the user's fixed
+        # lines and rebuild them by mirroring through a floating-point center,
+        # perturbing an exact 1.524 into 1.524000000000001. A zero-thickness PEC
+        # primitive at 1.524 then coincides with no grid plane and is silently
+        # dropped by the solver.
+        lines = np.unique([-75.0, 76.524] + np.linspace(0, 1.524, 5).tolist())
+        result = SmoothMeshLines(lines, 4.99654097, 1.4)
+        self.assertTrue(
+            np.any(result == 1.524),
+            msg='fixed line 1.524 not preserved, nearest={!r}'.format(
+                result[np.argmin(np.abs(result - 1.524))])
+        )
+
+    def test_check_symmetry_false_disables_detection(self):
+        # check_symmetry=False must smooth the full line set directly instead of
+        # mirroring one half, giving a different result for a symmetric input.
+        lines = np.unique([-75.0, 76.524] + np.linspace(0, 1.524, 5).tolist())
+        detected = SmoothMeshLines(lines, 4.99654097, 1.4)
+        full     = SmoothMeshLines(lines, 4.99654097, 1.4, check_symmetry=False)
+        self.assertFalse(
+            np.array_equal(detected, full),
+            msg='check_symmetry=False produced the mirrored (symmetric) result'
+        )
+        # disabling detection must still respect max_res and keep endpoints
+        self.assertTrue(np.all(np.diff(full) <= 4.99654097 * (1 + 1e-10)))
+        self.assertEqual(full[0], lines[0])
+        self.assertEqual(full[-1], lines[-1])
+
     def test_result_is_sorted(self):
         lines = [0, 3, 1, 8]
         result = SmoothMeshLines(lines, max_res=2)

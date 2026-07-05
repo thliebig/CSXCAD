@@ -186,7 +186,31 @@ def CheckSymmetry(lines):
     # if all checks pass, return true
     return 2 if NP%2==0 else 1
 
-def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
+def SnapToLines(lines, ref, tol=1e-10):
+    """
+    Internal function, do not use.
+
+    Snap every value in ``lines`` that lies within ``tol`` (relative to the
+    total range of ``ref``) of a value in ``ref`` back onto that exact reference
+    value. Used to preserve user-supplied fixed mesh lines bit-exactly through
+    the mirrored (symmetric) smoothing paths, which otherwise reconstruct them
+    from a floating-point center and introduce a ~1 ULP error.
+    """
+    lines = np.array(lines, dtype=float)
+    ref = np.asarray(ref, dtype=float)
+    if len(ref)<2:
+        return lines
+    abs_tol = (ref[-1]-ref[0])*tol
+    # nearest reference line for each input line
+    idx = np.clip(np.searchsorted(ref, lines), 1, len(ref)-1)
+    left  = ref[idx-1]
+    right = ref[idx]
+    nearest = np.where(lines-left <= right-lines, left, right)
+    snap = np.abs(lines-nearest) <= abs_tol
+    lines[snap] = nearest[snap]
+    return lines
+
+def SmoothMeshLines(lines, max_res, ratio=1.5, check_symmetry=True, **kw):
     """This is the form of a docstring.
 
     Parameters
@@ -198,10 +222,16 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
         Maximum allowed resolution, resulting mesh will always stay below that value
     ratio : float
         Ratio of increase or decrease of neighboring mesh lines
+    check_symmetry : bool
+        If True (default), a symmetric input mesh is detected and only one half
+        is smoothed and mirrored. Set to False to disable this detection and
+        smooth the full line set directly (e.g. if a coincidentally-symmetric
+        mesh should not be treated as symmetric).
 
     """
     out_l = Unique(lines)
-    sym = CheckSymmetry(out_l)
+    orig_l = out_l
+    sym = CheckSymmetry(out_l) if check_symmetry else 0
     if sym==1:
         center = 0.5*(out_l[-1]+out_l[0])
         out_l = out_l[:int(len(out_l)/2)+1]
@@ -232,10 +262,10 @@ def SmoothMeshLines(lines, max_res, ratio=1.5, **kw):
             break
 
     if sym==1:
-        return Unique(np.r_[out_l, 2*center-out_l[:-1]])
+        return SnapToLines(Unique(np.r_[out_l, 2*center-out_l[:-1]]), orig_l)
     elif sym==2:
         l = SmoothRange(out_l[-1], 2*center-out_l[-1], dl[-1], dl[-1], max_res, ratio)
-        return Unique(np.r_[out_l, l, 2*center-out_l])
+        return SnapToLines(Unique(np.r_[out_l, l, 2*center-out_l]), orig_l)
     return Unique(out_l)
 
 

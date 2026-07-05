@@ -167,21 +167,23 @@ cdef class CSRectGrid:
         ny = CheckNyDir(ny)
         self.thisptr.ClearLines(ny)
 
-    def SmoothMeshLines(self, ny, max_res, ratio=1.5):
-        """ SmoothMeshLines(ny, max_res, ratio=1.5)
+    def SmoothMeshLines(self, ny, max_res, ratio=1.5, check_symmetry=True):
+        """ SmoothMeshLines(ny, max_res, ratio=1.5, check_symmetry=True)
 
         Smooth all mesh lines in the given direction with a max. allowed resolution.
 
         :param ny: int or str -- direction definition or 'all' for all directions
         :param max_res: float -- max. allowed resolution
         :param ratio:   float -- max. allowed ration of mesh smoothing de/increase
+        :param check_symmetry: bool -- detect a symmetric mesh and smooth only one
+            half (default True); set False to disable and smooth the full line set
         """
         if ny=='all':
             for n in range(3):
-                self.SmoothMeshLines(n, max_res, ratio)
+                self.SmoothMeshLines(n, max_res, ratio, check_symmetry)
         else:
             lines = self.GetLines(ny)
-            lines = SmoothMeshLines(lines, max_res, ratio)
+            lines = SmoothMeshLines(lines, max_res, ratio, check_symmetry=check_symmetry)
             self.SetLines(ny, lines)
 
     def Clear(self):
