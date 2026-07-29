@@ -1125,7 +1125,16 @@ cdef class CSPropExcitation(CSProperties):
         so the weight can be defined relative to a port corner (0,0,0) rather
         than the global simulation origin.
 
-        :param origin: (3,) array -- [x, y, z] in drawing units
+        The origin is a **Cartesian** point for any mesh type. Coordinates are
+        converted to Cartesian and shifted, and only then are x/y/z/rho/a/r/t
+        derived, so that rho and a are measured from this point. On a
+        cylindrical mesh pass [0, 0, z] to keep the profile on the mesh axis.
+
+        A mode-match probe sampling the same mode must be given the same origin
+        via :meth:`CSPropProbeBox.SetModeOrigin`, otherwise the excited and the
+        probed mode differ and the mode match degrades.
+
+        :param origin: (3,) array -- Cartesian [x, y, z] in drawing units
         """
         assert len(origin) == 3, 'origin must have 3 elements'
         (<_CSPropExcitation*>self.thisptr).SetWeightOrigin(origin[0], origin[1], origin[2])
@@ -1329,7 +1338,16 @@ cdef class CSPropProbeBox(CSProperties):
         Stored and serialized by CSXCAD; applied by the simulator during
         mode-matching integration.
 
-        :param origin: (3,) array -- [x, y, z] in drawing units
+        The origin is a **Cartesian** point for any mesh type. Coordinates are
+        converted to Cartesian and shifted, and only then are x/y/z/rho/a/r/t
+        derived, so that rho and a are measured from this point. On a
+        cylindrical mesh pass [0, 0, z] to keep the profile on the mesh axis.
+
+        This must match the origin given to the excitation driving the same
+        mode via :meth:`CSPropExcitation.SetWeightOrigin`, otherwise the
+        excited and the probed mode differ and the mode match degrades.
+
+        :param origin: (3,) array -- Cartesian [x, y, z] in drawing units
         """
         assert len(origin) == 3, 'origin must have 3 elements'
         (<_CSPropProbeBox*>self.thisptr).SetModeOrigin(origin[0], origin[1], origin[2])
