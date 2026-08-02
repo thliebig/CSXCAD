@@ -1171,7 +1171,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         Get if face with index "idx" is valid
 
         :param idx: int -- Face index to return
-        :returns bool -- valid face
+        :returns: bool -- valid face
         """
         ptr = <_CSPrimPolyhedron*>self.thisptr
         return ptr.GetFaceValid(idx)
