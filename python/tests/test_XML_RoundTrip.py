@@ -596,6 +596,42 @@ class TestDiscMaterial(unittest.TestCase):
         self.assertFalse(d2.GetUseDataBaseForBackground())
 
 
+    def test_legacy_octave_xml(self):
+        """Legacy serialisers put File/Scale as attributes directly on <DiscMaterial>.
+        ReadFromXML must fall back to reading from the parent element so that
+        older XML files remain usable."""
+        # Minimal XML in the legacy format: File/Scale on <DiscMaterial> directly,
+        # no <DiscFile> child.
+        legacy_xml = """\
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<ContinuousStructure CoordSystem="0">
+    <RectilinearGrid DeltaUnit="1e-3" CoordSystem="0">
+        <XLines Qty="0" /><YLines Qty="0" /><ZLines Qty="0" />
+    </RectilinearGrid>
+    <Properties>
+        <DiscMaterial ID="0" Name="legacy" File="old.h5" Scale="500" UseDBBackground="0">
+            <Primitives/>
+        </DiscMaterial>
+    </Properties>
+</ContinuousStructure>
+"""
+        fn = os.path.join(tempfile.gettempdir(), 'test_disc_legacy.xml')
+        try:
+            with open(fn, 'w') as f:
+                f.write(legacy_xml)
+            csx = ContinuousStructure()
+            csx.ReadFromXML(fn)
+            props = csx.GetPropertiesByName('legacy')
+            self.assertEqual(len(props), 1)
+            d = props[0]
+            self.assertEqual(d.GetFilename(), 'old.h5')
+            self.assertAlmostEqual(d.GetScale(), 500.0)
+            self.assertFalse(d.GetUseDataBaseForBackground())
+        finally:
+            if os.path.exists(fn):
+                os.remove(fn)
+
+
 class TestMultiBox(unittest.TestCase):
     def setUp(self):
         self.csx = ContinuousStructure()

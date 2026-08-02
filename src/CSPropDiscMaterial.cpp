@@ -329,6 +329,7 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 	TiXmlElement* dfElem = prop->FirstChildElement("DiscFile");
 	if (dfElem)
 	{
+		// Canonical format: File/Scale inside <DiscFile> child element (matches Write2XML).
 		m_FileType = 0;
 		dfElem->QueryIntAttribute("Type",&m_FileType);
 		if (dfElem->QueryStringAttribute("File",&m_Filename)!=TIXML_SUCCESS)
@@ -339,6 +340,22 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 			SetUseDataBaseForBackground(help!=0);
 
 		if (dfElem->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
+			m_Scale=1;
+	}
+	else
+	{
+		// Legacy format: File/Scale as attributes on <DiscMaterial> element.
+		// Read for backward compatibility with older serializers.
+		m_FileType = 0;
+		prop->QueryIntAttribute("Type",&m_FileType);
+		if (prop->QueryStringAttribute("File",&m_Filename)!=TIXML_SUCCESS)
+			m_Filename.clear();
+
+		int help;
+		if (prop->QueryIntAttribute("UseDBBackground",&help)==TIXML_SUCCESS)
+			SetUseDataBaseForBackground(help!=0);
+
+		if (prop->QueryDoubleAttribute("Scale",&m_Scale)!=TIXML_SUCCESS)
 			m_Scale=1;
 	}
 
