@@ -273,7 +273,10 @@ void CSPropDiscMaterial::Init()
 	m_DB_Background = true;
 
 	for (int n=0;n<3;++n)
+	{
 		m_mesh[n]=NULL;
+		m_Size[n]=0;
+	}
 	m_Disc_Ind=NULL;
 	m_Disc_epsR=NULL;
 	m_Disc_kappa=NULL;
@@ -540,8 +543,20 @@ void CSPropDiscMaterial::ShowPropertyStatus(std::ostream& stream)
 	stream << "  Density\t: " << Density.GetValueString() << std::endl;
 }
 
-vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel() const
+vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel()
 {
+	// the voxel data is loaded lazily, make sure it is available before using it
+	EnsureFileLoaded();
+
+	// without valid data the unsigned loop bounds below would underflow (m_Size-1)
+	// and m_Disc_Ind/m_mesh would be dereferenced as NULL
+	if ((m_Disc_Ind==NULL) || (m_mesh[0]==NULL) || (m_mesh[1]==NULL) || (m_mesh[2]==NULL)
+		|| (m_Size[0]<2) || (m_Size[1]<2) || (m_Size[2]<2))
+	{
+		std::cerr << __func__ << ": Error, no valid discrete material data available, skipping model creation..." << std::endl;
+		return NULL;
+	}
+
 	vtkPolyData* polydata = vtkPolyData::New();
 	vtkCellArray *poly = vtkCellArray::New();
 	vtkPoints *points = vtkPoints::New();

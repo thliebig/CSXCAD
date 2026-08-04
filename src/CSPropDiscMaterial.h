@@ -83,8 +83,9 @@ public:
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
-	//! Create a vtkPolyData surface that separates the discrete material from background material
-	virtual vtkPolyData* CreatePolyDataModel() const;
+	//! Create a vtkPolyData surface that separates the discrete material from background material.
+	//! Loads the data file if not already read. Returns NULL if no valid data is available.
+	virtual vtkPolyData* CreatePolyDataModel();
 
 protected:
 	unsigned int GetWeightingPos(const double* coords);
