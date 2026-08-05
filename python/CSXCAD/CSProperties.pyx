@@ -1736,12 +1736,14 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
             return
         if not self.thisptr:
             self.thisptr = <_CSProperties*> new _CSPropDiscMaterial(pset.thisptr)
-        if 'filename' in kw:
-            self.SetFilename(kw['filename'])
-            del kw['filename']
-        if 'filetype' in kw:
-            self.SetFileType(kw['filetype'])
-            del kw['filetype']
+        has_filename = 'filename' in kw
+        has_filetype = 'filetype' in kw
+        if has_filename:
+            self.SetFilename(kw.pop('filename'))
+        if has_filetype:
+            self.SetFileType(kw.pop('filetype'))
+        elif has_filename:
+            self.SetFileType(0)  # HDF5 is the only supported format
         if 'scale' in kw:
             self.SetScale(kw['scale'])
             del kw['scale']
