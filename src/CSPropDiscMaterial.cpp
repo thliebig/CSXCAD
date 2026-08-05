@@ -573,49 +573,57 @@ vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel()
 	}
 
 	unsigned int mat_idx, mat_idx_down;
+	unsigned int mat_up_val, mat_down_val;
 	unsigned int mesh_idx=0;
 	bool bd, bu;
 	int nP, nPP;
 	unsigned int pos[3],rpos[3];
-	for (pos[2]=0;pos[2]<m_Size[2]-1;++pos[2])
+	// sweep over mesh nodes (not cells): a surface may also sit on the very last
+	// node of the data set, i.e. when the material reaches the boundary
+	for (pos[2]=0;pos[2]<m_Size[2];++pos[2])
 	{ // each xy-plane
 		for (unsigned int n=0;n<m_Size[0]*m_Size[1];++n)
 		{
 			pointIdx[0][n]=pointIdx[1][n];
 			pointIdx[1][n]=-1;
 		}
-		for (pos[0]=0;pos[0]<m_Size[0]-1;++pos[0])
-			for (pos[1]=0;pos[1]<m_Size[1]-1;++pos[1])
+		for (pos[0]=0;pos[0]<m_Size[0];++pos[0])
+			for (pos[1]=0;pos[1]<m_Size[1];++pos[1])
 			{
-				mat_idx = pos[0] + pos[1]*(m_Size[0]-1) + pos[2]*(m_Size[0]-1)*(m_Size[1]-1);
 				for (int n=0;n<3;++n)
 				{
+					// the quad spans one cell in both perpendicular directions
+					if ((pos[(n+1)%3]>=m_Size[(n+1)%3]-1) || (pos[(n+2)%3]>=m_Size[(n+2)%3]-1))
+						continue;
+
 					// reset relative pos
 					rpos[0]=pos[0];
 					rpos[1]=pos[1];
 					rpos[2]=pos[2];
 					bd = false;
 					bu = false;
-					if (pos[n]==0)
+
+					// material of the cells above/below the face at node pos[n];
+					// everything outside the data set is background
+					mat_up_val = 0;
+					mat_down_val = 0;
+					if (pos[n]<m_Size[n]-1)
 					{
-						if (m_Disc_Ind[mat_idx]>0)
-							bd=true;
+						mat_idx = pos[0] + pos[1]*(m_Size[0]-1) + pos[2]*(m_Size[0]-1)*(m_Size[1]-1);
+						mat_up_val = m_Disc_Ind[mat_idx];
 					}
-					else if (pos[n]==m_Size[n]-2)
-					{
-						if (m_Disc_Ind[mat_idx]>0)
-							bu=true;
-					}
-					else
+					if (pos[n]>0)
 					{
 						rpos[n] = pos[n]-1; // set relative pos
 						mat_idx_down  = rpos[0] + rpos[1]*(m_Size[0]-1) + rpos[2]*(m_Size[0]-1)*(m_Size[1]-1);
 						rpos[n] = pos[n]; // reset relative pos
-						if ((m_Disc_Ind[mat_idx]>0) && (m_Disc_Ind[mat_idx_down]==0))
-							bd=true;
-						else if (m_Disc_Ind[mat_idx]==0 && (m_Disc_Ind[mat_idx_down]>0))
-							bu=true;
+						mat_down_val = m_Disc_Ind[mat_idx_down];
 					}
+
+					if ((mat_up_val>0) && (mat_down_val==0))
+						bd=true;
+					else if ((mat_up_val==0) && (mat_down_val>0))
+						bu=true;
 
 					rpos[0]=pos[0];
 					rpos[1]=pos[1];
