@@ -19,9 +19,10 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 from CSXCAD.ParameterObjects cimport _ParameterSet
+from CSXCAD.CSObject cimport _CSObject
 
 cdef extern from "CSXCAD/CSTransform.h":
-        cdef cppclass _CSTransform "CSTransform":
+        cdef cppclass _CSTransform "CSTransform"(_CSObject):
             _CSTransform() except +
             _CSTransform(_ParameterSet*) except +
             _CSTransform(_CSTransform*) except +
@@ -52,6 +53,11 @@ cdef extern from "CSXCAD/CSTransform.h":
 
 cdef class CSTransform:
     cdef  _CSTransform *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
     @staticmethod
     cdef fromPtr(_CSTransform  *ptr)
     cdef _SetPtr(self, _CSTransform *ptr)
+    cdef _CSTransform* _ptr(self) except NULL

@@ -54,3 +54,21 @@ def GetMultiDirs(dirs):
         return [1, 2]
     elif dirs == 'xz' or dirs == 'rz':
         return [0, 2]
+
+
+# ---------------------------------------------------------------------------
+# Wrapper factory per CSObject::ObjectKind, filled by the wrapper modules on
+# import. Used to resolve the owner of a C++ object to its python wrapper, see
+# CSObject.pxd and CSObject::GetOwner().
+_WRAPPER_FACTORIES = {}
+
+def RegisterWrapperFactory(kind, factory):
+    """ Register the factory building a wrapper from an address, for one ObjectKind. """
+    _WRAPPER_FACTORIES[int(kind)] = factory
+
+def WrapperFromAddress(addr, kind):
+    """ Wrapper for the C++ object at `addr`, which is of the given ObjectKind. """
+    factory = _WRAPPER_FACTORIES.get(int(kind), None)
+    if factory is None:
+        return None
+    return factory(addr)

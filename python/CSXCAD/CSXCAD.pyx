@@ -37,6 +37,12 @@ Examples
 cimport CSXCAD.CSXCAD
 from CSXCAD.CSXCAD cimport _CSBackgroundMaterial
 
+from libc.stdint cimport uintptr_t
+import weakref
+from CSXCAD.CSObject cimport CSDestructionCallback, wrapper_destroyed
+from CSXCAD.CSObject cimport resolve_owner, STRUCTURE, BACKGROUNDMATERIAL
+from CSXCAD.Utilities import RegisterWrapperFactory
+
 from CSXCAD.CSProperties import CSPropMaterial, CSPropExcitation
 from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet
 from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox, CSPropAbsorbingBC
@@ -57,6 +63,10 @@ from pathlib import Path
 
 
 cdef class CSBackgroundMaterial:
+    _instances = weakref.WeakValueDictionary()
+    """ Wrapper per live C++ instance, so that looking the same object up twice
+    gives the same wrapper. Weak on purpose: a wrapper nobody holds any more must
+    be collectable, otherwise it would keep its owner alive forever. """
     """Background material for the continuous structure.
 
     Holds the EM properties (epsilon, mue, kappa, sigma) of the simulation
@@ -70,9 +80,43 @@ cdef class CSBackgroundMaterial:
 
     @staticmethod
     cdef fromPtr(_CSBackgroundMaterial *ptr):
-        cdef CSBackgroundMaterial obj = CSBackgroundMaterial.__new__(CSBackgroundMaterial)
-        obj.thisptr = ptr
-        return obj
+        if ptr == NULL:
+            return None
+        obj = CSBackgroundMaterial._instances.get(<uintptr_t>ptr, None)
+        # an entry whose C++ object is already gone must not be handed out: the
+        # weak reference only drops it once the wrapper itself dies
+        if obj is not None and (<CSBackgroundMaterial>obj).thisptr != NULL:
+            return obj
+        cdef CSBackgroundMaterial new_obj = CSBackgroundMaterial.__new__(CSBackgroundMaterial)
+        new_obj._SetPtr(ptr)
+        return new_obj
+
+    @staticmethod
+    def _from_address(addr):
+        """ Wrapper for the C++ instance at `addr`, \sa CSXCAD.Utilities """
+        return CSBackgroundMaterial.fromPtr(<_CSBackgroundMaterial*><uintptr_t>addr)
+
+    cdef _SetPtr(self, _CSBackgroundMaterial *ptr):
+        self.thisptr = ptr
+        CSBackgroundMaterial._instances[<uintptr_t>self.thisptr] = self
+        self._owner = resolve_owner(self.thisptr)
+        self.thisptr.SetDestructionCallback(<CSDestructionCallback>wrapper_destroyed,
+                                           <void*>&self.thisptr)
+
+    def __dealloc__(self):
+        # the background material is a member of the ContinuousStructure
+        if self.thisptr != NULL:
+            self.thisptr.SetDestructionCallback(NULL, NULL)
+
+    cdef _CSBackgroundMaterial* _ptr(self) except NULL:
+        """ Access the C++ instance, raising if it has already been destroyed.
+
+        The C++ instance is a member of the ContinuousStructure and dies with
+        it, while this wrapper may still be referenced from python.
+        """
+        if self.thisptr == NULL:
+            raise RuntimeError('wrapped C++ object of type {} has been deleted'.format(type(self).__name__))
+        return self.thisptr
 
     def __cinit__(self):
         self.thisptr = NULL
@@ -82,39 +126,39 @@ cdef class CSBackgroundMaterial:
 
     def GetEpsilon(self):
         """Get relative electric permittivity."""
-        return self.thisptr.GetEpsilon()
+        return self._ptr().GetEpsilon()
 
     def SetEpsilon(self, val):
         """Set relative electric permittivity."""
-        self.thisptr.SetEpsilon(val)
+        self._ptr().SetEpsilon(val)
 
     def GetMue(self):
         """Get relative magnetic permeability."""
-        return self.thisptr.GetMue()
+        return self._ptr().GetMue()
 
     def SetMue(self, val):
         """Set relative magnetic permeability."""
-        self.thisptr.SetMue(val)
+        self._ptr().SetMue(val)
 
     def GetKappa(self):
         """Get electric conductivity in S/m."""
-        return self.thisptr.GetKappa()
+        return self._ptr().GetKappa()
 
     def SetKappa(self, val):
         """Set electric conductivity in S/m."""
-        self.thisptr.SetKappa(val)
+        self._ptr().SetKappa(val)
 
     def GetSigma(self):
         """Get (artificial) magnetic conductivity in Ohm/m."""
-        return self.thisptr.GetSigma()
+        return self._ptr().GetSigma()
 
     def SetSigma(self, val):
         """Set (artificial) magnetic conductivity in Ohm/m."""
-        self.thisptr.SetSigma(val)
+        self._ptr().SetSigma(val)
 
     def Reset(self):
         """Reset all material parameters to their defaults (vacuum)."""
-        self.thisptr.Reset()
+        self._ptr().Reset()
 
 
 cdef class ContinuousStructure:
@@ -139,8 +183,20 @@ cdef class ContinuousStructure:
     >>> stop  = [1,2,1]
     >>> box   = metal.AddBox(start, stop) # Assign a box to propety "metal"
     """
-    def __cinit__(self, **kw):
-        self.thisptr   = new _ContinuousStructure()
+    _instances = weakref.WeakValueDictionary()
+    """ Wrapper per live C++ instance, so that an owned object and a borrowed
+    lookup of it share one wrapper -- which matters because only the owning
+    wrapper deletes the C++ instance, and everything owned by the structure
+    keeps a reference to it. Weak, \sa CSProperties._instances """
+
+    def __cinit__(self, *args, no_init=False, **kw):
+        self.no_init = no_init
+        if no_init:
+            # wrapping a C++ structure owned by someone else, \sa fromPtr
+            self.thisptr = NULL
+            return
+
+        self._SetPtr(new _ContinuousStructure())
 
         if 'CoordSystem' in kw:
             self.SetMeshType(kw['CoordSystem'])
@@ -152,11 +208,51 @@ cdef class ContinuousStructure:
         if len(kw)!=0:
             raise Exception('Unknown keyword arguments: "{}"'.format(kw))
 
+    @staticmethod
+    cdef fromPtr(_ContinuousStructure *ptr):
+        """ Wrap an existing C++ structure that is owned and deleted elsewhere. """
+        if ptr == NULL:
+            return None
+        csx = ContinuousStructure._instances.get(<uintptr_t>ptr, None)
+        # an entry whose C++ object is already gone must not be handed out: the
+        # weak reference only drops it once the wrapper itself dies
+        if csx is not None and (<ContinuousStructure>csx).thisptr != NULL:
+            return csx
+        cdef ContinuousStructure new_csx = ContinuousStructure(no_init=True)
+        new_csx._SetPtr(ptr)
+        return new_csx
+
+    @staticmethod
+    def _from_address(addr):
+        """ Wrapper for the C++ instance at `addr`, \sa CSXCAD.Utilities """
+        return ContinuousStructure.fromPtr(<_ContinuousStructure*><uintptr_t>addr)
+
+    cdef _SetPtr(self, _ContinuousStructure *ptr):
+        self.thisptr = ptr
+        ContinuousStructure._instances[<uintptr_t>self.thisptr] = self
+        ptr.SetDestructionCallback(<CSDestructionCallback>wrapper_destroyed,
+                                   <void*>&self.thisptr)
+
+    def __dealloc__(self):
+        if self.thisptr != NULL:
+            # drop the hook before deleting, it must not notify a dying wrapper
+            self.thisptr.SetDestructionCallback(NULL, NULL)
+            # delete only what we created and what nobody else claimed: a solver
+            # taking the structure over will destroy it itself
+            if not self.no_init and not self.thisptr.IsOwned():
+                del self.thisptr
+
+    cdef _ContinuousStructure* _ptr(self) except NULL:
+        """ Access the C++ instance, raising if it has already been destroyed. """
+        if self.thisptr == NULL:
+            raise RuntimeError('wrapped C++ object of type {} has been deleted'.format(type(self).__name__))
+        return self.thisptr
+
     def Update(self):
-        return self.thisptr.Update().decode('UTF-8')
+        return self._ptr().Update().decode('UTF-8')
 
     def Clear(self):
-        return self.thisptr.clear()
+        return self._ptr().clear()
 
     Reset=Clear
 
@@ -168,7 +264,7 @@ cdef class ContinuousStructure:
         file = Path(file) # Check that whatever we receive can be interpreted as a path.
         if not file.parent.is_dir():
             raise FileNotFoundError(f'Directory in which file is to be saved does not exist. ')
-        return self.thisptr.Write2XML(str(file).encode('UTF-8'))
+        return self._ptr().Write2XML(str(file).encode('UTF-8'))
 
     def ReadFromXML(self, fn):
         """ ReadFromXML(fn)
@@ -177,13 +273,13 @@ cdef class ContinuousStructure:
 
         :param fn: str -- file name
         """
-        return self.thisptr.ReadFromXML(fn.encode('UTF-8')).decode('UTF-8')
+        return self._ptr().ReadFromXML(fn.encode('UTF-8')).decode('UTF-8')
 
     def GetParameterSet(self):
         """
         Get the parameter set assigned to this class
         """
-        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
+        return ParameterSet.fromPtr(self._ptr().GetParameterSet())
 
     def GetGrid(self):
         """
@@ -193,14 +289,14 @@ cdef class ContinuousStructure:
         --------
         CSXCAD.CSRectGrid, DefineGrid
         """
-        return CSRectGrid.fromPtr(self.thisptr.GetGrid())
+        return CSRectGrid.fromPtr(self._ptr().GetGrid())
 
     def GetBackgroundMaterial(self):
         """Get the background material of this structure.
 
         :returns: CSBackgroundMaterial -- background EM material (epsilon, mue, kappa, sigma)
         """
-        return CSBackgroundMaterial.fromPtr(self.thisptr.GetBackgroundMaterial())
+        return CSBackgroundMaterial.fromPtr(self._ptr().GetBackgroundMaterial())
 
     @property
     def grid(self):
@@ -210,10 +306,10 @@ cdef class ContinuousStructure:
     def SetMeshType(self, cs_type):
         grid = self.GetGrid()
         grid.SetMeshType(cs_type)
-        self.thisptr.SetCoordInputType(cs_type)
+        self._ptr().SetCoordInputType(cs_type)
 
     def GetCoordInputType(self):
-        return self.thisptr.GetCoordInputType()
+        return self._ptr().GetCoordInputType()
 
     def DefineGrid(self, mesh, unit, smooth_mesh_res=None):
         """ DefineGrid(mesh, unit, smooth_mesh_res=None)
@@ -242,10 +338,10 @@ cdef class ContinuousStructure:
         return grid
 
     def GetQtyProperties(self):
-        return self.thisptr.GetQtyProperties()
+        return self._ptr().GetQtyProperties()
 
     def GetQtyPrimitives(self, prop_type=c_CSProperties.ANY):
-        return self.thisptr.GetQtyPrimitives(prop_type)
+        return self._ptr().GetQtyPrimitives(prop_type)
 
     def AddMaterial(self, name:str, **kw):
         """Add a material property with name `name`.
@@ -365,13 +461,17 @@ cdef class ContinuousStructure:
         -----
         This class will take ownership of the property.
         """
-        self.thisptr.AddProperty(prop.thisptr)
+        self._ptr().AddProperty(prop.thisptr)
+        # C++ ownership just changed, so the wrapper has to pick it up
+        prop._owner = resolve_owner(prop.thisptr)
 
     def RemoveProperty(self, CSProperties prop):
-        self.thisptr.RemoveProperty(prop.thisptr)
+        self._ptr().RemoveProperty(prop.thisptr)
+        # C++ ownership just changed, so the wrapper has to pick it up
+        prop._owner = resolve_owner(prop.thisptr)
 
     def DeleteProperty(self, CSProperties prop):
-        self.thisptr.DeleteProperty(prop.thisptr)
+        self._ptr().DeleteProperty(prop.thisptr)
 
     def GetProperty(self, index):
         """ GetProperty(index)
@@ -388,7 +488,7 @@ cdef class ContinuousStructure:
 
     cdef _GetProperty(self, int index):
         cdef _CSProperties* _prop
-        _prop = self.thisptr.GetProperty(index)
+        _prop = self._ptr().GetProperty(index)
         return CSProperties.fromPtr(_prop)
 
     def GetAllProperties(self):
@@ -410,7 +510,7 @@ cdef class ContinuousStructure:
 
     cdef __GetPropertiesByName(self, string name):
         cdef vector[_CSProperties*] vprop
-        vprop = self.thisptr.GetPropertiesByName(name)
+        vprop = self._ptr().GetPropertiesByName(name)
 
         cdef _CSProperties* _prop
         cdef CSProperties prop
@@ -431,7 +531,7 @@ cdef class ContinuousStructure:
 
     cdef __GetPropertyByType(self, PropertyType prop_type):
         cdef vector[_CSProperties*] vprop
-        vprop = self.thisptr.GetPropertyByType(prop_type)
+        vprop = self._ptr().GetPropertyByType(prop_type)
 
         cdef _CSProperties* _prop
         cdef CSProperties prop
@@ -453,7 +553,7 @@ cdef class ContinuousStructure:
 
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed):
         cdef _CSPrimitives *prim
-        cdef _CSProperties *_prop = self.thisptr.GetPropertyByCoordPriority(coord, prop_type, markFoundAsUsed, &prim)
+        cdef _CSProperties *_prop = self._ptr().GetPropertyByCoordPriority(coord, prop_type, markFoundAsUsed, &prim)
         return CSProperties.fromPtr(_prop)
 
     def GetAllPrimitives(self, sort=False, prop_type=c_CSProperties.ANY):
@@ -465,7 +565,7 @@ cdef class ContinuousStructure:
 
     cdef __GetAllPrimitives(self, bool sort, PropertyType prop_type):
         cdef vector[_CSPrimitives*] vprim
-        vprim = self.thisptr.GetAllPrimitives(sort, prop_type)
+        vprim = self._ptr().GetAllPrimitives(sort, prop_type)
 
         cdef _CSPrimitives* _prim
         cdef CSPrimitives prim
@@ -477,3 +577,5 @@ cdef class ContinuousStructure:
 
         return prims
 
+RegisterWrapperFactory(STRUCTURE, ContinuousStructure._from_address)
+RegisterWrapperFactory(BACKGROUNDMATERIAL, CSBackgroundMaterial._from_address)

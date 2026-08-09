@@ -26,9 +26,16 @@ from CSXCAD.ParameterObjects cimport ParameterSet
 cimport CSXCAD.CSTransform
 from CSXCAD.Utilities import CheckNyDir
 from libc.stdint cimport uintptr_t
+import weakref
+from CSXCAD.CSObject cimport CSDestructionCallback, wrapper_destroyed
+from CSXCAD.CSObject cimport resolve_owner, TRANSFORM
+from CSXCAD.Utilities import RegisterWrapperFactory
 
 cdef class CSTransform:
-    _instances = {}
+    _instances = weakref.WeakValueDictionary()
+    """ Wrapper per live C++ instance, so that looking the same object up twice
+    gives the same wrapper. Weak on purpose: a wrapper nobody holds any more must
+    be collectable, otherwise it would keep its owner alive forever. """
 
     @staticmethod
     cdef fromPtr(_CSTransform  *ptr):
@@ -36,7 +43,9 @@ cdef class CSTransform:
             return None
         cdef CSTransform cls
         cls = CSTransform._instances.get(<uintptr_t>ptr, None)
-        if cls is not None:
+        # an entry whose C++ object is already gone must not be handed out: the
+        # weak reference only drops it once the wrapper itself dies
+        if cls is not None and cls.thisptr != NULL:
             return cls
         cls = CSTransform(no_init=True)
         cls._SetPtr(ptr)
@@ -54,20 +63,43 @@ cdef class CSTransform:
             else:
                 self.thisptr = new _CSTransform(pset.thisptr)
             self._SetPtr(self.thisptr)
-            self.thisptr.SetAngleRadian()
+            self._ptr().SetAngleRadian()
         else:
             self.thisptr = NULL
+
+    @staticmethod
+    def _from_address(addr):
+        """ Wrapper for the C++ instance at `addr`, \sa CSXCAD.Utilities """
+        return CSTransform.fromPtr(<_CSTransform*><uintptr_t>addr)
 
     cdef _SetPtr(self, _CSTransform *ptr):
         if self.thisptr != NULL and self.thisptr != ptr:
             raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
         CSTransform._instances[<uintptr_t>self.thisptr] = self
+        self._owner = resolve_owner(self.thisptr)
+        self.thisptr.SetDestructionCallback(<CSDestructionCallback>wrapper_destroyed,
+                                           <void*>&self.thisptr)
+
+    def __dealloc__(self):
+        # a transform is owned by the primitive/property it belongs to
+        if self.thisptr != NULL:
+            self.thisptr.SetDestructionCallback(NULL, NULL)
+
+    cdef _CSTransform* _ptr(self) except NULL:
+        """ Access the C++ instance, raising if it has already been destroyed.
+
+        The C++ instance is owned by its CSPrimitives and can be destroyed while this
+        wrapper is still referenced from python. \sa wrapper_destroyed
+        """
+        if self.thisptr == NULL:
+            raise RuntimeError('wrapped C++ object of type {} has been deleted'.format(type(self).__name__))
+        return self.thisptr
 
     def copy(self):
         """Return an independent copy of this transform."""
         cdef CSTransform obj = CSTransform.__new__(CSTransform)
-        obj.thisptr = new _CSTransform(self.thisptr)
+        obj.thisptr = new _CSTransform(self._ptr())
         obj._SetPtr(obj.thisptr)
         return obj
 
@@ -75,13 +107,13 @@ cdef class CSTransform:
         """
         Reset all transformations.
         """
-        self.thisptr.Reset()
+        self._ptr().Reset()
 
     def HasTransform(self):
         """
         Check if any transformations are set.
         """
-        return self.thisptr.HasTransform()
+        return self._ptr().HasTransform()
 
     def Transform(self, coord, invers=False):
         """ Transform(coord, invers)
@@ -98,9 +130,9 @@ cdef class CSTransform:
             d_coord[n] = coord[n]
 
         if not invers:
-            self.thisptr.Transform(d_coord, d_out)
+            self._ptr().Transform(d_coord, d_out)
         else:
-            self.thisptr.InvertTransform(d_coord, d_out)
+            self._ptr().InvertTransform(d_coord, d_out)
         out = np.zeros((3,))
         for n in range(3):
             out[n] = d_out[n]
@@ -113,7 +145,7 @@ cdef class CSTransform:
         :returns: (4,4) array -- transformation matrix
         """
         cdef double *d_mat = NULL
-        d_mat = self.thisptr.GetMatrix()
+        d_mat = self._ptr().GetMatrix()
         mat = np.zeros([4,4])
         for n in range(4):
             for m in range(4):
@@ -174,7 +206,7 @@ cdef class CSTransform:
         cdef double[3] d_vec;
         for n in range(3):
             d_vec[n] = vec[n]
-        self.thisptr.Translate(d_vec, concatenate)
+        self._ptr().Translate(d_vec, concatenate)
 
 
     def SetMatrix(self, mat, concatenate=True):
@@ -190,7 +222,7 @@ cdef class CSTransform:
         for n in range(4):
             for m in range(4):
                 d_mat[4*n + m] = mat[n][m]
-        self.thisptr.SetMatrix(d_mat, concatenate)
+        self._ptr().SetMatrix(d_mat, concatenate)
 
     def RotateOrigin(self, vec, angle, deg=True, concatenate=True):
         """ RotateOrigin(vec, angle, deg=True, concatenate=True)
@@ -207,7 +239,7 @@ cdef class CSTransform:
             d_vec[n] = vec[n]
         if deg:
             angle = np.deg2rad(angle)
-        self.thisptr.RotateOrigin(d_vec, angle, concatenate)
+        self._ptr().RotateOrigin(d_vec, angle, concatenate)
 
     def RotateAxis(self, ny, angle, deg=True, concatenate=True):
         """ RotateAxis(ny, angle, deg=True, concatenate=True)
@@ -221,7 +253,7 @@ cdef class CSTransform:
         ny = CheckNyDir(ny)
         if deg:
             angle = np.deg2rad(angle)
-        self.thisptr.RotateXYZ(ny, angle, concatenate)
+        self._ptr().RotateXYZ(ny, angle, concatenate)
 
     def Scale(self, scale, bool concatenate=True):
         """ Scale(scale, concatenate=True)
@@ -233,23 +265,24 @@ cdef class CSTransform:
         cdef double[3] d_scale;
         if type(scale)==float or type(scale)==int:
             d_scale[0] = scale
-            self.thisptr.Scale(d_scale[0], concatenate)
+            self._ptr().Scale(d_scale[0], concatenate)
             return
 
         assert len(scale)==3, 'Scale: scale must be a float or array of length 3'
         for n in range(3):
             d_scale[n] = scale[n]
-        self.thisptr.Scale(d_scale, concatenate)
+        self._ptr().Scale(d_scale, concatenate)
 
     def SetPreMultiply(self):
         """
         Set all following transformations as pre multiply (default is post multiply)
         """
-        self.thisptr.SetPreMultiply()
+        self._ptr().SetPreMultiply()
 
     def SetPostMultiply(self):
         """
         Set all following transformations as post multiply (default)
         """
-        self.thisptr.SetPostMultiply()
+        self._ptr().SetPostMultiply()
 
+RegisterWrapperFactory(TRANSFORM, CSTransform._from_address)

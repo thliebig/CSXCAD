@@ -18,6 +18,7 @@
 
 from libcpp.string cimport string
 from libcpp cimport bool
+from CSXCAD.CSObject cimport _CSObject
 
 cdef extern from "CSXCAD/CSXCAD_Global.h":
     cpdef enum CoordinateSystem "CoordinateSystem":
@@ -26,7 +27,7 @@ cdef extern from "CSXCAD/CSXCAD_Global.h":
         UNDEFINED_CS "UNDEFINED_CS"
 
 cdef extern from "CSXCAD/CSRectGrid.h":
-        cdef cppclass _CSRectGrid "CSRectGrid":
+        cdef cppclass _CSRectGrid "CSRectGrid"(_CSObject):
             _CSRectGrid() except +
             void AddDiscLine(int direct, double val)
 
@@ -53,7 +54,12 @@ cdef extern from "CSXCAD/CSRectGrid.h":
 
 cdef class CSRectGrid:
     cdef _CSRectGrid *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
     @staticmethod
     cdef fromPtr(_CSRectGrid  *ptr)
     cdef _SetPtr(self, _CSRectGrid *ptr)
+    cdef _CSRectGrid* _ptr(self) except NULL
     cdef bool no_init

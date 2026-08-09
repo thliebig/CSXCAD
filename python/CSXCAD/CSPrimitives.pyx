@@ -40,15 +40,22 @@ import sys
 from libcpp.string cimport string
 from libcpp cimport bool
 from libc.stdint cimport uintptr_t
+import weakref
 from libcpp.vector cimport vector
 
 cimport CSXCAD.CSPrimitives
 from CSXCAD.Utilities import CheckNyDir, GetMultiDirs
 from CSXCAD import CSRectGrid
+from CSXCAD.CSObject cimport CSDestructionCallback, wrapper_destroyed
+from CSXCAD.CSObject cimport resolve_owner, PRIMITIVE
+from CSXCAD.Utilities import RegisterWrapperFactory
 
 
 cdef class CSPrimitives:
-    _instances = {}
+    _instances = weakref.WeakValueDictionary()
+    """ Wrapper per live C++ instance, so that looking the same object up twice
+    gives the same wrapper. Weak on purpose: a wrapper nobody holds any more must
+    be collectable, otherwise it would keep its owner alive forever. """
     """
     Virtual base class for all primitives, cannot be created!
 
@@ -107,7 +114,9 @@ cdef class CSPrimitives:
             return None
         cdef CSPrimitives prim
         prim = CSPrimitives._instances.get(<uintptr_t>ptr, None)
-        if prim is not None:
+        # an entry whose C++ object is already gone must not be handed out: the
+        # weak reference only drops it once the wrapper itself dies
+        if prim is not None and prim.thisptr != NULL:
             return prim
         prim = CSPrimitives.fromType(ptr.GetType(), None, None, no_init=True)
         prim._SetPtr(ptr)
@@ -130,11 +139,35 @@ cdef class CSPrimitives:
         if len(kw)!=0:
             raise Exception('Unknown keyword arguments: "{}"'.format(kw))
 
+    def __dealloc__(self):
+        # The C++ primitive is owned by its property and can outlive this
+        # wrapper, so make sure it does not notify a wrapper that is gone.
+        if self.thisptr != NULL:
+            self.thisptr.SetDestructionCallback(NULL, NULL)
+
+    @staticmethod
+    def _from_address(addr):
+        """ Wrapper for the C++ instance at `addr`, \sa CSXCAD.Utilities """
+        return CSPrimitives.fromPtr(<_CSPrimitives*><uintptr_t>addr)
+
     cdef _SetPtr(self, _CSPrimitives *ptr):
         if self.thisptr != NULL and self.thisptr != ptr:
             raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
         CSPrimitives._instances[<uintptr_t>self.thisptr] = self
+        self._owner = resolve_owner(self.thisptr)
+        self.thisptr.SetDestructionCallback(<CSDestructionCallback>wrapper_destroyed,
+                                           <void*>&self.thisptr)
+
+    cdef _CSPrimitives* _ptr(self) except NULL:
+        """ Access the C++ instance, raising if it has already been destroyed.
+
+        The C++ instance is owned by its CSProperties and can be destroyed while this
+        wrapper is still referenced from python. \sa wrapper_destroyed
+        """
+        if self.thisptr == NULL:
+            raise RuntimeError('wrapped C++ object of type {} has been deleted'.format(type(self).__name__))
+        return self.thisptr
 
     def GetCopy(self, CSProperties prop=None):
         cdef _CSProperties* prop_ptr
@@ -142,7 +175,7 @@ cdef class CSPrimitives:
             prop_ptr = NULL
         else:
             prop_ptr = prop.thisptr
-        ptr = self.thisptr.GetCopy(prop_ptr)
+        ptr = self._ptr().GetCopy(prop_ptr)
         return CSPrimitives.fromPtr(ptr)
 
     copy = GetCopy
@@ -153,7 +186,7 @@ cdef class CSPrimitives:
 
         :returns: int -- ID for this primitive
         """
-        return self.thisptr.GetID()
+        return self._ptr().GetID()
 
     def GetProperty(self):
         """
@@ -164,13 +197,13 @@ cdef class CSPrimitives:
         return self.__GetProperty()
 
     cdef __GetProperty(self):
-        return CSProperties.fromPtr(self.thisptr.GetProperty())
+        return CSProperties.fromPtr(self._ptr().GetProperty())
 
     def GetParameterSet(self):
         """
         Get the parameter set assigned to this class
         """
-        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
+        return ParameterSet.fromPtr(self._ptr().GetParameterSet())
 
     def GetType(self):
         """
@@ -178,7 +211,7 @@ cdef class CSPrimitives:
 
         :returns: int -- Type for this primitive (e.g. 0 --> Point, 1 --> Box, ...)
         """
-        return self.thisptr.GetType()
+        return self._ptr().GetType()
 
     def GetTypeName(self):
         """
@@ -186,7 +219,7 @@ cdef class CSPrimitives:
 
         :returns: str -- Type name for this primitive ("Point", "Box", ...)
         """
-        return self.thisptr.GetTypeName().decode('UTF-8')
+        return self._ptr().GetTypeName().decode('UTF-8')
 
     def SetPriority(self, val):
         """ SetPriority(val)
@@ -195,7 +228,7 @@ cdef class CSPrimitives:
 
         :param val: int -- Higher priority values will override primitives with a lower priority
         """
-        self.thisptr.SetPriority(val)
+        self._ptr().SetPriority(val)
 
     def GetPriority(self):
         """
@@ -203,7 +236,7 @@ cdef class CSPrimitives:
 
         :returns: int -- Priority for this primitive
         """
-        return self.thisptr.GetPriority()
+        return self._ptr().GetPriority()
 
     def GetBoundBox(self):
         """
@@ -213,7 +246,7 @@ cdef class CSPrimitives:
         """
         bb = np.zeros([2,3])
         cdef double _bb[6]
-        self.thisptr.GetBoundBox(_bb)
+        self._ptr().GetBoundBox(_bb)
         for n in range(3):
             bb[0,n] = _bb[2*n]
             bb[1,n] = _bb[2*n+1]
@@ -225,7 +258,7 @@ cdef class CSPrimitives:
 
         :returns: int -- dimension 0..3
         """
-        return self.thisptr.GetDimension()
+        return self._ptr().GetDimension()
 
     def IsInside(self, coord, tol=0):
         """ IsInside(coord, tol=0)
@@ -239,20 +272,20 @@ cdef class CSPrimitives:
         for n in range(3):
             c_coord[n] = coord[n]
 
-        return self.thisptr.IsInside(c_coord, tol)
+        return self._ptr().IsInside(c_coord, tol)
 
     def GetPrimitiveUsed(self):
         """
         Get if this primitive has been used (used flag set)
         """
-        return self.thisptr.GetPrimitiveUsed()
+        return self._ptr().GetPrimitiveUsed()
 
     def SetPrimitiveUsed(self, val):
         """ SetPrimitiveUsed(val)
 
         Set used flag.
         """
-        self.thisptr.SetPrimitiveUsed(val)
+        self._ptr().SetPrimitiveUsed(val)
 
     def GetTransform(self):
         """ GetTransform()
@@ -266,7 +299,7 @@ cdef class CSPrimitives:
         --------
         CSXCAD.CSTransform.CSTransform
         """
-        return CSTransform.fromPtr(self.thisptr.GetTransform())
+        return CSTransform.fromPtr(self._ptr().GetTransform())
 
     def AddTransform(self, transform, *args, **kw):
         """ AddTransform(transform, *args, **kw)
@@ -287,7 +320,7 @@ cdef class CSPrimitives:
 
         :returns: bool
         """
-        return self.thisptr.HasTransform()
+        return self._ptr().HasTransform()
 
     def SetCoordinateSystem(self, cs_type):
         """ SetCoordinateSystem(cs_type)
@@ -305,14 +338,14 @@ cdef class CSPrimitives:
         assert cs_type in [CSRectGrid.CoordinateSystem.CARTESIAN, CSRectGrid.CoordinateSystem.CYLINDRICAL, None], 'Unknown coordinate system: {}'.format(cs_type)
         if cs_type is None:
             cs_type = CSRectGrid.CoordinateSystem.UNDEFINED_CS
-        self.thisptr.SetCoordinateSystem(cs_type)
+        self._ptr().SetCoordinateSystem(cs_type)
 
     def GetCoordinateSystem(self):
         """ GetCoordinateSystem
 
         :returns: coordinate system (0 : Cartesian, 1 : Cylindrical) or None
         """
-        cs_type = self.thisptr.GetCoordinateSystem()
+        cs_type = self._ptr().GetCoordinateSystem()
         if cs_type == CSRectGrid.CoordinateSystem.UNDEFINED_CS:
             return None
         return cs_type
@@ -323,7 +356,7 @@ cdef class CSPrimitives:
         :returns: bool, err_msg -- success and error message (empty on success)
         """
         cdef string s
-        succ = self.thisptr.Update(&s)
+        succ = self._ptr().Update(&s)
         return succ, str(s)
 
 
@@ -358,7 +391,7 @@ cdef class CSPrimPoint(CSPrimitives):
 
         :param coord: list/array of float -- Set the point coordinate
         """
-        ptr = <_CSPrimPoint*>self.thisptr
+        ptr = <_CSPrimPoint*>self._ptr()
         assert len(coord)==3, "CSPrimPoint:SetCoord: length of array needs to be 3"
         for n in range(3):
             ptr.SetCoord(n, coord[n])
@@ -369,7 +402,7 @@ cdef class CSPrimPoint(CSPrimitives):
 
         :returns: (3,) ndarray -- point coordinate for this primitive
         """
-        ptr = <_CSPrimPoint*>self.thisptr
+        ptr = <_CSPrimPoint*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(n)
@@ -413,7 +446,7 @@ cdef class CSPrimBox(CSPrimitives):
 
         :param coord: list/array of float -- Set the start point coordinate
         """
-        ptr = <_CSPrimBox*>self.thisptr
+        ptr = <_CSPrimBox*>self._ptr()
         assert len(coord)==3, "CSPrimBox:SetStart: length of array needs to be 3"
         for n in range(3):
             ptr.SetCoord(2*n, coord[n])
@@ -425,7 +458,7 @@ cdef class CSPrimBox(CSPrimitives):
 
         :param coord: list/array of float -- Set the stop point coordinate
         """
-        ptr = <_CSPrimBox*>self.thisptr
+        ptr = <_CSPrimBox*>self._ptr()
         assert len(coord)==3, "CSPrimBox:SetStop: length of array needs to be 3"
         for n in range(3):
             ptr.SetCoord(2*n+1, coord[n])
@@ -436,7 +469,7 @@ cdef class CSPrimBox(CSPrimitives):
 
         :returns: (3,) ndarray -- Start coordinate for this primitive
         """
-        ptr = <_CSPrimBox*>self.thisptr
+        ptr = <_CSPrimBox*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n)
@@ -448,7 +481,7 @@ cdef class CSPrimBox(CSPrimitives):
 
         :returns: (3,) ndarray -- Stop coordinate for this primitive
         """
-        ptr = <_CSPrimBox*>self.thisptr
+        ptr = <_CSPrimBox*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n+1)
@@ -495,7 +528,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :param coord: list/array of float -- Set the axis start point coordinate.
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         assert len(coord)==3, "CSPrimCylinder:SetStart: length of array needs to be 3"
         for n in range(3):
             ptr.SetCoord(2*n, coord[n])
@@ -507,7 +540,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :param coord: list/array of float -- Set the axis stop point coordinate.
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         assert len(coord)==3, "CSPrimCylinder:SetStop: length of array needs to be 3"
         for n in range(3):
             ptr.SetCoord(2*n+1, coord[n])
@@ -518,7 +551,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :returns: (3,) ndarray -- Axis start coordinate.
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n)
@@ -530,7 +563,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :returns: (3,) ndarray -- Axis stop coordinate.
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(2*n+1)
@@ -543,7 +576,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :param val: float -- Set the cylinder radius
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         ptr.SetRadius(val)
 
     def GetRadius(self):
@@ -552,7 +585,7 @@ cdef class CSPrimCylinder(CSPrimitives):
 
         :returns: float -- Cylinder radius.
         """
-        ptr = <_CSPrimCylinder*>self.thisptr
+        ptr = <_CSPrimCylinder*>self._ptr()
         return ptr.GetRadius()
 
 ###############################################################################
@@ -585,7 +618,7 @@ cdef class CSPrimCylindricalShell(CSPrimCylinder):
 
         :param val: float -- Set the cylinder shell width
         """
-        ptr = <_CSPrimCylindricalShell*>self.thisptr
+        ptr = <_CSPrimCylindricalShell*>self._ptr()
         ptr.SetShellWidth(val)
 
     def GetShellWidth(self):
@@ -594,7 +627,7 @@ cdef class CSPrimCylindricalShell(CSPrimCylinder):
 
         :returns: float -- Cylinder shell width.
         """
-        ptr = <_CSPrimCylindricalShell*>self.thisptr
+        ptr = <_CSPrimCylindricalShell*>self._ptr()
         return ptr.GetShellWidth()
 
 ###############################################################################
@@ -633,7 +666,7 @@ cdef class CSPrimSphere(CSPrimitives):
 
         :param coord: (3,) array -- Set the sphere center point.
         """
-        ptr = <_CSPrimSphere*>self.thisptr
+        ptr = <_CSPrimSphere*>self._ptr()
         assert len(coord)==3, "CSPrimSphere:SetCenter: length of array needs to be 3"
         ptr.SetCenter(coord[0], coord[1], coord[2])
 
@@ -643,7 +676,7 @@ cdef class CSPrimSphere(CSPrimitives):
 
         :returns: (3,) ndarray -- Center coordinate.
         """
-        ptr = <_CSPrimSphere*>self.thisptr
+        ptr = <_CSPrimSphere*>self._ptr()
         coord = np.zeros(3)
         for n in range(3):
             coord[n] = ptr.GetCoord(n)
@@ -656,7 +689,7 @@ cdef class CSPrimSphere(CSPrimitives):
 
         :param val: float -- Set the sphere radius
         """
-        ptr = <_CSPrimSphere*>self.thisptr
+        ptr = <_CSPrimSphere*>self._ptr()
         ptr.SetRadius(val)
 
     def GetRadius(self):
@@ -665,7 +698,7 @@ cdef class CSPrimSphere(CSPrimitives):
 
         :returns: float -- Sphere radius.
         """
-        ptr = <_CSPrimSphere*>self.thisptr
+        ptr = <_CSPrimSphere*>self._ptr()
         return ptr.GetRadius()
 
 ###############################################################################
@@ -698,7 +731,7 @@ cdef class CSPrimSphericalShell(CSPrimSphere):
 
         :param val: float -- Set the sphere shell width
         """
-        ptr = <_CSPrimSphericalShell*>self.thisptr
+        ptr = <_CSPrimSphericalShell*>self._ptr()
         ptr.SetShellWidth(val)
 
     def GetShellWidth(self):
@@ -707,7 +740,7 @@ cdef class CSPrimSphericalShell(CSPrimSphere):
 
         :returns: float -- sphere shell width.
         """
-        ptr = <_CSPrimSphericalShell*>self.thisptr
+        ptr = <_CSPrimSphericalShell*>self._ptr()
         return ptr.GetShellWidth()
 
 ###############################################################################
@@ -763,7 +796,7 @@ cdef class CSPrimPolygon(CSPrimitives):
         assert len(x0)==len(x1), 'SetCoords: x0/x1 do not have the same length'
         assert len(x0)>0, 'SetCoords: empty coordinates'
 
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         ptr.ClearCoords()
         for n in range(len(x0)):
             ptr.AddCoord(x0[n])
@@ -775,7 +808,7 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :return x0, x1: (N,), (N,) Arrays for x0,x1 of the polygon coordinates
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         N = ptr.GetQtyCoords()
         x0 = np.zeros(N)
         x1 = np.zeros(N)
@@ -790,14 +823,14 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :return val: int -- Number of polygon coordinates.
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         return ptr.GetQtyCoords()
 
     def ClearCoords(self):
         """
         Remove all coordinates.
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         ptr.ClearCoords()
 
     def SetNormDir(self, ny):
@@ -807,7 +840,7 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :param ny: int or string -- Normal direction, either 0/1/2 or 'x'/'y'/'z'
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         ptr.SetNormDir(CheckNyDir(ny))
 
     def GetNormDir(self):
@@ -816,7 +849,7 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :return ny: int -- Normal direction as 0, 1 or 2 meaning x,y or z
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         return ptr.GetNormDir()
 
     def SetElevation(self, val):
@@ -826,7 +859,7 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :param val: float -- Elevation in normal direction.
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         ptr.SetElevation(val)
 
     def GetElevation(self):
@@ -835,7 +868,7 @@ cdef class CSPrimPolygon(CSPrimitives):
 
         :return val: float -- Get the elevation in normal direction.
         """
-        ptr = <_CSPrimPolygon*>self.thisptr
+        ptr = <_CSPrimPolygon*>self._ptr()
         return ptr.GetElevation()
 
 ###############################################################################
@@ -877,7 +910,7 @@ cdef class CSPrimLinPoly(CSPrimPolygon):
 
         :param val: float -- Extrusion length in normal direction.
         """
-        ptr = <_CSPrimLinPoly*>self.thisptr
+        ptr = <_CSPrimLinPoly*>self._ptr()
         ptr.SetLength(val)
 
     def GetLength(self):
@@ -886,7 +919,7 @@ cdef class CSPrimLinPoly(CSPrimPolygon):
 
         :return val: float -- Get the extrusion length in normal direction.
         """
-        ptr = <_CSPrimLinPoly*>self.thisptr
+        ptr = <_CSPrimLinPoly*>self._ptr()
         return ptr.GetLength()
 
 ###############################################################################
@@ -934,7 +967,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
 
         :param ny: int or str -- Rotation axis direction, either 0,1,2 or x/y/z respectively.
         """
-        ptr = <_CSPrimRotPoly*>self.thisptr
+        ptr = <_CSPrimRotPoly*>self._ptr()
         ptr.SetRotAxisDir(CheckNyDir(ny))
 
     def GetRotAxisDir(self):
@@ -943,7 +976,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
 
         :returns ny: int -- Rotation axis direction as 0, 1 or 2 meaning x,y or z
         """
-        ptr = <_CSPrimRotPoly*>self.thisptr
+        ptr = <_CSPrimRotPoly*>self._ptr()
         return ptr.GetRotAxisDir()
 
     def SetAngle(self, a0, a1):
@@ -954,7 +987,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
         :param a0: float -- Start angle (rad) of rotation.
         :param a1: float -- Stop angle (rad) of rotation.
         """
-        ptr = <_CSPrimRotPoly*>self.thisptr
+        ptr = <_CSPrimRotPoly*>self._ptr()
         ptr.SetAngle(0, a0)
         ptr.SetAngle(1, a1)
 
@@ -964,7 +997,7 @@ cdef class CSPrimRotPoly(CSPrimPolygon):
 
         :returns a0, a1: float, float -- Start/Stop angle (rad) of rotation.
         """
-        ptr = <_CSPrimRotPoly*>self.thisptr
+        ptr = <_CSPrimRotPoly*>self._ptr()
         return ptr.GetAngle(0), ptr.GetAngle(1)
 
 ###############################################################################
@@ -1007,7 +1040,7 @@ cdef class CSPrimCurve(CSPrimitives):
         :param point: (3,) array -- Add a single 3D point
         """
         assert len(point)==3, "CSPrimSphere:SetCenter: length of array needs to be 3"
-        ptr = <_CSPrimCurve*>self.thisptr
+        ptr = <_CSPrimCurve*>self._ptr()
         cdef double dp[3]
         for n in range(3):
             dp[n] = point[n]
@@ -1022,7 +1055,7 @@ cdef class CSPrimCurve(CSPrimitives):
         """
         assert len(x)==len(y)==len(z), 'SetPoints: each component must be of equal length'
         assert len(x)>0, 'SetPoints: empty list!'
-        ptr = <_CSPrimCurve*>self.thisptr
+        ptr = <_CSPrimCurve*>self._ptr()
         ptr.ClearPoints()
         cdef double dp[3]
         for n in range(len(x)):
@@ -1039,7 +1072,7 @@ cdef class CSPrimCurve(CSPrimitives):
         :param idx: int -- Index of point requested.
         :return point: (3,) array -- Point coordinate at index `idx`
         """
-        ptr = <_CSPrimCurve*>self.thisptr
+        ptr = <_CSPrimCurve*>self._ptr()
         cdef double dp[3]
         if not ptr.GetPoint(idx, dp):
             raise Exception('GetPoint: invalid index')
@@ -1052,7 +1085,7 @@ cdef class CSPrimCurve(CSPrimitives):
         """
         Clear all points.
         """
-        ptr = <_CSPrimCurve*>self.thisptr
+        ptr = <_CSPrimCurve*>self._ptr()
         ptr.ClearPoints()
 
     def GetNumberOfPoints(self):
@@ -1061,7 +1094,7 @@ cdef class CSPrimCurve(CSPrimitives):
 
         :return num: int -- Get the number of points.
         """
-        ptr = <_CSPrimCurve*>self.thisptr
+        ptr = <_CSPrimCurve*>self._ptr()
         return ptr.GetNumberOfPoints()
 
 
@@ -1095,7 +1128,7 @@ cdef class CSPrimWire(CSPrimCurve):
 
         :param val: float -- Set the wire radius
         """
-        ptr = <_CSPrimWire*>self.thisptr
+        ptr = <_CSPrimWire*>self._ptr()
         ptr.SetWireRadius(val)
 
     def GetWireRadius(self):
@@ -1104,7 +1137,7 @@ cdef class CSPrimWire(CSPrimCurve):
 
         :returns: float -- Wire radius.
         """
-        ptr = <_CSPrimWire*>self.thisptr
+        ptr = <_CSPrimWire*>self._ptr()
         return ptr.GetWireRadius()
 
 ###############################################################################
@@ -1126,7 +1159,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         """
         Reset the polyhedron, that means removeing all faces.
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         ptr.Reset()
 
     def AddVertex(self, x, y, z):
@@ -1136,7 +1169,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
 
         :param x,y,z: float,float,float -- 3D vertex
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         ptr.AddVertex(x, y, z)
 
     def GetVertex(self, idx):
@@ -1147,7 +1180,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         :param idx: int -- Vertex index to return
         :returns point: (3,) array -- Vertex coordinate at index `idx`
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         assert idx>=0 and idx<ptr.GetNumVertices(), "Error: invalid vertex index"
         cdef float* p
         p = ptr.GetVertex(idx)
@@ -1163,7 +1196,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
 
         :returns num: int -- Number of vertices
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         return ptr.GetNumVertices()
 
     def GetFaceValid(self, idx):
@@ -1173,7 +1206,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         :param idx: int -- Face index to return
         :returns: bool -- valid face
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         return ptr.GetFaceValid(idx)
 
     def AddFace(self, verts):
@@ -1185,7 +1218,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
 
         :params verts: (N,) array -- Face with N vericies
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         ptr.AddFace(verts)
 
     def GetFace(self, idx):
@@ -1196,7 +1229,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         :param idx: int -- Face index to return
         :returns: (N,) array -- Vertices array for face with index `idx`
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         if idx<0 or idx>=ptr.GetNumFaces():
             raise Exception("Error: invalid face index")
         cdef int *i_v
@@ -1215,7 +1248,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
 
         :return num: int -- number of faces
         """
-        ptr = <_CSPrimPolyhedron*>self.thisptr
+        ptr = <_CSPrimPolyhedron*>self._ptr()
         return ptr.GetNumFaces()
 
 ###############################################################################
@@ -1247,7 +1280,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
 
         :param fn: str -- File name to read
         """
-        ptr = <_CSPrimPolyhedronReader*>self.thisptr
+        ptr = <_CSPrimPolyhedronReader*>self._ptr()
         if fn.endswith('.stl'):
             self.SetFileType(1)
         elif fn.endswith('.ply'):
@@ -1262,7 +1295,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
 
         :returns fn: str -- File name to read
         """
-        ptr = <_CSPrimPolyhedronReader*>self.thisptr
+        ptr = <_CSPrimPolyhedronReader*>self._ptr()
         return ptr.GetFilename()
 
     def SetFileType(self, t):
@@ -1272,7 +1305,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
 
         :param t: int -- File type (see above)
         """
-        ptr = <_CSPrimPolyhedronReader*>self.thisptr
+        ptr = <_CSPrimPolyhedronReader*>self._ptr()
         ptr.SetFileType(t)
 
     def GetFileType(self):
@@ -1281,7 +1314,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
 
         :return t: int -- File type (see above)
         """
-        ptr = <_CSPrimPolyhedronReader*>self.thisptr
+        ptr = <_CSPrimPolyhedronReader*>self._ptr()
         return ptr.GetFileType()
 
     def ReadFile(self):
@@ -1292,7 +1325,7 @@ cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):
 
         :raises RuntimeError: If it is not possible to read the file, for whatever reason.
         """
-        ptr = <_CSPrimPolyhedronReader*>self.thisptr
+        ptr = <_CSPrimPolyhedronReader*>self._ptr()
         success = ptr.ReadFile()
         if success != True:
             raise RuntimeError('Cannot read file {}. Check file name, file location, or its content.'.format(self.GetFilename().decode()))
@@ -1331,7 +1364,7 @@ cdef class CSPrimMultiBox(CSPrimitives):
         """
         assert len(start) == 3 and len(stop) == 3, \
             'CSPrimMultiBox.AddBox: start and stop must have length 3'
-        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self.thisptr
+        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self._ptr()
         cdef int idx = ptr.GetQtyBoxes()
         ptr.AddBox(-1)
         for n in range(3):
@@ -1345,7 +1378,7 @@ cdef class CSPrimMultiBox(CSPrimitives):
         :param idx: int -- box index (0-based)
         :returns: (start, stop) tuple of (3,) ndarrays
         """
-        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self.thisptr
+        cdef _CSPrimMultiBox *ptr = <_CSPrimMultiBox*>self._ptr()
         assert idx < ptr.GetQtyBoxes(), 'CSPrimMultiBox.GetBox: index out of range'
         start = np.zeros(3)
         stop  = np.zeros(3)
@@ -1356,15 +1389,17 @@ cdef class CSPrimMultiBox(CSPrimitives):
 
     def GetQtyBoxes(self):
         """Return the number of boxes."""
-        return (<_CSPrimMultiBox*>self.thisptr).GetQtyBoxes()
+        return (<_CSPrimMultiBox*>self._ptr()).GetQtyBoxes()
 
     def DeleteBox(self, idx):
         """Delete box at index *idx*.
 
         :param idx: int -- box index (0-based)
         """
-        (<_CSPrimMultiBox*>self.thisptr).DeleteBox(idx)
+        (<_CSPrimMultiBox*>self._ptr()).DeleteBox(idx)
 
     def ClearOverlap(self):
         """Remove any overlapping boxes."""
-        (<_CSPrimMultiBox*>self.thisptr).ClearOverlap()
+        (<_CSPrimMultiBox*>self._ptr()).ClearOverlap()
+
+RegisterWrapperFactory(PRIMITIVE, CSPrimitives._from_address)

@@ -26,6 +26,7 @@ from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.CSXCAD cimport ContinuousStructure
 
 from CSXCAD.CSRectGrid cimport CoordinateSystem
+from CSXCAD.CSObject cimport _CSObject
 
 cdef extern from "CSXCAD/CSProperties.h":
     cpdef enum PropertyType "CSProperties::PropertyType":
@@ -49,7 +50,7 @@ cdef extern from "CSXCAD/CSProperties.h":
     ctypedef struct RGBa:
         unsigned char R,G,B,a
 
-    cdef cppclass _CSProperties "CSProperties":
+    cdef cppclass _CSProperties "CSProperties"(_CSObject):
             _CSProperties(_ParameterSet*) except +
 
             _CSProperties* GetCopy(bool incl_prim)
@@ -87,9 +88,14 @@ cdef extern from "CSXCAD/CSProperties.h":
 
 cdef class CSProperties:
     cdef  _CSProperties *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
     @staticmethod
     cdef fromPtr(_CSProperties  *ptr)
     cdef _SetPtr(self, _CSProperties *ptr)
+    cdef _CSProperties* _ptr(self) except NULL
     cdef __GetPrimitive(self, size_t index)
 
 ##############################################################################

@@ -42,7 +42,11 @@ cimport CSXCAD.CSPrimitives as c_CSPrimitives
 from CSXCAD.CSPrimitives import CSPrimitives
 from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.Utilities import CheckNyDir
+from CSXCAD.CSObject cimport CSDestructionCallback, wrapper_destroyed
+from CSXCAD.CSObject cimport resolve_owner, PROPERTY
+from CSXCAD.Utilities import RegisterWrapperFactory
 from libc.stdint cimport uintptr_t
+import weakref
 
 def hex2color(color):
     if not type(color) is str:
@@ -51,7 +55,10 @@ def hex2color(color):
     return tuple([int(x*255) for x in matplotlib.colors.to_rgb(color)])
 
 cdef class CSProperties:
-    _instances = {}
+    _instances = weakref.WeakValueDictionary()
+    """ Wrapper per live C++ instance, so that looking the same object up twice
+    gives the same wrapper. Weak on purpose: a wrapper nobody holds any more must
+    be collectable, otherwise it would keep its owner alive forever. """
     """
     Virtual base class for all properties, cannot be created!
 
@@ -141,7 +148,9 @@ cdef class CSProperties:
             return None
         cdef CSProperties prop
         prop = CSProperties._instances.get(<uintptr_t>ptr, None)
-        if prop is not None:
+        # an entry whose C++ object is already gone must not be handed out: the
+        # weak reference only drops it once the wrapper itself dies
+        if prop is not None and prop.thisptr != NULL:
             return prop
         prop = CSProperties.fromType(ptr.GetType(), pset=None, no_init=True)
         if prop is None:
@@ -175,11 +184,35 @@ cdef class CSProperties:
         if len(kw)!=0:
             raise Exception('Unknown keywords: {}'.format(kw))
 
+    def __dealloc__(self):
+        # The C++ property is owned by the ContinuousStructure and can outlive
+        # this wrapper, so make sure it does not notify a wrapper that is gone.
+        if self.thisptr != NULL:
+            self.thisptr.SetDestructionCallback(NULL, NULL)
+
+    @staticmethod
+    def _from_address(addr):
+        """ Wrapper for the C++ instance at `addr`, \sa CSXCAD.Utilities """
+        return CSProperties.fromPtr(<_CSProperties*><uintptr_t>addr)
+
     cdef _SetPtr(self, _CSProperties *ptr):
         if self.thisptr != NULL and self.thisptr != ptr:
             raise Exception('Different C++ class pointer already assigned to python wrapper class!')
         self.thisptr = ptr
         CSProperties._instances[<uintptr_t>self.thisptr] = self
+        self._owner = resolve_owner(self.thisptr)
+        self.thisptr.SetDestructionCallback(<CSDestructionCallback>wrapper_destroyed,
+                                           <void*>&self.thisptr)
+
+    cdef _CSProperties* _ptr(self) except NULL:
+        """ Access the C++ instance, raising if it has already been destroyed.
+
+        The C++ instance is owned by the ContinuousStructure and can be destroyed while this
+        wrapper is still referenced from python. \sa wrapper_destroyed
+        """
+        if self.thisptr == NULL:
+            raise RuntimeError('wrapped C++ object of type {} has been deleted'.format(type(self).__name__))
+        return self.thisptr
 
     def GetCopy(self, incl_prim=False):
         """
@@ -188,7 +221,7 @@ cdef class CSProperties:
         :param incl_prim: Include a copy of all primitive
         :return: CSProperties -- Copy of this property
         """
-        ptr = self.thisptr.GetCopy(incl_prim)
+        ptr = self._ptr().GetCopy(incl_prim)
         return CSProperties.fromPtr(ptr)
 
     copy = GetCopy
@@ -199,44 +232,44 @@ cdef class CSProperties:
 
         :returns: int -- Number of primitives
         """
-        return self.thisptr.GetQtyPrimitives()
+        return self._ptr().GetQtyPrimitives()
 
     def GetPrimitive(self, index):
         if index<0:
-            index = index%self.thisptr.GetQtyPrimitives()
+            index = index%self._ptr().GetQtyPrimitives()
         return self.__GetPrimitive(index)
 
     def GetAllPrimitives(self):
         return [self.GetPrimitive(n) for n in range(self.GetQtyPrimitives())]
 
     cdef __GetPrimitive(self, size_t index):
-        return CSPrimitives.fromPtr(self.thisptr.GetPrimitive(index))
+        return CSPrimitives.fromPtr(self._ptr().GetPrimitive(index))
 
     def GetType(self):
         """ Get the type of the property
 
         :returns: int -- Type ID of this property
         """
-        return self.thisptr.GetType()
+        return self._ptr().GetType()
 
     def GetTypeString(self):
         """ Get the type of the property as a string
 
         :returns: str -- Type name of this property type
         """
-        return self.thisptr.GetTypeString().decode('UTF-8')
+        return self._ptr().GetTypeString().decode('UTF-8')
 
     def GetParameterSet(self):
         """
         Get the parameter set assigned to this class
         """
-        return ParameterSet.fromPtr(self.thisptr.GetParameterSet())
+        return ParameterSet.fromPtr(self._ptr().GetParameterSet())
 
     def GetMaterial(self):
-        return self.thisptr.GetMaterial()
+        return self._ptr().GetMaterial()
 
     def GetID(self):
-        return self.thisptr.GetID()
+        return self._ptr().GetID()
 
     def SetName(self, name):
         """ SetName(name)
@@ -245,7 +278,7 @@ cdef class CSProperties:
 
         :params name: str -- Name for this property
         """
-        self.thisptr.SetName(name.encode('UTF-8'))
+        self._ptr().SetName(name.encode('UTF-8'))
 
     def GetName(self):
         """
@@ -253,7 +286,7 @@ cdef class CSProperties:
 
         :returns: str -- Name for this property
         """
-        return self.thisptr.GetName().decode('UTF-8')
+        return self._ptr().GetName().decode('UTF-8')
 
     def SetColor(self, color, alpha=255):
         """ SetColor(color, alpha=255)
@@ -275,7 +308,7 @@ cdef class CSProperties:
         :param alpha: opacity value (0.0 .. 255)
         """
         rgb = hex2color(color)
-        self.thisptr.SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
+        self._ptr().SetFillColor(rgb[0], rgb[1], rgb[2], alpha)
 
     def GetFillColor(self):
         """
@@ -284,7 +317,7 @@ cdef class CSProperties:
         :returns: (R,G,B,a) -- tuple for red, green, blue, alpha
         """
         cdef RGBa rgba
-        rgba = self.thisptr.GetFillColor()
+        rgba = self._ptr().GetFillColor()
         return (rgba.R, rgba.G, rgba.B, rgba.a)
 
     def SetEdgeColor(self, color, alpha=255):
@@ -296,7 +329,7 @@ cdef class CSProperties:
         :param alpha: opacity value (0 .. 255)
         """
         rgb = hex2color(color)
-        self.thisptr.SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
+        self._ptr().SetEdgeColor(rgb[0], rgb[1], rgb[2], alpha)
 
     def GetEdgeColor(self):
         """
@@ -305,14 +338,14 @@ cdef class CSProperties:
         :returns: (R,G,B,a) -- tuple for red, green, blue, alpha
         """
         cdef RGBa rgba
-        rgba = self.thisptr.GetEdgeColor()
+        rgba = self._ptr().GetEdgeColor()
         return (rgba.R, rgba.G, rgba.B, rgba.a)
 
     def GetVisibility(self):
-        return self.thisptr.GetVisibility()
+        return self._ptr().GetVisibility()
 
     def SetVisibility(self, val):
-        self.thisptr.SetVisibility(val)
+        self._ptr().SetVisibility(val)
 
     def SetCoordInputType(self, int ctype):
         """ SetCoordInputType(ctype)
@@ -320,14 +353,14 @@ cdef class CSProperties:
         Set the coordinate system used when evaluating weight functions.
         Use ``CSRectGrid.CoordinateSystem.CARTESIAN`` (0) or ``CSRectGrid.CoordinateSystem.CYLINDRICAL`` (1).
         """
-        self.thisptr.SetCoordInputType(<CoordinateSystem>ctype)
+        self._ptr().SetCoordInputType(<CoordinateSystem>ctype)
 
     def GetCoordInputType(self):
         """ GetCoordInputType() -> int
 
         Return the active coordinate system (0=Cartesian, 1=Cylindrical).
         """
-        return self.thisptr.GetCoordInputType()
+        return self._ptr().GetCoordInputType()
 
     def ExistAttribute(self, name):
         """ ExistAttribute(name)
@@ -337,7 +370,7 @@ cdef class CSProperties:
         :param name: str -- Attribute name
         :returns: bool
         """
-        return self.thisptr.ExistAttribute(name.encode('UTF-8'))
+        return self._ptr().ExistAttribute(name.encode('UTF-8'))
 
     def GetAttributeValue(self, name):
         """ GetAttributeValue(name)
@@ -347,7 +380,7 @@ cdef class CSProperties:
         :param name: str -- Attribute name
         :returns: str -- Attribute value
         """
-        return self.thisptr.GetAttributeValue(name.encode('UTF-8')).decode('UTF-8')
+        return self._ptr().GetAttributeValue(name.encode('UTF-8')).decode('UTF-8')
 
     def SetAttributeValue(self, name, val):
         """ SetAttributeValue(name, val)
@@ -357,7 +390,7 @@ cdef class CSProperties:
         :param name: str -- Attribute name
         :param val: str -- Attribute value
         """
-        self.thisptr.SetAttributeValue(name.encode('UTF-8'), val.encode('UTF-8'))
+        self._ptr().SetAttributeValue(name.encode('UTF-8'), val.encode('UTF-8'))
 
     AddAttribute = SetAttributeValue
 
@@ -368,11 +401,11 @@ cdef class CSProperties:
 
         :param name: str -- Attribute name
         """
-        self.thisptr.RemoveAttribute(name.encode('UTF-8'))
+        self._ptr().RemoveAttribute(name.encode('UTF-8'))
 
     def GetAttributeNames(self):
-        names = self.thisptr.GetAttributeNames()
-        attr_names = self.thisptr.GetAttributeNames()
+        names = self._ptr().GetAttributeNames()
+        attr_names = self._ptr().GetAttributeNames()
         return tuple([name.decode('UTF-8') for name in attr_names])
 
     def GetAttributes(self):
@@ -582,7 +615,7 @@ cdef class CSPropMaterial(CSProperties):
 
         :param val: bool -- enable/disable isotropy
         """
-        (<_CSPropMaterial*>self.thisptr).SetIsotropy(val)
+        (<_CSPropMaterial*>self._ptr()).SetIsotropy(val)
 
     def GetIsotropy(self):
         """
@@ -590,7 +623,7 @@ cdef class CSPropMaterial(CSProperties):
 
         :returns: bool -- isotropy status
         """
-        return (<_CSPropMaterial*>self.thisptr).GetIsotropy()
+        return (<_CSPropMaterial*>self._ptr()).GetIsotropy()
 
     def SetMaterialProperty(self, **kw):
         """ SetMaterialProperty(**kw)
@@ -605,7 +638,7 @@ cdef class CSPropMaterial(CSProperties):
         for prop_name in kw:
             val = kw[prop_name]
             if prop_name == 'density':
-                (<_CSPropMaterial*>self.thisptr).SetDensity(val)
+                (<_CSPropMaterial*>self._ptr()).SetDensity(val)
                 continue
             if type(val)==float or type(val)==int:
                 self._SetMaterialPropertyDir(prop_name, 0, val)
@@ -616,13 +649,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def _SetMaterialPropertyDir(self, prop_name, ny, val):
         if prop_name=='epsilon':
-            return (<_CSPropMaterial*>self.thisptr).SetEpsilon(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetEpsilon(val, ny)
         elif prop_name=='mue':
-            return (<_CSPropMaterial*>self.thisptr).SetMue(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetMue(val, ny)
         elif prop_name=='kappa':
-            return (<_CSPropMaterial*>self.thisptr).SetKappa(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetKappa(val, ny)
         elif prop_name=='sigma':
-            return (<_CSPropMaterial*>self.thisptr).SetSigma(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetSigma(val, ny)
         else:
             raise Exception('SetMaterialPropertyDir: Error, unknown material property')
 
@@ -650,7 +683,7 @@ cdef class CSPropMaterial(CSProperties):
         for prop_name in kw:
             val = kw[prop_name]
             if prop_name == 'density':
-                (<_CSPropMaterial*>self.thisptr).SetDensityWeightFunction(val.encode('UTF-8'))
+                (<_CSPropMaterial*>self._ptr()).SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
             if type(val)==str:
                 self._SetMaterialWeightDir(prop_name, 0, val)
@@ -662,13 +695,13 @@ cdef class CSPropMaterial(CSProperties):
     def _SetMaterialWeightDir(self, prop_name, ny, val):
         val = val.encode('UTF-8')
         if prop_name=='epsilon':
-            return (<_CSPropMaterial*>self.thisptr).SetEpsilonWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetEpsilonWeightFunction(val, ny)
         elif prop_name=='mue':
-            return (<_CSPropMaterial*>self.thisptr).SetMueWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetMueWeightFunction(val, ny)
         elif prop_name=='kappa':
-            return (<_CSPropMaterial*>self.thisptr).SetKappaWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetKappaWeightFunction(val, ny)
         elif prop_name=='sigma':
-            return (<_CSPropMaterial*>self.thisptr).SetSigmaWeightFunction(val, ny)
+            return (<_CSPropMaterial*>self._ptr()).SetSigmaWeightFunction(val, ny)
         else:
             raise Exception('SetMaterialWeightDir: Error, unknown material property')
 
@@ -680,8 +713,8 @@ cdef class CSPropMaterial(CSProperties):
         :returns: float for isotropic material and `density` or else (3,) array
         """
         if prop_name == 'density':
-            return (<_CSPropMaterial*>self.thisptr).GetDensity()
-        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+            return (<_CSPropMaterial*>self._ptr()).GetDensity()
+        if (<_CSPropMaterial*>self._ptr()).GetIsotropy():
             return self._GetMaterialPropertyDir(prop_name, 0)
         val = np.zeros(3)
         for n in range(3):
@@ -690,13 +723,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def _GetMaterialPropertyDir(self, prop_name, ny):
         if prop_name=='epsilon':
-            return (<_CSPropMaterial*>self.thisptr).GetEpsilon(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetEpsilon(ny)
         elif prop_name=='mue':
-            return (<_CSPropMaterial*>self.thisptr).GetMue(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetMue(ny)
         elif prop_name=='kappa':
-            return (<_CSPropMaterial*>self.thisptr).GetKappa(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetKappa(ny)
         elif prop_name=='sigma':
-            return (<_CSPropMaterial*>self.thisptr).GetSigma(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetSigma(ny)
         else:
             raise Exception('GetMaterialPropertyDir: Error, unknown material property')
 
@@ -708,8 +741,8 @@ cdef class CSPropMaterial(CSProperties):
         :returns: str for isotropic material and `density` or else str array
         """
         if prop_name == 'density':
-            return (<_CSPropMaterial*>self.thisptr).GetDensityWeightFunction().decode('UTF-8')
-        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+            return (<_CSPropMaterial*>self._ptr()).GetDensityWeightFunction().decode('UTF-8')
+        if (<_CSPropMaterial*>self._ptr()).GetIsotropy():
             return self._GetMaterialWeightDir(prop_name, 0).decode('UTF-8')
         val = ['', '', '']
         for n in range(3):
@@ -718,13 +751,13 @@ cdef class CSPropMaterial(CSProperties):
 
     def _GetMaterialWeightDir(self, prop_name, ny):
         if prop_name=='epsilon':
-            return (<_CSPropMaterial*>self.thisptr).GetEpsilonWeightFunction(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetEpsilonWeightFunction(ny)
         elif prop_name=='mue':
-            return (<_CSPropMaterial*>self.thisptr).GetMueWeightFunction(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetMueWeightFunction(ny)
         elif prop_name=='kappa':
-            return (<_CSPropMaterial*>self.thisptr).GetKappaWeightFunction(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetKappaWeightFunction(ny)
         elif prop_name=='sigma':
-            return (<_CSPropMaterial*>self.thisptr).GetSigmaWeightFunction(ny)
+            return (<_CSPropMaterial*>self._ptr()).GetSigmaWeightFunction(ny)
         else:
             raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
@@ -765,22 +798,22 @@ cdef class CSPropAbsorbingBC(CSProperties):
         super(CSPropAbsorbingBC, self).__init__(pset, *args, **kw)
         
     def SetNormalSignPositive(self,val):
-        (<_CSPropAbsorbingBC*>self.thisptr).SetNormalSignPositive(val)
+        (<_CSPropAbsorbingBC*>self._ptr()).SetNormalSignPositive(val)
         
     def GetNormalSignPositive(self):
-        return (<_CSPropAbsorbingBC*>self.thisptr).GetNormalSignPositive()
+        return (<_CSPropAbsorbingBC*>self._ptr()).GetNormalSignPositive()
         
     def SetPhaseVelocity(self,val):
-        (<_CSPropAbsorbingBC*>self.thisptr).SetPhaseVelocity(val)
+        (<_CSPropAbsorbingBC*>self._ptr()).SetPhaseVelocity(val)
     
     def GetPhaseVelocity(self):
-        return (<_CSPropAbsorbingBC*>self.thisptr).GetPhaseVelocity()
+        return (<_CSPropAbsorbingBC*>self._ptr()).GetPhaseVelocity()
     
     def SetAbsorbingBoundaryType(self,val):
-        (<_CSPropAbsorbingBC*>self.thisptr).SetAbsorbingBoundaryType(val)
+        (<_CSPropAbsorbingBC*>self._ptr()).SetAbsorbingBoundaryType(val)
     
     def GetAbsorbingBoundaryType(self):
-        return (<_CSPropAbsorbingBC*>self.thisptr).GetAbsorbingBoundaryType()
+        return (<_CSPropAbsorbingBC*>self._ptr()).GetAbsorbingBoundaryType()
     
 ###############################################################################
 cdef class CSPropLumpedElement(CSProperties):
@@ -844,62 +877,62 @@ cdef class CSPropLumpedElement(CSProperties):
     def SetResistance(self, val):
         """ SetResistance(val)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetResistance(val)
+        (<_CSPropLumpedElement*>self._ptr()).SetResistance(val)
 
     def GetResistance(self):
         """ GetResistance()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetResistance()
+        return (<_CSPropLumpedElement*>self._ptr()).GetResistance()
 
     def SetCapacity(self, val):
         """ SetCapacity(val)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetCapacity(val)
+        (<_CSPropLumpedElement*>self._ptr()).SetCapacity(val)
 
     def GetCapacity(self):
         """ GetCapacity()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetCapacity()
+        return (<_CSPropLumpedElement*>self._ptr()).GetCapacity()
 
     def SetInductance(self, val):
         """ SetInductance(val)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetInductance(val)
+        (<_CSPropLumpedElement*>self._ptr()).SetInductance(val)
 
     def GetInductance(self):
         """ GetInductance()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetInductance()
+        return (<_CSPropLumpedElement*>self._ptr()).GetInductance()
 
     def SetDirection(self, ny):
         """ SetDirection(ny)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetDirection(CheckNyDir(ny))
+        (<_CSPropLumpedElement*>self._ptr()).SetDirection(CheckNyDir(ny))
 
     def GetDirection(self):
         """ GetDirection()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetDirection()
+        return (<_CSPropLumpedElement*>self._ptr()).GetDirection()
 
     def SetCaps(self, val):
         """ SetCaps(val)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetCaps(val)
+        (<_CSPropLumpedElement*>self._ptr()).SetCaps(val)
 
     def GetCaps(self):
         """ GetCaps()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetCaps()==1
+        return (<_CSPropLumpedElement*>self._ptr()).GetCaps()==1
 
     def SetLEtype(self, val):
         """ SetLEtype(val)
         """
-        (<_CSPropLumpedElement*>self.thisptr).SetLEtype(val)
+        (<_CSPropLumpedElement*>self._ptr()).SetLEtype(val)
 
     def GetLEtype(self):
         """ GetLEtype()
         """
-        return (<_CSPropLumpedElement*>self.thisptr).GetLEtype()
+        return (<_CSPropLumpedElement*>self._ptr()).GetLEtype()
 
 ###############################################################################
 cdef class CSPropMetal(CSProperties):
@@ -951,22 +984,22 @@ cdef class CSPropConductingSheet(CSPropMetal):
     def SetConductivity(self, val):
         """ SetConductivity(val)
         """
-        (<_CSPropConductingSheet*>self.thisptr).SetConductivity(val)
+        (<_CSPropConductingSheet*>self._ptr()).SetConductivity(val)
 
     def GetConductivity(self):
         """ GetConductivity()
         """
-        return (<_CSPropConductingSheet*>self.thisptr).GetConductivity()
+        return (<_CSPropConductingSheet*>self._ptr()).GetConductivity()
 
     def SetThickness(self, val):
         """ SetThickness(val)
         """
-        (<_CSPropConductingSheet*>self.thisptr).SetThickness(val)
+        (<_CSPropConductingSheet*>self._ptr()).SetThickness(val)
 
     def GetThickness(self):
         """ GetThickness()
         """
-        return (<_CSPropConductingSheet*>self.thisptr).GetThickness()
+        return (<_CSPropConductingSheet*>self._ptr()).GetThickness()
 
 ###############################################################################
 cdef class CSPropExcitation(CSProperties):
@@ -1007,7 +1040,7 @@ cdef class CSPropExcitation(CSProperties):
 
         :param val: int -- excitation type (see above)
         """
-        (<_CSPropExcitation*>self.thisptr).SetExcitType(val)
+        (<_CSPropExcitation*>self._ptr()).SetExcitType(val)
 
     def GetExcitType(self):
         """ GetExcitType()
@@ -1015,15 +1048,15 @@ cdef class CSPropExcitation(CSProperties):
 
         :return: int -- excitation type (see above)
         """
-        return (<_CSPropExcitation*>self.thisptr).GetExcitType()
+        return (<_CSPropExcitation*>self._ptr()).GetExcitType()
 
     def SetEnabled(self, val):
         """ Enable/Disable the excitation"""
-        (<_CSPropExcitation*>self.thisptr).SetEnabled(val)
+        (<_CSPropExcitation*>self._ptr()).SetEnabled(val)
 
     def GetEnabled(self):
         """ Get enable/disable state of the excitation"""
-        return (<_CSPropExcitation*>self.thisptr).GetEnabled()
+        return (<_CSPropExcitation*>self._ptr()).GetEnabled()
 
     def SetExcitation(self, val):
         """ SetExcitation(val)
@@ -1040,7 +1073,7 @@ cdef class CSPropExcitation(CSProperties):
         """
         assert len(val)==3, "Error, excitation vector must be of dimension 3"
         for n in range(3):
-            (<_CSPropExcitation*>self.thisptr).SetExcitation(val[n], n)
+            (<_CSPropExcitation*>self._ptr()).SetExcitation(val[n], n)
 
     def GetExcitation(self):
         """ GetExcitation()
@@ -1049,7 +1082,7 @@ cdef class CSPropExcitation(CSProperties):
         """
         val = np.zeros(3)
         for n in range(3):
-            val[n] = (<_CSPropExcitation*>self.thisptr).GetExcitation(n)
+            val[n] = (<_CSPropExcitation*>self._ptr()).GetExcitation(n)
         return val
 
     def SetPropagationDir(self, val):
@@ -1061,7 +1094,7 @@ cdef class CSPropExcitation(CSProperties):
         """
         assert len(val)==3, "Error, excitation vector must be of dimension 3"
         for n in range(3):
-            (<_CSPropExcitation*>self.thisptr).SetPropagationDir(val[n], n)
+            (<_CSPropExcitation*>self._ptr()).SetPropagationDir(val[n], n)
 
     def GetPropagationDir(self):
         """ GetPropagationDir()
@@ -1072,7 +1105,7 @@ cdef class CSPropExcitation(CSProperties):
         """
         val = np.zeros(3)
         for n in range(3):
-            val[n] = (<_CSPropExcitation*>self.thisptr).GetPropagationDir(n)
+            val[n] = (<_CSPropExcitation*>self._ptr()).GetPropagationDir(n)
         return val
 
     def SetWeightFunction(self, func):
@@ -1085,7 +1118,7 @@ cdef class CSPropExcitation(CSProperties):
         assert len(func)==3, 'Error, excitation weighting function must be an array of length 3'
         for n in range(3):
             assert type(func[n]) is str, 'Error, excitation weighting function must be a string'
-            (<_CSPropExcitation*>self.thisptr).SetWeightFunction(func[n].encode('UTF-8'), n)
+            (<_CSPropExcitation*>self._ptr()).SetWeightFunction(func[n].encode('UTF-8'), n)
 
     def GetWeightFunction(self):
         """GetWeightFunction()
@@ -1097,7 +1130,7 @@ cdef class CSPropExcitation(CSProperties):
 
         func = [None]*3
         for n in range(3):
-            func[n] = (<_CSPropExcitation*>self.thisptr).GetWeightFunction(n).decode('UTF-8')
+            func[n] = (<_CSPropExcitation*>self._ptr()).GetWeightFunction(n).decode('UTF-8')
         return func
 
     def SetWeightFile(self, fileName):
@@ -1111,11 +1144,11 @@ cdef class CSPropExcitation(CSProperties):
         :param fileName: str -- path to the HDF5 weight file
         """
         assert type(fileName) is str, '"fileName" must be a str'
-        (<_CSPropExcitation*>self.thisptr).SetWeightFile(fileName.encode('UTF-8'))
+        (<_CSPropExcitation*>self._ptr()).SetWeightFile(fileName.encode('UTF-8'))
 
     def GetWeightFile(self):
         """ GetWeightFile() -> str """
-        return (<_CSPropExcitation*>self.thisptr).GetWeightFile().decode('UTF-8')
+        return (<_CSPropExcitation*>self._ptr()).GetWeightFile().decode('UTF-8')
 
     def SetWeightOrigin(self, origin):
         """ SetWeightOrigin(origin)
@@ -1137,11 +1170,11 @@ cdef class CSPropExcitation(CSProperties):
         :param origin: (3,) array -- Cartesian [x, y, z] in drawing units
         """
         assert len(origin) == 3, 'origin must have 3 elements'
-        (<_CSPropExcitation*>self.thisptr).SetWeightOrigin(origin[0], origin[1], origin[2])
+        (<_CSPropExcitation*>self._ptr()).SetWeightOrigin(origin[0], origin[1], origin[2])
 
     def GetWeightOrigin(self):
         """ GetWeightOrigin() -> [float, float, float] """
-        return [(<_CSPropExcitation*>self.thisptr).GetWeightOrigin(n) for n in range(3)]
+        return [(<_CSPropExcitation*>self._ptr()).GetWeightOrigin(n) for n in range(3)]
 
     def GetWeightedExcitation(self, int ny, coords):
         """ GetWeightedExcitation(ny, coords)
@@ -1158,7 +1191,7 @@ cdef class CSPropExcitation(CSProperties):
         c[0] = coords[0]
         c[1] = coords[1]
         c[2] = coords[2]
-        return (<_CSPropExcitation*>self.thisptr).GetWeightedExcitation(ny, c)
+        return (<_CSPropExcitation*>self._ptr()).GetWeightedExcitation(ny, c)
 
     def SetFrequency(self, val):
         """ SetFrequency(val)
@@ -1167,12 +1200,12 @@ cdef class CSPropExcitation(CSProperties):
 
         :param val: float -- Frequency
         """
-        (<_CSPropExcitation*>self.thisptr).SetFrequency(val)
+        (<_CSPropExcitation*>self._ptr()).SetFrequency(val)
 
     def GetFrequency(self):
         """ GetFrequency()
         """
-        return (<_CSPropExcitation*>self.thisptr).GetFrequency()
+        return (<_CSPropExcitation*>self._ptr()).GetFrequency()
 
     def SetDelay(self, val):
         """ SetDelay(val)
@@ -1181,12 +1214,12 @@ cdef class CSPropExcitation(CSProperties):
 
         :param val: float -- Signal delay
         """
-        (<_CSPropExcitation*>self.thisptr).SetDelay(val)
+        (<_CSPropExcitation*>self._ptr()).SetDelay(val)
 
     def GetDelay(self):
         """ GetDelay()
         """
-        return (<_CSPropExcitation*>self.thisptr).GetDelay()
+        return (<_CSPropExcitation*>self._ptr()).GetDelay()
 
 ###############################################################################
 cdef class CSPropProbeBox(CSProperties):
@@ -1239,46 +1272,46 @@ cdef class CSPropProbeBox(CSProperties):
     def SetProbeType(self, val):
         """ SetProbeType(val)
         """
-        (<_CSPropProbeBox*>self.thisptr).SetProbeType(val)
+        (<_CSPropProbeBox*>self._ptr()).SetProbeType(val)
 
     def GetProbeType(self):
         """ GetProbeType()
         """
-        return (<_CSPropProbeBox*>self.thisptr).GetProbeType()
+        return (<_CSPropProbeBox*>self._ptr()).GetProbeType()
 
     def SetWeighting(self, val):
         """ SetWeighting(val)
         """
-        (<_CSPropProbeBox*>self.thisptr).SetWeighting(val)
+        (<_CSPropProbeBox*>self._ptr()).SetWeighting(val)
 
     def GetWeighting(self):
         """ GetWeighting()
         """
-        return (<_CSPropProbeBox*>self.thisptr).GetWeighting()
+        return (<_CSPropProbeBox*>self._ptr()).GetWeighting()
 
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """
-        (<_CSPropProbeBox*>self.thisptr).SetNormalDir(val)
+        (<_CSPropProbeBox*>self._ptr()).SetNormalDir(val)
 
     def GetNormalDir(self):
         """ GetNormalDir()
         """
-        return (<_CSPropProbeBox*>self.thisptr).GetNormalDir()
+        return (<_CSPropProbeBox*>self._ptr()).GetNormalDir()
 
     def AddFrequency(self, freq):
         """ AddFrequency(freq)
         """
         if np.isscalar(freq):
-            (<_CSPropProbeBox*>self.thisptr).AddFDSample(freq)
+            (<_CSPropProbeBox*>self._ptr()).AddFDSample(freq)
         else:
             for f in freq:
-                (<_CSPropProbeBox*>self.thisptr).AddFDSample(f)
+                (<_CSPropProbeBox*>self._ptr()).AddFDSample(f)
 
     def ClearFrequency(self):
         """ ClearFrequency()
         """
-        (<_CSPropProbeBox*>self.thisptr).ClearFDSamples()
+        (<_CSPropProbeBox*>self._ptr()).ClearFDSamples()
 
     def SetFrequency(self, freq):
         """ SetFrequency(freq)
@@ -1289,7 +1322,7 @@ cdef class CSPropProbeBox(CSProperties):
     def GetFrequency(self):
         """ GetFrequency
         """
-        cdef vector[double]* _freq = (<_CSPropProbeBox*>self.thisptr).GetFDSamples()
+        cdef vector[double]* _freq = (<_CSPropProbeBox*>self._ptr()).GetFDSamples()
         Nf = _freq.size()
         freq = np.zeros(Nf)
         for n in range(Nf):
@@ -1299,7 +1332,7 @@ cdef class CSPropProbeBox(CSProperties):
     def GetFrequencyCount(self):
         """ GetFrequencyCount()
         """
-        return (<_CSPropProbeBox*>self.thisptr).CountFDSamples()
+        return (<_CSPropProbeBox*>self._ptr()).CountFDSamples()
 
     def SetModeFunction(self, mode_fun):
         """ SetModeFunction(mode_fun)
@@ -1309,11 +1342,11 @@ cdef class CSPropProbeBox(CSProperties):
         """
         assert len(mode_fun)==3, 'SetModeFunction: mode_fun must be list of length 3'
         for n in range(3):
-            (<_CSPropProbeBox*>self.thisptr).SetModeFunction(n, str(mode_fun[n]).encode('UTF-8'))
+            (<_CSPropProbeBox*>self._ptr()).SetModeFunction(n, str(mode_fun[n]).encode('UTF-8'))
 
     def GetModeFunction(self):
         """ GetModeFunction() -> list of 3 strings """
-        return [(<_CSPropProbeBox*>self.thisptr).GetModeFunction(n).decode('UTF-8') for n in range(3)]
+        return [(<_CSPropProbeBox*>self._ptr()).GetModeFunction(n).decode('UTF-8') for n in range(3)]
 
     def SetModeFile(self, fileName):
         """ SetModeFile(fileName)
@@ -1325,11 +1358,11 @@ cdef class CSPropProbeBox(CSProperties):
         :param fileName: str -- path to the HDF5 mode file
         """
         assert type(fileName) is str, '"fileName" must be a str'
-        (<_CSPropProbeBox*>self.thisptr).SetModeFile(fileName.encode('UTF-8'))
+        (<_CSPropProbeBox*>self._ptr()).SetModeFile(fileName.encode('UTF-8'))
 
     def GetModeFile(self):
         """ GetModeFile() -> str """
-        return (<_CSPropProbeBox*>self.thisptr).GetModeFile().decode('UTF-8')
+        return (<_CSPropProbeBox*>self._ptr()).GetModeFile().decode('UTF-8')
 
     def SetModeOrigin(self, origin):
         """ SetModeOrigin(origin)
@@ -1350,11 +1383,11 @@ cdef class CSPropProbeBox(CSProperties):
         :param origin: (3,) array -- Cartesian [x, y, z] in drawing units
         """
         assert len(origin) == 3, 'origin must have 3 elements'
-        (<_CSPropProbeBox*>self.thisptr).SetModeOrigin(origin[0], origin[1], origin[2])
+        (<_CSPropProbeBox*>self._ptr()).SetModeOrigin(origin[0], origin[1], origin[2])
 
     def GetModeOrigin(self):
         """ GetModeOrigin() -> [float, float, float] """
-        return [(<_CSPropProbeBox*>self.thisptr).GetModeOrigin(n) for n in range(3)]
+        return [(<_CSPropProbeBox*>self._ptr()).GetModeOrigin(n) for n in range(3)]
 
 ###############################################################################
 cdef class CSPropDumpBox(CSPropProbeBox):
@@ -1445,46 +1478,46 @@ cdef class CSPropDumpBox(CSPropProbeBox):
     def SetDumpType(self, val):
         """ SetDumpType(val)
         """
-        (<_CSPropDumpBox*>self.thisptr).SetDumpType(val)
+        (<_CSPropDumpBox*>self._ptr()).SetDumpType(val)
 
     def GetDumpType(self):
         """ GetDumpType()
         """
-        return (<_CSPropDumpBox*>self.thisptr).GetDumpType()
+        return (<_CSPropDumpBox*>self._ptr()).GetDumpType()
 
     def SetDumpMode(self, val):
         """ SetDumpMode(val)
         """
-        (<_CSPropDumpBox*>self.thisptr).SetDumpMode(val)
+        (<_CSPropDumpBox*>self._ptr()).SetDumpMode(val)
 
     def GetDumpMode(self):
         """ GetDumpMode()
         """
-        return (<_CSPropDumpBox*>self.thisptr).GetDumpMode()
+        return (<_CSPropDumpBox*>self._ptr()).GetDumpMode()
 
     def SetFileType(self, val):
         """ SetFileType(val)
         """
-        (<_CSPropDumpBox*>self.thisptr).SetFileType(val)
+        (<_CSPropDumpBox*>self._ptr()).SetFileType(val)
 
     def GetFileType(self):
         """ GetFileType()
         """
-        return (<_CSPropDumpBox*>self.thisptr).GetFileType()
+        return (<_CSPropDumpBox*>self._ptr()).GetFileType()
 
     def SetOptResolution(self, val):
         """ SetOptResolution(val)
         """
         assert len(val)==3, 'SetOptResolution: value must be list or array of length 3'
         for n in range(3):
-            (<_CSPropDumpBox*>self.thisptr).SetOptResolution(n, val[n])
+            (<_CSPropDumpBox*>self._ptr()).SetOptResolution(n, val[n])
 
     def GetOptResolution(self):
         """ GetOptResolution()
         """
         val = np.zeros(3)
         for n in range(3):
-            val[n] = (<_CSPropDumpBox*>self.thisptr).GetOptResolution(n)
+            val[n] = (<_CSPropDumpBox*>self._ptr()).GetOptResolution(n)
         return val
 
     def SetSubSampling(self, val):
@@ -1492,14 +1525,14 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         """
         assert len(val)==3, "SetSubSampling: 'val' must be a list or array of length 3"
         for n in range(3):
-            (<_CSPropDumpBox*>self.thisptr).SetSubSampling(n, val[n])
+            (<_CSPropDumpBox*>self._ptr()).SetSubSampling(n, val[n])
 
     def GetSubSampling(self):
         """ GetSubSampling()
         """
         val = np.zeros(3)
         for n in range(3):
-            val[n] = (<_CSPropDumpBox*>self.thisptr).GetSubSampling(n)
+            val[n] = (<_CSPropDumpBox*>self._ptr()).GetSubSampling(n)
         return val
 
 ###############################################################################
@@ -1516,13 +1549,13 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         super(CSPropDispersiveMaterial, self).__init__(pset, *args, **kw)
 
     def GetDispersionOrder(self):
-        return  (<_CSPropDispersiveMaterial*>self.thisptr).GetDispersionOrder()
+        return  (<_CSPropDispersiveMaterial*>self._ptr()).GetDispersionOrder()
 
     def SetDispersionOrder(self, val):
-        return  (<_CSPropDispersiveMaterial*>self.thisptr).SetDispersionOrder(val)
+        return  (<_CSPropDispersiveMaterial*>self._ptr()).SetDispersionOrder(val)
 
     def _CheckOrder(self, order):
-        if order<0 or order>=(<_CSPropDispersiveMaterial*>self.thisptr).GetDispersionOrder():
+        if order<0 or order>=(<_CSPropDispersiveMaterial*>self._ptr()).GetDispersionOrder():
             raise IndexError('Invalid dispersive media order requested')
 
     def GetDispersiveMaterialProperty(self, prop_name, order):
@@ -1534,7 +1567,7 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         :returns: float for isotropic material or else (3,) array
         """
         self._CheckOrder(order)
-        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+        if (<_CSPropMaterial*>self._ptr()).GetIsotropy():
             return self._GetDispersiveMaterialPropertyDir(prop_name, order, 0)
         val = np.zeros(3)
         for n in range(3):
@@ -1575,7 +1608,7 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         :returns: str for isotropic material and `density` or else str array
         """
         self._CheckOrder(order)
-        if (<_CSPropMaterial*>self.thisptr).GetIsotropy():
+        if (<_CSPropMaterial*>self._ptr()).GetIsotropy():
             return self._GetDispersiveMaterialWeightDir(prop_name, order, 0).decode('UTF-8')
         val = ['', '', '']
         for n in range(3):
@@ -1612,66 +1645,66 @@ cdef class CSPropLorentzMaterial(CSPropDispersiveMaterial):
 
     def _GetDispersiveMaterialPropertyDir(self, prop_name, order, ny):
         if prop_name == 'eps_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreq(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsPlasmaFreq(order, ny)
         elif prop_name == 'eps_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreq(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsLorPoleFreq(order, ny)
         elif prop_name == 'eps_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsRelaxTime(order, ny)
         elif prop_name == 'mue_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreq(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMuePlasmaFreq(order, ny)
         elif prop_name == 'mue_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreq(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMueLorPoleFreq(order, ny)
         elif prop_name == 'mue_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTime(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMueRelaxTime(order, ny)
         else:
             CSPropDispersiveMaterial._GetDispersiveMaterialPropertyDir(self, prop_name, order, ny)
 
     def _SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val):
         if prop_name == 'eps_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreq(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsPlasmaFreq(order, val, ny)
         elif prop_name == 'eps_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreq(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsLorPoleFreq(order, val, ny)
         elif prop_name == 'eps_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsRelaxTime(order, val, ny)
         elif prop_name == 'mue_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreq(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMuePlasmaFreq(order, val, ny)
         elif prop_name == 'mue_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreq(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMueLorPoleFreq(order, val, ny)
         elif prop_name == 'mue_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTime(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMueRelaxTime(order, val, ny)
         else:
             CSPropDispersiveMaterial._SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val)
 
     def _GetDispersiveMaterialWeightDir(self, prop_name, order, ny):
         if prop_name == 'eps_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsPlasmaFreqWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsPlasmaFreqWeightFunction(order, ny)
         elif prop_name == 'eps_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsLorPoleFreqWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsLorPoleFreqWeightFunction(order, ny)
         elif prop_name == 'eps_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetEpsRelaxTimeWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetEpsRelaxTimeWeightFunction(order, ny)
         elif prop_name == 'mue_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMuePlasmaFreqWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMuePlasmaFreqWeightFunction(order, ny)
         elif prop_name == 'mue_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueLorPoleFreqWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMueLorPoleFreqWeightFunction(order, ny)
         elif prop_name == 'mue_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).GetMueRelaxTimeWeightFunction(order, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).GetMueRelaxTimeWeightFunction(order, ny)
         else:
             CSPropDispersiveMaterial._GetDispersiveMaterialWeightDir(self, prop_name, order, ny)
 
     def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
         val = val.encode('UTF-8')
         if prop_name == 'eps_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsPlasmaFreqWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsPlasmaFreqWeightFunction(order, val, ny)
         elif prop_name == 'eps_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsLorPoleFreqWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsLorPoleFreqWeightFunction(order, val, ny)
         elif prop_name == 'eps_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetEpsRelaxTimeWeightFunction(order, val, ny)
         elif prop_name == 'mue_plasma':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMuePlasmaFreqWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMuePlasmaFreqWeightFunction(order, val, ny)
         elif prop_name == 'mue_pole_freq':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueLorPoleFreqWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMueLorPoleFreqWeightFunction(order, val, ny)
         elif prop_name == 'mue_relax':
-            return (<_CSPropLorentzMaterial*>self.thisptr).SetMueRelaxTimeWeightFunction(order, val, ny)
+            return (<_CSPropLorentzMaterial*>self._ptr()).SetMueRelaxTimeWeightFunction(order, val, ny)
         else:
             CSPropDispersiveMaterial._SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val)
 
@@ -1688,34 +1721,34 @@ cdef class CSPropDebyeMaterial(CSPropDispersiveMaterial):
 
     def _GetDispersiveMaterialPropertyDir(self, prop_name, order, ny):
         if prop_name == 'eps_delta':
-            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDelta(order, ny)
+            return (<_CSPropDebyeMaterial*>self._ptr()).GetEpsDelta(order, ny)
         elif prop_name == 'eps_relax':
-            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTime(order, ny)
+            return (<_CSPropDebyeMaterial*>self._ptr()).GetEpsRelaxTime(order, ny)
         else:
             CSPropDispersiveMaterial._GetDispersiveMaterialPropertyDir(self, prop_name, order, ny)
 
     def _SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val):
         if prop_name=='eps_delta':
-            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDelta(order, val, ny)
+            (<_CSPropDebyeMaterial*>self._ptr()).SetEpsDelta(order, val, ny)
         elif prop_name=='eps_relax':
-            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTime(order, val, ny)
+            (<_CSPropDebyeMaterial*>self._ptr()).SetEpsRelaxTime(order, val, ny)
         else:
             CSPropDispersiveMaterial._SetDispersiveMaterialPropertyDir(self, prop_name, order, ny, val)
 
     def _GetDispersiveMaterialWeightDir(self, prop_name, order, ny):
         if prop_name=='eps_delta':
-            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsDeltaWeightFunction(order, ny)
+            return (<_CSPropDebyeMaterial*>self._ptr()).GetEpsDeltaWeightFunction(order, ny)
         elif prop_name=='eps_relax':
-            return (<_CSPropDebyeMaterial*>self.thisptr).GetEpsRelaxTimeWeightFunction(order, ny)
+            return (<_CSPropDebyeMaterial*>self._ptr()).GetEpsRelaxTimeWeightFunction(order, ny)
         else:
             CSPropDispersiveMaterial._GetDispersiveMaterialWeightDir(self, prop_name, order, ny)
 
     def _SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val):
         val = val.encode('UTF-8')
         if prop_name=='eps_delta':
-            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsDeltaWeightFunction(order, val, ny)
+            (<_CSPropDebyeMaterial*>self._ptr()).SetEpsDeltaWeightFunction(order, val, ny)
         elif prop_name=='eps_relax':
-            (<_CSPropDebyeMaterial*>self.thisptr).SetEpsRelaxTimeWeightFunction(order, val, ny)
+            (<_CSPropDebyeMaterial*>self._ptr()).SetEpsRelaxTimeWeightFunction(order, val, ny)
         else:
             CSPropDispersiveMaterial._SetDispersiveMaterialWeightDir(self, prop_name, order, ny, val)
 
@@ -1754,39 +1787,39 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
 
     def SetFilename(self, fn):
         """Set the HDF5 material file path."""
-        (<_CSPropDiscMaterial*>self.thisptr).SetFilename(fn.encode('UTF-8'))
+        (<_CSPropDiscMaterial*>self._ptr()).SetFilename(fn.encode('UTF-8'))
 
     def GetFilename(self):
         """Get the HDF5 material file path."""
-        return (<_CSPropDiscMaterial*>self.thisptr).GetFilename().decode('UTF-8')
+        return (<_CSPropDiscMaterial*>self._ptr()).GetFilename().decode('UTF-8')
 
     def SetFileType(self, ftype):
         """Set the file type (0 = HDF5)."""
-        (<_CSPropDiscMaterial*>self.thisptr).SetFileType(ftype)
+        (<_CSPropDiscMaterial*>self._ptr()).SetFileType(ftype)
 
     def GetFileType(self):
         """Get the file type (0 = HDF5)."""
-        return (<_CSPropDiscMaterial*>self.thisptr).GetFileType()
+        return (<_CSPropDiscMaterial*>self._ptr()).GetFileType()
 
     def SetScale(self, val):
         """Set the spatial scale factor applied to mesh coordinates."""
-        (<_CSPropDiscMaterial*>self.thisptr).SetScale(val)
+        (<_CSPropDiscMaterial*>self._ptr()).SetScale(val)
 
     def GetScale(self):
         """Get the spatial scale factor."""
-        return (<_CSPropDiscMaterial*>self.thisptr).GetScale()
+        return (<_CSPropDiscMaterial*>self._ptr()).GetScale()
 
     def SetUseDataBaseForBackground(self, val):
         """Set whether database index 0 is used as background material."""
-        (<_CSPropDiscMaterial*>self.thisptr).SetUseDataBaseForBackground(val)
+        (<_CSPropDiscMaterial*>self._ptr()).SetUseDataBaseForBackground(val)
 
     def GetUseDataBaseForBackground(self):
         """Get whether database index 0 is used as background material."""
-        return (<_CSPropDiscMaterial*>self.thisptr).GetUseDataBaseForBackground()
+        return (<_CSPropDiscMaterial*>self._ptr()).GetUseDataBaseForBackground()
 
     def GetTransform(self):
         """Return the affine transform applied to lookup coordinates, or None if not set."""
-        return CSTransform.fromPtr((<_CSPropDiscMaterial*>self.thisptr).GetTransform())
+        return CSTransform.fromPtr((<_CSPropDiscMaterial*>self._ptr()).GetTransform())
 
     def SetTransform(self, CSTransform transform):
         """Set the affine transform applied to lookup coordinates before the scale factor.
@@ -1795,41 +1828,44 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
         you need to keep an independent copy. Pass None to remove the transform.
         """
         if transform is None:
-            (<_CSPropDiscMaterial*>self.thisptr).SetTransform(NULL)
+            (<_CSPropDiscMaterial*>self._ptr()).SetTransform(NULL)
         else:
-            (<_CSPropDiscMaterial*>self.thisptr).SetTransform(transform.thisptr)
+            (<_CSPropDiscMaterial*>self._ptr()).SetTransform(transform.thisptr)
+            # C++ ownership just changed, so the wrapper has to pick it up
+            transform._owner = resolve_owner(transform.thisptr)
 
     def ReadFile(self):
         """Read the material data from the HDF5 file. Returns True on success."""
-        return (<_CSPropDiscMaterial*>self.thisptr).ReadFile()
+        return (<_CSPropDiscMaterial*>self._ptr()).ReadFile()
 
     def GetEpsilonWeighted(self, int ny, coords):
         """Return epsilon at the given coordinates for direction ny (0/1/2)."""
         cdef double c[3]
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
-        return (<_CSPropDiscMaterial*>self.thisptr).GetEpsilonWeighted(ny, c)
+        return (<_CSPropDiscMaterial*>self._ptr()).GetEpsilonWeighted(ny, c)
 
     def GetMueWeighted(self, int ny, coords):
         """Return mue at the given coordinates for direction ny (0/1/2)."""
         cdef double c[3]
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
-        return (<_CSPropDiscMaterial*>self.thisptr).GetMueWeighted(ny, c)
+        return (<_CSPropDiscMaterial*>self._ptr()).GetMueWeighted(ny, c)
 
     def GetKappaWeighted(self, int ny, coords):
         """Return kappa at the given coordinates for direction ny (0/1/2)."""
         cdef double c[3]
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
-        return (<_CSPropDiscMaterial*>self.thisptr).GetKappaWeighted(ny, c)
+        return (<_CSPropDiscMaterial*>self._ptr()).GetKappaWeighted(ny, c)
 
     def GetSigmaWeighted(self, int ny, coords):
         """Return sigma at the given coordinates for direction ny (0/1/2)."""
         cdef double c[3]
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
-        return (<_CSPropDiscMaterial*>self.thisptr).GetSigmaWeighted(ny, c)
+        return (<_CSPropDiscMaterial*>self._ptr()).GetSigmaWeighted(ny, c)
 
     def GetDensityWeighted(self, coords):
         """Return density at the given coordinates."""
         cdef double c[3]
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
-        return (<_CSPropDiscMaterial*>self.thisptr).GetDensityWeighted(c)
+        return (<_CSPropDiscMaterial*>self._ptr()).GetDensityWeighted(c)
 
+RegisterWrapperFactory(PROPERTY, CSProperties._from_address)

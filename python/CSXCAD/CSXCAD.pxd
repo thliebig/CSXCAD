@@ -19,6 +19,7 @@
 from libcpp.string cimport string
 from libcpp cimport bool
 from libcpp.vector cimport vector
+from CSXCAD.CSObject cimport _CSObject
 
 cimport CSXCAD.CSPrimitives
 cimport CSXCAD.CSProperties
@@ -29,7 +30,7 @@ from CSXCAD.CSProperties cimport _CSProperties, CSProperties, PropertyType
 from CSXCAD.CSRectGrid cimport _CSRectGrid, CSRectGrid, CoordinateSystem
 
 cdef extern from "CSXCAD/CSBackgroundMaterial.h":
-    cdef cppclass _CSBackgroundMaterial "CSBackgroundMaterial":
+    cdef cppclass _CSBackgroundMaterial "CSBackgroundMaterial"(_CSObject):
         double GetEpsilon()
         void SetEpsilon(double val)
         double GetMue()
@@ -41,7 +42,7 @@ cdef extern from "CSXCAD/CSBackgroundMaterial.h":
         void Reset()
 
 cdef extern from "CSXCAD/ContinuousStructure.h":
-    cdef cppclass _ContinuousStructure "ContinuousStructure":
+    cdef cppclass _ContinuousStructure "ContinuousStructure"(_CSObject):
             _ContinuousStructure() except +
             bool Write2XML(string)
             string ReadFromXML(string)
@@ -72,11 +73,24 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
 
 cdef class CSBackgroundMaterial:
     cdef _CSBackgroundMaterial *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
+    cdef _SetPtr(self, _CSBackgroundMaterial *ptr)
+    cdef _CSBackgroundMaterial* _ptr(self) except NULL
     @staticmethod
     cdef fromPtr(_CSBackgroundMaterial *ptr)
 
 cdef class ContinuousStructure:
     cdef _ContinuousStructure *thisptr      # hold a C++ instance which we're wrapping
+    cdef object __weakref__
+    # False if this wrapper created the C++ instance and thus has to delete it
+    cdef bool no_init
+    @staticmethod
+    cdef fromPtr(_ContinuousStructure *ptr)
+    cdef _SetPtr(self, _ContinuousStructure *ptr)
+    cdef _ContinuousStructure* _ptr(self) except NULL
     cdef _GetProperty(self, int index)
     cdef __GetPropertyByCoordPriority(self, double* coord, PropertyType prop_type, bool markFoundAsUsed)
     cdef __GetAllPrimitives(self, bool sort, PropertyType prop_type)

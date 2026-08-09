@@ -17,15 +17,20 @@
 #
 
 from libcpp cimport bool
+from CSXCAD.CSObject cimport _CSObject
 
 cdef extern from "CSXCAD/ParameterObjects.h":
-    cdef cppclass _ParameterSet "ParameterSet":
+    cdef cppclass _ParameterSet "ParameterSet"(_CSObject):
             _ParameterSet() except +
             void PrintSelf()
             bool GetModified()
 
 cdef class ParameterSet:
     cdef _ParameterSet *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
     @staticmethod
     cdef fromPtr(_ParameterSet  *ptr)
     cdef _SetPtr(self, _ParameterSet *ptr)

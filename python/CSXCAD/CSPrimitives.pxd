@@ -24,6 +24,7 @@ from CSXCAD.ParameterObjects cimport _ParameterSet, ParameterSet
 from CSXCAD.CSProperties cimport _CSProperties, CSProperties
 from CSXCAD.CSTransform cimport _CSTransform, CSTransform
 from CSXCAD.CSRectGrid cimport CoordinateSystem
+from CSXCAD.CSObject cimport _CSObject
 
 cdef extern from "CSXCAD/CSPrimitives.h":
     cpdef enum PrimitiveType "CSPrimitives::PrimitiveType":
@@ -45,7 +46,7 @@ cdef extern from "CSXCAD/CSPrimitives.h":
 
 
 cdef extern from "CSXCAD/CSPrimitives.h":
-    cdef cppclass _CSPrimitives "CSPrimitives":
+    cdef cppclass _CSPrimitives "CSPrimitives"(_CSObject):
             _CSPrimitives(_ParameterSet*, _CSProperties*) except +
             unsigned int GetID()
             int GetType()
@@ -77,9 +78,14 @@ cdef extern from "CSXCAD/CSPrimitives.h":
 
 cdef class CSPrimitives:
     cdef _CSPrimitives *thisptr
+    cdef object __weakref__
+    # wrapper that has to stay alive for our C++ instance to stay valid,
+    # normally the ContinuousStructure the instance belongs to
+    cdef object _owner
     @staticmethod
     cdef fromPtr(_CSPrimitives  *ptr)
     cdef _SetPtr(self, _CSPrimitives *ptr)
+    cdef _CSPrimitives* _ptr(self) except NULL
     cdef __GetProperty(self)
 
 ###############################################################################
