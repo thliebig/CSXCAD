@@ -93,6 +93,7 @@ CSPrimitives::CSPrimitives(CSPrimitives* prim, CSProperties *prop)
 		SetProperty(prop);
 	clParaSet=prim->clParaSet;
 	m_Transform=CSTransform::New(prim->m_Transform);
+	if (m_Transform) m_Transform->SetOwner(this);
 	iPriority=prim->iPriority;
 	m_MeshType = prim->m_MeshType;
 	m_PrimCoordSystem = prim->m_PrimCoordSystem;
@@ -128,6 +129,7 @@ CSTransform* CSPrimitives::GetTransform()
 {
 	if (m_Transform==NULL)
 		m_Transform = new CSTransform(clParaSet);
+	m_Transform->SetOwner(this);
 	return m_Transform;
 }
 
@@ -149,6 +151,8 @@ void CSPrimitives::SetProperty(CSProperties *prop)
 
 CSPrimitives::~CSPrimitives()
 {
+	// notify early, so that we are invalidated before the transform we delete below
+	NotifyDestruction(this);
 	if (clProperty!=NULL)
 		clProperty->RemovePrimitive(this);
 	delete m_Transform;
@@ -220,6 +224,7 @@ bool CSPrimitives::ReadFromXML(TiXmlNode &root)
 
 	delete m_Transform;
 	m_Transform = CSTransform::New(elem, clParaSet);
+	if (m_Transform) m_Transform->SetOwner(this);
 
 	return true;
 }

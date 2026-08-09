@@ -31,13 +31,17 @@
 #include <algorithm>
 #include "ParameterObjects.h"
 #include "CSXCAD_Global.h"
+#include "CSObject.h"
 
 class TiXmlNode;
 
 //! CSRectGrid is managing a rectilinear graded mesh.
-class CSXCAD_EXPORT CSRectGrid
+class CSXCAD_EXPORT CSRectGrid : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return GRID;}
+
 	//! Create an empty grid.
 	CSRectGrid(void);
 	//! Deconstruct the grid.

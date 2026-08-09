@@ -54,12 +54,18 @@
 ContinuousStructure::ContinuousStructure(void)
 {
 	clParaSet = new ParameterSet();
+	// these belong to us and are destroyed with us
+	clParaSet->SetOwner(this);
+	clGrid.SetOwner(this);
+	m_BG_Mat.SetOwner(this);
 	//init datastructures...
 	clear();
 }
 
 ContinuousStructure::~ContinuousStructure(void)
 {
+	// notify early, so that we are invalidated before everything clear() deletes
+	NotifyDestruction(this);
 	clear();
 	delete clParaSet;
 	clParaSet=NULL;
@@ -77,6 +83,7 @@ void ContinuousStructure::AddProperty(CSProperties* prop)
 	prop->SetCoordInputType(m_MeshType);
 	prop->Update(&ErrString);
 	vProperties.push_back(prop);
+	prop->SetOwner(this);
 	prop->SetUniqueID(UniqueIDCounter++);
 	this->UpdateIDs();
 }
@@ -97,6 +104,7 @@ bool ContinuousStructure::ReplaceProperty(CSProperties* oldProp, CSProperties* n
 			}
 			delete *iter;
 			*iter=newProp;
+			newProp->SetOwner(this);
 			newProp->SetUniqueID(UniqueIDCounter++);
 			return true;
 		}
@@ -111,6 +119,7 @@ void ContinuousStructure::RemoveProperty(CSProperties* prop)
 		if (*iter==prop)
 		{
 			vProperties.erase(iter);
+			prop->SetOwner(NULL);   // ownership is handed back to the caller
 			this->UpdateIDs();
 			return;
 		}

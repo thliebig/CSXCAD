@@ -19,12 +19,16 @@
 #define CSBACKGROUNDMATERIAL_H
 
 #include "CSXCAD_Global.h"
+#include "CSObject.h"
 
 class TiXmlNode;
 
-class CSXCAD_EXPORT CSBackgroundMaterial
+class CSXCAD_EXPORT CSBackgroundMaterial : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return BACKGROUNDMATERIAL;}
+
 	CSBackgroundMaterial();
 
 	//! Get the rel. electric permittivity

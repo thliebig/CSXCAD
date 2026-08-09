@@ -35,6 +35,7 @@
 #include "CSBackgroundMaterial.h"
 #include "ParameterObjects.h"
 #include "CSUseful.h"
+#include "CSObject.h"
 
 class TiXmlNode;
 
@@ -43,9 +44,12 @@ class TiXmlNode;
  ContinuousStructure is a class that contains certain property objects containing geometrical primitive structures as boxes, spheres, cylinders etc.
  All values in this class can contain parameters and mathematical equations.
 */
-class CSXCAD_EXPORT ContinuousStructure
+class CSXCAD_EXPORT ContinuousStructure : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return STRUCTURE;}
+
 	//! Create an empty structure
 	ContinuousStructure(void);
 	//! Deconstructor. Will delete all properties and primitives it contains!

@@ -125,7 +125,10 @@ CSPropDiscMaterial::CSPropDiscMaterial(CSPropDiscMaterial* prop, bool copyPrim) 
 	m_DB_Background = prop->m_DB_Background;
 	m_Scale = prop->m_Scale;
 	if (prop->m_Transform)
+	{
 		m_Transform = CSTransform::New(prop->m_Transform);
+		if (m_Transform) m_Transform->SetOwner(this);
+	}
 	//Copy does not read the data!!
 }
 
@@ -297,6 +300,7 @@ void CSPropDiscMaterial::SetTransform(CSTransform* transform)
 		return;
 	delete m_Transform;
 	m_Transform = transform;
+	if (m_Transform) m_Transform->SetOwner(this);
 }
 
 bool CSPropDiscMaterial::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)

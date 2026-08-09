@@ -91,6 +91,8 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 
 CSProperties::~CSProperties()
 {
+	// notify early, so that we are invalidated before the primitives we delete below
+	NotifyDestruction(this);
 	while (vPrimitives.size()>0)
 		DeletePrimitive(vPrimitives.back());
 	delete coordParaSet;
@@ -264,6 +266,7 @@ void CSProperties::AddPrimitive(CSPrimitives *prim)
 		std::cerr << __func__ << ": Error, primitive is already owned by this property!" << std::endl;
 		return;
 	}
+	prim->SetOwner(this);
 	vPrimitives.push_back(prim);
 	prim->SetProperty(this);
 }
@@ -286,6 +289,7 @@ void CSProperties::RemovePrimitive(CSPrimitives *prim)
 		{
 			std::vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+i;
 			vPrimitives.erase(iter);
+			prim->SetOwner(NULL);   // ownership is handed back to the caller
 			prim->SetProperty(NULL);
 			return;
 		}
@@ -309,6 +313,7 @@ CSPrimitives* CSProperties::TakePrimitive(size_t index)
 	CSPrimitives* prim=vPrimitives.at(index);
 	std::vector<CSPrimitives*>::iterator iter=vPrimitives.begin()+index;
 	vPrimitives.erase(iter);
+	prim->SetOwner(NULL);   // ownership is handed back to the caller
 	return prim;
 }
 

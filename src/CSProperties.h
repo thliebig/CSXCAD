@@ -34,6 +34,7 @@
 #include "CSTransform.h"
 #include "CSXCAD_Global.h"
 #include "CSUseful.h"
+#include "CSObject.h"
 
 class CSPrimitives;
 
@@ -66,9 +67,12 @@ typedef struct
  All values in this class can contain parameters and mathematical equations.
  This absract base-class contains basic property methodes, e.g. set/get primitives, mesh-relations, color-information etc.
 */
-class CSXCAD_EXPORT CSProperties
+class CSXCAD_EXPORT CSProperties : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return PROPERTY;}
+
 	virtual ~CSProperties();
 	//! Copy constructor
 	CSProperties(CSProperties* prop, bool copyPrim=false);

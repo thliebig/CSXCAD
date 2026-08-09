@@ -30,6 +30,7 @@
 #include "ParameterObjects.h"
 #include "ParameterCoord.h"
 #include "CSXCAD_Global.h"
+#include "CSObject.h"
 
 class CSPrimPoint;
 class CSPrimBox;
@@ -67,9 +68,12 @@ bool CSXCAD_EXPORT CoordInRange(const double* p, const double* start, const doub
  This is an abstract base class for different geometrical primitives like boxes, spheres, cylinders etc.
  !!! Tolerances not yet obeyed !!!
  */
-class CSXCAD_EXPORT CSPrimitives
+class CSXCAD_EXPORT CSPrimitives : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return PRIMITIVE;}
+
 	virtual ~CSPrimitives();
 
 	virtual void Init();

@@ -30,6 +30,7 @@
 #include <vector>
 #include <math.h>
 #include "CSXCAD_Global.h"
+#include "CSObject.h"
 
 class Parameter;
 class LinearParameter;
@@ -139,9 +140,12 @@ protected:
 };
 
 
-class CSXCAD_EXPORT ParameterSet
+class CSXCAD_EXPORT ParameterSet : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return PARAMETERSET;}
+
 	//! Create an empty Parameter-Set
 	ParameterSet(void);
 	//! Delete the Parameter-Set, including all parameter

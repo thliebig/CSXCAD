@@ -26,10 +26,14 @@
 #include <algorithm>
 
 #include "ParameterObjects.h"
+#include "CSObject.h"
 
-class CSXCAD_EXPORT CSTransform
+class CSXCAD_EXPORT CSTransform : public CSObject
 {
 public:
+	//! \sa CSObject::ObjectKind
+	ObjectKind GetObjectKind() const {return TRANSFORM;}
+
 	CSTransform();
 	CSTransform(CSTransform* transform);
 	CSTransform(ParameterSet* paraSet);
