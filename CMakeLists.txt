@@ -162,6 +162,15 @@ message(STATUS "vtk libraries " ${vtk_LIBS})
 # depend on fparser.hh
 ADD_SUBDIRECTORY( src )
 
+# C++ unit tests. Off by default: they are of no use to somebody installing
+# CSXCAD, and building them needs nothing the library does not need anyway.
+# Enable with -DCSXCAD_BUILD_TESTS=ON, then run them with `ctest`.
+option(CSXCAD_BUILD_TESTS "Build the C++ unit tests in tests/" OFF)
+if (CSXCAD_BUILD_TESTS)
+  enable_testing()
+  ADD_SUBDIRECTORY( tests )
+endif()
+
 INSTALL(DIRECTORY matlab DESTINATION share/CSXCAD)
 
 #TODO tarball, debug, release, doxygen

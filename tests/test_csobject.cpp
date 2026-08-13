@@ -23,11 +23,10 @@
   unregistering, re-registering, and the object layout invariant the whole
   mechanism depends on.
 
-  There is no CMake test target yet, build and run it by hand:
+  Build with -DCSXCAD_BUILD_TESTS=ON and run it through ctest:
 
-    g++ -std=c++11 -o test_csobject tests/test_csobject.cpp \
-        -I src -I <prefix>/include -L <prefix>/lib -lCSXCAD -lfparser -ltinyxml
-    LD_LIBRARY_PATH=<prefix>/lib ./test_csobject
+    cmake -DCSXCAD_BUILD_TESTS=ON <the usual options> ..
+    make && ctest --output-on-failure
 
   Exits non-zero and prints "FAIL: ..." per failed check.
 */

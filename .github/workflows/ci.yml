@@ -408,8 +408,16 @@ jobs:
           # the error above! There's no need to install MPI.
           cd $GITHUB_WORKSPACE/CSXCAD
           mkdir build && cd build
-          cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
+          cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt -DCSXCAD_BUILD_TESTS=ON
           make -j`nproc` && make install
+
+      - name: Unittest CSXCAD C++ library
+        # a deadlocked test must not sit here until the six hour job limit
+        timeout-minutes: 10
+        run: |
+          # covers what the python tests cannot reach, destruction from plain C++
+          cd $GITHUB_WORKSPACE/CSXCAD/build
+          ctest --output-on-failure --timeout 300
 
       - name: Build and install CSXCAD Python module with --no-build-isolation
         run: |
@@ -602,8 +610,16 @@ jobs:
           source ~/.zprofile
           cd $GITHUB_WORKSPACE/CSXCAD
           mkdir build && cd build
-          cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
+          cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt -DCSXCAD_BUILD_TESTS=ON
           make -j$NCPUS && make install
+
+      - name: Unittest CSXCAD C++ library
+        # a deadlocked test must not sit here until the six hour job limit
+        timeout-minutes: 10
+        run: |
+          # covers what the python tests cannot reach, destruction from plain C++
+          cd $GITHUB_WORKSPACE/CSXCAD/build
+          ctest --output-on-failure --timeout 300
 
       - name: Build and install CSXCAD Python module with --no-build-isolation
         run: |
@@ -741,8 +757,13 @@ jobs:
             # the error above! There's no need to install MPI.
             cd $GITHUB_WORKSPACE/CSXCAD
             mkdir build && cd build
-            cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt
+            cmake ../ -DCMAKE_INSTALL_PREFIX=$HOME/opt -DCSXCAD_BUILD_TESTS=ON
             make -j$NCPUS && make install
+
+            echo "Unittest CSXCAD C++ library..."
+            # covers what the python tests cannot reach, destruction from plain C++
+            cd $GITHUB_WORKSPACE/CSXCAD/build
+            ctest --output-on-failure --timeout 300
 
             echo "Build and install CSXCAD Python module with --no-build-isolation..."
             cd $GITHUB_WORKSPACE/CSXCAD/python
@@ -899,6 +920,14 @@ jobs:
         run: |
           & "$env:VS_ROOT_DIR/Common7/Tools/Launch-VsDevShell.ps1" -Arch amd64 -HostArch amd64
 
+          # CSXCAD_BUILD_TESTS builds the C++ tests but nothing runs them here:
+          # this job compiles, it does not execute, which is also why it has no
+          # python steps. Running them would mean putting CSXCAD.dll and every
+          # vcpkg dependency of it on PATH, and a DLL that is not found opens a
+          # message box that no one is there to click away, so the job hangs
+          # until it hits the six hour limit instead of failing. The tests are
+          # about C++ semantics rather than about a platform, and the unix jobs
+          # run them. Building them still gets both toolchains to compile them.
           cd "$env:GITHUB_WORKSPACE/CSXCAD"
           mkdir build && cd build
           cmake ../ -GNinja `
@@ -907,7 +936,8 @@ jobs:
                     -DFPARSER_ROOT_DIR="$HOME/opt" `
                     -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
                     -DVCPKG_HOST_TRIPLET="x64-windows-release" `
-                    -DVCPKG_TARGET_TRIPLET="x64-windows-release"
+                    -DVCPKG_TARGET_TRIPLET="x64-windows-release" `
+                    -DCSXCAD_BUILD_TESTS=ON
 
           cmake --build ./ --parallel
           cmake --install ./ --parallel 8
