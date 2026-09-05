@@ -100,6 +100,7 @@ CSRectGrid* CSRectGrid::Clone(CSRectGrid* original)
 {
 	CSRectGrid* clone = new CSRectGrid();
 	clone->dDeltaUnit = original->dDeltaUnit;
+	clone->m_meshType = original->m_meshType;
 	for (int i=0;i<3;++i)
 		clone->Lines[i] = original->Lines[i];
 	for (int i=0;i<6;++i)
