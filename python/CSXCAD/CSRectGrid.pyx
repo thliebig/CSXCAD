@@ -30,6 +30,7 @@ import weakref
 from CSXCAD.CSObject cimport CSDestructionCallback, wrapper_destroyed
 from CSXCAD.CSObject cimport resolve_owner, GRID
 from CSXCAD.Utilities import RegisterWrapperFactory
+from operator import index
 
 cdef class CSRectGrid:
     _instances = weakref.WeakValueDictionary()
@@ -124,6 +125,10 @@ cdef class CSRectGrid:
         Set an array of lines. This will clear all previous defined lines in
         the given direction.
 
+        .. versionchanged:: 0.7.0
+            The lines are sorted and duplicates are dropped, `lines` does not
+            have to be given in increasing order any more.
+
         :param ny: int or str -- direction definition
         :param lines: array -- list of lines to be set in the given direction
         """
@@ -140,6 +145,10 @@ cdef class CSRectGrid:
         Add an array of lines. This will *not* clear the previous defined lines in
         the given direction.
 
+        .. versionchanged:: 0.7.0
+            The lines are sorted into the existing lines, a line that is already
+            present is dropped.
+
         :param ny: int or str -- direction definition
         :param lines: array -- list of lines to be added in the given direction
         """
@@ -154,6 +163,11 @@ cdef class CSRectGrid:
     def GetQtyLines(self, ny):
         """ GetQtyLines(ny)
 
+        Get the number of lines in a given direction `ny`.
+
+        .. versionchanged:: 0.7.0
+            Duplicate lines are dropped and are not counted any more.
+
         :param ny: int or str -- direction definition
         """
         ny = CheckNyDir(ny)
@@ -164,23 +178,41 @@ cdef class CSRectGrid:
 
         Get the line in a given direction `ny` and index
 
+        The lines are always sorted and unique, index 0 is the smallest line.
+
+        .. versionchanged:: 0.7.0
+            An out of range index raises an :class:`IndexError` instead of
+            returning 0, and a negative index counts from the end.
+
         :param ny: int or str -- direction definition
-        :param idx: int  -- line index
+        :param idx: int  -- line index, negative counts from the end
+        :returns: float -- line position
+        :raises IndexError: if `idx` is out of range
         """
         ny = CheckNyDir(ny)
+        cdef size_t N = self._ptr().GetQtyLines(ny)
+        # bounds check as Python ints, idx may be out of the size_t range
+        n_lines = int(N)
+        idx = index(idx)
+        pos = idx + n_lines if idx<0 else idx
+        if pos<0 or pos>=n_lines:
+            raise IndexError('GetLine: line index {} out of range for {} lines'.format(idx, n_lines))
+        idx = pos
         return self._ptr().GetLine(ny, idx)
 
     def GetLines(self, ny, do_sort=True):
         """ GetLines(ny, do_sort=True)
 
-        Get all lines in a given direction `ny`.
+        Get all lines in a given direction `ny`, sorted and unique.
+
+        .. deprecated:: 0.7.0
+            The `do_sort` argument is ignored, the lines are always sorted and
+            unique.
 
         :param ny: int or str -- direction definition
-        :param do_sort: bool  -- sort lines (default True)
+        :param do_sort: bool  -- ignored
         """
         ny = CheckNyDir(ny)
-        if do_sort:
-            self._ptr().Sort(ny)
         cdef size_t N = self._ptr().GetQtyLines(ny)
         lines = np.zeros(N)
         for n in range(N):
@@ -239,6 +271,10 @@ cdef class CSRectGrid:
         """ Sort(ny='all')
 
         Sort mesh lines in the given direction or all directions.
+
+        .. deprecated:: 0.7.0
+            The mesh lines are always sorted and unique, this method has no
+            effect.
         """
         if ny=='all':
             for n in range(3):

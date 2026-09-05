@@ -70,6 +70,9 @@ public:
 	double GetDeltaUnit();
 
 	//! Set a disc-line in a certain direction at a given index. Will return true on success.
+	/*! The value may break the ordering, the lines are re-sorted on the next
+	 read access. Note that this can drop the line again if the new value
+	 duplicates an already existing one. */
 	bool SetLine(int direct, size_t Index, double value);
 
 	//! Get an array of discretization lines in a certain direction.
@@ -77,12 +80,20 @@ public:
 	\param direct The direction of interest.
 	\param array The array in which the lines will be stored. Can be NULL. Caller has to delete the array.
 	\param qty Methode will return the number of lines in this direction.
-	\param sorted Define here whether the lines shall be in increasing order (default) or as currently stored (unknown order).
+	\param sorted Ignored.
+	\deprecated The \a sorted argument is ignored, the lines are always in
+	 increasing order.
 	 */
 	double* GetLines(int direct, double *array, unsigned int &qty, bool sorted=true);
 	//! Get quantity of lines in certain direction.
 	size_t GetQtyLines(int direct);
 	//! Get a disc-line in a certain direction an at given index.
+	/*!
+	The lines are in increasing order, index 0 is the smallest line.
+	\return The line position, or 0 if \a direct or \a Index is out of range.
+	Note: 0 is a valid line position, callers that need to detect an invalid
+	index have to check it against GetQtyLines() themselves.
+	 */
 	double GetLine(int direct, size_t Index);
 	//! Get disc-lines as a comma-seperated string for given direction
 	std::string GetLinesAsString(int direct);
@@ -91,6 +102,11 @@ public:
 	unsigned int Snap2LineNumber(int ny, double value, bool &inside) const;
 
 	//! Write the grid to a given XML-node.
+	/*!
+	\param sorted Ignored.
+	\deprecated The \a sorted argument is ignored, the lines are always written
+	 in increasing order.
+	 */
 	bool Write2XML(TiXmlNode &root, bool sorted=false);
 	//! Read the grid from a given XML-node.
 	bool ReadFromXML(TiXmlNode &root);
@@ -108,6 +124,8 @@ public:
 	void IncreaseResolution(int nu, int factor);
 
 	//! Sort the lines in a given direction.
+	/*! \deprecated The lines are sorted and unique on every read access, this
+	 method has no effect. */
 	void Sort(int direct);
 
 	//! Get the bounding box of the area defined by the disc-lines.
@@ -117,7 +135,51 @@ public:
 	bool isValid();
 
 protected:
-	std::vector<double> Lines[3];
+	//! The disc-lines of a single direction, sorted and unique on read access.
+	/*!
+	The vector itself is private to this class, all access has to go through
+	the methods below. That is on purpose: sorting is deferred to the next read
+	access, so code reaching the storage directly could observe an out of order
+	or duplicated line. Making that impossible by construction is cheaper than
+	remembering to sort in each of the accessors.
+
+	Note that a read can sort and is therefore not thread-safe. The grid is only
+	read while setting up an operator, the engines work on their own copy of the
+	disc-lines.
+	 */
+	class LineVector
+	{
+	public:
+		LineVector() : m_Dirty(false) {}
+
+		//! Add a line, keeping the order for the usual increasing input.
+		void Add(double val);
+		//! Set the line at \a idx, may break the order. \sa CSRectGrid::SetLine
+		bool Set(size_t idx, double val);
+		//! Remove the line at \a idx.
+		bool RemoveAt(size_t idx);
+		//! Remove the line of the given value.
+		bool RemoveValue(double val);
+		//! Remove all lines.
+		void Clear() {m_Lines.clear(); m_Dirty=false;}
+
+		//! Get all lines, in increasing order and without duplicates.
+		const std::vector<double>& Get() const {EnsureSorted(); return m_Lines;}
+		//! Get the number of lines, duplicates excluded.
+		size_t Size() const {EnsureSorted(); return m_Lines.size();}
+		//! Get the line at \a idx, or 0 if out of range. \sa CSRectGrid::GetLine
+		double At(size_t idx) const;
+
+	protected:
+		//! Sort and unique the lines if a previous Add or Set broke the order.
+		void EnsureSorted() const;
+
+		mutable std::vector<double> m_Lines;
+		//! Set if a line was added out of order or set to an arbitrary value.
+		mutable bool m_Dirty;
+	};
+
+	LineVector Lines[3];
 	double dDeltaUnit;
 	double SimBox[6];
 	CoordinateSystem m_meshType;

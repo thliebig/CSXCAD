@@ -33,6 +33,69 @@ CSRectGrid::~CSRectGrid(void)
 {
 }
 
+void CSRectGrid::LineVector::EnsureSorted() const
+{
+	if (m_Dirty==false) return;
+	std::vector<double>::iterator start = m_Lines.begin();
+	std::vector<double>::iterator end = m_Lines.end();
+	sort(start,end);
+	end=unique(start,end);
+	m_Lines.erase(end,m_Lines.end());
+	m_Dirty=false;
+}
+
+void CSRectGrid::LineVector::Add(double val)
+{
+	if (m_Dirty==false)
+	{
+		// mesh lines usually arrive in increasing order, appending keeps the
+		// invariant and avoids sorting the whole direction again
+		if (m_Lines.empty() || (val>m_Lines.back()))
+		{
+			m_Lines.push_back(val);
+			return;
+		}
+		if (val==m_Lines.back())
+			return;
+		m_Dirty=true;
+	}
+	m_Lines.push_back(val);
+}
+
+bool CSRectGrid::LineVector::Set(size_t idx, double val)
+{
+	EnsureSorted();
+	if (idx>=m_Lines.size()) return false;
+	m_Lines.at(idx)=val;
+	// the new value may be anywhere, defer sorting to the next read
+	m_Dirty=true;
+	return true;
+}
+
+bool CSRectGrid::LineVector::RemoveAt(size_t idx)
+{
+	EnsureSorted();
+	if (idx>=m_Lines.size()) return false;
+	m_Lines.erase(m_Lines.begin()+idx);
+	return true;
+}
+
+bool CSRectGrid::LineVector::RemoveValue(double val)
+{
+	EnsureSorted();
+	std::vector<double>::iterator it = lower_bound(m_Lines.begin(),m_Lines.end(),val);
+	if ((it==m_Lines.end()) || (*it!=val)) return false;
+	m_Lines.erase(it);
+	return true;
+}
+
+double CSRectGrid::LineVector::At(size_t idx) const
+{
+	EnsureSorted();
+	if (idx>=m_Lines.size()) return 0;
+	return m_Lines.at(idx);
+}
+
 CSRectGrid* CSRectGrid::Clone(CSRectGrid* original)
 {
 	CSRectGrid* clone = new CSRectGrid();
@@ -46,7 +109,7 @@ CSRectGrid* CSRectGrid::Clone(CSRectGrid* original)
 
 void CSRectGrid::AddDiscLine(int direct, double val)
 {
-	if ((direct>=0)&&(direct<3)) Lines[direct].push_back(val);
+	if ((direct>=0)&&(direct<3)) Lines[direct].Add(val);
 }
 
 void CSRectGrid::AddDiscLines(int direct, int numLines, double* vals)
@@ -96,34 +159,28 @@ std::string CSRectGrid::AddDiscLines(int direct, int numLines, double* vals, std
 bool CSRectGrid::RemoveDiscLine(int direct, int index)
 {
 	if ((direct<0) || (direct>=3)) return false;
-	if ((index>=(int)Lines[direct].size()) || (index<0)) return false;
-	std::vector<double>::iterator vIter=Lines[direct].begin();
-	Lines[direct].erase(vIter+index);
-	return true;
+	if (index<0) return false;
+	return Lines[direct].RemoveAt((size_t)index);
 }
 
 bool CSRectGrid::RemoveDiscLine(int direct, double val)
 {
 	if ((direct<0) || (direct>=3)) return false;
-	for (size_t i=0;i<Lines[direct].size();++i)
-	{
-		if (Lines[direct].at(i)==val) return RemoveDiscLine(direct,(int)i);
-	}
-	return false;
+	return Lines[direct].RemoveValue(val);
 }
 
 void CSRectGrid::clear()
 {
-	Lines[0].clear();
-	Lines[1].clear();
-	Lines[2].clear();
+	Lines[0].Clear();
+	Lines[1].Clear();
+	Lines[2].Clear();
 	dDeltaUnit=1;
 }
 
 void CSRectGrid::ClearLines(int direct)
 {
 	if ((direct<0) || (direct>=3)) return;
-	Lines[direct].clear();
+	Lines[direct].Clear();
 }
 
 void CSRectGrid::SetDeltaUnit(double val) {dDeltaUnit=val;}
@@ -133,33 +190,31 @@ double CSRectGrid::GetDeltaUnit() {return dDeltaUnit;}
 bool CSRectGrid::SetLine(int direct, size_t Index, double value)
 {
 	if ((direct<0) || (direct>=3)) return false;
-	if (Lines[direct].size()<=Index) return false;
-	Lines[direct].at(Index) = value;
-	return true;
+	return Lines[direct].Set(Index,value);
 }
 
 double CSRectGrid::GetLine(int direct, size_t Index)
 {
 	if ((direct<0) || (direct>=3)) return 0;
-	if (Lines[direct].size()<=Index) return 0;
-	return Lines[direct].at(Index);
+	return Lines[direct].At(Index);
 }
 
 double* CSRectGrid::GetLines(int direct, double *array, unsigned int &qty, bool sorted)
 {
+	UNUSED(sorted); // the lines are always sorted
 	if ((direct<0) || (direct>=3)) return 0;
-	if (sorted) Sort(direct);
+	const std::vector<double>& lines = Lines[direct].Get();
 	delete[] array;
-	array = new double[Lines[direct].size()];
-	for (size_t i=0;i<Lines[direct].size();++i) array[i]=Lines[direct].at(i);
-	qty=Lines[direct].size();
+	array = new double[lines.size()];
+	for (size_t i=0;i<lines.size();++i) array[i]=lines.at(i);
+	qty=lines.size();
 	return array;
 }
 
 size_t CSRectGrid::GetQtyLines(int direct)
 {
 	if ((direct>=0) && (direct<3))
-	return Lines[direct].size();
+	return Lines[direct].Size();
 	else return 0;
 }
 
@@ -167,13 +222,11 @@ std::string CSRectGrid::GetLinesAsString(int direct)
 {
 	std::stringstream xStr;
 	if ((direct<0)||(direct>=3)) return xStr.str();
-	if (Lines[direct].size()>0)
+	const std::vector<double>& lines = Lines[direct].Get();
+	for (size_t i=0;i<lines.size();++i)
 	{
-		for (size_t i=0;i<Lines[direct].size();++i)
-		{
-			if (i>0) xStr << ", ";
-			xStr<<Lines[direct].at(i);
-		}
+		if (i>0) xStr << ", ";
+		xStr<<lines.at(i);
 	}
 	return xStr.str();
 }
@@ -183,30 +236,31 @@ unsigned int CSRectGrid::Snap2LineNumber(int ny, double value, bool &inside) con
 	inside = false;
 	if ((ny<0) || (ny>2))
 		return -1;
-	if (Lines[ny].size()==0)
+	const std::vector<double>& lines = Lines[ny].Get();
+	if (lines.size()==0)
 		return -1;
-	if (value<Lines[ny].at(0))
+	if (value<lines.at(0))
 		return 0;
-	if (value>Lines[ny].at(Lines[ny].size()-1))
-		return Lines[ny].size()-1;
+	if (value>lines.at(lines.size()-1))
+		return lines.size()-1;
 	inside = true;
-	for (size_t n=0;n<Lines[ny].size()-1;++n)
+	for (size_t n=0;n<lines.size()-1;++n)
 	{
-		if (value < 0.5*(Lines[ny].at(n)+Lines[ny].at(n+1)) )
+		if (value < 0.5*(lines.at(n)+lines.at(n+1)) )
 			return n;
 	}
-	return Lines[ny].size()-1;
+	return lines.size()-1;
 }
 
 int CSRectGrid::GetDimension()
 {
-	if (Lines[0].size()==0) return -1;
-	if (Lines[1].size()==0) return -1;
-	if (Lines[2].size()==0) return -1;
+	if (Lines[0].Size()==0) return -1;
+	if (Lines[1].Size()==0) return -1;
+	if (Lines[2].Size()==0) return -1;
 	int dim=0;
-	if (Lines[0].size()>1) ++dim;
-	if (Lines[1].size()>1) ++dim;
-	if (Lines[2].size()>1) ++dim;
+	if (Lines[0].Size()>1) ++dim;
+	if (Lines[1].Size()>1) ++dim;
+	if (Lines[2].Size()>1) ++dim;
 	return dim;
 }
 
@@ -218,37 +272,35 @@ void CSRectGrid::IncreaseResolution(int nu, int factor)
 {
 	if ((nu<0) || (nu>=GetDimension())) return;
 	if ((factor<=1) || (factor>9)) return;
-	size_t size=Lines[nu].size();
-	for (size_t i=0;i<size-1;++i)
+	// work on a copy, adding lines invalidates the reference into the storage
+	const std::vector<double> lines = Lines[nu].Get();
+	for (size_t i=0;i+1<lines.size();++i)
 	{
-		double delta=(Lines[nu].at(i+1)-Lines[nu].at(i))/factor;
+		double delta=(lines.at(i+1)-lines.at(i))/factor;
 		for (int n=1;n<factor;++n)
 		{
-			AddDiscLine(nu,Lines[nu].at(i)+n*delta);
+			AddDiscLine(nu,lines.at(i)+n*delta);
 		}
 	}
-	Sort(nu);
 }
 
 
 void CSRectGrid::Sort(int direct)
 {
+	// kept for compatibility only, any read access sorts by itself
 	if ((direct<0) || (direct>=3)) return;
-	std::vector<double>::iterator start = Lines[direct].begin();
-	std::vector<double>::iterator end = Lines[direct].end();
-	sort(start,end);
-	end=unique(start,end);
-	Lines[direct].erase(end,Lines[direct].end());
+	Lines[direct].Get();
 }
 
 double* CSRectGrid::GetSimArea()
 {
 	for (int i=0;i<3;++i)
 	{
-		if (Lines[i].size()!=0)
+		const std::vector<double>& lines = Lines[i].Get();
+		if (lines.size()!=0)
 		{
-			SimBox[2*i]=*min_element(Lines[i].begin(),Lines[i].end());
-			SimBox[2*i+1]=*max_element(Lines[i].begin(),Lines[i].end());
+			SimBox[2*i]=lines.front();
+			SimBox[2*i+1]=lines.back();
 		}
 		else SimBox[2*i]=SimBox[2*i+1]=0;
 	}
@@ -266,35 +318,35 @@ bool CSRectGrid::isValid()
 
 bool CSRectGrid::Write2XML(TiXmlNode &root, bool sorted)
 {
-	if (sorted) {Sort(0);Sort(1);Sort(2);}
+	UNUSED(sorted); // the lines are always sorted
 	TiXmlElement grid("RectilinearGrid");
 
 	grid.SetDoubleAttribute("DeltaUnit",dDeltaUnit);
 	grid.SetAttribute("CoordSystem",(int)this->GetMeshType());
 
 	TiXmlElement XLines("XLines");
-	XLines.SetAttribute("Qty",(int)Lines[0].size());
-	if (Lines[0].size()>0)
+	XLines.SetAttribute("Qty",(int)Lines[0].Size());
+	if (Lines[0].Size()>0)
 	{
-		TiXmlText XText(CombineVector2String(Lines[0],','));
+		TiXmlText XText(CombineVector2String(Lines[0].Get(),','));
 		XLines.InsertEndChild(XText);
 	}
 	grid.InsertEndChild(XLines);
 
 	TiXmlElement YLines("YLines");
-	YLines.SetAttribute("Qty",(int)Lines[1].size());
-	if (Lines[1].size()>0)
+	YLines.SetAttribute("Qty",(int)Lines[1].Size());
+	if (Lines[1].Size()>0)
 	{
-		TiXmlText YText(CombineVector2String(Lines[1],','));
+		TiXmlText YText(CombineVector2String(Lines[1].Get(),','));
 		YLines.InsertEndChild(YText);
 	}
 	grid.InsertEndChild(YLines);
 
 	TiXmlElement ZLines("ZLines");
-	ZLines.SetAttribute("Qty",(int)Lines[2].size());
-	if (Lines[2].size()>0)
+	ZLines.SetAttribute("Qty",(int)Lines[2].Size());
+	if (Lines[2].Size()>0)
 	{
-		TiXmlText ZText(CombineVector2String(Lines[2],','));
+		TiXmlText ZText(CombineVector2String(Lines[2].Get(),','));
 		ZLines.InsertEndChild(ZText);
 	}
 	grid.InsertEndChild(ZLines);
