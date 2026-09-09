@@ -4,6 +4,6 @@
     "cgal",
     "hdf5",
     "tinyxml",
-    "vtk"
+    { "name": "vtk", "default-features": false }
   ]
 }
