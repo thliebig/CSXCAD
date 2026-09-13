@@ -17,6 +17,9 @@
 
 #pragma once
 
+#include <atomic>
+#include <mutex>
+
 #include "CSProperties.h"
 #include "CSPropMaterial.h"
 
@@ -105,7 +108,8 @@ protected:
 	float *m_Disc_Density;
 	double m_Scale;
 	bool m_DB_Background;
-	bool m_FileRead;
+	std::atomic<bool> m_FileRead;
+	std::mutex m_FileMutex;
 	CSTransform* m_Transform;
 
 	void EnsureFileLoaded();

@@ -371,21 +371,26 @@ bool CSPropDiscMaterial::ReadFromXML(TiXmlNode &root)
 
 void CSPropDiscMaterial::EnsureFileLoaded()
 {
+	// called concurrently by the multi-threaded operator setup: only one thread
+	// may read the file, the others have to wait until the data is complete
+	if (m_FileRead)
+		return;
+	std::lock_guard<std::mutex> lock(m_FileMutex);
 	if (!m_FileRead)
 		ReadFile();
 }
 
 bool CSPropDiscMaterial::ReadFile()
 {
-	m_FileRead = true;
+	bool ok = false;
 	if (m_Filename.empty())
-		return false;
-
-	if (m_FileType==0)
-		return ReadHDF5(m_Filename);
+		ok = false;
+	else if (m_FileType==0)
+		ok = ReadHDF5(m_Filename);
 	else
 		std::cerr << "CSPropDiscMaterial::ReadFile: Unknown file type or no filename given." << std::endl;
-	return false;
+	m_FileRead = true;
+	return ok;
 }
 
 bool CSPropDiscMaterial::ReadHDF5( std::string filename )
