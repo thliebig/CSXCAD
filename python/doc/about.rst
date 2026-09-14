@@ -15,7 +15,8 @@ CSXCAD is licensed under the terms of the LGPLv3.
 Further information
 -------------------
 
-:Website:   http://openems.de/index.php/CSXCAD
-:Forum:     http://openems.de/forum/
-:Tutorials: http://openems.de/index.php/Tutorials
+:Website:   https://www.openems.de
+:Docs:      https://docs.openems.de
+:Forum:     https://github.com/thliebig/openEMS-Project/discussions
+:Tutorials: https://docs.openems.de/en/latest/python/openEMS/Tutorials/index.html
 
