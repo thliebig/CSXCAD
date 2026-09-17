@@ -1563,8 +1563,8 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
             raise IndexError('Invalid dispersive media order requested')
 
     def GetDispersiveMaterialProperty(self, prop_name, order):
-        """ GetDispersiveMaterialProperty(prop_name)
-        Get the dispersive material property with of type `prop_name` and for order `order`.
+        """ GetDispersiveMaterialProperty(prop_name, order)
+        Get the dispersive material property of type `prop_name` and for order `order`.
 
         :params prop_name: str -- material property type
         :params order:     int -- material property order
@@ -1582,9 +1582,10 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         raise Exception('GetDispersiveMaterialPropertyDir: Error, unknown material property')
 
     def SetDispersiveMaterialProperty(self, order, **kw):
-        """ SetMaterialProperty(**kw)
-        Set the material properties.
+        """ SetDispersiveMaterialProperty(order, **kw)
+        Set the dispersive material properties for order `order`.
 
+        :params order:   int              - material property order
         :params epsilon: scalar or vector - relative electric permittivity
         :params mue:     scalar or vector - relative magnetic permeability
         :params kappa:   scalar or vector - electric conductivity
@@ -1605,10 +1606,11 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         raise Exception('SetMaterialPropertyDir: Error, unknown material property')
 
     def GetDispersiveMaterialWeight(self, prop_name, order):
-        """ GetMaterialWeight(prop_name)
-        Get the material weighting function(s).
+        """ GetDispersiveMaterialWeight(prop_name, order)
+        Get the dispersive material weighting function(s) for order `order`.
 
         :params prop_name: str -- material property type
+        :params order:     int -- material property order
         :returns: str for isotropic material and `density` or else str array
         """
         self._CheckOrder(order)
@@ -1623,6 +1625,14 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         raise Exception('GetMaterialWeightDir: Error, unknown material property')
 
     def SetDispersiveMaterialWeight(self, order, **kw):
+        """ SetDispersiveMaterialWeight(order, **kw)
+        Set the dispersive material weighting function(s) for order `order`.
+
+        The weighting functions are given as strings and are evaluated by
+        the internal function parser.
+
+        :params order: int -- material property order
+        """
         self._CheckOrder(order)
         for prop_name in kw:
             val = kw[prop_name]

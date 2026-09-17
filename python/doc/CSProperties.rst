@@ -11,9 +11,14 @@ CSProperties
 
     CSProperties/CSProperties
     CSProperties/CSPropMaterial
+    CSProperties/CSPropAbsorbingBC
     CSProperties/CSPropLumpedElement
     CSProperties/CSPropMetal
     CSProperties/CSPropConductingSheet
     CSProperties/CSPropExcitation
     CSProperties/CSPropProbeBox
     CSProperties/CSPropDumpBox
+    CSProperties/CSPropDispersiveMaterial
+    CSProperties/CSPropLorentzMaterial
+    CSProperties/CSPropDebyeMaterial
+    CSProperties/CSPropDiscMaterial
