@@ -1832,7 +1832,10 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
         return (<_CSPropDiscMaterial*>self._ptr()).GetUseDataBaseForBackground()
 
     def GetTransform(self):
-        """Return the affine transform applied to lookup coordinates, or None if not set."""
+        """Return the affine transform applied to lookup coordinates.
+
+        Lazily creates one (as a no-op transform) if none has been set yet.
+        """
         return CSTransform.fromPtr((<_CSPropDiscMaterial*>self._ptr()).GetTransform())
 
     def SetTransform(self, CSTransform transform):

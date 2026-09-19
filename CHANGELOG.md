@@ -29,7 +29,8 @@ there are unreleased changes. It becomes the next release entry.
   `AddDjordjevicSarkarMaterial.m` and `CalcDjordjevicSarkarApprox.m`.
 - **Python API for classes that were C++-only**: `CSBackgroundMaterial`,
   `CSPropDiscMaterial` (including coordinate/data queries and
-  `SetTransform()`/`GetTransform()`) and `CSPrimMultiBox`.
+  `SetTransform()`/`GetTransform()`, the latter lazily creating a transform so
+  it is always usable) and `CSPrimMultiBox`.
 - Copying support: `GetCopy()` on properties and primitives, and
   `CSTransform.copy()`.
 - An excitation can be enabled and disabled (`SetEnabled()`/`GetEnabled()`).

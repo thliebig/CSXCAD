@@ -294,6 +294,14 @@ void CSPropDiscMaterial::Init()
 	CSPropMaterial::Init();
 }
 
+CSTransform* CSPropDiscMaterial::GetTransform()
+{
+	if (m_Transform==NULL)
+		m_Transform = new CSTransform(clParaSet);
+	m_Transform->SetOwner(this);
+	return m_Transform;
+}
+
 void CSPropDiscMaterial::SetTransform(CSTransform* transform)
 {
 	if (transform == m_Transform)

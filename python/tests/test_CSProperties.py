@@ -856,7 +856,8 @@ class TestDiscMaterialTransform(unittest.TestCase):
         self.csx.AddProperty(self.mat)
 
     def test_no_transform_by_default(self):
-        self.assertIsNone(self.mat.GetTransform())
+        # GetTransform() lazily creates a transform, but it starts out as a no-op.
+        self.assertFalse(self.mat.GetTransform().HasTransform())
 
     def test_set_transform_get_returns_same_wrapper(self):
         from CSXCAD.CSTransform import CSTransform
@@ -875,7 +876,8 @@ class TestDiscMaterialTransform(unittest.TestCase):
         from CSXCAD.CSTransform import CSTransform
         self.mat.SetTransform(CSTransform())
         self.mat.SetTransform(None)
-        self.assertIsNone(self.mat.GetTransform())
+        # GetTransform() lazily creates a replacement, but it starts out as a no-op.
+        self.assertFalse(self.mat.GetTransform().HasTransform())
 
     def test_set_transform_replaces_previous(self):
         from CSXCAD.CSTransform import CSTransform

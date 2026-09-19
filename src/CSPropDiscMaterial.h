@@ -62,9 +62,10 @@ public:
 	int GetFileType() const {return m_FileType;}
 
 	//! Get the affine transform applied to lookup coordinates before the scale factor.
-	/*! Returns NULL if no transform has been set.
+	/*! Lazily creates a transform if none exists yet, so the result can always be
+	 *  used directly (e.g. GetTransform()->AddTransform(...)).
 	 *  Coordinate lookup order: InvertTransform(coord) -> divide by Scale -> look up in mesh. */
-	CSTransform* GetTransform() {return m_Transform;}
+	CSTransform* GetTransform();
 
 	//! Set (and take ownership of) an affine transform applied to lookup coordinates.
 	/*! The transform is applied before the scale factor: coords are first
