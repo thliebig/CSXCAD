@@ -22,6 +22,7 @@
 CSPropProbeBox::CSPropProbeBox(ParameterSet* paraSet) : CSProperties(paraSet)
 {
 	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisible=false; startTime=0; stopTime=0;
+	m_OverSampling=-1;
 	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
 }
 CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperties(prop, copyPrim)
@@ -33,6 +34,7 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 	m_weight=prop->m_weight;
 	startTime=prop->startTime;
 	stopTime=prop->stopTime;
+	m_OverSampling=prop->m_OverSampling;
 	m_FD_Samples=prop->m_FD_Samples;
 	m_ModeFile=prop->m_ModeFile;
 	for (int n=0;n<3;++n) m_ModeFunction[n]=prop->m_ModeFunction[n];
@@ -41,6 +43,7 @@ CSPropProbeBox::CSPropProbeBox(CSPropProbeBox* prop, bool copyPrim) : CSProperti
 CSPropProbeBox::CSPropProbeBox(unsigned int ID, ParameterSet* paraSet) : CSProperties(ID,paraSet)
 {
 	Type=PROBEBOX; uiNumber=0; m_NormDir=-1; ProbeType=0; m_weight=1; bVisible=false; startTime=0; stopTime=0;
+	m_OverSampling=-1;
 	m_ModeOrigin[0] = m_ModeOrigin[1] = m_ModeOrigin[2] = 0.0;
 }
 CSPropProbeBox::~CSPropProbeBox() {}
@@ -72,6 +75,9 @@ bool CSPropProbeBox::Write2XML(TiXmlNode& root, bool parameterised, bool sparse)
 	prop->SetAttribute("NormDir",m_NormDir);
 	prop->SetDoubleAttribute("StartTime",startTime);
 	prop->SetDoubleAttribute("StopTime" ,stopTime );
+
+	if (m_OverSampling>=0)
+		prop->SetAttribute("OverSampling", m_OverSampling);
 
 	if (m_FD_Samples.size())
 	{
@@ -128,6 +134,8 @@ bool CSPropProbeBox::ReadFromXML(TiXmlNode &root)
 
 	if (prop->QueryDoubleAttribute("StartTime",&startTime)!=TIXML_SUCCESS) startTime=0;
 	if (prop->QueryDoubleAttribute("StopTime" ,&stopTime )!=TIXML_SUCCESS) stopTime =0;
+
+	if (prop->QueryIntAttribute("OverSampling",&m_OverSampling)!=TIXML_SUCCESS) m_OverSampling=-1;
 
 	TiXmlElement* FDSamples = prop->FirstChildElement("FD_Samples");
 	if (FDSamples!=NULL)

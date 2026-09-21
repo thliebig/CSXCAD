@@ -22,6 +22,9 @@ function CSX = AddProbe(CSX, name, type, varargin)
 % - NormDir:      necessary for current probing box with dimension~=2
 % - StartTime/StopTime: Define a start and/or stop time (in seconds)
 %                     for this probe to be active.
+% - OverSampling: An arbitrary oversampling factor for this probe; meaning is
+%                 defined by the simulator (e.g. openEMS's InitFDTD
+%                 'OverSampling' setting).
 % - ModeFile:     (Optional) path to an HDF5 mode file, used instead of
 %                 a parsed ModeFunction.
 % - ModeOrigin:   (Optional) [x,y,z] coordinate origin for mode function/file
@@ -66,6 +69,9 @@ for n=1:2:numel(varargin)
         prop_args{end+1} = varargin{n+1};
     elseif (strcmpi(varargin{n},'StopTime')==1);
         prop_args{end+1} = 'StopTime';
+        prop_args{end+1} = varargin{n+1};
+    elseif (strcmpi(varargin{n},'OverSampling')==1);
+        prop_args{end+1} = 'OverSampling';
         prop_args{end+1} = varargin{n+1};
     elseif (strcmpi(varargin{n},'ModeFile')==1);
         ModeFile = varargin{n+1};

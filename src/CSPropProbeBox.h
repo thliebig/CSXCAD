@@ -69,6 +69,11 @@ public:
 	//! Get the probe stop time
 	double GetStopTime() {return stopTime;}
 
+	//! Define an arbitrary oversampling factor for this probe/dump, meaning defined by the simulator (-1: not set) \sa GetOverSampling
+	void SetOverSampling(int val) {m_OverSampling=val;}
+	//! Get the arbitrary oversampling factor, or -1 if none is set \sa SetOverSampling
+	int GetOverSampling() const {return m_OverSampling;}
+
 	size_t CountFDSamples() {return m_FD_Samples.size();}
 	std::vector<double> *GetFDSamples()	{return &m_FD_Samples;}
 	void ClearFDSamples() {m_FD_Samples.clear();}
@@ -101,6 +106,7 @@ protected:
 	int ProbeType;
 	std::vector<double> m_FD_Samples;
 	double startTime, stopTime;
+	int m_OverSampling;
 	std::string m_ModeFile;
 	std::string m_ModeFunction[3];
 	double m_ModeOrigin[3];

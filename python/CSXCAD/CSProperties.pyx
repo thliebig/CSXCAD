@@ -1243,6 +1243,8 @@ cdef class CSPropProbeBox(CSProperties):
     :param frequency:        dump in the frequency domain at the given samples (in Hz)
     :param mode_function:    A mode function (used only with probe type 10/11).
     :param norm_dir:         Necessary for current probing box with dimension not 2
+    :param over_sampling:    An arbitrary oversampling factor for this probe/dump;
+                              meaning is defined by the simulator (default: not set)
 
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
@@ -1258,6 +1260,9 @@ cdef class CSPropProbeBox(CSProperties):
         if 'weight' in kw:
             self.SetWeighting(kw['weight'])
             del kw['weight']
+        if 'over_sampling' in kw:
+            self.SetOverSampling(kw['over_sampling'])
+            del kw['over_sampling']
         if 'norm_dir' in kw:
             self.SetNormalDir(kw['norm_dir'])
             del kw['norm_dir']
@@ -1288,6 +1293,21 @@ cdef class CSPropProbeBox(CSProperties):
         """ GetWeighting()
         """
         return (<_CSPropProbeBox*>self._ptr()).GetWeighting()
+
+    def SetOverSampling(self, val):
+        """ SetOverSampling(val)
+
+        Set an arbitrary oversampling factor for this probe/dump; meaning is
+        defined by the simulator. Pass -1 (the default) to leave it unset.
+        """
+        (<_CSPropProbeBox*>self._ptr()).SetOverSampling(val)
+
+    def GetOverSampling(self):
+        """ GetOverSampling()
+
+        Returns the oversampling factor, or -1 if none is set.
+        """
+        return (<_CSPropProbeBox*>self._ptr()).GetOverSampling()
 
     def SetNormalDir(self, val):
         """ SetNormalDir(val)

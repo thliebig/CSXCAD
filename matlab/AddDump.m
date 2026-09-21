@@ -44,9 +44,13 @@ function CSX = AddDump(CSX, name, varargin)
 %                   Note: This only takes effect if the method supports and
 %                   uses multiple grids!
 %
-% - StartTime/StopTime: Define a start and/or stop time (in seconds) 
+% - StartTime/StopTime: Define a start and/or stop time (in seconds)
 %                       for this dump to be active.
-% 
+%
+% - OverSampling: An arbitrary oversampling factor for this dump; meaning is
+%                 defined by the simulator (e.g. openEMS's InitFDTD
+%                 'OverSampling' setting).
+%
 % - Warning:
 %   - FDTD Interpolation abnormalities
 %   - no-interpolation: fields are located in the mesh by the

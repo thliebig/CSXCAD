@@ -254,6 +254,9 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             void SetWeighting(double weight)
             double GetWeighting()
 
+            void SetOverSampling(int val)
+            int GetOverSampling()
+
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()
 
