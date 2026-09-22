@@ -111,6 +111,15 @@ WriteCSX('my_structure.xml', CSX);
 
 ---
 
+## Contributing
+
+Pull requests are welcome. [AGENTS.md](AGENTS.md) has the working rules —
+architecture, build and test cycle, code style, changelog and commit
+conventions — and applies to human and AI-assisted contributions alike.
+Disclosure and sign-off requirements are in [AI_POLICY.md](AI_POLICY.md).
+
+---
+
 ## Related Projects
 
 - [openEMS](https://github.com/thliebig/openEMS) — FDTD simulator using CSXCAD for geometry input
