@@ -18,6 +18,8 @@
 #include "ParameterObjects.h"
 #include <sstream>
 #include <iostream>
+#include <iomanip>
+#include <limits>
 #include "tinyxml.h"
 #include "CSFunctionParser.h"
 #include "CSUseful.h"
@@ -42,9 +44,11 @@ void WriteTerm(ParameterScalar &PS, TiXmlElement &elem, const char* attr, bool m
 			return;
 		if (scientific)
 		{
-			char doubleVal[50];
-			sprintf(doubleVal,"%e",PS.GetValue());
-			elem.SetAttribute(attr,doubleVal);
+			std::ostringstream ss;
+			ss << std::scientific
+			   << std::setprecision(std::numeric_limits<double>::max_digits10 - 1)
+			   << PS.GetValue();
+			elem.SetAttribute(attr,ss.str().c_str());
 		}
 		else
 			elem.SetDoubleAttribute(attr,PS.GetValue());
@@ -93,7 +97,10 @@ void WriteVectorTerm(ParameterScalar PS[3], TiXmlElement &elem, const char* attr
 {
 	std::stringstream ss;
 	if (sci)
-		ss << std::scientific;
+		ss << std::scientific
+		   << std::setprecision(std::numeric_limits<double>::max_digits10 - 1);
+	else
+		ss << std::setprecision(std::numeric_limits<double>::max_digits10);
 	for (int i=0;i<3;++i)
 	{
 		if (PS[i].GetMode() && mode)
