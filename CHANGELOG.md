@@ -29,8 +29,7 @@ there are unreleased changes. It becomes the next release entry.
   `AddDjordjevicSarkarMaterial.m` and `CalcDjordjevicSarkarApprox.m`.
 - **Python API for classes that were C++-only**: `CSBackgroundMaterial`,
   `CSPropDiscMaterial` (including coordinate/data queries and
-  `SetTransform()`/`GetTransform()`, the latter lazily creating a transform so
-  it is always usable) and `CSPrimMultiBox`.
+  `SetTransform()`/`GetTransform()`) and `CSPrimMultiBox`.
 - Copying support: `GetCopy()` on properties and primitives, and
   `CSTransform.copy()`.
 - An excitation can be enabled and disabled (`SetEnabled()`/`GetEnabled()`).
@@ -41,14 +40,12 @@ there are unreleased changes. It becomes the next release entry.
 - Test suites: Python unit tests under `python/tests/` (including XML
   round-trip and wrapper-lifetime tests) and C++ tests under `tests/`, both run
   from CTest and CI.
-- **Arbitrary per-probe/dump `OverSampling` factor.** `CSPropProbeBox` (and
-  thus `CSPropDumpBox`) can carry an optional integer oversampling factor for
-  that one probe or dump; CSXCAD stores and serializes it but leaves its
-  meaning to the simulator (openEMS lets a probe/dump opt into oversampling
-  its frequency-domain accumulation beyond the plain Nyquist rate it uses by
-  default, e.g. for a dump where the aliasing that causes matters more than
-  the extra cost). Octave: the `OverSampling` key of `AddProbe.m`/`AddDump.m`.
-  Python: `over_sampling=` or `SetOverSampling()`/`GetOverSampling()`.
+- **Per-probe/dump `OverSampling` factor.** `CSPropProbeBox`, and thus
+  `CSPropDumpBox`, can carry an optional integer oversampling factor, which
+  CSXCAD stores and serializes but leaves the simulator to interpret — see the
+  openEMS changelog. Octave: the `OverSampling` key of
+  `AddProbe.m`/`AddDump.m`. Python: `over_sampling=` or
+  `SetOverSampling()`/`GetOverSampling()`.
 
 ### Changed
 
