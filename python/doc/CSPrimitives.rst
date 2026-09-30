@@ -12,6 +12,7 @@ CSPrimitives
     CSPrimitives/CSPrimitives
     CSPrimitives/CSPrimPoint
     CSPrimitives/CSPrimBox
+    CSPrimitives/CSPrimMultiBox
     CSPrimitives/CSPrimCylinder
     CSPrimitives/CSPrimCylindricalShell
     CSPrimitives/CSPrimSphere

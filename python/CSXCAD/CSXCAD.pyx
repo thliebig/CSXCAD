@@ -480,7 +480,7 @@ cdef class ContinuousStructure:
 
         See Also
         --------
-        CSXCAD.GetQtyProperties
+        CSXCAD.ContinuousStructure.GetQtyProperties
         """
         if index<0 or index >=self.GetQtyProperties():
             raise IndexError('Index is out of range')
