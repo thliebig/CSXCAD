@@ -234,6 +234,15 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual( prop2.GetMaterialWeight('mue'), 'cos(y)')
         self.assertEqual( prop2.GetMaterialWeight('density'), 'z*z')
 
+    def test_material_property_numpy_scalar(self):
+        tau = np.array([1e-10, 2e-11])
+        prop = CSProperties.CSPropMaterial(self.pset)
+        prop.SetMaterialProperty(epsilon=tau[0])
+        self.assertEqual(prop.GetMaterialProperty('epsilon'), tau[0])
+        deb = CSProperties.CSPropDebyeMaterial(self.pset, order=2, epsilon=3.0)
+        deb.SetDispersiveMaterialProperty(1, eps_relax=tau[1])
+        self.assertEqual(deb.GetDispersiveMaterialProperty('eps_relax', 1), tau[1])
+
     def test_lumped_elem(self):
         prop = CSProperties.CSPropLumpedElement(self.pset, R = 50, C=1e-12, caps=True, ny='x')
 

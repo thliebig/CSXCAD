@@ -640,7 +640,7 @@ cdef class CSPropMaterial(CSProperties):
             if prop_name == 'density':
                 (<_CSPropMaterial*>self._ptr()).SetDensity(val)
                 continue
-            if type(val)==float or type(val)==int:
+            if np.ndim(val)==0:
                 self._SetMaterialPropertyDir(prop_name, 0, val)
                 continue
             assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
@@ -685,7 +685,7 @@ cdef class CSPropMaterial(CSProperties):
             if prop_name == 'density':
                 (<_CSPropMaterial*>self._ptr()).SetDensityWeightFunction(val.encode('UTF-8'))
                 continue
-            if type(val)==str:
+            if isinstance(val, str):
                 self._SetMaterialWeightDir(prop_name, 0, val)
                 continue
             assert len(val)==3, 'SetMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)
@@ -1615,10 +1615,10 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         self._CheckOrder(order)
         for prop_name in kw:
             val = kw[prop_name]
-            if type(val)==float or type(val)==int:
+            if np.ndim(val)==0:
                 self._SetDispersiveMaterialPropertyDir(prop_name, order, 0, val)
                 continue
-            assert len(val)==3, 'SetMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
+            assert len(val)==3, 'SetDispersiveMaterialProperty: "{}" must be a list or array of length 3'.format(prop_name)
             for n in range(3):
                 self._SetDispersiveMaterialPropertyDir(prop_name, order, n, val[n])
 
@@ -1656,7 +1656,7 @@ cdef class CSPropDispersiveMaterial(CSPropMaterial):
         self._CheckOrder(order)
         for prop_name in kw:
             val = kw[prop_name]
-            if type(val)==str:
+            if isinstance(val, str):
                 self._SetDispersiveMaterialWeightDir(prop_name, order, 0, val)
                 continue
             assert len(val)==3, 'SetDispersiveMaterialWeight: "{}" must be a list or array of length 3'.format(prop_name)

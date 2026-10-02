@@ -71,6 +71,10 @@ there are unreleased changes. It becomes the next release entry.
 
 ### Fixed
 
+- Python: `SetMaterialProperty()` and `SetDispersiveMaterialProperty()` accept
+  numpy scalars, e.g. an element indexed from an array. `SetMaterialWeight()`
+  and `SetDispersiveMaterialWeight()` no longer split a three-character `str`
+  subclass into one weighting function per direction.
 - XML writing is no longer affected by the numeric locale — under locales with a
   decimal comma the written files were malformed.
 - `SmoothMeshLines` preserves user-supplied lines exactly through the symmetric
