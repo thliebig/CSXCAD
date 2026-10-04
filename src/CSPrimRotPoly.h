@@ -35,12 +35,12 @@ public:
 
 	virtual CSPrimRotPoly* GetCopy(CSProperties *prop=NULL) {return new CSPrimRotPoly(this,prop);}
 
-	void SetRotAxisDir(int dir) {if ((dir>=0) && (dir<3)) m_RotAxisDir=dir;}
+	void SetRotAxisDir(int dir) {if ((dir>=0) && (dir<3)) {Invalidate(); m_RotAxisDir=dir;}}
 
 	int GetRotAxisDir() const {return m_RotAxisDir;}
 
-	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
-	void SetAngle(int index, const std::string val) {if ((index>=0) && (index<2)) StartStopAngle[index].SetValue(val);}
+	void SetAngle(int index, double val) {if ((index>=0) && (index<2)) {Invalidate(); StartStopAngle[index].SetValue(val);}}
+	void SetAngle(int index, const std::string val) {if ((index>=0) && (index<2)) {Invalidate(); StartStopAngle[index].SetValue(val);}}
 
 	double GetAngle(int index) const {if ((index>=0) && (index<2)) return StartStopAngle[index].GetValue(); else return 0;}
 	ParameterScalar* GetAnglePS(int index) {if ((index>=0) && (index<2)) return &StartStopAngle[index]; else return NULL;}

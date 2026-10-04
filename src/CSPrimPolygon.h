@@ -41,7 +41,7 @@ public:
 	void AddCoord(const std::string val);
 
 	void RemoveCoords(int index);
-	void ClearCoords() {vCoords.clear();}
+	void ClearCoords() {Invalidate(); vCoords.clear();}
 
 	double GetCoord(int index);
 	ParameterScalar* GetCoordPS(int index);
@@ -53,8 +53,8 @@ public:
 
 	int GetNormDir() {return m_NormDir;}
 
-	void SetElevation(double val) {Elevation.SetValue(val);}
-	void SetElevation(const char* val) {Elevation.SetValue(val);}
+	void SetElevation(double val) {Invalidate(); Elevation.SetValue(val);}
+	void SetElevation(const char* val) {Invalidate(); Elevation.SetValue(val);}
 
 	double GetElevation() {return Elevation.GetValue();}
 	ParameterScalar* GetElevationPS() {return &Elevation;}

@@ -410,5 +410,33 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(phr2.GetNumVertices(), 50)
         self.assertEqual(phr2.GetNumFaces(), 96)
 
+    def test_is_inside_without_update(self):
+        # IsInside() must not depend on an explicit Update(), neither right
+        # after creation nor after a setter changed the geometry
+        m, P = self.metal, self.pset
+        cyl = CSPrimitives.CSPrimCylinder(P, m, start=[0, 0, 0], stop=[0, 0, 1], radius=1)
+        shell = CSPrimitives.CSPrimCylindricalShell(P, m, start=[0, 0, 0], stop=[0, 0, 1], radius=1, shell_width=0.2)
+        poly = CSPrimitives.CSPrimPolygon(P, m, points=[[0, 1, 1, 0], [0, 0, 1, 1]], norm_dir='z', elevation=0)
+        lin = CSPrimitives.CSPrimLinPoly(P, m, points=[[0, 1, 1, 0], [0, 0, 1, 1]], norm_dir='z', elevation=0, length=1)
+        rot = CSPrimitives.CSPrimRotPoly(P, m, points=[[1, 2, 2, 1], [0, 0, 1, 1]], norm_dir='x', elevation=0,
+                                         rot_axis='z', angle=[0, 2*np.pi])
+        wire = CSPrimitives.CSPrimWire(P, m, points=[[0, 1], [0, 0], [0, 0]], radius=0.1)
+        for prim, pos in ((cyl, [0.1, 0, 0.5]), (shell, [1, 0, 0.5]), (poly, [0.5, 0.5, 0]),
+                          (lin, [0.5, 0.5, 0.5]), (rot, [0, 1.5, 0.5]), (wire, [0.5, 0, 0])):
+            self.assertTrue(prim.IsInside(pos), prim.GetTypeName())
+
+        cyl.SetRadius(3)
+        shell.SetShellWidth(1)
+        poly.SetElevation(2)
+        lin.SetLength(3)
+        rot.SetAngle(0, np.pi)
+        wire.SetWireRadius(0.5)
+        for prim, inside, outside in ((cyl, [2, 0, 0.5], None), (shell, [1.4, 0, 0.5], None),
+                                      (poly, [0.5, 0.5, 2], [0.5, 0.5, 0]), (lin, [0.5, 0.5, 2.5], None),
+                                      (rot, [0, 1.5, 0.5], [0, -1.5, 0.5]), (wire, [0.5, 0.3, 0], None)):
+            self.assertTrue(prim.IsInside(inside), prim.GetTypeName())
+            if outside is not None:
+                self.assertFalse(prim.IsInside(outside), prim.GetTypeName())
+
 if __name__ == '__main__':
     unittest.main()

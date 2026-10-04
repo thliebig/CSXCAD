@@ -179,7 +179,7 @@ public:
 	CoordinateSystem GetCoordInputType() const {return m_MeshType;}
 
 	//! Define the coordinate system this primitive is defined in (may be different to the input mesh type) \sa SetCoordInputType
-	void SetCoordinateSystem(CoordinateSystem cs) {m_PrimCoordSystem=cs;}
+	void SetCoordinateSystem(CoordinateSystem cs) {Invalidate(); m_PrimCoordSystem=cs;}
 	//! Read the coordinate system for this primitive (may be different to the input mesh type) \sa GetCoordInputType
 	CoordinateSystem GetCoordinateSystem() const {return m_PrimCoordSystem;}
 

@@ -63,6 +63,9 @@ CSPrimRotPoly::~CSPrimRotPoly()
 bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 {
 	if (inCoord==NULL) return false;
+	// a setter invalidated the bounding box used below, or Update() was never called
+	if (m_Dimension<0)
+		this->Update();
 
 	double Coord[3];
 	//transform incoming coordinates into cartesian coords

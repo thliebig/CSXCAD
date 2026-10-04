@@ -156,6 +156,9 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 {
 	if (inCoord==NULL) return false;
+	// a setter invalidated the bounding box used below, or Update() was never called
+	if (m_Dimension<0)
+		this->Update();
 	if (vCoords.size()<2) return false;
 
 	double Coord[3];

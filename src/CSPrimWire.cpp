@@ -81,6 +81,9 @@ bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
+	// a setter invalidated the bounding box used below, or Update() was never called
+	if (m_Dimension<0)
+		this->Update();
 	double rad = wireRadius.GetValue();
 	const double* p0;
 	const double* p1;

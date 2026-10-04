@@ -35,8 +35,8 @@ public:
 
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimCylindricalShell(this,prop);}
 
-	void SetShellWidth(double val) {psShellWidth.SetValue(val);}
-	void SetShellWidth(const char* val) {psShellWidth.SetValue(val);}
+	void SetShellWidth(double val) {Invalidate(); psShellWidth.SetValue(val);}
+	void SetShellWidth(const char* val) {Invalidate(); psShellWidth.SetValue(val);}
 
 	double GetShellWidth() {return psShellWidth.GetValue();}
 	ParameterScalar* GetShellWidthPS() {return &psShellWidth;}

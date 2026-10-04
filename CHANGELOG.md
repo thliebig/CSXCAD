@@ -100,6 +100,10 @@ there are unreleased changes. It becomes the next release entry.
 - Windows: `CSBackgroundMaterial` symbols are exported, and the DLL is installed
   to `bin/`.
 - `hdf5.h` is no longer pulled in by the public headers.
+- `IsInside()` of cylinders, cylindrical shells, polygons, linear and
+  rotational polygons and wires no longer returns `False` everywhere when the
+  primitive was created or changed without a following `Update()`, e.g. from
+  Python. Several setters also left the cached bounding box stale.
 
 ### Build
 

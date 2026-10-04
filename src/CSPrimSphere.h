@@ -34,11 +34,11 @@ public:
 	virtual CSPrimitives* GetCopy(CSProperties *prop=NULL) {return new CSPrimSphere(this,prop);}
 
 	//! Set the center point coordinate
-	void SetCoord(int index, double val) {m_Center.SetValue(index,val);}
+	void SetCoord(int index, double val) {Invalidate(); m_Center.SetValue(index,val);}
 	//! Set the center point coordinate as paramater string
-	void SetCoord(int index, const char* val) {m_Center.SetValue(index,val);}
+	void SetCoord(int index, const char* val) {Invalidate(); m_Center.SetValue(index,val);}
 	//! Set the center point coordinate as paramater string
-	void SetCoord(int index, std::string val) {m_Center.SetValue(index,val);}
+	void SetCoord(int index, std::string val) {Invalidate(); m_Center.SetValue(index,val);}
 
 	void SetCenter(double x1, double x2, double x3);
 	void SetCenter(double x[3]);
@@ -50,8 +50,8 @@ public:
 	ParameterScalar* GetCoordPS(int index) {return m_Center.GetCoordPS(index);}
 	ParameterCoord* GetCenter() {return &m_Center;}
 
-	void SetRadius(double val) {psRadius.SetValue(val);}
-	void SetRadius(const char* val) {psRadius.SetValue(val);}
+	void SetRadius(double val) {Invalidate(); psRadius.SetValue(val);}
+	void SetRadius(const char* val) {Invalidate(); psRadius.SetValue(val);}
 
 	double GetRadius() {return psRadius.GetValue();}
 	ParameterScalar* GetRadiusPS() {return &psRadius;}

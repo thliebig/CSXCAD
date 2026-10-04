@@ -215,6 +215,9 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 {
 	if (Coord==NULL) return false;
+	// a setter invalidated the bounding box used below, or Update() was never called
+	if (m_Dimension<0)
+		this->Update();
 
 	const double* start=m_AxisCoords[0].GetCartesianCoords();
 	const double* stop =m_AxisCoords[1].GetCartesianCoords();
