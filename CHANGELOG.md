@@ -12,7 +12,7 @@ of the [openEMS documentation](https://docs.openems.de/).
 same commit**, creating that section if it is not there — it exists only while
 there are unreleased changes. It becomes the next release entry.
 
-## Unreleased
+## 0.7.0 — 2026-10-09
 
 ### Added
 
