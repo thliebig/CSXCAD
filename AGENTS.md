@@ -128,10 +128,9 @@ the code is not verification, and "should work" is not a test result.
   rendered into the [openEMS documentation](https://docs.openems.de/), so it
   must stay valid Markdown.
 - **Dependencies**: do not add any. CSXCAD builds across a wide OS matrix, from
-  CentOS 7 to Alpine; a new dependency is a discussion, not a commit.
-- **Legacy targets**: CI still builds on very old distributions — Python 3.4
-  (Ubuntu 14.04) has no f-strings, so keep helper and test scripts that run
-  there on `.format()`.
+  AlmaLinux 8 to Alpine; a new dependency is a discussion, not a commit.
+- **Legacy targets**: the oldest Python CI tests is 3.6 (AlmaLinux 8); do not
+  use language features newer than that.
 - **Brevity**: commit messages, PR descriptions and comments as short as a human
   would write them. See the Brevity section of [AI_POLICY.md](AI_POLICY.md).
 - **Keep the tree clean**: never commit build output, installed files or

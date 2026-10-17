@@ -12,6 +12,13 @@ of the [openEMS documentation](https://docs.openems.de/).
 same commit**, creating that section if it is not there — it exists only while
 there are unreleased changes. It becomes the next release entry.
 
+## Unreleased
+
+### Changed
+
+- The Python bindings need Python 3.6 or newer (was 3.4), the oldest version
+  CI still tests; CentOS 7 and Ubuntu 14.04 are no longer tested.
+
 ## 0.7.0 — 2026-10-09
 
 ### Added

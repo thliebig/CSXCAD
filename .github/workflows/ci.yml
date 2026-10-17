@@ -90,50 +90,29 @@ jobs:
           # name: OS name (only a name for humans to read).
           # libc: userland libc, "GNU" or "musl"
           #       (only a name for humans to read)
-          # ancient: true or false.
-          #          true: incompatible with GitHub's actions/checkout due to
-          #                node.js compatibility problem. Manual git checkout
-          #                required.
-          #          false: use standard GitHub's actions/checkout.
           # docker-image: string, image on DockerHub to use
-          - name: "CentOS 7"
-            libc: "GNU"
-            ancient: true
-            docker-image: "centos:7"
-
-          - name: "Ubuntu 14.04"
-            libc: "GNU"
-            ancient: true
-            docker-image: "ubuntu:14.04"
-
           - name: "Debian oldstable"
             libc: "GNU"
-            ancient: false
             docker-image: "debian:oldstable"
 
           - name: "Debian"
             libc: "GNU"
-            ancient: false
             docker-image: "debian:latest"
 
           - name: "Ubuntu"
             libc: "GNU"
-            ancient: false
             docker-image: "ubuntu:latest"
 
           - name: "Fedora"
             libc: "GNU"
-            ancient: false
             docker-image: "fedora:latest"
 
           - name: "AlmaLinux 8"
             libc: "GNU"
-            ancient: false
             docker-image: "almalinux:8"
 
           - name: "AlmaLinux 9"
             libc: "GNU"
-            ancient: false
             docker-image: "almalinux:9"
 
           # Waiting for upstream packages:
@@ -142,12 +121,10 @@ jobs:
           #
           #- name: "AlmaLinux Latest"
           #  libc: "GNU"
-          #  ancient: false
           #  docker-image: "almalinux:latest"
 
           - name: "Alpine"
             libc: "musl"
-            ancient: false
             docker-image: "alpine:latest"
 
     container:
@@ -184,8 +161,7 @@ jobs:
       # order, from the project repo to its dependencies. This reduces
       # race conditions due to force pushes (they are harmless but
       # annoying).
-      - if: ${{ ! matrix.os.ancient }}
-        name: Checkout CSXCAD.git
+      - name: Checkout CSXCAD.git
         uses: actions/checkout@v6
         with:
           path: CSXCAD
@@ -193,68 +169,12 @@ jobs:
           # We need tags for "git describe", otherwise build fails.
           fetch-depth: 0
 
-      - if: ${{ ! matrix.os.ancient }}
-        name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
+      - name: ${{ needs.Dependencies.outputs.fparser_checkout_title }}
         uses: actions/checkout@v6
         with:
           repository: "${{ needs.Dependencies.outputs.fparser_repo }}"
           ref: "${{ needs.Dependencies.outputs.fparser_branch }}"
           path: fparser
-
-      - if: ${{ matrix.os.ancient }}
-        name: (legacy) Work around known problems
-        run: |
-          if [ -f /etc/centos-release ]; then
-            # IPv6 on GitHub Actions is broken, causing random network failures
-            # if a CDN rosolves to IPv6.
-            echo "ip_resolve=4" >> /etc/yum.conf
-
-            # CentOS repos are EOL and desupported
-            sed -i 's|^mirrorlist|#mirrorlist|g; s|^#baseurl|baseurl|g; s|mirror.centos.org|vault.centos.org|g' \
-                /etc/yum.repos.d/CentOS-Base.repo
-
-            yum install -y centos-release-scl || true
-            sed -i 's|^mirrorlist|#mirrorlist|g; s|^#baseurl|baseurl|g;
-                    s|^# baseurl|baseurl|g; s|mirror.centos.org|vault.centos.org|g' \
-                /etc/yum.repos.d/CentOS-SCLo-scl.repo \
-                /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-          fi
-
-      - if: ${{ matrix.os.ancient }}
-        name: (legacy) Install git
-        run: |
-          if [ -f /etc/centos-release ]; then
-            yum install -y git
-          elif grep -q "ID=ubuntu" /etc/os-release && \
-            grep -q 'VERSION_ID="14.04"' /etc/os-release; then
-              apt-get install -y git
-          fi
-
-      - if: ${{ matrix.os.ancient }}
-        name: (legacy) Checkout CSXCAD.git
-        run: |
-          git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" CSXCAD
-          cd "$GITHUB_WORKSPACE/CSXCAD"
-
-          git fetch --force "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "+refs/heads/*:refs/remotes/origin/*"
-          git fetch --force "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY.git" "+refs/pull/*/merge:refs/remotes/origin/pr/*"
-          git checkout "$GITHUB_SHA"
-
-      - if: ${{ matrix.os.ancient }}
-        name: (legacy) ${{ needs.Dependencies.outputs.fparser_checkout_title }}
-        run: |
-          echo "Clone $REPO.git (branch $BRANCH)"
-          git clone "$GITHUB_SERVER_URL/$REPO.git"
-          cd "$GITHUB_WORKSPACE/$CHECKOUT_PATH"
-
-          git fetch --force "$GITHUB_SERVER_URL/$REPO.git" "+refs/heads/*:refs/remotes/origin/*"
-          git fetch --force "$GITHUB_SERVER_URL/$REPO.git" "+refs/pull/*/merge:refs/remotes/origin/pr/*"
-          git checkout "$BRANCH"
-        env:
-          # convert template variables to shell variables to avoid arbitrary code injection
-          REPO: ${{ needs.Dependencies.outputs.fparser_repo }}
-          BRANCH: ${{ needs.Dependencies.outputs.fparser_branch }}
-          CHECKOUT_PATH: fparser
 
       - name: Install dependencies
         shell: sh
@@ -290,45 +210,17 @@ jobs:
                                python3-setuptools python3-numpy
 
             # VTK9 or VTK7, at least one must succeed (depending on Debian version)
-            # VTK9,  VTK7, or VTK6, at least one must succeed (depending on Debian version)
             apt-get install -y libvtk9-dev || \
-                apt-get install -y libvtk7-dev || \
-                  apt-get install -y libvtk6-dev
+                apt-get install -y libvtk7-dev
 
             # only for CI/CD test builds without networks.
             apt-get install -y iproute2
 
-            if grep -q 'VERSION_ID="14.04"' /etc/os-release; then
-              # Ubuntu 14.04 has CMake 2 by default, but we require CMake 3
-              apt-get install -y cmake3
+            apt-get install -y cmake
+            apt-get install -y python3-setuptools-scm cython3 python3-matplotlib
 
-              # Ubuntu 14.04's cython3 package is ancient, install via pip instead
-              apt-get install -y python3-pip
-
-              # Must use Cython 3.0 or lower, since 3.1 uses f-string which is
-              # incompatible with Python 3.4.
-              pip3 install "cython<3.1"
-
-              # Ubuntu 14.04's matplotlib package is ancient, install the
-              # minimum version and its dependencies via pip. Note that the
-              # native build uses Python 3.4 while the venv build (tested
-              # later) uses Python 3.5 without these problems.
-              #
-              # pip's pyparsing is incompatible with Python 3.4
-              apt-get install -y python3-pyparsing
-              # same, newer cycler has incompatible type annotation
-              pip3 install "cycler==0.10.0"
-              pip3 install "matplotlib==2.1.0"
-
-              # venv is not installed here. See special case in the step
-              # "Create Python venv and install dependencies"
-            else
-              apt-get install -y cmake
-              apt-get install -y python3-setuptools-scm cython3 python3-matplotlib
-
-              # testing Python packages in isolated venv
-              apt-get install -y python3-venv
-            fi
+            # testing Python packages in isolated venv
+            apt-get install -y python3-venv
           elif grep -q "ID=alpine" /etc/os-release; then
             apk add bash \
                     build-base gmp-dev mpfr-dev git cmake \
@@ -339,47 +231,6 @@ jobs:
 
             # only for CI/CD test builds without networks.
             apk add iproute2
-          elif [ -f /etc/centos-release ]; then
-            # "(legacy) Work around known problems" must run before this step
-            yum install -y epel-release
-            yum install -y git
-            yum install -y gcc gcc-c++ gmp-devel mpfr-devel \
-                           cmake3 git tinyxml-devel vtk-devel hdf5-devel \
-                           python3-devel \
-                           python3-pip \
-                           python3-setuptools python3-setuptools_scm python3-Cython \
-                           python3-numpy
-
-            # only for CI/CD test builds without networks.
-            yum install -y iproute
-
-            # use cmake3 instead of default cmake2
-            alternatives --install /usr/local/bin/cmake cmake /usr/bin/cmake3 99
-
-            # To upgrade GCC, one can use GCC 7 from centos-release-scl, required by CGAL.
-            # Even GCC 10+ is provided.
-            # Not used for now, since openEMS is still compatible with GCC 4.8! But we may
-            # need it in the future.
-            # yum install -y devtoolset-7-gcc devtoolset-7-gcc-c++
-            # alternatives --install /usr/local/bin/gcc gcc /opt/rh/devtoolset-7/root/usr/bin/gcc 99
-            # alternatives --install /usr/local/bin/g++ g++ /opt/rh/devtoolset-7/root/usr/bin/g++ 99
-
-            # This is a very old Boost incompatible with openEMS, but good enough
-            # for CGAL. See openEMS.git for the alternative solution.
-            yum install -y boost-devel
-
-            # CentOS didn't package matplotlib for Python 3, install the minimum
-            # requirement here.
-            pip3 install "matplotlib==2.1.0"
-
-            # not package on CentOS
-            # CGAL v4.14.3 was old enough to be compatible with GCC 4.8. Otherwise,
-            # you get: The compiler feature "cxx_decltype_auto" is not known
-            # to CXX compiler "GNU" version 4.8.5.
-            git clone $GITHUB_SERVER_URL/CGAL/cgal.git --depth=1 --branch=v4.14.3
-            cd cgal && mkdir build && cd build
-            cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$HOME/opt
-            make -j`nproc` && make install
           else
             echo "Unknown system!"
             exit 1
@@ -450,32 +301,10 @@ jobs:
         run: |
           cd ~/
 
-          if grep -q "ID=ubuntu" /etc/os-release && \
-            grep -q 'VERSION_ID="14.04"' /etc/os-release; then
-              # Use Python 3.5 instead of the default Python 3.4 because
-              # 3.5 is the latest available version on Ubuntu 14.04, and
-              # also because Python 3.5 is the first Python that supported
-              # type annotation, while Python 3.4 is locked out from most
-              # modern packages.
-              apt-get install -y curl python3.5-dev
-
-              # Ubuntu 14.04 is ancient, and the python3.5-venv package is
-              # broken. So the best approach is to install a bare Python 3.5
-              # interpreter from apt, and bootstrapping pip ourselves.
-              python3.5 -m venv ~/venv --without-pip
-              curl -O https://bootstrap.pypa.io/pip/3.5/get-pip.py
-              source ~/venv/bin/activate
-              python3.5 get-pip.py
-          else
-            python3 -m venv ~/venv
-            source ~/venv/bin/activate
-          fi
+          python3 -m venv ~/venv
+          source ~/venv/bin/activate
 
           pip install --upgrade pip
-
-          if [ -f /etc/centos-release ]; then
-            pip3 install "cython<3.1"
-          fi
 
       - name: Build and install CSXCAD Python module in venv
         run: |
