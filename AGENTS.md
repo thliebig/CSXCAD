@@ -109,7 +109,7 @@ the code is not verification, and "should work" is not a test result.
 
 ## House rules
 
-- **Style**: C++11. Match the file you are editing. No trailing whitespace, no
+- **Style**: C++17. Match the file you are editing. No trailing whitespace, no
   drive-by reformatting, no reorganising code you were not asked to touch. A
   diff should contain only what the change actually needs.
 - **Tests**: add a focused test for behaviour that could silently regress —

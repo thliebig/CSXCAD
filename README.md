@@ -11,7 +11,7 @@ Licensed under the [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.html).
 ## Dependencies
 
 - CMake ≥ 3.0
-- C++11 compiler (GCC, Clang, MSVC)
+- C++17 compiler (GCC 8, Clang, MSVC)
 - [fparser](http://warp.povusers.org/FunctionParser/) — parametric expression evaluation
 - [TinyXML](https://sourceforge.net/projects/tinyxml/) — XML serialization
 - [HDF5](https://www.hdfgroup.org/solutions/hdf5/) — discrete material file I/O

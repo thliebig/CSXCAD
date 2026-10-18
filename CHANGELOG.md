@@ -19,6 +19,11 @@ there are unreleased changes. It becomes the next release entry.
 - The Python bindings need Python 3.6 or newer (was 3.4), the oldest version
   CI still tests; CentOS 7 and Ubuntu 14.04 are no longer tested.
 
+### Build
+
+- C++17 is now required (was C++11), e.g. GCC 8 or newer, also for the
+  Python bindings.
+
 ## 0.7.0 — 2026-10-09
 
 ### Added
