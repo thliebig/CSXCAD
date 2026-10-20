@@ -397,6 +397,13 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertTrue (ph2.IsInside([x0+width/2, y0+width/2, z0+height/2]))
         self.assertFalse(ph2.IsInside([x0        , y0        , z0+height/2]))
 
+    def test_polyhedron_precision(self):
+        # vertices are stored in double precision
+        ph = CSPrimitives.CSPrimPolyhedron(self.pset, self.metal)
+        p = [0.1234567890123, -2.718281828459, 1e-9]
+        ph.AddVertex(*p)
+        np.testing.assert_array_equal(ph.GetVertex(0), p)
+
     def test_polyhedron_reader(self):
         ## Test CSPrimPolyhedronReader
         phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)

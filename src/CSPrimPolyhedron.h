@@ -37,7 +37,7 @@ public:
 	};
 	struct vertex
 	{
-		float coord[3];
+		double coord[3];
 	};
 
 	CSPrimPolyhedron(ParameterSet* paraSet, CSProperties* prop);
@@ -49,10 +49,10 @@ public:
 
 	virtual void AddVertex(float p[3]) {AddVertex(p[0],p[1],p[2]);}
 	virtual void AddVertex(double p[3]) {AddVertex(p[0],p[1],p[2]);}
-	virtual void AddVertex(float px, float py, float pz);
+	virtual void AddVertex(double px, double py, double pz);
 
 	virtual unsigned int GetNumVertices() const {return m_Vertices.size();}
-	virtual float* GetVertex(unsigned int n);
+	virtual double* GetVertex(unsigned int n);
 
 	virtual void AddFace(face f);
 	virtual void AddFace(int numVertex, int* vertices);

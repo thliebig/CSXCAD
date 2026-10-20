@@ -406,6 +406,13 @@ class TestXMLRoundTrip(unittest.TestCase):
         np.testing.assert_array_almost_equal(ph2.GetVertex(1), [1, 0, 0])
         np.testing.assert_array_equal(ph2.GetFace(0), [0, 1, 2])
 
+    def test_prim_polyhedron_precision(self):
+        # vertices are double precision, and the XML keeps 15 digits
+        ph = self.csx.AddMetal('ph').AddPolyhedron()
+        ph.AddVertex(0.1234567890123, -2.718281828459, 1e-9)
+        ph2 = self._prop(self._roundtrip(), 'ph').GetPrimitive(0)
+        np.testing.assert_array_equal(ph2.GetVertex(0), [0.1234567890123, -2.718281828459, 1e-9])
+
     def test_prim_polyhedron_reader(self):
         stl_fn = os.path.join(tempfile.gettempdir(), 'test_phr.stl')
         with open(stl_fn, 'w') as f:

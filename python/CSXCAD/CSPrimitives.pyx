@@ -1182,7 +1182,7 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         """
         ptr = <_CSPrimPolyhedron*>self._ptr()
         assert idx>=0 and idx<ptr.GetNumVertices(), "Error: invalid vertex index"
-        cdef float* p
+        cdef double* p
         p = ptr.GetVertex(idx)
         assert p!=NULL
         pyp = np.zeros(3)

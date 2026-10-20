@@ -26,6 +26,15 @@ there are unreleased changes. It becomes the next release entry.
   CI still tests; CentOS 7 and Ubuntu 14.04 are no longer tested.
 - C++: `CSPropDiscMaterial::CreatePolyDataModel()` is removed, use
   `GetPolyDataModel()`.
+- Polyhedron vertices are double precision (were single), also when read
+  from an ASCII STL or a PLY file. C++: `CSPrimPolyhedron::AddVertex()` takes
+  and `GetVertex()` returns `double`.
+
+### Fixed
+
+- A broken PLY file for a polyhedron could crash or give wrong faces; it now
+  fails, and the message says what is wrong. ASCII STL files with upper-case
+  keywords, facets of more than three corners, or no `endsolid` now load.
 
 ### Build
 

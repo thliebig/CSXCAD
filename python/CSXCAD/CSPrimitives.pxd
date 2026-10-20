@@ -220,8 +220,8 @@ cdef extern from "CSXCAD/CSPrimPolyhedron.h":
     cdef cppclass _CSPrimPolyhedron "CSPrimPolyhedron" (_CSPrimitives):
             _CSPrimPolyhedron(_ParameterSet*, _CSProperties*) except +
             void Reset()
-            void AddVertex(float px, float py, float pz)
-            float* GetVertex(unsigned int n)
+            void AddVertex(double px, double py, double pz)
+            double* GetVertex(unsigned int n)
             unsigned int GetNumVertices()
             bool GetFaceValid(int idx)
             void AddFace(vector[int] vertices)

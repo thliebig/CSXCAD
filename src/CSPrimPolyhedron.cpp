@@ -133,7 +133,7 @@ void CSPrimPolyhedron::Reset()
 	m_InvalidFaces = 0;
 }
 
-void CSPrimPolyhedron::AddVertex(float px, float py, float pz)
+void CSPrimPolyhedron::AddVertex(double px, double py, double pz)
 {
 	Invalidate();
 	vertex nv;
@@ -141,7 +141,7 @@ void CSPrimPolyhedron::AddVertex(float px, float py, float pz)
 	m_Vertices.push_back(nv);
 }
 
-float* CSPrimPolyhedron::GetVertex(unsigned int n)
+double* CSPrimPolyhedron::GetVertex(unsigned int n)
 {
 	if (n<m_Vertices.size())
 		return m_Vertices.at(n).coord;
