@@ -15,8 +15,6 @@ Licensed under the [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.html).
 - [fparser](http://warp.povusers.org/FunctionParser/) — parametric expression evaluation
 - [TinyXML](https://sourceforge.net/projects/tinyxml/) — XML serialization
 - [HDF5](https://www.hdfgroup.org/solutions/hdf5/) — discrete material file I/O
-- [VTK](https://vtk.org/) — geometry export
-- [CGAL](https://www.cgal.org/) — polyhedron operations
 
 > **Note:** The git clone must be **deep** (not shallow). CMake uses `git describe --tags --always` for the version string and will fail on shallow clones.
 
@@ -35,7 +33,7 @@ Optional local CMake overrides can be placed in `localConfig.cmake` at the repo 
 
 ### Windows
 
-On Windows, [vcpkg](https://vcpkg.io) is used for TinyXML, HDF5, VTK, and CGAL (see `vcpkg.json`):
+On Windows, [vcpkg](https://vcpkg.io) is used for TinyXML and HDF5 (see `vcpkg.json`):
 
 ```bash
 cmake .. -DCMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake

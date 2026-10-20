@@ -1,9 +1,9 @@
 {
   "dependencies": [
-    "boost",
-    "cgal",
-    "hdf5",
-    "tinyxml",
-    { "name": "vtk", "default-features": false }
+    {
+      "name": "hdf5",
+      "features": ["hl"]
+    },
+    "tinyxml"
   ]
 }

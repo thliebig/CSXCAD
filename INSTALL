@@ -6,8 +6,6 @@ Install instructions for the CSXCAD library:
   - fparser (http://warp.povusers.org/FunctionParser/)
   - tinyxml (http://www.grinninglizard.com/tinyxml/)
   - hdf5 (http://www.hdfgroup.org/HDF5/)
-  - vtk (http://www.vtk.org/)
-  - cgal (http://www.cgal.org/)
 
 2) Build:
   - change directory to CSXCAD

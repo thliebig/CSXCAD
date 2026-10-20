@@ -56,6 +56,7 @@ there are unreleased changes. It becomes the next release entry.
 
 - C++17 is now required (was C++11), e.g. GCC 8 or newer, also for the
   Python bindings.
+- VTK, CGAL and Boost (and with them GMP and MPFR) are no longer needed.
 
 ## 0.7.0 — 2026-10-09
 
