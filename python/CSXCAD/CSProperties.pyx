@@ -1905,4 +1905,26 @@ cdef class CSPropDiscMaterial(CSPropMaterial):
         c[0] = coords[0]; c[1] = coords[1]; c[2] = coords[2]
         return (<_CSPropDiscMaterial*>self._ptr()).GetDensityWeighted(c)
 
+    def GetPolyDataModel(self):
+        """ GetPolyDataModel()
+
+        Get the surface that separates the discrete material from the
+        background, e.g. for display. Reads the data file if necessary.
+
+        Returns
+        -------
+        points : (N,3) ndarray
+            Point coordinates, in structure coordinates (scale and transform
+            applied).
+        quads : (M,4) ndarray of int
+            Point indices of each surface quad.
+
+        Both are empty if no valid data is available.
+        """
+        cdef vector[double] points
+        cdef vector[int] quads
+        (<_CSPropDiscMaterial*>self._ptr()).GetPolyDataModel(points, quads)
+        pts = np.array(points, dtype=np.float64).reshape(-1, 3)
+        return pts, np.array(quads, dtype=np.int64).reshape(-1, 4)
+
 RegisterWrapperFactory(PROPERTY, CSProperties._from_address)

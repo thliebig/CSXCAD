@@ -19,9 +19,7 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
-#include "vtkPolyData.h"
-#include "vtkCellArray.h"
-#include "vtkPoints.h"
+#include <algorithm>
 
 #include "ParameterCoord.h"
 #include "CSPropDiscMaterial.h"
@@ -560,8 +558,11 @@ void CSPropDiscMaterial::ShowPropertyStatus(std::ostream& stream)
 	stream << "  Density\t: " << Density.GetValueString() << std::endl;
 }
 
-vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel()
+bool CSPropDiscMaterial::GetPolyDataModel(std::vector<double>& points, std::vector<int>& quads, bool transform)
 {
+	points.clear();
+	quads.clear();
+
 	// the voxel data is loaded lazily, make sure it is available before using it
 	EnsureFileLoaded();
 
@@ -571,39 +572,41 @@ vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel()
 		|| (m_Size[0]<2) || (m_Size[1]<2) || (m_Size[2]<2))
 	{
 		std::cerr << __func__ << ": Error, no valid discrete material data available, skipping model creation..." << std::endl;
-		return NULL;
+		return false;
 	}
 
-	vtkPolyData* polydata = vtkPolyData::New();
-	vtkCellArray *poly = vtkCellArray::New();
-	vtkPoints *points = vtkPoints::New();
-
-
-	int* pointIdx[2];
-	pointIdx[0] = new int[m_Size[0]*m_Size[1]];
-	pointIdx[1] = new int[m_Size[0]*m_Size[1]];
-	// init point idx
-	for (unsigned int n=0;n<m_Size[0]*m_Size[1];++n)
-	{
-		pointIdx[0][n]=-1;
-		pointIdx[1][n]=-1;
-	}
+	// point index of each node in the current (0) and next (1) xy-plane, -1 if not created yet
+	std::vector<int> pointIdx[2];
+	pointIdx[0].assign(m_Size[0]*m_Size[1],-1);
+	pointIdx[1].assign(m_Size[0]*m_Size[1],-1);
 
 	unsigned int mat_idx, mat_idx_down;
 	unsigned int mat_up_val, mat_down_val;
-	unsigned int mesh_idx=0;
 	bool bd, bu;
 	int nP, nPP;
 	unsigned int pos[3],rpos[3];
+
+	// append the point index of node rpos (rpos[2] relative to the plane pos[2]), creating the point if necessary
+	auto addPoint = [&]()
+	{
+		unsigned int mesh_idx = rpos[0] + rpos[1]*m_Size[0];
+		int& idx = pointIdx[rpos[2]][mesh_idx];
+		if (idx<0)
+		{
+			idx = (int)(points.size()/3);
+			points.push_back(m_mesh[0][rpos[0]]);
+			points.push_back(m_mesh[1][rpos[1]]);
+			points.push_back(m_mesh[2][pos[2]+rpos[2]]);
+		}
+		quads.push_back(idx);
+	};
+
 	// sweep over mesh nodes (not cells): a surface may also sit on the very last
 	// node of the data set, i.e. when the material reaches the boundary
 	for (pos[2]=0;pos[2]<m_Size[2];++pos[2])
 	{ // each xy-plane
-		for (unsigned int n=0;n<m_Size[0]*m_Size[1];++n)
-		{
-			pointIdx[0][n]=pointIdx[1][n];
-			pointIdx[1][n]=-1;
-		}
+		pointIdx[0].swap(pointIdx[1]);
+		std::fill(pointIdx[1].begin(),pointIdx[1].end(),-1);
 		for (pos[0]=0;pos[0]<m_Size[0];++pos[0])
 			for (pos[1]=0;pos[1]<m_Size[1];++pos[1])
 			{
@@ -641,78 +644,44 @@ vtkPolyData* CSPropDiscMaterial::CreatePolyDataModel()
 						bd=true;
 					else if ((mat_up_val==0) && (mat_down_val>0))
 						bu=true;
+					if (!bu && !bd)
+						continue;
 
 					rpos[0]=pos[0];
 					rpos[1]=pos[1];
 					rpos[2]=0;
-
-					if (bu) // draw poly for surface up
+					nP = (n+1)%3;
+					nPP = (n+2)%3;
+					// the four corners in turn
+					if (bu) // surface up
 					{
-						nP = (n+1)%3;
-						nPP = (n+2)%3;
-						poly->InsertNextCell(4);
-
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						++rpos[nP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						++rpos[nPP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						--rpos[nP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+						addPoint();
+						++rpos[nP];  addPoint();
+						++rpos[nPP]; addPoint();
+						--rpos[nP];  addPoint();
 					}
-					else if (bd) // draw poly for surface down
+					else // surface down
 					{
-						nP = (n+1)%3;
-						nPP = (n+2)%3;
-						poly->InsertNextCell(4);
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						++rpos[nPP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						++rpos[nP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
-
-						--rpos[nPP];
-						mesh_idx = rpos[0] + rpos[1]*m_Size[0];
-						if (pointIdx[rpos[2]][mesh_idx]<0)
-							pointIdx[rpos[2]][mesh_idx] = (int)points->InsertNextPoint(m_mesh[0][rpos[0]],m_mesh[1][rpos[1]],m_mesh[2][pos[2]+rpos[2]]);
-						poly->InsertCellPoint(pointIdx[rpos[2]][mesh_idx]);
+						addPoint();
+						++rpos[nPP]; addPoint();
+						++rpos[nP];  addPoint();
+						--rpos[nPP]; addPoint();
 					}
 				}
 			}
 	}
-	delete[] pointIdx[0];
-	delete[] pointIdx[1];
 
-	polydata->SetPoints(points);
-	points->Delete();
-	polydata->SetPolys(poly);
-	poly->Delete();
+	if (!transform)
+		return true;
 
-	return polydata;
+	// model coordinates are mesh coordinates: scale first, then transform
+	for (size_t n=0;n<points.size();n+=3)
+	{
+		double* p = &points[n];
+		for (int i=0;i<3;++i)
+			p[i]*=m_Scale;
+		if (m_Transform)
+			m_Transform->Transform(p,p);
+	}
+	return true;
 }

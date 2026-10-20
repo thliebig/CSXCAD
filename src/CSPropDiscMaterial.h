@@ -25,7 +25,6 @@
 
 typedef unsigned char uint8;
 
-class vtkPolyData;
 
 //! Continuous Structure Discrete Material Property
 /*!
@@ -87,9 +86,15 @@ public:
 
 	virtual void ShowPropertyStatus(std::ostream& stream);
 
-	//! Create a vtkPolyData surface that separates the discrete material from background material.
-	//! Loads the data file if not already read. Returns NULL if no valid data is available.
-	virtual vtkPolyData* CreatePolyDataModel();
+	//! Get the surface that separates the discrete material from background material, as quads.
+	//! Loads the data file if not already read.
+	/*!
+	  \param points (x,y,z) of every point, appended in sequence
+	  \param quads four point indices per surface quad, appended in sequence
+	  \param transform true: structure coordinates (scale and transform applied), false: mesh coordinates of the data file
+	  \return false if no valid data is available (both vectors are empty then)
+	  */
+	bool GetPolyDataModel(std::vector<double>& points, std::vector<int>& quads, bool transform=true);
 
 protected:
 	unsigned int GetWeightingPos(const double* coords);

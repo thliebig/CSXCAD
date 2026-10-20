@@ -812,6 +812,32 @@ class TestDiscMaterialData(unittest.TestCase):
     def test_read_file_succeeds(self):
         self.assertTrue(self.mat.ReadFile())
 
+    def test_polydata_model(self):
+        # one quad per cell face between material and background, where
+        # everything outside the data set is background
+        ind = np.zeros((4, 4, 4), dtype=int)  # padded [iz, iy, ix]
+        ind[1:3, 1:3, 1:3] = [[[0, 1], [2, 1]], [[2, 0], [1, 2]]]
+        solid = ind > 0
+        n_faces = sum(np.count_nonzero(np.diff(solid, axis=a)) for a in range(3))
+
+        pts, quads = self.mat.GetPolyDataModel()
+        self.assertEqual(quads.shape, (n_faces, 4))
+        np.testing.assert_allclose(pts.min(axis=0), [0, 0, 0])
+        np.testing.assert_allclose(pts.max(axis=0), [20, 20, 20])
+
+        # scale first, then transform
+        self.mat.SetScale(2)
+        self.mat.GetTransform().AddTransform('Translate', [1, 0, 0])
+        pts, quads = self.mat.GetPolyDataModel()
+        np.testing.assert_allclose(pts.min(axis=0), [1, 0, 0])
+        np.testing.assert_allclose(pts.max(axis=0), [41, 40, 40])
+
+    def test_polydata_model_without_file(self):
+        mat = CSPropDiscMaterial(self.csx.GetParameterSet(), filename='does_not_exist.h5')
+        pts, quads = mat.GetPolyDataModel()
+        self.assertEqual(pts.shape, (0, 3))
+        self.assertEqual(quads.shape, (0, 4))
+
     def test_epsilon_at_all_cells(self):
         for (x, y, z), mat_idx in self.CELLS.items():
             with self.subTest(coords=(x, y, z)):

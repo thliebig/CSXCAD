@@ -415,6 +415,7 @@ cdef extern from "CSXCAD/CSPropDiscMaterial.h":
         double GetKappaWeighted(int ny, const double* coords)
         double GetSigmaWeighted(int ny, const double* coords)
         double GetDensityWeighted(const double* coords)
+        bool GetPolyDataModel(vector[double]& points, vector[int]& quads)
 
 cdef class CSPropDiscMaterial(CSPropMaterial):
     pass

@@ -14,10 +14,18 @@ there are unreleased changes. It becomes the next release entry.
 
 ## Unreleased
 
+### Added
+
+- `CSPropDiscMaterial::GetPolyDataModel()` returns the discrete-material
+  surface as plain point and quad arrays, in structure coordinates or in the
+  mesh coordinates of the data file, and as numpy arrays in Python.
+
 ### Changed
 
 - The Python bindings need Python 3.6 or newer (was 3.4), the oldest version
   CI still tests; CentOS 7 and Ubuntu 14.04 are no longer tested.
+- C++: `CSPropDiscMaterial::CreatePolyDataModel()` is removed, use
+  `GetPolyDataModel()`.
 
 ### Build
 
