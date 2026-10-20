@@ -8,6 +8,7 @@
 set(TESTS
   test_csobject
   test_csrectgrid
+  test_cstransform
 )
 
 foreach(test ${TESTS})

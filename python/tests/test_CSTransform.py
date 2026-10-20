@@ -85,6 +85,34 @@ class Test_CSTransform(unittest.TestCase):
         inv = self.tr.Transform([0, 1, 0], invers=True)
         self.assertTrue(compare_coords(inv, [1, 0, 0]))
 
+    def test_invers_transform_general(self):
+        # the inverse is the full 4x4 inverse, its first three rows applied to (x, y, z, 1)
+        rng = np.random.RandomState(3)
+        pnts = rng.uniform(-5, 5, size=(10, 3))
+        shear = np.array([[1, 0.5, 0, 1], [0, 1, -0.3, 2], [0.2, 0, 1, 3], [0, 0, 0, 1]])
+        full = rng.uniform(-1, 1, size=(4, 4)) + 3*np.identity(4)
+
+        def composite(tr):
+            tr.RotateOrigin([1, 2, 3], 37)
+            tr.Scale([2, 0.5, 3])
+            tr.Translate([-1, 4, 2])
+            tr.RotateAxis('y', -70)
+
+        cases = [('composite', composite, True),
+                 ('shear', lambda tr: tr.SetMatrix(shear), True),
+                 ('full 4x4', lambda tr: tr.SetMatrix(full), False)]
+        for name, setup, affine in cases:
+            with self.subTest(name):
+                self.tr.Reset()
+                setup(self.tr)
+                inv = np.linalg.inv(self.tr.GetMatrix())
+                for p in pnts:
+                    np.testing.assert_allclose(self.tr.Transform(p, invers=True), (inv @ np.append(p, 1))[:3],
+                                               rtol=1e-12, atol=1e-12)
+                    if affine:
+                        np.testing.assert_allclose(self.tr.Transform(self.tr.Transform(p), invers=True), p,
+                                                   rtol=1e-12, atol=1e-12)
+
     def test_multiply_order(self):
         self.tr.Translate([1, 0, 0])
 
