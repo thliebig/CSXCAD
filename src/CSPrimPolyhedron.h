@@ -80,5 +80,5 @@ protected:
 	virtual void Invalidate();
 	std::vector<vertex> m_Vertices;
 	std::vector<face> m_Faces;
-	CSPrimPolyhedronPrivate *d_ptr; //!< pointer to private data structure, to hide the CGAL dependency from applications
+	CSPrimPolyhedronPrivate *d_ptr; //!< the triangles and their search tree for IsInside()
 };

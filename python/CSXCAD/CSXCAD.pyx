@@ -543,6 +543,22 @@ cdef class ContinuousStructure:
 
         return props
 
+    def SetDrawingTolerance(self, tol):
+        """ SetDrawingTolerance(tol)
+
+        A coordinate closer to a primitive than `tol` (drawing units) is
+        inside it, e.g. for :meth:`GetPropertyByCoordPriority`. openEMS sets
+        it from the mesh. Only polyhedra use it so far.
+        """
+        self._ptr().SetDrawingTolerance(tol)
+
+    def GetDrawingTolerance(self):
+        """ GetDrawingTolerance()
+
+        See :meth:`SetDrawingTolerance`.
+        """
+        return self._ptr().GetDrawingTolerance()
+
     def GetPropertyByCoordPriority(self, coord, prop_type=c_CSProperties.ANY, markFoundAsUsed=False):
         """ GetPropertyByCoordPriority(coord, prop_type=None, markFoundAsUsed=False)
         """

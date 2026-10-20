@@ -62,6 +62,8 @@ cdef extern from "CSXCAD/ContinuousStructure.h":
             int  GetQtyProperties()
 
             _CSProperties* GetPropertyByCoordPriority(const double* coord, PropertyType prop_type, bool markFoundAsUsed, _CSPrimitives** foundPrimitive)
+            void SetDrawingTolerance(double val)
+            double GetDrawingTolerance()
 
             vector[_CSPrimitives*] GetAllPrimitives(bool sort, PropertyType prop_type)
 

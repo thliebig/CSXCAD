@@ -29,6 +29,14 @@ there are unreleased changes. It becomes the next release entry.
 - Polyhedron vertices are double precision (were single), also when read
   from an ASCII STL or a PLY file. C++: `CSPrimPolyhedron::AddVertex()` takes
   and `GetVertex()` returns `double`.
+- The inside of a polyhedron (also one read from an STL or PLY file) is found
+  more robustly. Its surface counts as inside, as for a box, and so does a
+  point within the drawing tolerance of it (`SetDrawingTolerance()`, now also
+  in Python; openEMS sets it from the mesh). No face is dropped any more:
+  bodies that touch, overlap or lie inside each other, cavities, faces of more
+  than three corners and surfaces with small holes work. Results change for
+  models with mesh lines on a polyhedron's surface, which used to be metal or
+  not at random.
 
 ### Fixed
 

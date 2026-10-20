@@ -331,7 +331,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 	CSProperties* prop = NULL;
 	// search in all given primitives if coordinate given is inside
 	for (size_t i=0;i<primList.size();++i)
-		if (primList.at(i)->IsInside(coord))
+		if (primList.at(i)->IsInside(coord,dDrawingTol))
 		{
 			if (foundPrimitive)
 				*foundPrimitive = primList.at(i);

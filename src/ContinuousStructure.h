@@ -96,8 +96,9 @@ public:
 
 	CoordinateSystem GetCoordInputType();
 
-	//! Set a drawing tolerance. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
+	//! Set a drawing tolerance: a coordinate closer to a primitive than this is inside it. /sa GetPropertyByCoordPriority /sa GetPropertiesByCoordsPriority
 	void SetDrawingTolerance(double val);
+	double GetDrawingTolerance() const {return dDrawingTol;}
 
 	//! Get a property by its priority at a given coordinate and property type.
 	/*!
