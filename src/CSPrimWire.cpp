@@ -78,7 +78,7 @@ bool CSPrimWire::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return accurate;
 }
 
-bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimWire::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
 	// a setter invalidated the bounding box used below, or Update() was never called
@@ -92,10 +92,12 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 	if (m_Transform)
 		m_Transform->InvertTransform(pos,pos);
+	tol = LocalTolerance(tol);
+	rad += tol;
 
 	for (unsigned int n=0;n<3;++n)
 	{
-		if ((m_BoundBox[2*n]>pos[n]) || (m_BoundBox[2*n+1]<pos[n])) return false;
+		if ((m_BoundBox[2*n]-tol>pos[n]) || (m_BoundBox[2*n+1]+tol<pos[n])) return false;
 	}
 
 	double foot,dist,distPP;
@@ -104,7 +106,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 		p0 = points.at(i)->GetCartesianCoords();
 
 		dist = sqrt(pow(pos[0]-p0[0],2)+pow(pos[1]-p0[1],2)+pow(pos[2]-p0[2],2));
-		if (dist<rad)
+		if (dist<=rad)
 			return true;
 
 		if (i<GetNumberOfPoints()-1)
@@ -114,7 +116,7 @@ bool CSPrimWire::IsInside(const double* Coord, double /*tol*/)
 			if (dist<distPP)
 			{
 				Point_Line_Distance(pos ,p0 ,p1 ,foot ,dist);
-				if ((foot>0) && (foot<1) && (dist<rad))
+				if ((foot>0) && (foot<1) && (dist<=rad))
 					return true;
 			}
 		}

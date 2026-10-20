@@ -187,34 +187,22 @@ bool CSPrimMultiBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return false;
 }
 
-bool CSPrimMultiBox::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimMultiBox::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
-	bool in=false;
-	double UpVal,DownVal;
 	double coords[3]={Coord[0],Coord[1],Coord[2]};
 	TransformCoords(coords, true, m_MeshType);
-	//fprintf(stderr,"here\n");
+	tol = LocalTolerance(tol);
 	for (unsigned int i=0;i<vCoords.size()/6;++i)
 	{
-		in=true;
+		double start[3], stop[3];
 		for (unsigned int n=0;n<3;++n)
 		{
-			//fprintf(stderr,"%e %e %e \n",vCoords.at(6*i+2*n)->GetValue(),vCoords.at(6*i+2*n+1)->GetValue());
-			UpVal=vCoords.at(6*i+2*n+1)->GetValue();
-			DownVal=vCoords.at(6*i+2*n)->GetValue();
-			if (DownVal<UpVal)
-			{
-				if (DownVal>coords[n]) {in=false;break;}
-				if (UpVal<coords[n]) {in=false;break;}
-			}
-			else
-			{
-				if (DownVal<coords[n]) {in=false;break;}
-				if (UpVal>coords[n]) {in=false;break;}
-			}
+			start[n]=vCoords.at(6*i+2*n)->GetValue();
+			stop[n]=vCoords.at(6*i+2*n+1)->GetValue();
 		}
-		if (in==true) {	return true;}
+		if (CoordInRange(coords, start, stop, m_MeshType, tol))
+			return true;
 	}
 	return false;
 }

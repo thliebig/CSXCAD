@@ -212,7 +212,7 @@ bool CSPrimCylinder::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return accurate;
 }
 
-bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimCylinder::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
 	// a setter invalidated the bounding box used below, or Update() was never called
@@ -226,17 +226,21 @@ bool CSPrimCylinder::IsInside(const double* Coord, double /*tol*/)
 	TransformCoordSystem(Coord,pos,m_MeshType,CARTESIAN);
 	if (m_Transform)
 		m_Transform->InvertTransform(pos,pos);
+	tol = LocalTolerance(tol);
 
 	for (int n=0;n<3;++n)
-		if (pos[n]<m_BoundBox[2*n] || pos[n]>m_BoundBox[2*n+1])
+		if (pos[n]<m_BoundBox[2*n]-tol || pos[n]>m_BoundBox[2*n+1]+tol)
 			return false;
 
 	double foot,dist;
 	Point_Line_Distance(pos,start,stop,foot,dist);
+	double length = sqrt(pow(stop[0]-start[0],2)+pow(stop[1]-start[1],2)+pow(stop[2]-start[2],2));
 
-	if ((foot<0) || (foot>1)) //the foot point is not on the axis
+	// the tolerance along the axis, in parts of its length
+	double dfoot = (length>0) ? tol/length : 0;
+	if ((foot<-dfoot) || (foot>1+dfoot)) //the foot point is not on the axis
 		return false;
-	if (dist>psRadius.GetValue())
+	if (dist>psRadius.GetValue()+tol)
 		return false;
 
 	return true;

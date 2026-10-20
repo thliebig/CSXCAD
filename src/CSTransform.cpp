@@ -21,6 +21,8 @@
 #include "tinyxml.h"
 
 #include <math.h>
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 
 #define PI 3.141592653589793238462643383279
@@ -69,6 +71,20 @@ void CSTransform::Reset()
 	m_TransformArguments.clear();
 	MakeUnitMatrix(m_TMatrix);
 	MakeUnitMatrix(m_Inv_TMatrix);
+}
+
+double CSTransform::GetInverseScale() const
+{
+	// the largest length of a column of the linear part
+	double scale = 0;
+	for (int n=0;n<3;++n)
+	{
+		double len2 = 0;
+		for (int m=0;m<3;++m)
+			len2 += m_Inv_TMatrix[4*m+n]*m_Inv_TMatrix[4*m+n];
+		scale = std::max(scale, std::sqrt(len2));
+	}
+	return scale;
 }
 
 bool CSTransform::HasTransform()

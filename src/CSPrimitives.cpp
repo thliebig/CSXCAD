@@ -51,23 +51,26 @@ void Point_Line_Distance(const double P[], const double start[], const double st
 	dist = sqrt(pow(l_P[0]-footP[0],2)+pow(l_P[1]-footP[1],2)+pow(l_P[2]-footP[2],2));
 }
 
-bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const double* stop, CoordinateSystem cs_in)
+bool CSXCAD_EXPORT CoordInRange(const double* coord, const double* start, const double* stop, CoordinateSystem cs_in, double tol)
 {
 	double p[] = {coord[0],coord[1],coord[2]};
+	double dist[3] = {tol, tol, tol};
 	switch (cs_in)
 	{
 	case CYLINDRICAL:
-		if (p[1]<std::min(start[1],stop[1]))
-			while (p[1]<std::min(start[1],stop[1]))
+		// the angle tol covers at radius p[0]; close to the axis any angle
+		dist[1] = (std::fabs(p[0])>tol) ? tol/std::fabs(p[0]) : PI;
+		if (p[1]<std::min(start[1],stop[1])-dist[1])
+			while (p[1]<std::min(start[1],stop[1])-dist[1])
 				p[1]+=2*PI;
-		else if (p[1]>std::max(start[1],stop[1]))
-			while (p[1]>std::max(start[1],stop[1]))
+		else if (p[1]>std::max(start[1],stop[1])+dist[1])
+			while (p[1]>std::max(start[1],stop[1])+dist[1])
 				p[1]-=2*PI;
 		// fallthrough
 	case CARTESIAN:
 	default:
 		for (int n=0;n<3;++n)
-			if ((p[n]<std::min(start[n],stop[n])) || (p[n]>std::max(start[n],stop[n])))
+			if ((p[n]<std::min(start[n],stop[n])-dist[n]) || (p[n]>std::max(start[n],stop[n])+dist[n]))
 				return false;
 		return true;
 		break;
@@ -241,6 +244,13 @@ void CSPrimitives::ShowPrimitiveStatus(std::ostream& stream)
 	}
 	else
 		stream << "  Transform: None" << std::endl;
+}
+
+double CSPrimitives::LocalTolerance(double tol) const
+{
+	if ((m_Transform==NULL) || (tol<=0))
+		return tol;
+	return tol*m_Transform->GetInverseScale();
 }
 
 void CSPrimitives::TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const

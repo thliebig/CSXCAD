@@ -440,7 +440,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         wire.SetWireRadius(0.5)
         for prim, inside, outside in ((cyl, [2, 0, 0.5], None), (shell, [1.4, 0, 0.5], None),
                                       (poly, [0.5, 0.5, 2], [0.5, 0.5, 0]), (lin, [0.5, 0.5, 2.5], None),
-                                      (rot, [0, 1.5, 0.5], [0, -1.5, 0.5]), (wire, [0.5, 0.3, 0], None)):
+                                      (rot, [0, 1.5, 0.5], [1.5, 0, 0.5]), (wire, [0.5, 0.3, 0], None)):
             self.assertTrue(prim.IsInside(inside), prim.GetTypeName())
             if outside is not None:
                 self.assertFalse(prim.IsInside(outside), prim.GetTypeName())

@@ -605,7 +605,7 @@ bool CSPrimPolyhedron::IsInside(const double* Coord, double tol)
 
 	const CSPrimPolyhedronPrivate& P = *d_ptr;
 	// the surface counts as inside; a little more than rounding errors always does
-	tol = std::max(tol, 1e-12*P.size);
+	tol = std::max(LocalTolerance(tol), 1e-12*P.size);
 	for (unsigned int n=0;n<3;++n)
 	{
 		if ((m_BoundBox[2*n]-tol>pos[n]) || (m_BoundBox[2*n+1]+tol<pos[n])) return false;

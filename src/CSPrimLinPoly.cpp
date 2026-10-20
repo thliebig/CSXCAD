@@ -96,7 +96,10 @@ bool CSPrimLinPoly::IsInside(const double* Coord, double tol)
 	if (Coord==NULL) return false;
 	double coords[3]={Coord[0],Coord[1],Coord[2]};
 	if (m_Transform && Type==LINPOLY)
+	{
 		TransformCoords(coords,true, m_MeshType);
+		tol = LocalTolerance(tol);
+	}
 	return CSPrimPolygon::IsInside(coords, tol);
 }
 

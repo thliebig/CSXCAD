@@ -37,6 +37,14 @@ there are unreleased changes. It becomes the next release entry.
   than three corners and surfaces with small holes work. Results change for
   models with mesh lines on a polyhedron's surface, which used to be metal or
   not at random.
+- **All primitives obey the drawing tolerance:** a point within it of a box,
+  cylinder, sphere, shell, wire, polygon, linear or rotational polygon counts
+  as inside, so coordinates rounded in the XML or computed (e.g. `sin(pi)`
+  instead of 0) still meet the mesh lines they were meant for. The tolerance
+  is a length also along the angle of cylindrical coordinates and for scaled
+  primitives. The surface of spheres, spherical shells, wires and the stop
+  angle of a rotational polygon now count as inside too, as for boxes, and so
+  do the corners of polygons. User-defined primitives ignore the tolerance.
 
 ### Fixed
 

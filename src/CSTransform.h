@@ -48,6 +48,9 @@ public:
 
 	double* Transform(const double inCoords[3], double outCoords[3]) const;
 	double* InvertTransform(const double inCoords[3], double outCoords[3]) const;
+	//! The factor by which the inverse transformation stretches a length at most: 1/scale for
+	//! rotations, translations and a uniform scale, the largest factor for a non-uniform one
+	double GetInverseScale() const;
 
 	void Invert();
 

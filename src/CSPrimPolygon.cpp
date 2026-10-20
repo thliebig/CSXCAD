@@ -18,6 +18,7 @@
 #include <sstream>
 #include <iostream>
 #include <limits>
+#include <algorithm>
 #include "tinyxml.h"
 #include "stdint.h"
 
@@ -153,7 +154,7 @@ bool CSPrimPolygon::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return accurate;
 }
 
-bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
+bool CSPrimPolygon::IsInside(const double* inCoord, double tol)
 {
 	if (inCoord==NULL) return false;
 	// a setter invalidated the bounding box used below, or Update() was never called
@@ -165,10 +166,13 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 	if (m_Transform && Type==POLYGON)
+	{
 		TransformCoords(Coord,true, CARTESIAN);
+		tol = LocalTolerance(tol);
+	}
 
 	for (unsigned int n=0;n<3;++n)
-		if ((m_BoundBox[2*n]>Coord[n]) || (m_BoundBox[2*n+1]<Coord[n])) return false;
+		if ((m_BoundBox[2*n]-tol>Coord[n]) || (m_BoundBox[2*n+1]+tol<Coord[n])) return false;
 
 	double x=0,y=0;
 	int nP = (m_NormDir+1)%3;
@@ -217,6 +221,23 @@ bool CSPrimPolygon::IsInside(const double* inCoord, double /*tol*/)
 	if (wn != 0)
 		return true;
 
+	// or on an edge or corner, or within the tolerance of it
+	x1 = vCoords[2*np-2].GetValue();
+	y1 = vCoords[2*np-1].GetValue();
+	for (size_t i=0;i<np;++i)
+	{
+		x2 = vCoords[2*i].GetValue();
+		y2 = vCoords[2*i+1].GetValue();
+		double dx = x2-x1, dy = y2-y1;
+		double len2 = dx*dx+dy*dy;
+		double t = len2>0 ? ((x-x1)*dx+(y-y1)*dy)/len2 : 0;
+		t = std::max(0.0, std::min(1.0, t));
+		double ex = x1+t*dx-x, ey = y1+t*dy-y;
+		if (ex*ex+ey*ey<=tol*tol)
+			return true;
+		x1 = x2;
+		y1 = y2;
+	}
 	return false;
 }
 

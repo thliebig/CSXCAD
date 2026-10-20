@@ -61,12 +61,15 @@ class CSTransform;
 */
 void CSXCAD_EXPORT Point_Line_Distance(const double P[], const double start[], const double stop[], double &foot, double &dist, CoordinateSystem c_system=UNDEFINED_CS);
 
-bool CSXCAD_EXPORT CoordInRange(const double* p, const double* start, const double* stop, CoordinateSystem cs_in);
+//! Check if p is within the box from start to stop, or within the distance tol of it (along the
+//! angle of a cylindrical box tol is a length too)
+bool CSXCAD_EXPORT CoordInRange(const double* p, const double* start, const double* stop, CoordinateSystem cs_in, double tol=0);
 
 //! Abstract base class for different geometrical primitives.
 /*!
  This is an abstract base class for different geometrical primitives like boxes, spheres, cylinders etc.
- !!! Tolerances not yet obeyed !!!
+ IsInside() counts the surface as inside, and a point within the given tolerance of it too
+ (a length in the coordinates given; CSPrimUserDefined does not obey it).
  */
 class CSXCAD_EXPORT CSPrimitives : public CSObject
 {
@@ -202,6 +205,9 @@ protected:
 
 	//! Apply (invers) transformation to the given coordinate in the given coordinate system
 	void TransformCoords(double* Coord, bool invers, CoordinateSystem cs_in) const;
+	//! The tolerance tol (a length in the global coordinates) in the coordinates of this primitive
+	//! before its transformation
+	double LocalTolerance(double tol) const;
 
 	unsigned int uiID;
 	int iPriority;

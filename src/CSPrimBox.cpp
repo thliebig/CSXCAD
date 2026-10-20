@@ -111,7 +111,7 @@ bool CSPrimBox::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return true;
 }
 
-bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimBox::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
 
@@ -122,11 +122,12 @@ bool CSPrimBox::IsInside(const double* Coord, double /*tol*/)
 	TransformCoords(pos, true, m_MeshType);
 	//transform incoming coordinates into the coorindate system of the primitive
 	TransformCoordSystem(pos,pos,m_MeshType,m_PrimCoordSystem);
+	tol = LocalTolerance(tol);
 
 	if (m_PrimCoordSystem!=UNDEFINED_CS)
-		return CoordInRange(pos, start, stop, m_PrimCoordSystem);
+		return CoordInRange(pos, start, stop, m_PrimCoordSystem, tol);
 	else
-		return CoordInRange(pos, start, stop, m_MeshType);
+		return CoordInRange(pos, start, stop, m_MeshType, tol);
 }
 
 

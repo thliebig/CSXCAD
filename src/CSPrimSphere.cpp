@@ -99,7 +99,7 @@ bool CSPrimSphere::GetBoundBox(double dBoundBox[6], bool PreserveOrientation)
 	return true;
 }
 
-bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
+bool CSPrimSphere::IsInside(const double* Coord, double tol)
 {
 	if (Coord==NULL) return false;
 	double out[3];
@@ -108,7 +108,7 @@ bool CSPrimSphere::IsInside(const double* Coord, double /*tol*/)
 	if (m_Transform)
 		m_Transform->InvertTransform(out,out);
 	double dist=sqrt(pow(out[0]-center[0],2)+pow(out[1]-center[1],2)+pow(out[2]-center[2],2));
-	if (dist<psRadius.GetValue())
+	if (dist<=psRadius.GetValue()+LocalTolerance(tol))
 		return true;
 	return false;
 }

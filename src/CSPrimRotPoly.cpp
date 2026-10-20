@@ -60,7 +60,7 @@ CSPrimRotPoly::~CSPrimRotPoly()
 {
 }
 
-bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
+bool CSPrimRotPoly::IsInside(const double* inCoord, double tol)
 {
 	if (inCoord==NULL) return false;
 	// a setter invalidated the bounding box used below, or Update() was never called
@@ -71,7 +71,10 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 	//transform incoming coordinates into cartesian coords
 	TransformCoordSystem(inCoord,Coord,m_MeshType,CARTESIAN);
 	if (m_Transform && Type==ROTPOLY)
+	{
 		TransformCoords(Coord,true, CARTESIAN);
+		tol = LocalTolerance(tol);
+	}
 
 	double origin[3]={0,0,0};
 	double dir[3]={0,0,0};
@@ -87,32 +90,36 @@ bool CSPrimRotPoly::IsInside(const double* inCoord, double /*tol*/)
 		alpha=alpha-M_PI/2;
 	if (alpha<0)
 		alpha+=2*M_PI;
+	// the angle the tolerance covers at this distance from the axis; close to it any angle
+	double dalpha = (dist>tol) ? tol/dist : 2*M_PI;
 
 	origin[0] = dist;origin[1] = dist;origin[2] = dist;
 	origin[m_NormDir] = 0;
 	origin[m_RotAxisDir] = foot;
 
-	if (alpha<m_StartStopAng[0])
-		alpha+=2*M_PI;
+	// the angle within the start and stop angle, give or take dalpha
+	double lo = m_StartStopAng[0]-dalpha;
+	auto in_range = [&](double a)
+	{
+		while (a<lo)
+			a+=2*M_PI;
+		while (a>=lo+2*M_PI)
+			a-=2*M_PI;
+		return a<=m_StartStopAng[1]+dalpha;
+	};
 
-	if ((CSPrimPolygon::IsInside(origin)) && (alpha<m_StartStopAng[1]))
+	if (in_range(alpha) && CSPrimPolygon::IsInside(origin, tol))
 		return true;
 
+	// the half plane on the other side of the axis
 	dist*=-1;
-	alpha=alpha+M_PI;
-	if (alpha>2*M_PI)
-		alpha-=2*M_PI;
-
-	if (alpha<m_StartStopAng[0])
-		alpha+=2*M_PI;
-
-	if (alpha>m_StartStopAng[1])
+	if (!in_range(alpha+M_PI))
 		return false;
 
 	origin[0] = dist;origin[1] = dist;origin[2] = dist;
 	origin[m_NormDir] = 0;
 	origin[m_RotAxisDir] = foot;
-	return CSPrimPolygon::IsInside(origin);
+	return CSPrimPolygon::IsInside(origin, tol);
 }
 
 
