@@ -72,6 +72,8 @@ there are unreleased changes. It becomes the next release entry.
 
 - The Python bindings need Python 3.6 or newer (was 3.4), the oldest version
   CI still tests; CentOS 7 and Ubuntu 14.04 are no longer tested.
+- `CSXGeomPlot.m` shows the structure with `csxcad-view` when it is
+  installed, and falls back to AppCSXCAD otherwise.
 - A new property's edge colour defaults to black instead of its (random) fill
   colour, so edges stand out in a viewer. `SetColor()` still sets both.
 - C++: `CSPropDiscMaterial::CreatePolyDataModel()` is removed, use

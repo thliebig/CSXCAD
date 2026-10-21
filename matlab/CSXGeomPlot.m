@@ -1,9 +1,10 @@
 function CSXGeomPlot(CSX_filename, args_string)
 % function CSXGeomPlot(CSX_filename<, args_string>)
 %
-% Show the geometry stored in the CSX file using AppCSXCAD
+% Show the geometry stored in the CSX file using csxcad-view, the viewer of
+% the CSXCAD python interface, or AppCSXCAD if csxcad-view is not installed
 %
-% Optional AppCSXCAD arguments (args_string):
+% Optional arguments (args_string), understood by both:
 % - '--RenderDiscMaterial', enable material rendering
 %
 % exports:
@@ -26,6 +27,22 @@ end
 
 filename = mfilename('fullpath');
 pathname = fileparts( filename );
+prefix = [pathname filesep '..' filesep '..' filesep '..' filesep];
+
+% prefer the python viewer (csxcad-view), e.g. from the venv next to the install
+if isunix
+    viewer_bin = searchBinary('csxcad-view', {[prefix 'bin' filesep], [prefix 'venv' filesep 'bin' filesep]}, 0);
+else % assume windows
+    viewer_bin = searchBinary('csxcad-view.exe', [pathname filesep '..' filesep], 0);
+end
+if ~isempty(viewer_bin)
+    disp( ['invoking csxcad-view, exit to continue script...'] );
+    if isOctave()
+        fflush(stdout);
+    end
+    system([viewer_bin ' --disableEdit ' args_string ' ' CSX_filename]);
+    return
+end
 
 if isunix
     AppCSXCAD_bin = searchBinary('AppCSXCAD.sh', ...
