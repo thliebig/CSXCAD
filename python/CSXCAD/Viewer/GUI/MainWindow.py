@@ -24,12 +24,12 @@ import time
 
 import numpy as np
 
-from PySide6.QtCore import Qt, QTimer, Signal, QSettings, QByteArray, QSize
+from PySide6.QtCore import Qt, QTimer, Signal, QSettings, QByteArray, QSize, QObject, QEvent
 from PySide6.QtGui import QAction, QActionGroup, QIcon, QKeySequence, QPixmap, QPainter, QPalette
 from PySide6.QtWidgets import (QMainWindow, QDockWidget, QFileDialog, QMessageBox, QWidget, QToolBar,
                                QApplication, QInputDialog, QColorDialog, QDialog, QFormLayout, QSpinBox,
                                QCheckBox, QDialogButtonBox, QWidgetAction, QSlider, QHBoxLayout, QLabel,
-                               QMenu, QProgressDialog)
+                               QMenu, QProgressDialog, QMdiArea, QMdiSubWindow, QVBoxLayout, QTabBar)
 from PySide6.QtSvg import QSvgRenderer
 
 from CSXCAD.Viewer import Actions
@@ -74,6 +74,24 @@ def _RenderWidgetClass():
     return QVTKRenderWindowInteractor
 
 
+class _CloseFilter(QObject):
+    """ Event filter on a sub-window of the central area: a close is
+    ignored and handed to `on_close` (None: nothing). QMdiArea would delete
+    the sub-window with its widget; the 3D view must stay, a figure only
+    hides. """
+    def __init__(self, parent, on_close=None):
+        super().__init__(parent)
+        self._on_close = on_close
+
+    def eventFilter(self, obj, ev):
+        if ev.type() == QEvent.Type.Close:
+            ev.ignore()
+            if self._on_close is not None:
+                self._on_close()
+            return True
+        return False
+
+
 class MainWindow(QMainWindow, ViewerHost):
     """ MainWindow(viewer, render_widget=None)
 
@@ -112,7 +130,18 @@ class MainWindow(QMainWindow, ViewerHost):
         else:
             self._own_render_widget = False
         self.vtk_widget = render_widget
-        self.setCentralWidget(render_widget)
+        # the 3D view and the figures are windows of the central area,
+        # shown as tabs or as sub-windows (ApplyWindowMode)
+        self.mdi = QMdiArea(self)
+        self.mdi.setTabsMovable(True)
+        self.mdi.setDocumentMode(True)
+        # windows are added in sub-window mode, the saved mode (default tabs)
+        # is applied once all are there (_RestoreSettings)
+        self.setCentralWidget(self.mdi)
+        self._figure_subs = {}   # {figure path: (sub-window, toolbar)}
+        render_widget.setWindowTitle('3D view')
+        self._view_sub = self._AddSubWindow(render_widget, None)
+        self.mdi.subWindowActivated.connect(self._OnSubWindow)
 
         from CSXCAD.Viewer.GUI.Tree import SceneTree
         from CSXCAD.Viewer.GUI.InfoPanel import InfoPanel
@@ -139,6 +168,9 @@ class MainWindow(QMainWindow, ViewerHost):
         self.statusBar().addPermanentWidget(self.status_pos)
 
         viewer.SetHost(self)
+        # figures added before this window opened (or shown in an earlier one)
+        for figure in viewer.GetFigures().values():
+            self.FigureAdded(figure)
         self.Customize()
         self._RestoreSettings()
 
@@ -180,6 +212,8 @@ class MainWindow(QMainWindow, ViewerHost):
         if v._window_position is not None:
             self.ApplyPosition(v._window_position)
         self.RefreshAll()
+        self.mdi.setActiveSubWindow(self._view_sub)   # the 3D view starts in front
+        self._OnSubWindow()
         w.setFocus()
         v.Render()
 
@@ -206,6 +240,157 @@ class MainWindow(QMainWindow, ViewerHost):
         # an item's settings may follow the clock (not every played frame)
         if not self.viewer.GetAnimation()['playing']:
             self.item_editor.Sync()
+
+    # ------------------------------------------------------------------
+    # figures and the central area
+    def WindowMode(self):
+        """ ``'tabs'`` or ``'windows'``, see :meth:`ApplyWindowMode`. """
+        return 'tabs' if self.mdi.viewMode() == QMdiArea.ViewMode.TabbedView else 'windows'
+
+    def ApplyWindowMode(self, mode):
+        """ ApplyWindowMode(mode)
+
+        ``'tabs'``: the 3D view and every figure fill the central area, one
+        tab each. ``'windows'``: framed sub-windows inside the area, to place
+        side by side (Tile, Cascade). Set it with
+        :meth:`CSXCAD.Viewer.Viewer.SetWindowMode`, it is part of the view
+        state. """
+        tabs = mode == 'tabs'
+        self.mdi.setViewMode(QMdiArea.ViewMode.TabbedView if tabs else QMdiArea.ViewMode.SubWindowView)
+        for sub in self.mdi.subWindowList():
+            if not sub.isHidden():
+                self._StyleSubWindow(sub)
+        if not tabs:
+            self.mdi.tileSubWindows()
+        self._mode_actions[mode].setChecked(True)
+        self._tile_act.setEnabled(not tabs)
+        self._cascade_act.setEnabled(not tabs)
+        self._SyncShown()
+
+    def _SyncShown(self):
+        """ A hidden figure is not in the central area at all: QMdiArea
+        cannot hide single tabs (a hidden tab leaves a gap and mixes up the
+        order). A shown one is, at its place: the 3D view first, then the
+        figures in their order. The 3D view itself always stays. """
+        figures = self.viewer._figures
+        attached = self.mdi.subWindowList()
+        for path, (sub, tb) in self._figure_subs.items():
+            shown = path not in figures or figures[path].IsShown()
+            if not shown and sub in attached:
+                if self.mdi.currentSubWindow() is sub:
+                    self.mdi.setActiveSubWindow(self._view_sub)
+                self.mdi.removeSubWindow(sub)   # kept, with its figure
+                sub.hide()
+            elif shown and sub not in attached:
+                self.mdi.addSubWindow(sub)
+                self._StyleSubWindow(sub)
+                self._PlaceTab(sub)
+        self._OnSubWindow()
+
+    def _PlaceTab(self, sub):
+        """ Move the tab of a re-added `sub` (appended at the end) to its place. """
+        bar = self.mdi.findChild(QTabBar)
+        if bar is None:
+            return
+        order = [self._view_sub] + [s for s, tb in self._figure_subs.values()]
+        tabs = self.mdi.subWindowList(QMdiArea.WindowOrder.CreationOrder)
+        want = sum(1 for s in tabs if s is not sub and s in order and order.index(s) < order.index(sub))
+        have = tabs.index(sub)
+        if have != want and have < bar.count():
+            bar.moveTab(have, want)   # QMdiArea follows the tab bar's order
+
+    def _StyleSubWindow(self, sub):
+        """ Show `sub` as the mode wants it: filling and frameless as a tab,
+        framed (the 3D view without a close button) as a sub-window. """
+        if self.WindowMode() == 'tabs':
+            sub.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+            sub.showMaximized()
+            return
+        flags = Qt.WindowType.SubWindow | Qt.WindowType.WindowTitleHint | Qt.WindowType.WindowMinMaxButtonsHint
+        if sub.widget() is not self.vtk_widget:
+            flags |= Qt.WindowType.WindowCloseButtonHint
+        sub.setWindowFlags(flags)
+        sub.showNormal()
+
+    def _AddSubWindow(self, widget, figure):
+        # The render widget is a native (X11) window, VTK draws into it. Its
+        # containers must be native too: Qt cannot reliably move and resize
+        # a native child with an alien (non-native) parent, the picture then
+        # stays where it was. All sub-windows are native, so that they also
+        # stack among each other through the window system.
+        sub = QMdiSubWindow()
+        sub.setAttribute(Qt.WidgetAttribute.WA_NativeWindow)
+        sub.setWidget(widget)
+        self.mdi.addSubWindow(sub)
+        sub.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+        sub.setWindowTitle(widget.windowTitle())
+        on_close = None if figure is None else (lambda p=figure.GetPath(): self.viewer.SetVisible(p, False))
+        sub.installEventFilter(_CloseFilter(sub, on_close))
+        self._StyleSubWindow(sub)
+        return sub
+
+    def _OnSubWindow(self, *args):
+        """ Only the current figure's toolbar is shown, none for the 3D view.
+        As a tab, the render widget is hidden while another tab is in front:
+        it is a native window, which the other (non-native) tabs cannot cover
+        (QMdiArea only raises the current tab, it hides none). """
+        cur = self.mdi.currentSubWindow()
+        for sub, tb in self._figure_subs.values():
+            tb.setVisible(sub is cur and not sub.isHidden())
+        show_3d = self.WindowMode() == 'windows' or cur is None or cur is self._view_sub
+        if self.vtk_widget.isHidden() == show_3d:   # hidden but wanted, or the other way round
+            self.vtk_widget.setVisible(show_3d)
+            if show_3d and self.viewer.GetHost() is self:
+                self.viewer.Render()
+
+    def FigureAdded(self, figure):
+        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
+        fig = figure.GetFigure()
+        if getattr(fig.canvas, 'manager', None) is not None:
+            import matplotlib.pyplot as plt
+            plt.close(fig)   # a pyplot figure: no window of its own
+        canvas = FigureCanvasQTAgg(fig)
+        w = QWidget()
+        lay = QVBoxLayout(w)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(canvas)
+        w.setWindowTitle(figure.GetName())
+        tb = NavigationToolbar2QT(canvas, self)
+        tb.setObjectName('figure_toolbar_' + figure.GetPath())
+        tb.setWindowTitle(figure.GetName() + ' figure')
+        tb.toggleViewAction().setVisible(False)   # not in the toolbar menu
+        tb.setIconSize(QSize(20, 20))   # as the viewer's own, or the toolbar area changes height
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, tb)
+        cur = self.mdi.currentSubWindow()
+        sub = self._AddSubWindow(w, figure)
+        self._figure_subs[figure.GetPath()] = (sub, tb)
+        if cur is not None:   # a new figure does not take the front
+            self.mdi.setActiveSubWindow(cur)
+        self._SyncShown()
+
+    def FigureRemoved(self, figure):
+        sub, tb = self._figure_subs.pop(figure.GetPath(), (None, None))
+        if sub is None:
+            return
+        self.removeToolBar(tb)
+        tb.deleteLater()
+        if sub in self.mdi.subWindowList():
+            self.mdi.removeSubWindow(sub)
+        sub.deleteLater()
+        self._OnSubWindow()
+
+    def FigureShown(self, figure, shown):
+        sub = self._figure_subs[figure.GetPath()][0]
+        self._SyncShown()
+        if shown:
+            self.mdi.setActiveSubWindow(sub)
+            self._OnSubWindow()
+
+    def RaiseFigure(self, figure):
+        self._SyncShown()   # Viewer.RaiseFigure shows a hidden figure first
+        sub = self._view_sub if figure is None else self._figure_subs[figure.GetPath()][0]
+        self.mdi.setActiveSubWindow(sub)
+        self._OnSubWindow()
 
     def _Screen(self):
         return self.screen() or QApplication.primaryScreen()
@@ -382,6 +567,26 @@ class MainWindow(QMainWindow, ViewerHost):
                                             '<pre>' + Actions.HelpText(self.viewer) + '</pre>'))
         self._help_menu.addAction(self.Action('help'))
         self._help_menu.addAction(self.Action('about'))
+        self._BuildWindowMenu()
+
+    def _BuildWindowMenu(self):
+        menu = self.Menu('Window')
+        group = QActionGroup(self)
+        self._mode_actions = {}
+        for text, mode in (('Tabs', 'tabs'), ('Windows', 'windows')):
+            act = QAction(text, self, checkable=True)
+            act.triggered.connect(lambda checked=False, m=mode: self.viewer.SetWindowMode(m))
+            group.addAction(act)
+            menu.addAction(act)
+            self._mode_actions[mode] = act
+        self._mode_actions['tabs'].setChecked(True)
+        menu.addSeparator()
+        self._tile_act = menu.addAction('Tile', self.mdi.tileSubWindows)
+        self._cascade_act = menu.addAction('Cascade', self.mdi.cascadeSubWindows)
+        self._tile_act.setEnabled(False)
+        self._cascade_act.setEnabled(False)
+        menu.addSeparator()
+        menu.addAction('3D view', lambda: self.viewer.RaiseFigure(None))
 
     def Menu(self, name):
         """ The menu `name`, created before Help if new. """
@@ -719,6 +924,7 @@ class MainWindow(QMainWindow, ViewerHost):
             self.restoreState(st)
         self.viewer.SetPicking(self._settings.value('picking', True, type=bool))
         self.viewer.SetPrimitiveSelection(self._settings.value('select_primitives', False, type=bool))
+        self.ApplyWindowMode(self.viewer.GetWindowMode())   # part of the view state
         self.RefreshActions()
 
     def closeEvent(self, event):

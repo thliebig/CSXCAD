@@ -46,6 +46,8 @@ Key                        Meaning (default)
                            ``(0.454, 1.333)`` (800 x 600 offscreen)
 ``window_position``        top-left corner of the window in fractions of the available
                            screen area (GUI and VTK window), ``None``
+``window_mode``            GUI: the 3D view and the figures as ``'tabs'`` or as sub-windows
+                           side by side, ``'windows'``; ``'tabs'``
 ``background``             colour, or a pair for a gradient, ``'white'``
 ``camera``                 ``position``, ``focal_point``, ``view_up``, ``view_angle``,
                            ``parallel_scale``, ``parallel_projection``; None fits the view
@@ -79,8 +81,8 @@ Key                        Meaning (default)
 =========================  ===================================================================
 
 Without a display, set ``CSXCAD_VIEWER_OUTPUT=<dir>`` and every ``Show()``
-writes ``<name>_view.png``, ``<name>_views.png`` and ``<name>_describe.json``
-there instead of opening a window. The offscreen backend (EGL, OSMesa or the
+writes ``<name>_view.png``, ``<name>_views.png``, ``<name>_describe.json`` and
+``<name>_<figure>.png`` per shown figure there instead of opening a window. The offscreen backend (EGL, OSMesa or the
 native window system) is chosen automatically; ``CSXCAD_VIEWER_BACKEND``
 overrides it.
 
@@ -89,6 +91,33 @@ Animations (of items, e.g. field results) are rendered with
 animation...*: a GIF (needs Pillow), PNG frames, or a video (``.ogv``,
 ``.mp4``) where the VTK build has the writer; the pip wheels have Ogg Theora
 but no FFMPEG.
+
+Figures
+^^^^^^^
+
+Matplotlib figures (results, e.g.) are shown next to the 3D view with
+:meth:`~CSXCAD.Viewer.Core.Viewer.AddFigure`: in the GUI as further tabs, or
+sub-windows (``window_mode``), each figure's matplotlib toolbar in the main
+toolbar area while it is in front. The tree lists them below *Figures*, with
+a row per curve to show or hide; selecting a row brings its figure to the
+front and draws the selected curves thicker
+(:meth:`~CSXCAD.Viewer.Core.Viewer.HighlightCurves`), selecting the
+structure brings back the 3D view. Closing a figure only
+hides it, the 3D view cannot be closed. The plain VTK window does not show
+figures.
+
+.. code-block:: python
+
+    from matplotlib.figure import Figure
+
+    fig = Figure()
+    ax = fig.add_subplot()
+    ax.plot(f, s11_dB, label='S11')
+    ax.plot(f, s21_dB, label='S21')
+    v = Viewer(CSX)
+    v.AddFigure(fig, 'S-parameters')                       # curves: the labelled lines
+    v.SetVisible('figures/S-parameters/S21', False)
+    v.Show()
 
 Extending
 ^^^^^^^^^
@@ -150,6 +179,9 @@ An application building on the viewer adds these kinds of things:
     :members:
 
 .. autoclass:: CSXCAD.Viewer.Scene.ViewItem
+    :members:
+
+.. autoclass:: CSXCAD.Viewer.Figures.ViewFigure
     :members:
 
 .. automodule:: CSXCAD.Viewer.Actions

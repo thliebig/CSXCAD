@@ -49,6 +49,12 @@ there are unreleased changes. It becomes the next release entry.
   and section-plane controls and an animation bar. `Show(block=False)`
   shares the Qt event loop with matplotlib; importing `CSXCAD.Viewer` before
   the first figure starts Qt on X11 for both.
+- **Figures in the viewer:** `Viewer.AddFigure()` shows matplotlib figures
+  next to the 3D view, in the GUI as tabs or side-by-side sub-windows
+  (`window_mode`), with a tree row per curve to show or hide (a selected
+  curve is drawn thicker, `HighlightCurves()`; mathtext labels such as
+  `$S_{11}$` named in plain text, `S₁₁`); written as images in the output
+  mode.
 
 ### Changed
 

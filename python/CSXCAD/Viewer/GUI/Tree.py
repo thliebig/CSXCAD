@@ -145,6 +145,9 @@ class SceneTree(QTreeWidget):
             it.setText(1, desc or 'item')
             it.setToolTip(1, desc or '')
             it.setForeground(1, QBrush(QColor(128, 128, 128)))
+        elif node['kind'] == 'figure':
+            it.setText(1, 'figure')
+            it.setForeground(1, QBrush(QColor(128, 128, 128)))
         # empty groups are hidden, except Materials
         empty = node['kind'] == 'group' and not node['children']
         it.setHidden(empty and path != 'properties/materials')
@@ -183,13 +186,22 @@ class SceneTree(QTreeWidget):
         v = self.viewer
         if not items:
             v.Highlight(None)
+            v.HighlightCurves([])
             self.win.info.clear()
             return
+        v.HighlightCurves([i.data(0, ROLE_PATH) for i in items if i.data(0, ROLE_KIND) == 'curve'])
         it = self.currentItem() if self.currentItem() in items else items[-1]
         kind = it.data(0, ROLE_KIND)
         path = it.data(0, ROLE_PATH)
         if kind not in ('property', 'primitive'):
             v.Highlight(None)   # an item, group or grid row has no highlight
+        # a figure or curve row brings its figure to the front, any other row the 3D view
+        if kind == 'figure':
+            v.RaiseFigure(path)
+        elif kind == 'curve':
+            v.RaiseFigure(v._scene.tree.Get(path).parent.path)
+        elif not (kind == 'group' and path == 'figures'):
+            v.RaiseFigure(None)
         if kind == 'property':
             names = [i.data(0, ROLE_PATH) for i in items if i.data(0, ROLE_KIND) == 'property']
             v.Highlight([v._scene.Entry(n).name for n in names])

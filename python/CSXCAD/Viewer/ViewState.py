@@ -59,6 +59,7 @@ DEFAULTS = dict(
     # on the reference screen, e.g. offscreen)
     size=(0.454, 1.333),
     window_position=None,
+    window_mode='tabs',
     background='white',
     arc_resolution=32,
     disc_material=True,
@@ -88,6 +89,7 @@ DEFAULTS = dict(
 ACCESSORS = {
     'size': ('SetSize', 'GetViewSize'),
     'window_position': ('SetWindowPosition', 'GetWindowPosition'),
+    'window_mode': ('SetWindowMode', 'GetWindowMode'),
     'background': ('SetBackground', 'GetBackground'),
     'arc_resolution': ('SetArcResolution', 'GetArcResolution'),
     'disc_material': ('SetDiscMaterial', 'GetDiscMaterial'),

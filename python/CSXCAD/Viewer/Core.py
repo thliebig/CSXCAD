@@ -322,6 +322,21 @@ class ViewerHost:
     def AnimationChanged(self):
         """ The animation clock changed (steps, tick, playing). """
 
+    def FigureAdded(self, figure):
+        """ A :class:`~CSXCAD.Viewer.Figures.ViewFigure` was added. """
+
+    def FigureRemoved(self, figure):
+        """ A figure was removed. """
+
+    def FigureShown(self, figure, shown):
+        """ A figure was shown or hidden (its tree node checked). """
+
+    def RaiseFigure(self, figure):
+        """ Bring the figure to the front; None: the 3D view. """
+
+    def ApplyWindowMode(self, mode):
+        """ Arrange the 3D view and the figures, see :meth:`Viewer.SetWindowMode`. """
+
     def Close(self):
         """ Close the window; False lets the viewer stop its interactor. """
         return False
@@ -422,6 +437,8 @@ class Viewer:
         self._looks = {}
         self._pending_visible = {}
         self._pending_items = {}    # {path: {name: value}} for items added later
+        self._figures = {}          # {path: ViewFigure}
+        self._window_mode = 'tabs'
         self._legends = []          # [(item, scalar bar)]
         self._legend_drag = None    # ((item, bar), press position, bar position)
         self._legend_cursor = False
@@ -1982,13 +1999,15 @@ class Viewer:
         return path
 
     def RemoveGroup(self, path, render=True):
-        """ Remove a group and all items in it. """
+        """ Remove a group and all items (and figures) in it. """
         node = self._scene.tree.Get(path)
         if node.kind != 'group' or path in ('properties', 'items') or path.startswith('properties/'):
             raise ValueError('"{}" is no removable group'.format(path))
         for leaf in self._scene.tree.Leaves(node):
             if leaf.kind == 'item':
                 self.RemoveItem(self._scene.items[leaf.path], render=False)
+            elif leaf.kind == 'figure':
+                self.RemoveFigure(self._figures[leaf.path])
         self._scene.tree.Remove(path)
         self._TreeChanged()
         self._Changed(render)
@@ -2017,6 +2036,10 @@ class Viewer:
             return self._scene.Entry(path).IsVisible()
         if node.kind == 'item':
             return self._scene.items[path].GetVisible()
+        if node.kind == 'figure':
+            return self._figures[path].IsShown()
+        if node.kind == 'curve':
+            return self._figures[node.parent.path].GetCurveVisible(node.label)
         if node.kind == 'grid':
             g = self._s['grid']
             if path == 'grid':
@@ -2069,6 +2092,13 @@ class Viewer:
                 if val:
                     self._clock.ItemShown(it)
                 self._CallHook(it.OnVisibilityChanged, val)
+            elif node.kind == 'figure':
+                vf = self._figures[path]
+                if vf._shown != val:
+                    vf._shown = val
+                    self._host.FigureShown(vf, val)
+            elif node.kind == 'curve':
+                self._figures[node.parent.path].SetCurveVisible(node.label, val)
             elif node.kind == 'grid':
                 part = path.split('/')[1] if '/' in path else None
                 if part is None:
@@ -2172,6 +2202,132 @@ class Viewer:
     def GetItems(self):
         """ ``{path: ViewItem}`` of all items. """
         return dict(self._scene.items)
+
+    # ------------------------------------------------------------------
+    # figures
+    def AddFigure(self, figure, name=None, curves=None, shown=True):
+        """ AddFigure(figure, name=None, curves=None, shown=True)
+
+        Show a matplotlib figure next to the 3D view: a tab or window in the
+        GUI, an image in the output mode (``CSXCAD_VIEWER_OUTPUT``). The
+        plain VTK window does not show figures. In the scene tree it is a
+        node below ``figures``, with a child per curve to show or hide. A
+        name already used gets a number, e.g. ``'S11 (2)'``.
+
+        Parameters
+        ----------
+        figure : matplotlib.figure.Figure or ViewFigure
+        name : str, optional
+            Default: the figure's suptitle.
+        curves : dict, optional
+            ``{name: artist or [artists]}``; default: the labelled artists.
+        shown : bool
+
+        Returns
+        -------
+        :class:`~CSXCAD.Viewer.Figures.ViewFigure`
+
+        Examples
+        --------
+        >>> fig, ax = plt.subplots()
+        >>> ax.plot(f, s11_dB, label='S11')
+        >>> viewer.AddFigure(fig, 'S-parameters')
+        >>> viewer.SetVisible('figures/S-parameters/S11', False)
+        """
+        from CSXCAD.Viewer.Figures import ViewFigure
+        vf = figure if isinstance(figure, ViewFigure) else ViewFigure(figure, name, curves)
+        if vf.GetPath() is not None:
+            raise ValueError('figure "{}" was added already'.format(vf.GetName()))
+        base, n = vf.GetName(), 1
+        path = JoinPath('figures', EscapeName(base))
+        while path in self._scene.tree.nodes:
+            n += 1
+            vf._name = '{} ({})'.format(base, n)
+            path = JoinPath('figures', EscapeName(vf.GetName()))
+        if 'figures' not in self._scene.tree.nodes:
+            self._scene.tree.Add('figures', 'Figures', 'group')
+        self._scene.tree.Add(path, vf.GetName(), 'figure')
+        for c in vf.GetCurves():
+            self._scene.tree.Add(JoinPath(path, EscapeName(c)), c, 'curve')
+        vf._path = path
+        vf._shown = bool(shown)
+        self._figures[path] = vf
+        self._host.FigureAdded(vf)
+        self._TreeChanged()
+        return vf
+
+    def RemoveFigure(self, figure):
+        """ Remove a figure (a ViewFigure, its name or tree path). """
+        vf = self._Figure(figure)
+        self._figures.pop(vf.GetPath())
+        self._scene.tree.Remove(vf.GetPath())
+        if not self._figures:
+            self._scene.tree.Remove('figures')
+        self._host.FigureRemoved(vf)
+        vf._path = None
+        self._TreeChanged()
+
+    def SetWindowMode(self, mode, render=True):
+        """ SetWindowMode(mode)
+
+        How the GUI arranges the 3D view and the figures: ``'tabs'`` (each
+        fills the central area, one tab each; the default) or ``'windows'``
+        (sub-windows side by side). Part of the view state; only the GUI
+        uses it.
+        """
+        if mode not in ('tabs', 'windows'):
+            raise ValueError('window mode must be "tabs" or "windows", not {!r}'.format(mode))
+        self._window_mode = mode
+        self._host.ApplyWindowMode(mode)
+
+    def GetWindowMode(self):
+        return self._window_mode
+
+    def GetFigures(self):
+        """ ``{name: ViewFigure}`` of all figures, in order. """
+        return {vf.GetName(): vf for vf in self._figures.values()}
+
+    def RaiseFigure(self, figure):
+        """ RaiseFigure(figure)
+
+        Show the figure (a ViewFigure, its name or tree path) and bring it to
+        the front in the GUI; None brings the 3D view to the front. """
+        if figure is None:
+            self._host.RaiseFigure(None)
+            return
+        vf = self._Figure(figure)
+        if not vf.IsShown():
+            self.SetVisible(vf.GetPath(), True)
+        self._host.RaiseFigure(vf)
+
+    def HighlightCurves(self, paths):
+        """ HighlightCurves(paths)
+
+        Draw the curves with these tree paths (a list, empty: none) with a
+        thicker line; the GUI does so for the curve rows selected in the
+        tree. Like the selection, not part of the view state. """
+        names = {}
+        for path in paths or []:
+            node = self._scene.tree.Get(path)
+            if node.kind != 'curve':
+                raise ValueError('"{}" is not a curve'.format(path))
+            names.setdefault(node.parent.path, []).append(node.label)
+        for fpath, vf in self._figures.items():
+            if names.get(fpath) or vf.GetHighlight():
+                vf.SetHighlight(names.get(fpath, []))
+
+    def _Figure(self, figure):
+        from CSXCAD.Viewer.Figures import ViewFigure
+        if isinstance(figure, ViewFigure):
+            if figure.GetPath() not in self._figures:
+                raise KeyError('figure "{}" is not in this viewer'.format(figure.GetName()))
+            return figure
+        if figure in self._figures:
+            return self._figures[figure]
+        for vf in self._figures.values():
+            if vf.GetName() == figure:
+                return vf
+        raise KeyError('unknown figure "{}"'.format(figure))
 
     def _Item(self, item):
         if isinstance(item, ViewItem):
@@ -2706,7 +2862,8 @@ class Viewer:
 
         Machine-readable summary of the scene: units, bounding box,
         properties, grid statistics, unrendered primitives, the scene tree,
-        camera and size. ``fmt='text'`` gives a compact text version.
+        items, figures, camera and size. ``fmt='text'`` gives a compact text
+        version.
         """
         from CSXCAD.Viewer import Describe
         return Describe.Describe(self, fmt)
@@ -2751,9 +2908,10 @@ class Viewer:
         Notes
         -----
         With the environment variable ``CSXCAD_VIEWER_OUTPUT=<dir>`` no
-        window opens: ``<name>_view.png``, ``<name>_views.png`` and
-        ``<name>_describe.json`` are written to that directory instead,
-        numbered on repeated calls. In Jupyter an image is shown inline.
+        window opens: ``<name>_view.png``, ``<name>_views.png``,
+        ``<name>_describe.json`` and ``<name>_<figure>.png`` per shown
+        figure are written to that directory instead, numbered on repeated
+        calls. In Jupyter an image is shown inline.
         """
         if gui is None:
             gui = self._gui_default
@@ -2788,6 +2946,10 @@ class Viewer:
         base = os.path.join(out, name if n == 1 else '{}_{}'.format(name, n))
         self.Screenshot(base + '_view.png')
         self.RenderViews(base + '_views.png')
+        for vf in self._figures.values():
+            if vf.IsShown():
+                fn = ''.join(c if c.isalnum() or c in '-_' else '_' for c in vf.GetName())
+                vf.GetFigure().savefig('{}_{}.png'.format(base, fn))
         with open(base + '_describe.json', 'w') as f:
             json.dump(self.Describe('dict'), f, indent=1)
         return self.GetState()

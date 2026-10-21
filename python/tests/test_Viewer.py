@@ -78,6 +78,22 @@ def _Interactive(v, size):
     return iren
 
 
+def _Figure():
+    """ S11 and S21 curves (and one without a label) next to a map with a
+    colour bar, and a suptitle. """
+    from matplotlib.figure import Figure
+    fig = Figure()
+    ax1, ax2 = fig.subplots(1, 2)
+    ax1.plot([0, 1], [0, 1], label='S11')
+    ax1.plot([0, 1], [1, 0], label='S21')
+    ax1.plot([0, 1], [0.5, 0.5])          # no label: not a curve
+    ax2.set_title('SAR')
+    m = ax2.pcolormesh(np.ones((3, 4)))
+    fig.colorbar(m, ax=ax2)                # its axes are no curve
+    fig.suptitle('S-parameters')
+    return fig
+
+
 @unittest.skipUnless(HAS_VTK, 'vtk not available')
 class TestViewerGeometry(unittest.TestCase):
 
@@ -891,6 +907,218 @@ class TestViewerOutput(unittest.TestCase):
         self.assertEqual(v.GetCamera(), cam)
         with open(os.path.join(self.dir, 'out', 'demo_2_describe.json')) as f:
             self.assertIn('items/nothing', json.load(f)['items'])
+
+
+class TestViewerFigures(unittest.TestCase):
+
+    def setUp(self):
+        if not HAS_VTK:
+            self.skipTest('vtk not available')
+        try:
+            import matplotlib
+        except ImportError:
+            self.skipTest('matplotlib not available')
+        matplotlib.use('Agg')
+
+    def _Figure(self):
+        return _Figure()
+
+    def test_tree_and_visibility(self):
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), offscreen=True)
+        fig = self._Figure()
+        vf = v.AddFigure(fig)
+        self.assertEqual(vf.GetName(), 'S-parameters')
+        self.assertEqual(vf.GetCurves(), ['S11', 'S21', 'SAR'])
+        node = v.GetTree('figures')
+        self.assertEqual([c['kind'] for c in node['children']], ['figure'])
+        self.assertEqual([c['label'] for c in node['children'][0]['children']], ['S11', 'S21', 'SAR'])
+        self.assertTrue(v.GetVisible('figures/S-parameters'))
+        v.SetVisible('figures/S-parameters/S21', False)
+        self.assertFalse(fig.axes[0].get_lines()[1].get_visible())
+        self.assertFalse(v.GetVisible('figures/S-parameters/S21'))
+        v.SetVisible('figures', False)         # the group hides the figures, not the curves
+        self.assertFalse(vf.IsShown())
+        self.assertTrue(v.GetVisible('figures/S-parameters/S11'))
+        v.RaiseFigure('S-parameters')          # raising shows it again
+        self.assertTrue(vf.IsShown())
+        s11, s21 = fig.axes[0].get_lines()[:2]
+        lw = s11.get_linewidth()
+        sar = vf.GetCurveArtists('SAR')[0]
+        edges = np.array(sar.get_linewidth(), copy=True)
+        v.HighlightCurves(['figures/S-parameters/S11', 'figures/S-parameters/SAR'])
+        self.assertGreater(s11.get_linewidth(), lw)    # thicker
+        np.testing.assert_array_equal(sar.get_linewidth(), edges)   # the map keeps its edges
+        self.assertEqual(vf.GetHighlight(), ['S11', 'SAR'])
+        v.HighlightCurves(['figures/S-parameters/S21'])
+        self.assertEqual((s11.get_linewidth(), vf.GetHighlight()), (lw, ['S21']))
+        v.HighlightCurves([])
+        self.assertEqual(s21.get_linewidth(), lw)
+        with self.assertRaises(ValueError):
+            v.HighlightCurves(['figures/S-parameters'])
+        d = v.Describe()['figures']['figures/S-parameters']
+        self.assertEqual((d['shown'], d['curves']), (True, dict(S11=True, S21=False, SAR=True)))
+        self.assertIn('figures/S-parameters (shown): S11, S21 (hidden), SAR', v.Describe('text'))
+        vf2 = v.AddFigure(self._Figure(), curves={'both': fig.axes[0].get_lines()[:2]})
+        self.assertEqual(vf2.GetName(), 'S-parameters (2)')
+        self.assertEqual(vf2.GetCurves(), ['both'])
+        self.assertEqual(list(v.GetFigures()), ['S-parameters', 'S-parameters (2)'])
+        with self.assertRaises(ValueError):
+            v.AddFigure(vf)
+        v.RemoveFigure(vf)
+        v.RemoveFigure('S-parameters (2)')
+        self.assertNotIn('figures', [n['path'] for n in v.GetTree()])
+
+    def test_remove_figures_group(self):
+        # the figures group takes its figures along (in the GUI: their tabs)
+        from CSXCAD.Viewer import Viewer
+        from CSXCAD.Viewer.Core import ViewerHost
+        removed = []
+
+        class Host(ViewerHost):
+            def FigureRemoved(self, figure):
+                removed.append(figure.GetName())
+
+        v = Viewer(_Structure(), offscreen=True)
+        v.SetHost(Host())
+        vf = v.AddFigure(self._Figure())
+        v.AddFigure(self._Figure(), name='other')
+        v.RemoveGroup('figures')
+        self.assertEqual((v.GetFigures(), removed, vf.GetPath()), ({}, ['S-parameters', 'other'], None))
+        self.assertNotIn('figures', v._scene.tree.nodes)
+        v.AddFigure(vf)   # free to be added again
+
+    def test_plain_label(self):
+        # mathtext labels become plain text for the tree rows
+        from CSXCAD.Viewer import Viewer
+        from CSXCAD.Viewer.Figures import PlainLabel
+        self.assertEqual(PlainLabel(r'$\Re\{Z_{in}\}$'), 'Re(Zᵢₙ)')
+        self.assertEqual(PlainLabel(r'arg $S_{11}$ / $\pi a^2$'), 'arg S₁₁ / πa²')
+        self.assertEqual(PlainLabel(r'$\beta_{MSL}$, $Z_{L, 0}$'), 'β_MSL, Z_(L, 0)')
+        self.assertEqual(PlainLabel(r'cost \$5'), 'cost $5')   # an escaped dollar, no math
+        fig = self._Figure()
+        s11, s21 = fig.axes[0].get_lines()[:2]
+        # two names with the same plain text
+        vf = Viewer(_Structure(), offscreen=True).AddFigure(fig, curves={'$S_{11}$': s11, 'S₁₁': s21})
+        self.assertEqual(vf.GetCurves(), ['S₁₁', 'S₁₁ (2)'])
+        self.assertEqual(vf.GetCurveArtists('S₁₁ (2)'), [s21])
+        s21.set_label('$S11$')   # the same for the labels found in the figure
+        self.assertEqual(Viewer(_Structure(), offscreen=True).AddFigure(fig).GetCurves(),
+                         ['S11', 'S11 (2)', 'SAR'])
+
+    def test_output_mode(self):
+        from CSXCAD.Viewer import Core, Viewer
+        v = Viewer(_Structure(), offscreen=True, name='fig_test')
+        v.AddFigure(self._Figure())
+        hidden = v.AddFigure(self._Figure(), name='hidden', shown=False)
+        self.assertFalse(hidden.IsShown())
+        with tempfile.TemporaryDirectory() as tmp:
+            v._WriteOutput(tmp)
+            self.assertTrue(os.path.exists(os.path.join(tmp, 'fig_test_S-parameters.png')))
+            self.assertFalse(os.path.exists(os.path.join(tmp, 'fig_test_hidden.png')))
+        Core._OUTPUT['counts'].pop('fig_test', None)
+
+    def test_gui(self):
+        # in a subprocess, to use Qt's offscreen platform and a scratch config
+        try:
+            import PySide6  # noqa: F401
+        except ImportError:
+            self.skipTest('PySide6 not available')
+        import subprocess
+        import sys
+        code = """
+import sys
+sys.path.insert(0, {tests!r})
+from test_Viewer import _Structure, _Figure
+import matplotlib
+matplotlib.use('QtAgg')
+from PySide6.QtWidgets import QApplication, QWidget
+app = QApplication([])
+from CSXCAD.Viewer import Viewer
+from CSXCAD.Viewer.GUI.MainWindow import MainWindow
+v = Viewer(_Structure(), offscreen=True)
+early = v.AddFigure(_Figure(), name='early', shown=False)   # before the window
+w = MainWindow(v, render_widget=QWidget())
+w.show()
+w.Start()
+assert early.GetPath() in w._figure_subs and w._figure_subs[early.GetPath()][0].isHidden()
+v.RaiseFigure('early')
+assert w.mdi.currentSubWindow() is w._figure_subs[early.GetPath()][0]
+v.RaiseFigure(None)
+v.RemoveFigure(early)
+vf = v.AddFigure(_Figure())
+app.processEvents()
+subs = w.mdi.subWindowList()
+assert [s.windowTitle() for s in subs] == ['3D view', 'S-parameters'], [s.windowTitle() for s in subs]
+from PySide6.QtCore import Qt
+assert all(s.testAttribute(Qt.WidgetAttribute.WA_NativeWindow) for s in subs)   # see _AddSubWindow
+sub, tb = w._figure_subs[vf.GetPath()]
+assert tb.iconSize() == w.Toolbar('View').iconSize()   # same height as the viewer's toolbars
+assert w.mdi.currentSubWindow() is w._view_sub
+assert not tb.isVisible()                          # the 3D view is in front
+w.tree._items['figures/S-parameters/S21'].setSelected(True)
+app.processEvents()
+assert w.mdi.currentSubWindow() is sub and tb.isVisible()
+s21 = vf.GetCurveArtists('S21')[0]
+assert vf.GetHighlight() == ['S21'] and s21.get_linewidth() > vf.GetCurveArtists('S11')[0].get_linewidth()
+assert w.vtk_widget.isHidden()                     # a native window would paint over the tab
+w.tree.clearSelection()
+assert vf.GetHighlight() == []                     # deselected: back to its width
+w.tree._items['properties/materials/patch'].setSelected(True)
+app.processEvents()
+assert w.mdi.currentSubWindow() is w._view_sub and not tb.isVisible()
+assert not w.vtk_widget.isHidden()
+row = w.tree._items['figures/S-parameters/S11']
+row.setCheckState(0, Qt.CheckState.Unchecked)     # the tree hides a curve
+assert not vf.GetCurveVisible('S11')
+w._view_sub.close()                                # the 3D view cannot be closed
+v.SetWindowMode('windows')
+v.RaiseFigure(vf)
+assert not w.vtk_widget.isHidden()                 # side by side, the 3D view stays
+w._view_sub.close()
+assert not w._view_sub.isHidden() and len(w.mdi.subWindowList()) == 2
+assert not (w._view_sub.windowFlags() & Qt.WindowType.WindowCloseButtonHint)
+sub.close()                                        # a figure closes as hidden
+assert sub.isHidden() and not vf.IsShown()
+v.SetWindowMode('tabs')
+from PySide6.QtWidgets import QTabBar
+tabs = lambda: [w.mdi.findChild(QTabBar).tabText(i) for i in range(w.mdi.findChild(QTabBar).count())]
+assert tabs() == ['3D view'], tabs()               # a hidden figure has no tab (a mode switch rebuilds the bar)
+assert w.mdi.currentSubWindow() is w._view_sub
+v.SetWindowMode('windows')
+assert w.tree._items['figures/S-parameters'].checkState(0) == Qt.CheckState.Unchecked
+v.RaiseFigure(vf)                                  # and comes back
+assert not sub.isHidden() and w.mdi.currentSubWindow() is sub
+v.SetWindowMode('tabs')
+assert tabs() == ['3D view', 'S-parameters'], tabs()
+v.SetVisible(vf.GetPath(), False)                  # hiding the current tab: the 3D view comes to the front
+assert w.mdi.currentSubWindow() is w._view_sub and tabs() == ['3D view'] and not w.vtk_widget.isHidden()
+v.RaiseFigure(vf)
+second = v.AddFigure(_Figure(), name='second')
+v.SetVisible(vf.GetPath(), False)
+assert tabs() == ['3D view', 'second'], tabs()
+w.mdi.setActiveSubWindow(w._figure_subs[second.GetPath()][0])   # a click on another tab
+assert tabs() == ['3D view', 'second'], tabs()
+v.SetVisible(vf.GetPath(), True)                   # back at its place, not at the end
+assert tabs() == ['3D view', 'S-parameters', 'second'], tabs()
+assert [s.windowTitle() for s in w.mdi.subWindowList()] == tabs()   # the area follows the tab order
+assert w.mdi.currentSubWindow() is w._figure_subs[vf.GetPath()][0]
+v.RemoveFigure(second)
+assert w._figure_subs[vf.GetPath()][0].isMaximized()
+v.RemoveFigure(vf)
+assert [s.windowTitle() for s in w.mdi.subWindowList()] == ['3D view']
+w.close()
+assert w.final_state is not None and w.final_state['window_mode'] == 'tabs'
+w2 = MainWindow(Viewer(_Structure(), offscreen=True, window_mode='windows'), render_widget=QWidget())
+assert w2.WindowMode() == 'windows' and w2._mode_actions['windows'].isChecked()   # from the view, not saved
+w2.close()
+print('ok')
+""".format(tests=os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ, QT_QPA_PLATFORM='offscreen', XDG_CONFIG_HOME=tmp)
+            # (a timeout: a modal dialog would wait forever)
+            out = subprocess.run([sys.executable, '-c', code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=env, timeout=300)
+        self.assertEqual(out.stdout.strip(), 'ok', out.stderr)
 
 
 class TestViewerImport(unittest.TestCase):
