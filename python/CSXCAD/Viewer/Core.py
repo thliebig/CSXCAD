@@ -1875,12 +1875,12 @@ class Viewer:
         """ Isolate(names)
 
         Show only the given properties (a name or list), without changing
-        the structure. None shows all again.
+        the structure. ``'type:<type>'`` stands for all properties of a type,
+        e.g. ``'type:Metal'`` (the types are in :meth:`Describe`). None shows
+        all again.
         """
         if names is not None:
-            if isinstance(names, str):
-                names = [names]
-            names = [self._scene.Entry(n).name for n in names]
+            names = [e.name for e in self._scene.Entries(names)]
         self._scene.isolate = None if names is None else list(names)
         self._scene.ApplyAll()
         self._Changed(render)
@@ -2244,6 +2244,41 @@ class Viewer:
         self._TreeChanged()
         self._Changed(render)
         return item
+
+    def AddFile(self, filename, name=None, group=None, unit=None, visible=True, render=True, **settings):
+        """ AddFile(filename, name=None, group=None, unit=None, visible=True, **settings)
+
+        Show a VTK file next to the structure, e.g. the metal edges of
+        openEMS's ``--debug-PEC`` (``PEC_dump.vtp``), as a
+        :class:`~CSXCAD.Viewer.Files.FileItem` below ``files``.
+
+        Parameters
+        ----------
+        filename : str
+            ``.vtp``, ``.vtu``, ``.vtr``, ``.vts``, ``.vti``, ``.vtk`` or
+            ``.vtkhdf``.
+        unit : str or float, optional
+            Length unit of the file: ``'m'``, ``'drawing'`` or metres per
+            unit; default from the file's ``LengthUnit`` field data, else
+            metres.
+        settings
+            Item settings, e.g. ``color='blue'``, ``line_width=3``,
+            ``color_by='direction'``.
+
+        Returns
+        -------
+        FileItem
+
+        Examples
+        --------
+        >>> viewer.AddFile('sim/PEC_dump.vtp', color_by='direction')
+        >>> viewer.Isolate('type:Metal')
+        """
+        from CSXCAD.Viewer.Files import FileItem
+        item = FileItem(filename, name=name, unit=unit)
+        for k, val in settings.items():
+            item.SetParameter(k, val)
+        return self.AddItem(item, group=group, visible=visible, render=render)
 
     def RemoveItem(self, item, render=True):
         """ Remove an item (a ViewItem or its tree path). """

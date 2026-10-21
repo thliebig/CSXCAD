@@ -489,6 +489,7 @@ class MainWindow(QMainWindow, ViewerHost):
         add('save_xml_as', 'Save XML as...', None, self.SaveXMLAs)
         add('save_view', 'Save view...', 'save-view', self.SaveView)
         add('load_view', 'Load view...', 'load-view', self.LoadView)
+        add('add_file', 'Add VTK file...', None, self.AddFileDialog)
         add('copy_view_qt', 'Copy view as Python', 'copy', self.CopyView, 'Ctrl+Shift+C')
         add('screenshot_qt', 'Screenshot...', 'camera', self.ScreenshotDialog, 'Ctrl+P')
         add('views_qt', 'Render all views...', 'views', self.RenderViewsDialog)
@@ -532,7 +533,7 @@ class MainWindow(QMainWindow, ViewerHost):
         mb = self.menuBar()
         m = mb.addMenu('&File')
         for n in ('open', 'reload', 'save_xml', 'save_xml_as', None, 'save_view', 'load_view', 'copy_view_qt', None,
-                  'screenshot_qt', 'views_qt', 'export_animation_qt'):
+                  'add_file', None, 'screenshot_qt', 'views_qt', 'export_animation_qt'):
             m.addSeparator() if n is None else m.addAction(self.Action(n))
         self.recent_menu = m.addMenu('Recent files')
         self.recent_menu.aboutToShow.connect(self._FillRecent)
@@ -746,6 +747,18 @@ class MainWindow(QMainWindow, ViewerHost):
                 self.viewer.LoadState(fn)
             except Exception as err:
                 QMessageBox.critical(self, 'Load view', str(err))
+            self.RefreshAll()
+
+    def AddFileDialog(self):
+        from CSXCAD.Viewer.Files import READERS
+        pattern = ' '.join('*' + e for e in READERS)
+        fn, _ = QFileDialog.getOpenFileName(self, 'Add VTK file', self._LastDir(),
+                                            'VTK files ({});;All files (*)'.format(pattern))
+        if fn:
+            try:
+                self.viewer.AddFile(fn)
+            except Exception as err:
+                QMessageBox.critical(self, 'Add VTK file', str(err))
             self.RefreshAll()
 
     def CopyView(self):

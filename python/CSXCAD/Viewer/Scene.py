@@ -126,6 +126,13 @@ def _Opacity(alpha, cap):
     return o
 
 
+def _Mapper(prop):
+    """ The mapper of a 3D actor, or None (2D actors, volumes without one). """
+    if not isinstance(prop, vtkProp3D) or not hasattr(prop, 'GetMapper'):
+        return None
+    return prop.GetMapper()
+
+
 def _SplitPolyData(pd):
     """ Split into (polys, lines+verts) polydata, sharing points, with cell data. """
     nv, nl, npoly = pd.GetNumberOfVerts(), pd.GetNumberOfLines(), pd.GetNumberOfPolys()
@@ -806,6 +813,9 @@ class ViewItem:
     DEFAULT_GROUP = 'items'
     #: tooltips of the settings by name, for those without a ``help`` key
     HELP = {}
+    #: cut the item's 3D actors by the section plane (``clip``) like the
+    #: properties, for items showing geometry; results stay whole
+    CLIPPED = False
 
     def __init__(self, name, props=(), include_in_bounds=False, exportable=True):
         self._name = name
@@ -1186,9 +1196,25 @@ class Scene:
             name, ', '.join(e.name for e in self.entries) or 'none'))
 
     def Entries(self, names):
+        """ Entries by property names, tree paths or objects, and
+        ``'type:<type>'`` for all properties of a type (e.g.
+        ``'type:Metal'``, the names of ``GetTypeString()``, any case). """
         if isinstance(names, str) or not hasattr(names, '__iter__'):
             names = [names]
-        return [self.Entry(n) for n in names]
+        out = []
+        for n in names:
+            if isinstance(n, str) and n.lower().startswith('type:') and not any(e.name == n for e in self.entries):
+                t = n[5:].strip().lower()
+                found = [e for e in self.entries if e.prop.GetTypeString().lower() == t]
+                if not found:
+                    raise KeyError('no property of type "{}"; the types: {}'.format(n[5:].strip(), ', '.join(
+                        sorted(set(e.prop.GetTypeString() for e in self.entries))) or 'none'))
+                out += [e for e in found if e not in out]
+            else:
+                e = self.Entry(n)
+                if e not in out:
+                    out.append(e)
+        return out
 
     def StructureBounds(self):
         """ Bounds of the visible properties (of all if none is visible), or None. """
@@ -1209,6 +1235,7 @@ class Scene:
         self.clip_state = clip
         mappers = [a.GetMapper() for e in self.entries for a in e.Actors()]
         mappers += [a.GetMapper() for a in (self.highlight_actor, self.highlight_surf) if a is not None]
+        mappers += self._ClippedMappers()
         if self.clip_plane is not None:
             for m in mappers:
                 m.RemoveClippingPlane(self.clip_plane)
@@ -1437,10 +1464,21 @@ class Scene:
         self._leaders.GetMapper().SetInputData(pd)
 
     # -- items
+    def _ClippedMappers(self):
+        """ Mappers of the items cut by the section plane (ViewItem.CLIPPED). """
+        return [m for it in self.items.values() if it.CLIPPED for m in map(_Mapper, it.GetProps()) if m is not None]
+
     def AddItemProp(self, item, prop):
         self.renderer.AddViewProp(prop)
         item._ApplyOpacity(prop)
         prop.SetVisibility(item.GetVisible())
+        m = _Mapper(prop)
+        if item.CLIPPED and m is not None and self.clip_plane is not None:
+            m.AddClippingPlane(self.clip_plane)
 
     def RemoveItemProp(self, prop):
         self.renderer.RemoveViewProp(prop)
+        m = _Mapper(prop)
+        planes = None if m is None else m.GetClippingPlanes()
+        if planes is not None and self.clip_plane is not None and planes.IsItemPresent(self.clip_plane):
+            m.RemoveClippingPlane(self.clip_plane)

@@ -148,7 +148,8 @@ KEY_HELP = {
             'quality_threshold, planes: {"x"|"y"|"z": {visible, index or position}}}',
     'clip': 'section plane {normal: "x"|"y"|"z"|[nx, ny, nz], position, invert}, keeps the side below '
             '(invert: above); null: off',
-    'isolate': 'show only these properties (a name or a list); null: all',
+    'isolate': 'show only these properties (a name or a list); "type:Metal" for all of a type '
+               '(the types are listed by --describe); null: all',
     'highlight': 'outline a property name, [name, primitive number] (0, 1, ... as listed by --describe) '
                  'or a list of them; '
                  '{target: [...], dim_others: true} dims the rest',

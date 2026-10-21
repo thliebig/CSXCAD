@@ -48,6 +48,13 @@ there are unreleased changes. It becomes the next release entry.
   (`--set view=iso --set focus=port`); `--list-view-keys` explains every key
   and `--print-view` prints the resulting view. Wrong keys, values and names
   are reported with the valid ones. AppCSXCAD's options are accepted too.
+- **VTK files in the viewer:** `Viewer.AddFile()`, `csxcad-view --file` and
+  *File → Add VTK file...* show a `.vtp`/`.vtu`/`.vtr`/`.vts`/`.vti`/`.vtk`/
+  `.vtkhdf` file next to the structure, scaled from metres (or the file's
+  `LengthUnit` field data, which the VTP export now writes) into drawing
+  units, coloured solid or by a data array, e.g. openEMS's `PEC_dump.vtp`,
+  and cut by the section plane like the structure (`ViewItem.CLIPPED`).
+  `isolate` (and `focus`) take `'type:Metal'` for all properties of a type.
 - **Viewer GUI** (`pip install CSXCAD[gui]`, needs PySide6): toolbars and
   menus for all viewer actions, a structure tree to show, hide, recolour and
   change the render mode of properties, an info panel, item settings, grid

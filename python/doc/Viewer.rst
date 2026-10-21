@@ -31,9 +31,21 @@ The view comes from a file, from single keys, or both:
     csxcad-view model.xml --png cut.png --set view=+y --set 'clip={"normal": "y", "position": 0}'
     csxcad-view --list-view-keys                       # every view key, its default and values
     csxcad-view model.xml --print-view --set view=+z > view.json   # a view to edit, for --view
+    csxcad-view sim/openEMS_setup.xml --file sim/PEC_dump.vtp --set isolate=type:Metal --png pec.png
 
 ``--set KEY=VALUE`` takes the value as JSON (plain words as text). A wrong
 key, value or property name is reported with the valid ones.
+
+``--file`` (:meth:`~CSXCAD.Viewer.Core.Viewer.AddFile`) shows a VTK file next
+to the structure, as the item ``files/<name>``: ``.vtp``, ``.vtu``, ``.vtr``,
+``.vts``, ``.vti``, legacy ``.vtk`` or ``.vtkhdf``. Its coordinates are in
+metres unless its field data ``LengthUnit`` gives the metres per unit (the
+VTP export writes it). The section plane cuts it like the structure. E.g. the
+metal edges of openEMS's ``--debug-PEC`` (``PEC_dump.vtp``) over the metals,
+``color_by='direction'`` colouring x, y and z edges like the axes::
+
+    v.AddFile('sim/PEC_dump.vtp', color_by='direction')
+    v.Isolate('type:Metal')
 
 The GUI embeds VTK's native X11 window, on Wayland through XWayland. A script
 that shows the GUI after matplotlib figures imports ``CSXCAD.Viewer`` before
@@ -92,7 +104,8 @@ Key                        Meaning (default)
                            ``quality`` (``'ratio'`` or ``'size'``), ``quality_threshold``
 ``clip``                   section plane ``{normal, position, invert}``, ``None``
 ``arc_resolution``         segments of a full circle, ``32``
-``isolate``                only show these properties, ``None``
+``isolate``                only show these properties, ``'type:Metal'`` for all of a type
+                           (``GetTypeString()``, any case), ``None``
 ``highlight``              outline properties or primitives: ``(name, index)`` or
                            ``{prop, primitive}``, the index being the position in
                            ``prop.GetAllPrimitives()`` (stable across sessions, unlike the
@@ -213,6 +226,9 @@ An application building on the viewer adds these kinds of things:
     :members:
 
 .. autoclass:: CSXCAD.Viewer.Figures.ViewFigure
+
+.. automodule:: CSXCAD.Viewer.Files
+    :members: FileItem, ReadFile, FileUnit, LENGTH_UNIT, DIRECTION
     :members:
 
 .. automodule:: CSXCAD.Viewer.Actions

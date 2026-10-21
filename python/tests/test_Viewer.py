@@ -726,6 +726,109 @@ class TestViewerOutput(unittest.TestCase):
         with open(fn, 'rb') as f:
             self.assertIn(b'"ball"', f.read())
 
+    def _EdgeFile(self, name, unit=None):
+        """ An x edge and a y edge as openEMS's PEC dump writes them (metres,
+        cell array direction), optionally with a LengthUnit. """
+        from vtkmodules.vtkCommonCore import vtkPoints, vtkUnsignedCharArray, vtkDoubleArray
+        from vtkmodules.vtkCommonDataModel import vtkCellArray, vtkPolyData
+        from vtkmodules.vtkIOXML import vtkXMLPolyDataWriter
+        s = 1 if unit is None else 1 / unit
+        pts = vtkPoints()
+        for p in ((-0.02, 0, 0.0015), (0.02, 0, 0.0015), (0, -0.02, 0.0015), (0, 0.02, 0.0015)):
+            pts.InsertNextPoint(*(c * s for c in p))
+        lines = vtkCellArray()
+        direction = vtkUnsignedCharArray()
+        direction.SetName('direction')
+        for i in (0, 2):
+            lines.InsertNextCell(2)
+            lines.InsertCellPoint(i)
+            lines.InsertCellPoint(i + 1)
+            direction.InsertNextValue(i // 2)
+        pd = vtkPolyData()
+        pd.SetPoints(pts)
+        pd.SetLines(lines)
+        pd.GetCellData().AddArray(direction)
+        if unit is not None:
+            u = vtkDoubleArray()
+            u.SetName('LengthUnit')
+            u.InsertNextValue(unit)
+            pd.GetFieldData().AddArray(u)
+        fn = os.path.join(self.dir, name)
+        w = vtkXMLPolyDataWriter()
+        w.SetFileName(fn)
+        w.SetInputData(pd)
+        w.Write()
+        return fn
+
+    def test_add_file(self):
+        # a VTK file in drawing units: metres by default, else its LengthUnit
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), offscreen=True, size=(200, 200), view='+z')
+        item = v.AddFile(self._EdgeFile('edges.vtp'), line_width=6)
+        self.assertEqual(item.GetPath(), 'files/edges.vtp')
+        np.testing.assert_allclose(item.GetBounds(), (-20, 20, -20, 20, 1.5, 1.5), atol=1e-6)
+        mm = v.AddFile(self._EdgeFile('mm.vtp', unit=1e-3))
+        np.testing.assert_allclose(mm.GetBounds(), item.GetBounds(), atol=1e-6)
+        raw = v.AddFile(self._EdgeFile('raw.vtp'), unit='drawing')
+        np.testing.assert_allclose(raw.GetBounds(), (-0.02, 0.02, -0.02, 0.02, 0.0015, 0.0015), atol=1e-9)
+        v.RemoveItem(mm)
+        v.RemoveItem(raw)
+        # visible on the sheet they lie on, coloured by direction like the axes
+        v.Isolate('type:metal')
+        self.assertEqual(v.GetIsolate(), ['patch'])
+        v.SetItemParameter('files/edges.vtp', 'color', 'blue')
+        v.SetVisible('files/edges.vtp', False)
+        img = v.Capture().astype(int)
+        rows, cols = np.nonzero((img[..., 0] > 150) & (img[..., 1] < 80) & (img[..., 2] < 80))
+        v.SetVisible('files/edges.vtp', True)
+        img = v.Capture().astype(int)
+        blue = (img[..., 2] > 150) & (img[..., 0] < 80) & (img[..., 1] < 80)
+        on_patch = blue[rows.min() + 5:rows.max() - 5, cols.min() + 5:cols.max() - 5]
+        self.assertGreater(on_patch.sum(), 100)
+        v.SetItemParameter('files/edges.vtp', 'color_by', 'direction')
+        img = v.Capture().astype(int)
+        red = (img[..., 0] > 150) & (img[..., 1] < 80) & (img[..., 2] < 80)
+        green = (img[..., 1] > 150) & (img[..., 0] < 80) & (img[..., 2] < 80)
+        rows, cols = np.nonzero(green)
+        self.assertGreater(green.sum(), 100)        # the y edge: a vertical line
+        self.assertLess(np.ptp(cols), 15)
+        self.assertGreater(np.ptp(rows), 60)
+        self.assertGreater(red.sum(), 100)          # the x edge
+        # cut by the section plane like the structure (results are not)
+        v.SetClip(normal='x', position=-5)
+        img = v.Capture().astype(int)
+        red_cut = (img[..., 0] > 150) & (img[..., 1] < 80) & (img[..., 2] < 80)
+        self.assertGreater(red_cut.sum(), 20)
+        self.assertLess(np.nonzero(red_cut)[1].max(), np.nonzero(red)[1].min() + 0.4 * np.ptp(np.nonzero(red)[1]))
+        green_cut = (img[..., 1] > 150) & (img[..., 0] < 80) & (img[..., 2] < 80)
+        self.assertEqual(green_cut.sum(), 0)        # the y edge at x=0 is cut away
+        v.SetClip(None)
+        self.assertEqual(item.GetValueText(None, None, 1), 'direction y')
+        with self.assertRaisesRegex(ValueError, 'one of solid, direction'):
+            item.SetParameter('color_by', 'speed')
+        d = v.Describe()['items']['files/edges.vtp']
+        self.assertEqual(d['settings']['color_by']['choices'], ['solid', 'direction'])
+        self.assertIn('files/edges.vtp (shown): 2 lines', v.Describe('text'))
+        # mistakes say what is valid
+        with self.assertRaisesRegex(ValueError, 'the extensions: .vtp, .vtu'):
+            v.AddFile(os.path.join(self.dir, 'edges.stl'))
+        with self.assertRaises(FileNotFoundError):
+            v.AddFile(os.path.join(self.dir, 'none.vtp'))
+        with self.assertRaises(KeyError) as cm:
+            v.Isolate('type:Wire')
+        self.assertEqual(cm.exception.args[0],
+                         'no property of type "Wire"; the types: DumpBox, Excitation, Material, Metal')
+
+    def test_vtp_round_trip(self):
+        # an exported property, added back as a file, covers the property
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), offscreen=True)
+        v.Export('vtp', os.path.join(self.dir, 'vtp'))
+        item = v.AddFile(os.path.join(self.dir, 'vtp', 'patch.vtp'))
+        np.testing.assert_allclose(item.GetBounds(), v._scene.Entry('patch').GetBounds(), atol=1e-6)
+        item = v.AddFile(os.path.join(self.dir, 'vtp', 'patch.vtp'), unit='drawing')
+        np.testing.assert_allclose(item.GetBounds()[1], 10e-3, rtol=1e-6)   # the file is in metres
+
     def test_tight_fit(self):
         # the fit follows the geometry, not its bounding box, and keeps the
         # legend column free
@@ -1032,6 +1135,12 @@ class TestViewerOutput(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn('no tree path properties/dump; the paths:', err)
         self.assertIn('properties/dumps', err)
+        # VTK files next to the structure
+        edges = self._EdgeFile('edges.vtp')
+        self.assertIn('files/edges.vtp (shown): 2 lines', run('--file', edges, '--describe')[1])
+        code, _, err = run('--file', os.path.join(self.dir, 'none.vtp'), '--describe')
+        self.assertEqual((code, err.strip()), (1, 'csxcad-view: {}: no such file'.format(
+            os.path.join(self.dir, 'none.vtp'))))
         # the text summary has the tree paths and primitive ids for the view keys
         text = run('--describe')[1]
         self.assertIn('patch [Metal] properties/materials/patch: 2 prim (0 Box, 1 Cylinder)', text)

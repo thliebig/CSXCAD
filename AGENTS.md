@@ -139,6 +139,9 @@ print(v.GetStateAsPython())     # the current view as code to paste into a scrip
   Primitives are numbered by position in their property, not by ID. A wrong
   key, value or name raises an error naming the valid ones: read it, do not
   guess.
+- **Other data next to it**: `--file FILE.vtp` (`Viewer.AddFile()`) shows a
+  VTK file as the item `files/<name>`, e.g. openEMS's `PEC_dump.vtp`;
+  `isolate=type:Metal` shows all properties of a type.
 - **Look at the result**: open the PNG and check that it shows what was asked
   (framing, occlusion: a small part inside another may need `transparency` or
   `isolate`).

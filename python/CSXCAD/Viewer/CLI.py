@@ -43,6 +43,7 @@ examples:
   csxcad-view model.xml --png feed.png --set view=iso --set focus=port --set elevation=20
   csxcad-view model.xml --png cut.png --set view=+y --set 'clip={"normal": "y", "position": 0}'
   csxcad-view model.xml --png patch.png --set 'highlight=["patch"]' --set render_mode=solid+edges
+  csxcad-view sim/openEMS_setup.xml --file sim/PEC_dump.vtp --set isolate=type:Metal --png pec.png
 """
 
 
@@ -78,6 +79,9 @@ def AddViewArguments(p):
                    help='one view state key, after --view (repeatable), e.g. view=+z')
     p.add_argument('--list-view-keys', action='store_true', help='list the view state keys and exit')
     p.add_argument('--print-view', action='store_true', help='print the resulting view state as JSON')
+    p.add_argument('--file', dest='files', action='append', metavar='FILE.vtp',
+                   help='show a VTK file next to the structure (repeatable), e.g. openEMS\'s PEC_dump.vtp; '
+                        'its item path is files/<name>')
     p.add_argument('--size', type=_Size, metavar='WxH', help='render size in pixels')
     p.add_argument('--png', metavar='OUT.png', help='write a screenshot of the view')
     p.add_argument('--views', metavar='OUT.png', help='write a contact sheet of all sides')
@@ -101,6 +105,12 @@ def ViewFromArgs(args):
     if args.size:
         view['size'] = args.size
     return view
+
+
+def AddFiles(v, args):
+    """ Add the files of ``--file`` to the viewer `v`. """
+    for fn in args.files or []:
+        v.AddFile(fn, render=False)
 
 
 def HasOutputs(args):
@@ -207,6 +217,7 @@ def Main(argv=None):
     try:
         with ItemSettings() as wrong:
             v = Viewer(args.file, offscreen=not want_window, **ViewFromArgs(args))
+            AddFiles(v, args)
     except (FileNotFoundError, ValueError, KeyError) as err:
         print('csxcad-view: {}'.format(ErrorText(err)), file=sys.stderr)
         return 1

@@ -76,6 +76,24 @@ def _Scaled(pd, factor):
     return out
 
 
+def _WithLengthUnit(pd, metres):
+    """ A copy of `pd` with the metres per coordinate unit as field data,
+    for :class:`~CSXCAD.Viewer.Files.FileItem` and other readers. """
+    from vtkmodules.vtkCommonCore import vtkDoubleArray
+    from vtkmodules.vtkCommonDataModel import vtkFieldData
+    from CSXCAD.Viewer.Files import LENGTH_UNIT
+    out = vtkPolyData()
+    out.ShallowCopy(pd)
+    fd = vtkFieldData()
+    fd.PassData(pd.GetFieldData())
+    out.SetFieldData(fd)
+    arr = vtkDoubleArray()
+    arr.SetName(LENGTH_UNIT)
+    arr.InsertNextValue(metres)
+    out.GetFieldData().AddArray(arr)
+    return out
+
+
 def _ScaleFactor(viewer, scale):
     if scale in ('m', 'meter', 'metre'):
         return viewer.CSX.GetGrid().GetDeltaUnit()
@@ -150,6 +168,7 @@ def _MeshExport(viewer, path, fmt, merged=False, include_hidden=False, scale='m'
         else:
             w = vtkXMLPolyDataWriter()
             w.SetDataModeToBinary() if binary else w.SetDataModeToAscii()
+            pd = _WithLengthUnit(pd, viewer.CSX.GetGrid().GetDeltaUnit() / factor)
         w.SetFileName(fn)
         w.SetInputData(pd)
         w.Write()
