@@ -102,7 +102,8 @@ def DescribeDict(viewer):
                           settings=_Settings(viewer, it))
                for path, it in sc.items.items()},
         figures={vf.GetPath(): dict(name=vf.GetName(), shown=vf.IsShown(),
-                                    curves={c: vf.GetCurveVisible(c) for c in vf.GetCurves()})
+                                    curves={c: vf.GetCurveVisible(c) for c in vf.GetCurves()},
+                                    settings=_Settings(viewer, vf))
                  for vf in viewer.GetFigures().values()},
         camera=viewer.GetCamera(),
         size=list(viewer.GetSize()),
@@ -164,6 +165,9 @@ def DescribeText(d):
         for path, f in d['figures'].items():
             lines.append('  {} ({}): {}'.format(path, 'shown' if f['shown'] else 'hidden', ', '.join(
                 c if vis else c + ' (hidden)' for c, vis in f['curves'].items())))
+            if f['settings']:
+                lines.append('    settings: ' + ', '.join('{}={}'.format(k, json.dumps(ToJSON(s.get('value'))))
+                                                          for k, s in f['settings'].items()))
     c = d['camera']
     lines.append('camera: position {} focal_point {} view_up {}{}'.format(
         _Fmt(c['position']), _Fmt(c['focal_point']), _Fmt(c['view_up']),

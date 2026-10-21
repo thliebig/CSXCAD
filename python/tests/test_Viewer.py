@@ -1331,6 +1331,7 @@ from PySide6.QtCore import Qt
 assert all(s.testAttribute(Qt.WidgetAttribute.WA_NativeWindow) for s in subs)   # see _AddSubWindow
 sub, tb = w._figure_subs[vf.GetPath()]
 assert tb.iconSize() == w.Toolbar('View').iconSize()   # same height as the viewer's toolbars
+assert 'edit_parameters' not in tb._actions and 'zoom' in tb._actions   # settings go to the Settings dock
 assert w.mdi.currentSubWindow() is w._view_sub
 assert not tb.isVisible()                          # the 3D view is in front
 from CSXCAD.Viewer import ViewItem
@@ -1343,7 +1344,10 @@ w.tree.clearSelection()
 w.tree._items['figures/S-parameters/S21'].setSelected(True)
 app.processEvents()
 assert w.mdi.currentSubWindow() is sub and tb.isVisible()
-assert w.item_editor.item is None                  # not the settings of the earlier row
+assert w.item_editor.item is vf and w.item_editor.sections == ['Curve S21']   # the curve's, not the earlier row's
+from PySide6.QtWidgets import QLineEdit, QComboBox
+w.item_editor._fields['S21/linestyle'][1].setCurrentIndex(1)   # edited in the form
+assert vf.GetCurveArtists('S21')[0].get_linestyle() == '--'
 assert w.info.toPlainText().startswith('S21'), w.info.toPlainText()
 assert not any(t.isVisible() for t in view_tbs)    # nothing for the 3D view behind the tab
 assert not w.dock_grid.isVisible()
@@ -1352,9 +1356,15 @@ assert w.Action('open').isEnabled() and w.Action('clear_selection').isEnabled()
 w.tree.clearSelection()
 w.tree._items['figures/S-parameters'].setSelected(True)
 assert w.info.toPlainText().startswith('S-parameters') and 'S11, S21' in w.info.toPlainText()
+assert w.item_editor.item is vf and 'ylim' in w.item_editor._fields and 'S11/color' not in w.item_editor._fields
+edit = w.item_editor._fields['ylim'][1]
+edit.setText('-2, 3')
+edit.editingFinished.emit()
+assert vf.GetFigure().axes[0].get_ylim() == (-2, 3)
+assert v.GetState()['items']['figures/S-parameters']['ylim'] == [-2, 3]   # in the view state
 w.tree.clearSelection()
 w.tree._items['figures'].setSelected(True)         # a group: no info of the earlier row
-assert w.info.toPlainText() == ''
+assert w.info.toPlainText() == '' and w.item_editor.item is None
 w.tree.clearSelection()
 w.tree._items['figures/S-parameters/S21'].setSelected(True)
 s21 = vf.GetCurveArtists('S21')[0]
@@ -1372,7 +1382,7 @@ w.tree._items['results/field'].setSelected(True)
 w.mdi.setActiveSubWindow(sub)                      # a click on the figure's tab
 app.processEvents()
 assert [i.data(0, Qt.ItemDataRole.UserRole) for i in w.tree.selectedItems()] == ['figures/S-parameters']
-assert w.item_editor.item is None and w.info.toPlainText().startswith('S-parameters')
+assert w.item_editor.item is vf and w.info.toPlainText().startswith('S-parameters')
 w.mdi.setActiveSubWindow(w._view_sub)              # and on the 3D view's: no figure row stays
 app.processEvents()
 assert w.tree.selectedItems() == [] and w.info.toPlainText() == ''

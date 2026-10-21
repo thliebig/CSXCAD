@@ -291,6 +291,7 @@ class ItemEditor(QWidget):
         super().__init__(win)
         self.win = win
         self.item = None
+        self.sections = None      # only the settings of these sections (None: all)
         self._fields = {}
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -304,7 +305,8 @@ class ItemEditor(QWidget):
         self._Hint('Select an item to change its settings.')
 
     def _Params(self):
-        return [p for p in self.win.viewer.GetItemParameters(self.item) if p.get('form', True)]
+        return [p for p in self.win.viewer.GetItemParameters(self.item) if p.get('form', True)
+                and (self.sections is None or p.get('section') in self.sections)]
 
     def _Hint(self, text):
         hint = QLabel(text)
@@ -314,13 +316,15 @@ class ItemEditor(QWidget):
         self._box = hint
         self._scroll.setWidget(hint)
 
-    def SetItem(self, item):
-        """ Show the settings of `item` (None clears). """
+    def SetItem(self, item, sections=None):
+        """ Show the settings of `item` (an item or a figure; None clears),
+        only those of `sections` if given (e.g. of one curve). """
         if self._box is not None:
             self._scroll.takeWidget()
             self._box.deleteLater()
             self._box = None
         self.item = item
+        self.sections = None if sections is None else list(sections)
         self._fields = {}
         if item is None:
             self._Hint('Select an item to change its settings.')
@@ -334,7 +338,10 @@ class ItemEditor(QWidget):
         if not params and custom is None:
             self._Hint('{} has no settings.'.format(item.GetName()))
             return
-        self._box = QGroupBox(item.GetName())
+        title = item.GetName()
+        if self.sections is not None and len(self.sections) == 1:
+            title = self.sections[0]   # e.g. one curve of a figure
+        self._box = QGroupBox(title)
         lay = QVBoxLayout(self._box)
         if params:
             form = QFormLayout()
@@ -421,7 +428,9 @@ class ItemEditor(QWidget):
         except Exception as err:
             self.win.statusBar().showMessage('{}: {}'.format(name, err), 5000)
         self.Sync()
-        self.win.info.ShowItem(item)
+        from CSXCAD.Viewer.Figures import ViewFigure
+        if not isinstance(item, ViewFigure):   # a figure's info has none of its settings
+            self.win.info.ShowItem(item)
 
     def Sync(self):
         """ Re-read the values from the item (a setting may change others);
@@ -433,7 +442,7 @@ class ItemEditor(QWidget):
         except Exception:
             return
         if list(params) != list(self._fields):
-            self.SetItem(self.item)
+            self.SetItem(self.item, self.sections)
             return
         for name, (p, w) in self._fields.items():
             if name not in params:

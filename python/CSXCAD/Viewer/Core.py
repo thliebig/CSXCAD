@@ -897,7 +897,7 @@ class Viewer:
                                 if n.kind in ('part', 'figure', 'curve')})
             elif key == 'items':
                 st[key] = {p: dict(v) for p, v in self._pending_items.items()}
-                for p, it in self._scene.items.items():
+                for p, it in list(self._scene.items.items()) + list(self._figures.items()):
                     st[key][p] = {q['name']: q['value'] for q in self.GetItemParameters(it)
                                   if q.get('state', True)}
             elif key in ViewState.CAMERA_STEPS:
@@ -933,8 +933,8 @@ class Viewer:
                             self._pending_visible[path] = bool(v)
                 elif key == 'items':
                     for path, params in (val or {}).items():
-                        if path in self._scene.items:
-                            self._ApplyItemParameters(self._scene.items[path], params)
+                        if path in self._scene.items or path in self._figures:
+                            self._ApplyItemParameters(self._Item(path), params)
                         else:
                             # an item added later picks them up, see AddItem
                             self._pending_items.setdefault(path, {}).update(params)
@@ -1018,7 +1018,7 @@ class Viewer:
     def _ItemsDiff(self, items):
         out = {}
         for path, params in items.items():
-            item = self._scene.items.get(path)
+            item = self._scene.items.get(path) or self._figures.get(path)
             defaults = {} if item is None else {q['name']: q['default'] for q in self.GetItemParameters(item)
                                                  if 'default' in q}
             diff = {k: v for k, v in params.items()
@@ -2359,6 +2359,9 @@ class Viewer:
             if pending is not None:
                 vf.SetCurveVisible(c, pending)
         self._figures[path] = vf
+        pending = self._pending_items.pop(path, None)
+        if pending:
+            self._ApplyItemParameters(vf, pending)
         self._host.FigureAdded(vf)
         self._TreeChanged()
         return vf
@@ -2447,8 +2450,12 @@ class Viewer:
         raise KeyError('unknown figure "{}"'.format(figure))
 
     def _Item(self, item):
-        if isinstance(item, ViewItem):
+        """ A ViewItem or ViewFigure, or the one at a tree path. """
+        from CSXCAD.Viewer.Figures import ViewFigure
+        if isinstance(item, (ViewItem, ViewFigure)):
             return item
+        if item in self._figures:
+            return self._figures[item]
         if item not in self._scene.items:
             raise KeyError('unknown item path "{}"'.format(item))
         return self._scene.items[item]
@@ -2459,9 +2466,13 @@ class Viewer:
         Settings of an item (a ViewItem or its tree path): its
         :meth:`ViewItem.GetParameters` plus the generic ``opacity``, with
         ``help`` texts from :attr:`ViewItem.HELP` where a setting has none.
+        A figure (a ViewFigure or its tree path) has its
+        :meth:`~CSXCAD.Viewer.Figures.ViewFigure.GetParameters`.
         """
         item = self._Item(item)
         params = [dict(p) for p in item.GetParameters() or []]
+        if not isinstance(item, ViewItem):   # a figure
+            return params
         if not any(p['name'] == 'opacity' for p in params):
             params.append(dict(name='opacity', type='float', value=item.GetOpacity(), min=0.0, max=1.0,
                                step=0.05, default=1.0, section='Display',
@@ -2474,15 +2485,20 @@ class Viewer:
     def SetItemParameter(self, item, name, value, render=True):
         """ SetItemParameter(item, name, value)
 
-        Change a setting of an item (a ViewItem or its tree path), see
-        :meth:`GetItemParameters`. A ``'slider'`` value is snapped to the
-        nearest of its values.
+        Change a setting of an item or a figure (a ViewItem, ViewFigure or
+        its tree path), see :meth:`GetItemParameters`. A ``'slider'`` value
+        is snapped to the nearest of its values.
 
         Examples
         --------
         >>> viewer.SetItemParameter('results/fields/Et', 'opacity', 0.5)
+        >>> viewer.SetItemParameter('figures/S-Parameter', 'ylim', [-40, 0])
         """
         item = self._Item(item)
+        if not isinstance(item, ViewItem):   # a figure: drawn by matplotlib
+            item.SetParameter(name, value)
+            self._TreeChanged()
+            return
         own = list(item.GetParameters() or [])
         p = next((q for q in own if q['name'] == name), None)
         if p is not None and p.get('type') == 'slider' and len(p.get('values', ())):

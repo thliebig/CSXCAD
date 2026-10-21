@@ -171,9 +171,10 @@ def UnknownPaths(v, view):
     bad = [p for p in (view.get('visible') or {}) if p not in paths]
     if bad:
         out.append('no tree path {}; the paths: {}'.format(', '.join(bad), ', '.join(sorted(paths))))
-    bad = [p for p in (view.get('items') or {}) if p not in v.GetItems()]
+    have = list(v.GetItems()) + list(v._figures)
+    bad = [p for p in (view.get('items') or {}) if p not in have]
     if bad:
-        out.append('no item {}; the items: {}'.format(', '.join(bad), ', '.join(v.GetItems()) or 'none'))
+        out.append('no item or figure {}; the items and figures: {}'.format(', '.join(bad), ', '.join(have) or 'none'))
     return out
 
 

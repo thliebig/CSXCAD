@@ -65,7 +65,10 @@ there are unreleased changes. It becomes the next release entry.
   next to the 3D view, in the GUI as tabs or side-by-side sub-windows
   (`window_mode`), with a tree row per curve to show or hide (a selected
   curve is drawn thicker, `HighlightCurves()`; mathtext labels such as
-  `$S_{11}$` named in plain text, `S₁₁`). A figure tab in front hides the
+  `$S_{11}$` named in plain text, `S₁₁`), and settings like an item: title,
+  axis labels, ranges, scales, grid, legend and each curve's label, colour
+  and line, edited in the GUI's Settings dock, set with `SetItemParameter()`
+  and kept in the view state (`items`). A figure tab in front hides the
   toolbars and the grid dock of the 3D view and disables its actions. Figures are written as
   images in the output mode.
 

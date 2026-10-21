@@ -118,11 +118,11 @@ class InfoPanel(QTextBrowser):
         self.win = win
         self.setOpenLinks(False)
 
-    def _Show(self, title, rows, item=None):
+    def _Show(self, title, rows, item=None, sections=None):
         self.setHtml('<h3>{}</h3><table cellspacing="2">{}</table>'.format(html.escape(title), ''.join(rows)))
         editor = getattr(self.win, 'item_editor', None)
-        if editor is not None and editor.item is not item:
-            editor.SetItem(item)
+        if editor is not None and (editor.item is not item or editor.sections != sections):
+            editor.SetItem(item, sections)
 
     def clear(self):
         super().clear()
@@ -223,13 +223,14 @@ class InfoPanel(QTextBrowser):
         self._Show('Grid', rows)
 
     def ShowFigure(self, figure, curve=None):
-        """ Info of a figure (a ViewFigure), or of its curve `curve`; a
-        figure has no settings. """
+        """ Info of a figure (a ViewFigure), or of its curve `curve`;
+        the Settings dock gets those of the figure and its axes, or of the
+        curve. """
         curves = figure.GetCurves()
         if curve is not None:
             rows = [_Row('Figure', figure.GetName()), _Row('Visible', figure.GetCurveVisible(curve)),
                     _Row('Artists', len(figure.GetCurveArtists(curve)))]
-            self._Show(curve, rows)
+            self._Show(curve, rows, figure, ['Curve ' + curve])
             return
         hidden = [c for c in curves if not figure.GetCurveVisible(c)]
         rows = [_Row('Path', figure.GetPath()), _Row('Shown', figure.IsShown()),
@@ -237,7 +238,9 @@ class InfoPanel(QTextBrowser):
                 _Row('Curves', ', '.join(curves) or '-')]
         if hidden:
             rows.append(_Row('Hidden', ', '.join(hidden)))
-        self._Show(figure.GetName(), rows)
+        own = [p.get('section') for p in figure.GetParameters()]
+        self._Show(figure.GetName(), rows, figure,
+                   [s for n, s in enumerate(own) if not s.startswith('Curve ') and s not in own[:n]])
 
     def ShowItem(self, item):
         """ Info of a ViewItem; its settings go to the Settings dock. """

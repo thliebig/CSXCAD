@@ -155,8 +155,8 @@ KEY_HELP = {
                  '{target: [...], dim_others: true} dims the rest',
     'visible': '{tree path: true|false}, e.g. {"properties/dumps": false, "grid": false}; '
                'the paths are listed by --describe',
-    'items': '{item path: {setting: value}}: settings of items such as field planes, '
-             'see Viewer.GetItemParameters()',
+    'items': '{item or figure path: {setting: value}}: settings of items such as field planes, '
+             'and of figures (title, axis labels and ranges, curves), see Viewer.GetItemParameters()',
     'legends': '{item path: [x, y]}: colour legends moved out of the automatic layout',
     'view': 'look from "+x", "-x", "+y", "-y", "+z", "-z" ("xy" = "+z", "yz" = "+x", "xz" = "-y"), '
             '"iso" (= "iso_z"), "iso_x" or "iso_y" (the axis pointing up), fitted',

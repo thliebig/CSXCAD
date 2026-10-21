@@ -67,6 +67,23 @@ def Icon(name, widget=None):
     return icon
 
 
+_FIGURE_TOOLBAR = None
+
+
+def _FigureToolbar():
+    """ Matplotlib's toolbar without its "Customize" dialog: a figure's
+    settings are edited in the Settings dock, where they reach the view
+    state and the figure's description (the dialog would bypass both). """
+    global _FIGURE_TOOLBAR
+    if _FIGURE_TOOLBAR is None:
+        from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
+
+        class FigureToolbar(NavigationToolbar2QT):
+            toolitems = [t for t in NavigationToolbar2QT.toolitems if t[0] != 'Customize']
+        _FIGURE_TOOLBAR = FigureToolbar
+    return _FIGURE_TOOLBAR
+
+
 def _RenderWidgetClass():
     import vtkmodules.qt
     vtkmodules.qt.PyQtImpl = 'PySide6'
@@ -388,7 +405,7 @@ class MainWindow(QMainWindow, ViewerHost):
         return a.group in self.VIEW_GROUPS and name != 'clear_selection'   # Esc also clears the tree
 
     def FigureAdded(self, figure):
-        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
+        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
         fig = figure.GetFigure()
         if getattr(fig.canvas, 'manager', None) is not None:
             import matplotlib.pyplot as plt
@@ -399,7 +416,7 @@ class MainWindow(QMainWindow, ViewerHost):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(canvas)
         w.setWindowTitle(figure.GetName())
-        tb = NavigationToolbar2QT(canvas, self)
+        tb = _FigureToolbar()(canvas, self)
         tb.setObjectName('figure_toolbar_' + figure.GetPath())
         tb.setWindowTitle(figure.GetName() + ' figure')
         tb.toggleViewAction().setVisible(False)   # not in the toolbar menu

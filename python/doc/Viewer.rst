@@ -151,6 +151,17 @@ structure brings back the 3D view. Closing a figure only
 hides it, the 3D view cannot be closed. The plain VTK window does not show
 figures.
 
+A figure has settings like an item
+(:meth:`~CSXCAD.Viewer.Figures.ViewFigure.GetParameters`): its title, per
+axes the title, labels, ranges, scales, grid and legend, per curve its
+label, colour, line style and width (a map: colour map and range). The
+Settings dock shows those of the figure and its axes for a figure row, those
+of the curve for a curve row; scripts use
+:meth:`~CSXCAD.Viewer.Core.Viewer.SetItemParameter` on the figure's tree
+path, and the view state stores them under ``items``, as for items. A figure
+made by a program from a description of its own (openEMS's ``Results``)
+changes that and draws it anew.
+
 .. code-block:: python
 
     from matplotlib.figure import Figure
