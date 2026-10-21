@@ -62,9 +62,8 @@ CSProperties::CSProperties(ParameterSet* paraSet)
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
 	FillColor.B=(rand()%256);
-	EdgeColor.R=FillColor.R;
-	EdgeColor.G=FillColor.G;
-	EdgeColor.B=FillColor.B;
+	// black edges stand out against any fill colour
+	EdgeColor.R=EdgeColor.G=EdgeColor.B=0;
 	FillColor.a=EdgeColor.a=255;
 	bVisible=true;
 	Type=ANY;
@@ -79,9 +78,8 @@ CSProperties::CSProperties(unsigned int ID, ParameterSet* paraSet)
 	FillColor.R=(rand()%256);
 	FillColor.G=(rand()%256);
 	FillColor.B=(rand()%256);
-	EdgeColor.R=FillColor.R;
-	EdgeColor.G=FillColor.G;
-	EdgeColor.B=FillColor.B;
+	// black edges stand out against any fill colour
+	EdgeColor.R=EdgeColor.G=EdgeColor.B=0;
 	FillColor.a=EdgeColor.a=255;
 	bVisible=true;
 	Type=ANY;

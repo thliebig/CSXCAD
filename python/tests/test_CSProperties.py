@@ -132,6 +132,7 @@ class Test_CSPrimMethods(unittest.TestCase):
 
     def test_colors(self):
         prop = CSProperties.CSPropMaterial(self.pset)
+        self.assertEqual(prop.GetEdgeColor()[:3], (0,0,0))   # default
         prop.SetColor('red')
         self.assertEqual(prop.GetFillColor(), (255,0,0,255))
         self.assertEqual(prop.GetEdgeColor(), (255,0,0,255))
