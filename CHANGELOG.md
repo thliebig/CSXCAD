@@ -33,16 +33,21 @@ there are unreleased changes. It becomes the next release entry.
   `vtk`): `Show(CSX, **view)` renders a structure on screen or off screen, and
   the whole view is a dict of keyword arguments that a script can bake in.
   Screenshots, a contact sheet of all sides (`RenderViews()`) and a
-  machine-readable summary (`Describe()`) work without a display. Render
+  machine-readable summary (`Describe()`) work without a display. Views are
+  named directions turned by `azimuth` and `elevation` and fitted on all
+  that is shown (as cut by the section plane) or on a `focus`. Render
   modes with feature edges, mesh-grid planes, outline and quality overlay,
   section plane, highlight, isolate and picking; a scene tree with groups,
   and `ViewItem`s for external content, with settings kept in the view
   state, parts shown and hidden on their own (`GetParts()`), movable colour legends, values under the mouse and an animation
   clock, exported as GIF, video or PNG frames; export to STL/PLY/VTP,
   glTF/GLB and SVG/PDF.
-- **`csxcad-view`** opens a structure file,
+- **`csxcad-view`** (also `python -m CSXCAD.Viewer`) opens a structure file,
   or writes `--png`, `--views`, `--export` and `--describe` outputs without a
-  window. AppCSXCAD's options are accepted too.
+  window. The view comes from a file (`--view`) or single keys
+  (`--set view=iso --set focus=port`); `--list-view-keys` explains every key
+  and `--print-view` prints the resulting view. Wrong keys, values and names
+  are reported with the valid ones. AppCSXCAD's options are accepted too.
 - **Viewer GUI** (`pip install CSXCAD[gui]`, needs PySide6): toolbars and
   menus for all viewer actions, a structure tree to show, hide, recolour and
   change the render mode of properties, an info panel, item settings, grid

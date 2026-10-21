@@ -76,6 +76,12 @@ VTK_CURSOR_DEFAULT = 0
 VTK_CURSOR_SIZEALL = 8
 
 
+class ItemSettingWarning(UserWarning):
+    """ A setting of a view state could not be given to its item (a wrong
+    name or value). The view still opens; ``csxcad-view`` and
+    ``openems-view`` stop with an error instead. """
+
+
 ###############################################################################
 # offscreen backend selection
 
@@ -888,14 +894,14 @@ class Viewer:
                 st[key] = dict(self._pending_visible)
                 st[key].update({p: it.GetVisible() for p, it in self._scene.items.items()})
                 st[key].update({n.path: self.GetVisible(n.path) for n in self._scene.tree.nodes.values()
-                                if n.kind == 'part'})
+                                if n.kind in ('part', 'figure', 'curve')})
             elif key == 'items':
                 st[key] = {p: dict(v) for p, v in self._pending_items.items()}
                 for p, it in self._scene.items.items():
                     st[key][p] = {q['name']: q['value'] for q in self.GetItemParameters(it)
                                   if q.get('state', True)}
-            elif key == 'view':
-                st[key] = None
+            elif key in ViewState.CAMERA_STEPS:
+                st[key] = None   # applied once, kept as `camera`
             else:
                 st[key] = getattr(self, getter)()
         return ViewState.ToJSON(st)
@@ -915,7 +921,10 @@ class Viewer:
                     continue
                 val = st[key]
                 setter = ViewState.ACCESSORS[key][0]
-                if key == 'visible':
+                if key in ViewState.CAMERA_STEPS:
+                    if key == next(k for k in ViewState.CAMERA_STEPS if k in st):
+                        self._CameraSteps(**{k: st.get(k) for k in ViewState.CAMERA_STEPS})
+                elif key == 'visible':
                     for path, v in (val or {}).items():
                         if path in self._scene.tree.nodes:
                             self.SetVisible(path, v, render=False)
@@ -934,6 +943,23 @@ class Viewer:
                 else:
                     getattr(self, setter)(val, render=False)
             self._dirty = True
+
+    def _CameraSteps(self, view=None, azimuth=None, elevation=None, focus=None):
+        """ The camera keys of a view state, see ViewState.CAMERA_STEPS: the
+        direction, the turns, then the fit on `focus` or on everything. """
+        if all(v is None for v in (view, azimuth, elevation, focus)):
+            return
+        if view is not None:
+            self.SetView(view, render=False, fit=False)
+        if azimuth:
+            self.Azimuth(float(azimuth), render=False)
+        if elevation:
+            self.Elevation(float(elevation), render=False)
+        if focus is not None:
+            self.Focus(_Target(focus), render=False)
+        else:
+            self.Fit(render=False)
+            self._auto_fit = True   # as SetView: new items are fitted in too
 
     def SaveState(self, filename):
         """ Save the view state as JSON. """
@@ -956,7 +982,7 @@ class Viewer:
         st = self.GetState()
         lines = ['view = dict(']
         for key, default in ViewState.DEFAULTS.items():
-            if key in ('version', 'view'):
+            if key == 'version' or key in ViewState.CAMERA_STEPS:
                 continue
             val = st[key]
             if key not in ('size', 'camera') and ViewState.ToJSON(default) == val:
@@ -1471,7 +1497,8 @@ class Viewer:
 
     def _FitPoints(self):
         """ Points of the visible content (structure, items counted for the
-        bounds, grid outline) for a tight fit, or None. """
+        bounds, grid outline) for a tight fit, or None. The structure counts
+        as cut by the section plane, as it is shown. """
         sc = self._scene
         entries = [e for e in sc.entries if e.IsVisible()]
         items = [it for it in sc.items.values() if it.GetVisible() and it.IsIncludedInBounds()]
@@ -1481,7 +1508,7 @@ class Viewer:
         for e in entries:
             for pd in (e.raw, e.disc_pd):
                 if pd is not None and pd.GetNumberOfPoints():
-                    parts.append(vtk_to_numpy(pd.GetPoints().GetData()))
+                    parts.append(self._ClippedPoints(pd))
         for it in items:
             for a in it.GetProps():
                 if not isinstance(a, vtkActor) or not a.GetVisibility() or a.GetMapper() is None:
@@ -1507,6 +1534,21 @@ class Viewer:
             pts = pts[::len(pts) // 2000000 + 1]
         return pts if len(pts) else None
 
+    def _ClippedPoints(self, pd):
+        """ The points of `pd`, cut by the section plane (with the new ones
+        along the cut). """
+        plane = self._scene.clip_plane
+        if plane is not None:
+            from vtkmodules.vtkFiltersCore import vtkClipPolyData
+            clip = vtkClipPolyData()
+            clip.SetInputData(pd)
+            clip.SetClipFunction(plane)
+            clip.Update()
+            pd = clip.GetOutput()
+            if not pd.GetNumberOfPoints():
+                return np.zeros((0, 3))
+        return vtk_to_numpy(pd.GetPoints().GetData())
+
     def Reset(self, render=True):
         """ Reset to the isometric view, fitted. """
         if self._s['mode_2d']:
@@ -1522,15 +1564,24 @@ class Viewer:
         Parameters
         ----------
         target : str, list, tuple
-            A property name, a list of names, ``(name, primitive_id)`` or a
-            bounding box ``(xmin, xmax, ymin, ymax, zmin, zmax)``.
+            A property name, a list of names, ``(name, index)`` of a
+            primitive (its position in ``prop.GetAllPrimitives()``) or a
+            bounding box ``(xmin, xmax, ymin, ymax, zmin, zmax)``. A small
+            target (e.g. a lumped port, a line) is shown with at least a
+            tenth of the structure's size around it.
         view : str, optional
             Named view direction to use (see :meth:`SetView`).
         """
         self._auto_fit = False
         if view is not None:
             self.SetView(view, render=False, fit=False)
-        self.Fit(margin=margin, bounds=self._TargetBounds(target), render=render)
+        b = np.asarray(self._TargetBounds(target), float).reshape(3, 2)
+        sb = self.GetStructureBounds()
+        if sb is not None:
+            least = 0.1 * float(np.ptp(np.reshape(sb, (3, 2)), axis=1).max())
+            grow = np.maximum(least - (b[:, 1] - b[:, 0]), 0) / 2
+            b += np.stack([-grow, grow], axis=1)
+        self.Fit(margin=margin, bounds=tuple(b.ravel()), render=render)
 
     def _TargetBounds(self, target):
         if isinstance(target, (list, tuple, np.ndarray)) and len(target) == 6 and all(
@@ -1538,9 +1589,10 @@ class Viewer:
             return tuple(float(v) for v in target)
         if isinstance(target, tuple) and len(target) == 2 and isinstance(target[1], (int, np.integer)):
             e = self._scene.Entry(target[0])
+            e._CheckIndex(int(target[1]))
             pd, cells = e.CellsOf(int(target[1]))
             if pd is None or len(cells) == 0:
-                raise KeyError('no primitive {} in "{}"'.format(target[1], target[0]))
+                raise KeyError('primitive {} of "{}" is not rendered'.format(target[1], e.name))
             from CSXCAD.Viewer.Scene import ExtractCells
             return ExtractCells(pd, cells).GetBounds()
         bounds = UnionBounds(e.GetBounds() for e in self._scene.Entries(target))
@@ -1844,9 +1896,10 @@ class Viewer:
         Parameters
         ----------
         target : str, dict, tuple, list or None
-            A property name, ``(name, primitive_id)``, a dict
-            ``{'prop': name, 'primitive': id}``, or a list of these. None
-            clears the highlight.
+            A property name, ``(name, index)`` of a primitive (its position
+            in ``prop.GetAllPrimitives()``, stable across sessions unlike
+            its ID), a dict ``{'prop': name, 'primitive': index}``, or a
+            list of these. None clears the highlight.
         dim_others : bool
             Draw everything else nearly transparent.
         """
@@ -1855,16 +1908,19 @@ class Viewer:
             target = target['target']
         targets = []
         if target is not None:
-            if isinstance(target, (str, dict)) or (isinstance(target, tuple) and len(target) == 2
+            # one target: a name, a dict or (name, primitive id), also as a JSON list
+            if isinstance(target, (str, dict)) or (isinstance(target, (tuple, list)) and len(target) == 2
+                                                   and isinstance(target[0], str)
                                                    and isinstance(target[1], (int, np.integer))):
                 target = [target]
             for t in target:
                 if isinstance(t, dict):
-                    targets.append((self._scene.Entry(t['prop']).name, t.get('primitive')))
-                elif isinstance(t, (tuple, list)):
-                    targets.append((self._scene.Entry(t[0]).name, int(t[1])))
-                else:
-                    targets.append((self._scene.Entry(t).name, None))
+                    t = (t['prop'], t.get('primitive'))
+                elif not isinstance(t, (tuple, list)):
+                    t = (t, None)
+                e = self._scene.Entry(t[0])
+                index = None if t[1] is None else e._CheckIndex(int(t[1]))
+                targets.append((e.name, index))
         self._scene.highlight = targets
         self._scene.dim_others = bool(dim_others) and bool(targets)
         self._scene.ApplyAll()
@@ -1874,7 +1930,7 @@ class Viewer:
         t = self._scene.highlight
         if not t:
             return None
-        lst = [n if pid is None else dict(prop=n, primitive=pid) for n, pid in t]
+        lst = [n if index is None else dict(prop=n, primitive=index) for n, index in t]
         if self._scene.dim_others:
             return dict(target=lst, dim_others=True)
         return lst
@@ -1899,7 +1955,7 @@ class Viewer:
         not part of the view state.
         """
         self._select_primitives = bool(val)
-        if not val and any(pid is not None for _, pid in self._scene.highlight):
+        if not val and any(index is not None for _, index in self._scene.highlight):
             names = list(dict.fromkeys(n for n, _ in self._scene.highlight))
             self.Highlight(names, dim_others=self._scene.dim_others)
         self._TreeChanged()
@@ -1911,7 +1967,9 @@ class Viewer:
         """ Pick(x, y)
 
         The nearest object at display position (x, y), as dict ``{prop,
-        primitive_id, primitive, world_pos}`` for the structure, ``{item,
+        primitive_index, primitive_id, primitive, world_pos}`` for the
+        structure (the primitive's position in its property, its ID and
+        the primitive itself), ``{item,
         world_pos}`` (the item's path) for a shown item, or None.
         """
         picker = vtkCellPicker()
@@ -1947,7 +2005,8 @@ class Viewer:
         pid = int(data.GetCellData().GetArray('primitive_id').GetValue(cid))
         pidx = int(data.GetCellData().GetArray('primitive_index').GetValue(cid))
         prim = e.prop.GetPrimitive(pidx) if pidx >= 0 else None
-        return dict(prop=e.name, primitive_id=pid, primitive=prim, world_pos=tuple(picker.GetPickPosition()))
+        return dict(prop=e.name, primitive_index=pidx, primitive_id=pid, primitive=prim,
+                    world_pos=tuple(picker.GetPickPosition()))
 
     # ------------------------------------------------------------------
     # scene tree and items
@@ -2167,12 +2226,9 @@ class Viewer:
         item._viewer = weakref.ref(self)
         item._group = group
         item._visible = bool(visible)
-        parts = SplitPath(path)
-        for n in range(len(parts), 0, -1):
-            pending = self._pending_visible.get('/'.join(parts[:n]))
-            if pending is not None:
-                item._visible = pending
-                break
+        pending = self._PendingVisible(path)
+        if pending is not None:
+            item._visible = pending
         self._scene.tree.Add(path, item.GetName(), 'item')
         self._scene.items[path] = item
         for p in item.GetProps():
@@ -2259,10 +2315,28 @@ class Viewer:
             self._scene.tree.Add(JoinPath(path, EscapeName(c)), c, 'curve')
         vf._path = path
         vf._shown = bool(shown)
+        # a view state applied before the figure existed, as for items
+        pending = self._PendingVisible(path)
+        if pending is not None:
+            vf._shown = pending
+        for c in vf.GetCurves():
+            pending = self._pending_visible.get(JoinPath(path, EscapeName(c)))
+            if pending is not None:
+                vf.SetCurveVisible(c, pending)
         self._figures[path] = vf
         self._host.FigureAdded(vf)
         self._TreeChanged()
         return vf
+
+    def _PendingVisible(self, path):
+        """ The visibility a view state gave `path` or a group above it
+        before it existed, or None. """
+        parts = SplitPath(path)
+        for n in range(len(parts), 0, -1):
+            pending = self._pending_visible.get('/'.join(parts[:n]))
+            if pending is not None:
+                return pending
+        return None
 
     def RemoveFigure(self, figure):
         """ Remove a figure (a ViewFigure, its name or tree path). """
@@ -2412,7 +2486,8 @@ class Viewer:
             try:
                 self.SetItemParameter(item, name, value, render=False)
             except Exception as err:
-                warnings.warn('item "{}": cannot set "{}": {!r}'.format(item.GetPath(), name, err))
+                text = err.args[0] if isinstance(err, KeyError) and err.args else err
+                warnings.warn(ItemSettingWarning('item "{}": cannot set "{}": {}'.format(item.GetPath(), name, text)))
 
     def GetStructureBounds(self):
         """ GetStructureBounds()
@@ -3024,6 +3099,16 @@ class Viewer:
         """ Run the GUI event loop until the last viewer window is closed. """
         from CSXCAD.Viewer import GUI
         return GUI.Exec()
+
+
+def _Target(t):
+    """ A focus or highlight target from JSON: lists back to the tuples
+    ``(name, primitive id)`` and boxes. """
+    if isinstance(t, list) and len(t) == 2 and isinstance(t[0], str) and isinstance(t[1], int):
+        return tuple(t)
+    if isinstance(t, list) and len(t) == 6 and all(isinstance(v, (int, float)) for v in t):
+        return tuple(t)
+    return t
 
 
 def _Tuples(v):

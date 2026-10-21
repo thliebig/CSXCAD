@@ -378,14 +378,23 @@ class PropertyEntry:
             self._label_pts = pts[::max(1, len(pts) // 4096)].astype(float)
         return self._label_pts
 
-    def CellsOf(self, primitive_id=None):
-        """ (pd, cell ids) of the cells belonging to a primitive (all if None). """
+    def _CheckIndex(self, index):
+        """ `index` if the property has a primitive with that number, else KeyError. """
+        n = self.prop.GetQtyPrimitives()
+        if not 0 <= index < n:
+            raise KeyError('property "{}" has no primitive {}; it has {} (index 0..{})'.format(
+                self.name, index, n, n - 1) if n else 'property "{}" has no primitives'.format(self.name))
+        return index
+
+    def CellsOf(self, index=None):
+        """ (pd, cell ids) of the cells of the primitive number `index` of
+        the property (all if None). """
         if self.raw is None:
             return None, None
-        if primitive_id is None:
+        if index is None:
             return self.raw, np.arange(self.raw.GetNumberOfCells())
-        ids = vtk_to_numpy(self.raw.GetCellData().GetArray('primitive_id'))
-        return self.raw, np.nonzero(ids == primitive_id)[0]
+        idx = vtk_to_numpy(self.raw.GetCellData().GetArray('primitive_index'))
+        return self.raw, np.nonzero(idx == index)[0]
 
 
 class _GridLines:
@@ -1173,7 +1182,8 @@ class Scene:
         for e in self.entries:
             if e.prop is name or e.name == name or e.path == name:
                 return e
-        raise KeyError('unknown property "{}"'.format(name))
+        raise KeyError('unknown property "{}"; the properties: {}'.format(
+            name, ', '.join(e.name for e in self.entries) or 'none'))
 
     def Entries(self, names):
         if isinstance(names, str) or not hasattr(names, '__iter__'):
@@ -1235,9 +1245,9 @@ class Scene:
         app = vtkAppendPolyData()
         surf = vtkAppendPolyData()
         n = 0
-        for name, pid in self.highlight:
+        for name, index in self.highlight:
             e = self.Entry(name)
-            pd, cells = e.CellsOf(pid)
+            pd, cells = e.CellsOf(index)
             if pd is None or len(cells) == 0:
                 continue
             g = ExtractCells(pd, cells)

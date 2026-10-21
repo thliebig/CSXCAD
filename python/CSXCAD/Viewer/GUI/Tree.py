@@ -160,7 +160,8 @@ class SceneTree(QTreeWidget):
         e = self.viewer._scene.Entry(it.data(0, ROLE_PATH))
         self.blockSignals(True)
         for idx, prim in enumerate(e.prop.GetAllPrimitives()):
-            child = QTreeWidgetItem(['{} #{}'.format(prim.GetTypeName(), prim.GetID()),
+            # numbered as in the view state (highlight, focus): by position
+            child = QTreeWidgetItem(['{} #{}'.format(prim.GetTypeName(), idx),
                                      'prio {}'.format(prim.GetPriority())])
             child.setData(0, ROLE_KIND, 'primitive')
             child.setData(0, ROLE_PATH, e.path)
@@ -208,8 +209,8 @@ class SceneTree(QTreeWidget):
             self.win.info.ShowProperty(v._scene.Entry(path).prop)
         elif kind == 'primitive':
             e = v._scene.Entry(path)
-            pid, idx = it.data(0, ROLE_PRIM)
-            v.Highlight((e.name, pid))
+            _, idx = it.data(0, ROLE_PRIM)
+            v.Highlight((e.name, idx))
             self.win.info.ShowPrimitive(e.prop.GetPrimitive(idx))
         elif kind == 'item':
             self.win.info.ShowItem(v.GetItems()[path])
@@ -225,8 +226,8 @@ class SceneTree(QTreeWidget):
             if kind == 'property':
                 v.Focus(v._scene.Entry(it.data(0, ROLE_PATH)).name)
             elif kind == 'primitive':
-                pid, _ = it.data(0, ROLE_PRIM)
-                v.Focus((v._scene.Entry(it.data(0, ROLE_PATH)).name, pid))
+                _, idx = it.data(0, ROLE_PRIM)
+                v.Focus((v._scene.Entry(it.data(0, ROLE_PATH)).name, idx))
         except (ValueError, KeyError):
             pass
 
@@ -242,8 +243,9 @@ class SceneTree(QTreeWidget):
         self.scrollToItem(it)
         self.win.info.ShowItem(self.viewer.GetItems()[path])
 
-    def Select(self, prop_name, primitive_id=None):
-        """ Select the row of a property (and primitive), or clear with None. """
+    def Select(self, prop_name, index=None):
+        """ Select the row of a property (and of its primitive number
+        `index`), or clear with None. """
         self.blockSignals(True)
         self.clearSelection()
         self.blockSignals(False)
@@ -256,12 +258,12 @@ class SceneTree(QTreeWidget):
         if it is None:
             return
         target = it
-        if primitive_id is not None and primitive_id >= 0 and v.GetPrimitiveSelection():
+        if index is not None and index >= 0 and v.GetPrimitiveSelection():
             it.setExpanded(True)
             self._OnExpanded(it)
             for i in range(it.childCount()):
                 c = it.child(i)
-                if c.data(0, ROLE_PRIM)[0] == primitive_id:
+                if c.data(0, ROLE_PRIM)[1] == index:
                     target = c
                     break
         self.blockSignals(True)

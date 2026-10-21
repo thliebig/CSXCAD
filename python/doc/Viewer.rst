@@ -19,8 +19,21 @@ additionally ``PySide6`` (``pip install CSXCAD[gui]``).
     v.RenderViews('all_sides.png')
     print(v.Describe('text'))
 
-The command ``csxcad-view`` opens a structure file, or writes images and
-exports without a window (``csxcad-view --help``).
+The command ``csxcad-view`` (also ``python -m CSXCAD.Viewer``) opens a
+structure file, or writes images, exports and a summary without a window.
+The view comes from a file, from single keys, or both:
+
+.. code-block:: bash
+
+    csxcad-view model.xml --describe                   # properties, tree paths, mesh statistics
+    csxcad-view model.xml --views all_sides.png        # all sides and iso in one image
+    csxcad-view model.xml --png feed.png --set view=iso --set focus=port --set elevation=20
+    csxcad-view model.xml --png cut.png --set view=+y --set 'clip={"normal": "y", "position": 0}'
+    csxcad-view --list-view-keys                       # every view key, its default and values
+    csxcad-view model.xml --print-view --set view=+z > view.json   # a view to edit, for --view
+
+``--set KEY=VALUE`` takes the value as JSON (plain words as text). A wrong
+key, value or property name is reported with the valid ones.
 
 The GUI embeds VTK's native X11 window, on Wayland through XWayland. A script
 that shows the GUI after matplotlib figures imports ``CSXCAD.Viewer`` before
@@ -31,8 +44,9 @@ View state
 
 The whole view is a dict of keyword arguments, accepted by ``Show()``,
 ``Viewer()`` and :meth:`~CSXCAD.Viewer.Core.Viewer.SetState`, and returned by
-:meth:`~CSXCAD.Viewer.Core.Viewer.GetState`. Each key ``foo_bar`` has a setter
-``SetFooBar()``; the colour, opacity, visibility and render mode of a property
+:meth:`~CSXCAD.Viewer.Core.Viewer.GetState`; ``csxcad-view --list-view-keys``
+lists them. Each key has a method of the viewer (e.g. ``render_mode``:
+``SetRenderMode()``); the colour, opacity, visibility and render mode of a property
 are not part of it, they are set on the property itself
 (``SetColor()``, ``SetVisibility()``, ``SetRenderMode()``) and saved with the
 XML file.
@@ -54,6 +68,16 @@ Key                        Meaning (default)
 ``view``                   named direction applied before ``camera``: ``'+x'`` ... ``'-z'``,
                            ``'xy'``, ``'yz'``, ``'xz'``, ``'iso'``, ``'iso_x'``, ``'iso_y'``,
                            ``'iso_z'``
+``azimuth``                degrees to turn the camera about the view up (z for the iso
+                           views), after ``view``
+``elevation``              degrees to tilt the camera up (negative: down), after
+                           ``azimuth``
+``focus``                  fit on a property, a list of them, ``(name, index)`` of a
+                           primitive or a box, after the turns; small targets keep a tenth
+                           of the structure around them. Without it the view is fitted on
+                           everything shown (cut by ``clip``). ``view``, ``azimuth``,
+                           ``elevation`` and ``focus`` only move the camera, ``GetState()``
+                           returns the result as ``camera``
 ``mode_2d``                snapped axis view with 2D interaction, ``False``
 ``render_mode``            ``'solid'``, ``'edges'`` or ``'solid+edges'`` for properties without
                            their own, ``'solid'``
@@ -69,8 +93,13 @@ Key                        Meaning (default)
 ``clip``                   section plane ``{normal, position, invert}``, ``None``
 ``arc_resolution``         segments of a full circle, ``32``
 ``isolate``                only show these properties, ``None``
-``highlight``              outline properties or ``{prop, primitive}``, ``None``
+``highlight``              outline properties or primitives: ``(name, index)`` or
+                           ``{prop, primitive}``, the index being the position in
+                           ``prop.GetAllPrimitives()`` (stable across sessions, unlike the
+                           primitive's ID), ``None``
 ``visible``                ``{tree path: bool}`` for items and groups
+``items``                  ``{item path: {setting: value}}``, see
+                           :meth:`~CSXCAD.Viewer.Core.Viewer.GetItemParameters`
 ``legends``                legends dragged out of the layout: ``{item path: (x, y)}``
                            (lower left, fractions of the view), ``{}``
 ``disc_material``          show discrete-material models, ``True``

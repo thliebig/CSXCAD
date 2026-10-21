@@ -657,11 +657,11 @@ class MainWindow(QMainWindow, ViewerHost):
             self.viewer.Highlight(None)
             self.tree.SelectItem(res['item'])
             return
-        pid = res['primitive_id'] if self.viewer.GetPrimitiveSelection() else -1
-        self.viewer.Highlight((res['prop'], pid) if pid >= 0 else res['prop'])
-        self.tree.Select(res['prop'], pid)
+        idx = res['primitive_index'] if self.viewer.GetPrimitiveSelection() else -1
+        self.viewer.Highlight((res['prop'], idx) if idx >= 0 else res['prop'])
+        self.tree.Select(res['prop'], idx)
         self.statusBar().showMessage('{}{} at ({})'.format(
-            res['prop'], ' #{}'.format(pid) if pid >= 0 else '',
+            res['prop'], ' #{}'.format(idx) if idx >= 0 else '',
             ', '.join('{:.4g}'.format(c) for c in res['world_pos'])), 8000)
 
     def _OnMove(self, obj, event):

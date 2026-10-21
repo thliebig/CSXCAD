@@ -111,14 +111,37 @@ the code is not verification, and "should work" is not a test result.
 
 `python/CSXCAD/Viewer/` is a VTK viewer with an optional PySide6 GUI
 (`csxcad-view`, replacing AppCSXCAD). Use it to check a structure rather than
-reasoning about coordinates:
+reasoning about coordinates, and to make images of it. From a written XML
+file, without a window:
+
+```bash
+csxcad-view model.xml --describe            # properties with tree paths and primitives, mesh stats
+csxcad-view model.xml --views views.png     # labelled images of all sides and iso
+csxcad-view model.xml --png feed.png --set view=iso --set focus=port --set elevation=20
+csxcad-view --list-view-keys                # every view key with its values
+```
+
+The same view keys go into Python as keyword arguments:
 
 ```python
 from CSXCAD.Viewer import Viewer
-v = Viewer(CSX, offscreen=True)
-v.RenderViews('views.png')      # labelled images of all sides and iso
-print(v.Describe('text'))       # properties, bounds, mesh stats, unrendered primitives
+v = Viewer(CSX, offscreen=True, view='+y', clip=dict(normal='y', position=0), transparency=0.4)
+v.Screenshot('cut.png', size=(1200, 800))
+print(v.Describe('text'))
+print(v.GetStateAsPython())     # the current view as code to paste into a script
 ```
+
+- **Views as data**: `view` (direction), `azimuth`/`elevation` (degrees),
+  `focus` (a property, `[name, primitive number]` or a box), `clip`,
+  `isolate`, `highlight`, `visible` (tree paths from `--describe`),
+  `render_mode`, `transparency`, `grid`, `items` (settings of items such as
+  field planes, `Viewer.GetItemParameters(item)` lists them with help texts).
+  Primitives are numbered by position in their property, not by ID. A wrong
+  key, value or name raises an error naming the valid ones: read it, do not
+  guess.
+- **Look at the result**: open the PNG and check that it shows what was asked
+  (framing, occlusion: a small part inside another may need `transparency` or
+  `isolate`).
 
 - **Headless**: off screen it picks EGL or OSMesa itself (probed in a
   subprocess; `CSXCAD_VIEWER_BACKEND` overrides). With

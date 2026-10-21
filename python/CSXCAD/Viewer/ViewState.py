@@ -19,10 +19,9 @@
 View state schema: defaults, validation and JSON conversion.
 
 The view is a flat dict. Every key maps to a setter of
-:class:`CSXCAD.Viewer.Viewer`: key ``foo_bar`` to ``SetFooBar()``, except
-``isolate`` (``Isolate()``), ``highlight`` (``Highlight()``), ``visible``
-(``SetVisible(path, bool)``) and ``items`` (``SetItemParameter(path, name,
-value)``).
+:class:`CSXCAD.Viewer.Viewer` (see :data:`ACCESSORS`), :data:`KEY_HELP`
+explains each key. ``view``, ``focus``, ``azimuth`` and ``elevation`` only
+move the camera when the state is applied: the stored camera is ``camera``.
 """
 
 import copy
@@ -80,6 +79,9 @@ DEFAULTS = dict(
     items={},
     legends={},
     view=None,
+    focus=None,
+    azimuth=None,
+    elevation=None,
     mode_2d=False,
     camera=None,
     animation=dict(step=0, fps=20, playing=False),
@@ -109,10 +111,62 @@ ACCESSORS = {
     'visible': (None, None),   # SetVisible(path, bool) per entry
     'items': (None, None),     # SetItemParameter(path, name, value) per entry
     'legends': ('SetLegendPositions', 'GetLegendPositions'),
-    'view': ('SetView', None),
+    'view': ('SetView', None),          # view, focus, azimuth, elevation: see CAMERA_STEPS
+    'focus': ('Focus', None),
+    'azimuth': ('Azimuth', None),
+    'elevation': ('Elevation', None),
     'mode_2d': ('SetMode2D', 'GetMode2D'),
     'camera': ('SetCamera', 'GetCamera'),
     'animation': ('SetAnimation', 'GetAnimation'),
+}
+
+
+#: keys that only move the camera when applied, in this order: the view
+#: direction, the turns, then a fit on `focus` (or on everything)
+CAMERA_STEPS = ('view', 'azimuth', 'elevation', 'focus')
+
+#: one line per key, for ``csxcad-view --list-view-keys``
+KEY_HELP = {
+    'version': 'format version of the view state (1)',
+    'size': 'render size: [fraction, aspect] of the screen diagonal, e.g. [0.454, 1.333], '
+            'or [width, height] in pixels',
+    'window_position': '[x, y] of the window\'s top-left corner in fractions of the screen; null: the window system',
+    'window_mode': 'GUI: "tabs" or "windows" for the 3D view and the figures',
+    'background': 'a colour ("white", "#rrggbb", [r, g, b]); two colours: a vertical gradient, bottom first',
+    'arc_resolution': 'segments of a full circle',
+    'disc_material': 'show the surface model of discrete materials',
+    'render_mode': '"solid", "edges" or "solid+edges", for properties without a render mode of their own',
+    'transparency': 'see-through: cap the opacity of all properties at 0..1; null: off',
+    'edge_color': 'one edge colour for all properties; null: their own',
+    'edge_angle': 'feature angle in degrees above which an edge is drawn',
+    'antialias': 'FXAA anti-aliasing',
+    'max_peels': 'cap of the depth-peeling passes for transparency',
+    'interactive_quality': '"auto", "full" or "fast" while the view moves (GUI)',
+    'axes': 'show the axes marker',
+    'labels': 'show the property names with leaders to their properties',
+    'grid': 'mesh grid (partial dicts merge): {visible, color, opacity, outline, quality: null|"size"|"ratio", '
+            'quality_threshold, planes: {"x"|"y"|"z": {visible, index or position}}}',
+    'clip': 'section plane {normal: "x"|"y"|"z"|[nx, ny, nz], position, invert}, keeps the side below '
+            '(invert: above); null: off',
+    'isolate': 'show only these properties (a name or a list); null: all',
+    'highlight': 'outline a property name, [name, primitive number] (0, 1, ... as listed by --describe) '
+                 'or a list of them; '
+                 '{target: [...], dim_others: true} dims the rest',
+    'visible': '{tree path: true|false}, e.g. {"properties/dumps": false, "grid": false}; '
+               'the paths are listed by --describe',
+    'items': '{item path: {setting: value}}: settings of items such as field planes, '
+             'see Viewer.GetItemParameters()',
+    'legends': '{item path: [x, y]}: colour legends moved out of the automatic layout',
+    'view': 'look from "+x", "-x", "+y", "-y", "+z", "-z" ("xy" = "+z", "yz" = "+x", "xz" = "-y"), '
+            '"iso" (= "iso_z"), "iso_x" or "iso_y" (the axis pointing up), fitted',
+    'focus': 'fit on a property name, a list of names, [name, primitive number] or a box '
+             '[xmin, xmax, ymin, ymax, zmin, zmax], after view, azimuth and elevation',
+    'azimuth': 'turn the camera by this many degrees about the view up, after view',
+    'elevation': 'tilt the camera by this many degrees (positive: from above), after view and azimuth',
+    'mode_2d': '2D mode: the nearest axis view with parallel projection, no rotation',
+    'camera': '{position, focal_point, view_up, view_angle, parallel_scale, parallel_projection}, '
+              'applied after (and so instead of) view, focus, azimuth and elevation',
+    'animation': '{step, fps, playing}',
 }
 
 

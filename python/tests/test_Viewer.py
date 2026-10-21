@@ -243,6 +243,66 @@ class TestViewerState(unittest.TestCase):
         with self.assertRaises(ValueError):
             v.SetState(grid=dict(plane={}))
 
+    def test_camera_steps(self):
+        # view, azimuth, elevation and focus as view state keys: applied in
+        # that order, kept as the camera
+        from CSXCAD.Viewer import Viewer
+
+        def direction(v):
+            c = v.GetCamera()
+            d = np.subtract(c['position'], c['focal_point'])
+            return d / np.linalg.norm(d)
+        # iso looks from (1, 1, 1): 45 degree around, 35.26 degree up; the
+        # turn is about the vertical (z up), the tilt raises the camera
+        d = direction(Viewer(_Structure(), view='iso', azimuth=30))
+        self.assertAlmostEqual(abs(np.degrees(np.arctan2(d[1], d[0])) - 45), 30, places=6)
+        self.assertAlmostEqual(np.degrees(np.arcsin(d[2])), np.degrees(np.arcsin(1 / np.sqrt(3))), places=6)
+        v = Viewer(_Structure(), view='iso', azimuth=30, elevation=20)
+        self.assertAlmostEqual(np.degrees(np.arcsin(direction(v)[2])), 35.264 + 20, places=2)
+        st = v.GetState()
+        self.assertEqual((st['view'], st['azimuth'], st['elevation'], st['focus']), (None, None, None, None))
+        self.assertEqual(Viewer(_Structure(), **st).GetCamera(), v.GetCamera())
+        # focus: on the patch's via (its primitive 1, a JSON list), seen from +z
+        whole = Viewer(_Structure(), view='+z').GetCamera()
+        cam = Viewer(_Structure(), view='+z', focus=['patch', 1]).GetCamera()
+        np.testing.assert_allclose(cam['focal_point'][:2], (0, 0), atol=1e-6)
+        self.assertLess(cam['position'][2], whole['position'][2])
+        # a framed view needs its picture fitted: in view of all, not cut by the window
+        v = Viewer(_Structure(), view='iso', elevation=40)
+        self.assertTrue(v._auto_fit)
+        # a small target keeps a tenth of the structure (50) around it
+        v = Viewer(_Structure(), view='+z', focus='port')
+        c = v.GetCamera()
+        half = np.linalg.norm(np.subtract(c['position'], c['focal_point'])) * np.tan(np.radians(c['view_angle']) / 2)
+        self.assertGreater(half, 2.5)
+        with self.assertRaisesRegex(KeyError, 'patch" has no primitive 2; it has 2 \\(index 0..1\\)'):
+            Viewer(_Structure(), focus=['patch', 2])
+
+    def test_fit_with_clip(self):
+        # the fit frames what the section plane leaves: x <= 0
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), view='+z', clip=dict(normal='x', position=0))
+        self.assertAlmostEqual(v.GetCamera()['focal_point'][0], -12.5, delta=0.1)
+        v.SetClip(None)
+        v.Fit()
+        self.assertAlmostEqual(v.GetCamera()['focal_point'][0], 0, delta=0.1)
+
+    def test_highlight_checks(self):
+        # a primitive by its number in the property, as a JSON list too, the
+        # same in every session (primitive IDs are not); a wrong one says
+        # which exist
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), highlight=['patch', 1])
+        self.assertEqual(v.GetHighlight(), [dict(prop='patch', primitive=1)])
+        np.testing.assert_allclose(v._scene.highlight_actor.GetBounds()[:4], (-1, 1, -1, 1), atol=0.05)   # the via
+        st = v.GetState()
+        _Structure()   # more primitives in this process: other IDs
+        self.assertEqual(Viewer(_Structure(), **st).GetHighlight(), [dict(prop='patch', primitive=1)])
+        with self.assertRaisesRegex(KeyError, 'patch" has no primitive 2; it has 2 \\(index 0..1\\)'):
+            v.Highlight(['patch', 2])
+        with self.assertRaisesRegex(KeyError, 'the properties: substrate, patch, port, Et, Ht'):
+            v.Highlight('nothing')
+
     def test_write_through_and_groups(self):
         from CSXCAD.Viewer import Viewer
         csx = _Structure()
@@ -407,6 +467,10 @@ class TestViewerState(unittest.TestCase):
         self.assertIn("items={'results/a': {'planes': ((0, 2.0),), 'opacity': 0.5}}", v.GetStateAsPython())
         with self.assertWarns(UserWarning):
             v.SetState(items={'results/a': dict(colour=1)})
+        # the summary lists the settings the view state takes (not the form-only pos)
+        settings = v.Describe()['items']['results/a']['settings']
+        self.assertEqual(list(settings), ['planes', 'scale', 'opacity'])
+        self.assertEqual(settings['scale'], dict(value=1.0, type='float', default=1.0))
         self.assertEqual(v.AddItem(Item('a'), group='results').GetPath(), 'results/a (2)')
 
     def test_structure_bounds(self):
@@ -943,7 +1007,46 @@ class TestViewerOutput(unittest.TestCase):
             self.assertEqual(CLI.Main([fn, '--describe', 'json', '--export', 'stl', os.path.join(self.dir, 'stl')]), 0)
         d = json.loads(out.getvalue())
         self.assertEqual([p['name'] for p in d['properties']], ['substrate', 'patch', 'port', 'Et', 'Ht'])
+        self.assertEqual(d['properties'][1]['primitive_types'], ['Box', 'Cylinder'])
         self.assertTrue(os.path.isfile(os.path.join(self.dir, 'stl', 'patch.stl')))
+
+        def run(*args):
+            out, err = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+                code = CLI.Main([fn] + list(args))
+            return code, out.getvalue(), err.getvalue()
+        # the view from single keys: JSON values, plain words as text
+        code, out, _ = run('--print-view', '--set', 'view=+z', '--set', 'elevation=-30',
+                           '--set', 'clip={"normal": "y", "position": 2}', '--set', 'labels=true')
+        st = json.loads(out)
+        self.assertEqual((code, st['clip'], st['labels']), (0, dict(normal='y', position=2.0, invert=False), True))
+        ref = Viewer(fn, view='+z', elevation=-30, clip=dict(normal='y', position=2), labels=True)
+        np.testing.assert_allclose(st['camera']['position'], ref.GetCamera()['position'])
+        # mistakes say what is valid
+        self.assertEqual(run('--set', 'render_mode=edgez', '--print-view')[:2], (1, ''))
+        self.assertIn('use one of', run('--set', 'render_mode=edgez', '--print-view')[2])
+        self.assertIn('valid keys:', run('--set', 'colour=red', '--print-view')[2])
+        self.assertEqual(run('--set', 'isolate=nothing', '--print-view')[2].strip(),
+                         'csxcad-view: unknown property "nothing"; the properties: substrate, patch, port, Et, Ht')
+        code, _, err = run('--set', 'visible={"properties/dump": false}', '--print-view')
+        self.assertEqual(code, 1)
+        self.assertIn('no tree path properties/dump; the paths:', err)
+        self.assertIn('properties/dumps', err)
+        # the text summary has the tree paths and primitive ids for the view keys
+        text = run('--describe')[1]
+        self.assertIn('patch [Metal] properties/materials/patch: 2 prim (0 Box, 1 Cylinder)', text)
+        self.assertIn('tree paths: grid, grid/x', text)
+        # every key is explained
+        from CSXCAD.Viewer.ViewState import DEFAULTS, KEY_HELP
+        self.assertEqual(set(KEY_HELP), set(DEFAULTS))
+        keys = CLI.KeyList()
+        self.assertTrue(all('  {} '.format(k) in keys for k in DEFAULTS if k != 'version'))
+        # python -m CSXCAD.Viewer is csxcad-view
+        import subprocess
+        import sys
+        out = subprocess.run([sys.executable, '-m', 'CSXCAD.Viewer', '--list-view-keys'], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                             universal_newlines=True)
+        self.assertEqual(out.stdout.strip(), keys.strip(), out.stderr)
 
         os.environ['CSXCAD_VIEWER_OUTPUT'] = os.path.join(self.dir, 'out')
         v = Viewer(_Structure(), name='demo')
@@ -1038,6 +1141,20 @@ class TestViewerFigures(unittest.TestCase):
         self.assertEqual((v.GetFigures(), removed, vf.GetPath()), ({}, ['S-parameters', 'other'], None))
         self.assertNotIn('figures', v._scene.tree.nodes)
         v.AddFigure(vf)   # free to be added again
+
+    def test_view_before_figures(self):
+        # a view applied before the figures exist (e.g. openems-view) shows or
+        # hides them and their curves, and the state reports them
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), offscreen=True,
+                   visible={'figures/S-parameters/S21': False, 'figures/other': False})
+        vf = v.AddFigure(self._Figure())
+        other = v.AddFigure(self._Figure(), name='other')
+        self.assertEqual((vf.IsShown(), vf.GetCurveVisible('S21'), vf.GetCurveVisible('S11')), (True, False, True))
+        self.assertFalse(other.IsShown())
+        st = v.GetState()['visible']
+        self.assertEqual((st['figures/S-parameters/S21'], st['figures/S-parameters/S11'], st['figures/other']),
+                         (False, True, False))
 
     def test_plain_label(self):
         # mathtext labels become plain text for the tree rows
