@@ -67,6 +67,17 @@ class TestXMLRoundTrip(unittest.TestCase):
         p2 = self._prop(self._roundtrip(), 'visibility')
         self.assertFalse(p2.GetVisibility())
 
+    def test_base_render_mode(self):
+        p = self.csx.AddMetal('render_mode')
+        self.assertIsNone(p.GetRenderMode())
+        with self.assertRaises(ValueError):
+            p.SetRenderMode('wireframe')
+        p.SetRenderMode('edges')
+        p2 = self._prop(self._roundtrip(), 'render_mode')
+        self.assertEqual(p2.GetRenderMode(), 'edges')
+        p2.SetRenderMode(None)
+        self.assertIsNone(p2.GetRenderMode())
+
     def test_base_custom_attribute(self):
         p = self.csx.AddMetal('custom_attr')
         p.SetAttributeValue('mykey', 'myvalue')

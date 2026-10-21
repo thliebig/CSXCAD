@@ -109,6 +109,13 @@ public:
 	std::string GetNameByType(TransformType type, unsigned int &numArgs) const;
 	int GetTypeByName(std::string name, unsigned int &numArgs) const;
 
+	//! Number of transformations in the list, in the order they were added.
+	size_t GetNumberOfTransforms() const {return m_TransformList.size();}
+	//! Name of the n-th transformation as used in the XML, e.g. "Rotate_X".
+	std::string GetTransformName(size_t n) const {return GetNameByType(m_TransformList.at(n));}
+	//! Arguments of the n-th transformation as strings (values or parameter expressions).
+	std::vector<std::string> GetTransformArguments(size_t n) const;
+
 	void PrintMatrix(std::ostream& stream);
 
 	void PrintTransformations(std::ostream& stream, std::string prefix="");

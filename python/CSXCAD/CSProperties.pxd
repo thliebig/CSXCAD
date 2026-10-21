@@ -257,6 +257,11 @@ cdef extern from "CSXCAD/CSPropProbeBox.h":
             void SetOverSampling(int val)
             int GetOverSampling()
 
+            void SetStartTime(float value)
+            double GetStartTime()
+            void SetStopTime(float value)
+            double GetStopTime()
+
             void SetNormalDir(unsigned int ndir)
             int GetNormalDir()
 
@@ -294,6 +299,9 @@ cdef extern from "CSXCAD/CSPropDumpBox.h":
 
             void SetSubSampling(int ny, unsigned int val)
             unsigned int GetSubSampling(int ny)
+
+            void SetMultiGridLevel(int mgl)
+            int GetMultiGridLevel()
 
 cdef class CSPropDumpBox(CSPropProbeBox):
     pass

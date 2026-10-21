@@ -347,6 +347,44 @@ cdef class CSProperties:
     def SetVisibility(self, val):
         self._ptr().SetVisibility(val)
 
+    def SetRenderMode(self, mode):
+        """ SetRenderMode(mode)
+
+        Set how a viewer should draw this property. The mode is stored in the
+        attribute ``RenderMode`` and thus saved with the XML file.
+
+        Parameters
+        ----------
+        mode : str or None
+            ``'solid'``, ``'edges'`` or ``'solid+edges'``. ``None`` removes
+            the setting, so that the viewer's default applies.
+
+        Examples
+        --------
+        >>> substrate.SetRenderMode('edges')
+        """
+        if mode is None:
+            if self.ExistAttribute('RenderMode'):
+                self.RemoveAttribute('RenderMode')
+            return
+        if mode not in ('solid', 'edges', 'solid+edges'):
+            raise ValueError('SetRenderMode: invalid mode "{}", use "solid", "edges" or "solid+edges"'.format(mode))
+        self.SetAttributeValue('RenderMode', mode)
+
+    def GetRenderMode(self):
+        """ GetRenderMode()
+
+        Get the render mode set with :meth:`SetRenderMode`.
+
+        Returns
+        -------
+        str or None
+            ``'solid'``, ``'edges'``, ``'solid+edges'``, or ``None`` if not set.
+        """
+        if not self.ExistAttribute('RenderMode'):
+            return None
+        return self.GetAttributeValue('RenderMode')
+
     def SetCoordInputType(self, int ctype):
         """ SetCoordInputType(ctype)
 
@@ -1309,6 +1347,32 @@ cdef class CSPropProbeBox(CSProperties):
         """
         return (<_CSPropProbeBox*>self._ptr()).GetOverSampling()
 
+    def SetStartTime(self, val):
+        """ SetStartTime(val)
+
+        Set the start time of this probe/dump, meaning is defined by the
+        simulator.
+        """
+        (<_CSPropProbeBox*>self._ptr()).SetStartTime(val)
+
+    def GetStartTime(self):
+        """ GetStartTime()
+        """
+        return (<_CSPropProbeBox*>self._ptr()).GetStartTime()
+
+    def SetStopTime(self, val):
+        """ SetStopTime(val)
+
+        Set the stop time of this probe/dump, meaning is defined by the
+        simulator.
+        """
+        (<_CSPropProbeBox*>self._ptr()).SetStopTime(val)
+
+    def GetStopTime(self):
+        """ GetStopTime()
+        """
+        return (<_CSPropProbeBox*>self._ptr()).GetStopTime()
+
     def SetNormalDir(self, val):
         """ SetNormalDir(val)
         """
@@ -1558,6 +1622,18 @@ cdef class CSPropDumpBox(CSPropProbeBox):
         for n in range(3):
             val[n] = (<_CSPropDumpBox*>self._ptr()).GetSubSampling(n)
         return val
+
+    def SetMultiGridLevel(self, val):
+        """ SetMultiGridLevel(val)
+
+        Set the multi grid level to use (default is 0).
+        """
+        (<_CSPropDumpBox*>self._ptr()).SetMultiGridLevel(val)
+
+    def GetMultiGridLevel(self):
+        """ GetMultiGridLevel()
+        """
+        return (<_CSPropDumpBox*>self._ptr()).GetMultiGridLevel()
 
 ###############################################################################
 cdef class CSPropDispersiveMaterial(CSPropMaterial):

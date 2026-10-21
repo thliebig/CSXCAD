@@ -330,6 +330,11 @@ class Test_CSPrimMethods(unittest.TestCase):
         prop.SetFrequency(np.linspace(1e9,2e9,11))
         self.assertEqual(prop.GetFrequencyCount(), 11)
 
+        prop.SetStartTime(1e-9)
+        prop.SetStopTime(5e-9)
+        self.assertAlmostEqual(prop.GetStartTime(), 1e-9)
+        self.assertAlmostEqual(prop.GetStopTime(), 5e-9)
+
         prop2 = prop.copy()
         self.assertEqual( prop2.GetType(), CSProperties.PropertyType.PROBEBOX)
         self.assertEqual( prop2.GetTypeString(), 'ProbeBox')
@@ -516,6 +521,10 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual(prop.GetFileType(), 5)
         self.assertTrue((prop.GetOptResolution() == [10,11.5,12]).all())
         self.assertTrue((prop.GetSubSampling() == [1,2,4]).all())
+
+        self.assertEqual(prop.GetMultiGridLevel(), 0)
+        prop.SetMultiGridLevel(2)
+        self.assertEqual(prop.GetMultiGridLevel(), 2)
 
         prop2 = prop.copy()
         self.assertEqual( prop2.GetType(), CSProperties.PropertyType.DUMPBOX)

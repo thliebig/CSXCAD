@@ -101,7 +101,11 @@ cdef class CSPrimitives:
         elif prim_type == WIRE:
             prim = CSPrimWire(pset, prop, no_init=no_init, **kw)
         elif prim_type == USERDEFINED:
-            raise Exception('Primitive type "USERDEFINED" not yet implemented!')
+            if not no_init:
+                raise Exception('Primitive type "USERDEFINED" not yet implemented!')
+            # wrap an existing one (e.g. read from XML) with the generic base
+            # class, so that iterating over all primitives does not fail
+            prim = CSPrimitives(pset, prop, no_init=True)
         elif prim_type == POLYHEDRONREADER:
             prim = CSPrimPolyhedronReader(pset, prop, no_init=no_init, **kw)
         else:
@@ -1250,6 +1254,77 @@ cdef class CSPrimPolyhedron(CSPrimitives):
         """
         ptr = <_CSPrimPolyhedron*>self._ptr()
         return ptr.GetNumFaces()
+
+    def GetVertices(self):
+        """ GetVertices()
+
+        Get all vertices at once, much faster than :meth:`GetVertex` for
+        large polyhedra.
+
+        Returns
+        -------
+        (N,3) ndarray
+            Vertex coordinates.
+        """
+        ptr = <_CSPrimPolyhedron*>self._ptr()
+        cdef unsigned int N = ptr.GetNumVertices()
+        verts = np.empty((N, 3), dtype=np.float64)
+        cdef double[:, :] v = verts
+        cdef double* p
+        cdef unsigned int n
+        for n in range(N):
+            p = ptr.GetVertex(n)
+            v[n, 0] = p[0]
+            v[n, 1] = p[1]
+            v[n, 2] = p[2]
+        return verts
+
+    def GetFaces(self):
+        """ GetFaces()
+
+        Get all faces at once, much faster than :meth:`GetFace` for large
+        polyhedra. The layout is the one of a VTK cell array: face `i` is
+        ``connectivity[offsets[i]:offsets[i+1]]``.
+
+        Returns
+        -------
+        connectivity : ndarray of int
+            Vertex indices of all faces, one after another.
+        offsets : ndarray of int
+            Start of each face in `connectivity`, plus its total length
+            (number of faces + 1 entries).
+        """
+        ptr = <_CSPrimPolyhedron*>self._ptr()
+        cdef unsigned int N = ptr.GetNumFaces()
+        offsets = np.zeros(N + 1, dtype=np.int64)
+        cdef long long[:] o = offsets
+        cdef vector[int] conn
+        cdef int* i_v
+        cdef unsigned int numVert, n, k
+        for n in range(N):
+            numVert = 0
+            i_v = ptr.GetFace(n, numVert)
+            for k in range(numVert):
+                conn.push_back(i_v[k])
+            o[n + 1] = o[n] + numVert
+        return np.array(conn, dtype=np.int64), offsets
+
+    def GetFacesValid(self):
+        """ GetFacesValid()
+
+        Get the valid flag of all faces at once, see :meth:`GetFaceValid`.
+
+        Returns
+        -------
+        ndarray of bool
+        """
+        ptr = <_CSPrimPolyhedron*>self._ptr()
+        cdef unsigned int N = ptr.GetNumFaces()
+        valid = np.zeros(N, dtype=np.bool_)
+        cdef unsigned int n
+        for n in range(N):
+            valid[n] = ptr.GetFaceValid(n)
+        return valid
 
 ###############################################################################
 cdef class CSPrimPolyhedronReader(CSPrimPolyhedron):

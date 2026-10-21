@@ -17,6 +17,7 @@
 #
 
 from libcpp.string cimport string
+from libcpp.vector cimport vector
 from libcpp cimport bool
 from CSXCAD.ParameterObjects cimport _ParameterSet
 from CSXCAD.CSObject cimport _CSObject
@@ -35,6 +36,10 @@ cdef extern from "CSXCAD/CSTransform.h":
             double* GetMatrix()
 
             bool HasTransform()
+
+            size_t GetNumberOfTransforms()
+            string GetTransformName(size_t n) except +
+            vector[string] GetTransformArguments(size_t n) except +
 
             void Translate(double *translate, bool concatenate)
 

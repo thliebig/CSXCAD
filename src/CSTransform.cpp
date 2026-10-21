@@ -709,6 +709,14 @@ void CSTransform::PrintTransformations(std::ostream& stream, std::string prefix)
 	}
 }
 
+std::vector<std::string> CSTransform::GetTransformArguments(size_t n) const
+{
+	std::vector<std::string> args;
+	for (size_t a=0;a<m_TransformArguments.at(n).size();++a)
+		args.push_back(m_TransformArguments.at(n).at(a).GetValueString());
+	return args;
+}
+
 void CSTransform::AppendList(TransformType type, const double* args, size_t numArgs )
 {
 	m_TransformList.push_back(type);

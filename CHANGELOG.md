@@ -19,6 +19,13 @@ there are unreleased changes. It becomes the next release entry.
 - `CSPropDiscMaterial::GetPolyDataModel()` returns the discrete-material
   surface as plain point and quad arrays, in structure coordinates or in the
   mesh coordinates of the data file, and as numpy arrays in Python.
+- Python: `SetRenderMode()`/`GetRenderMode()` on properties (stored as the
+  `RenderMode` attribute), bulk `GetVertices()`/`GetFaces()`/`GetFacesValid()`
+  on polyhedra, probe/dump `Get/SetStartTime()`, `Get/SetStopTime()` and
+  `Get/SetMultiGridLevel()`, and `CSTransform.GetTransformList()` with the
+  individual transformation steps (C++: `GetNumberOfTransforms()`,
+  `GetTransformName()`, `GetTransformArguments()`). `GetAllPrimitives()` no
+  longer fails on a user-defined primitive read from XML.
 
 ### Changed
 

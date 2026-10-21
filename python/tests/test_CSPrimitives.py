@@ -403,6 +403,7 @@ class Test_CSPrimMethods(unittest.TestCase):
         p = [0.1234567890123, -2.718281828459, 1e-9]
         ph.AddVertex(*p)
         np.testing.assert_array_equal(ph.GetVertex(0), p)
+        np.testing.assert_array_equal(ph.GetVertices(), [p])
 
     def test_polyhedron_reader(self):
         ## Test CSPrimPolyhedronReader
@@ -444,6 +445,24 @@ class Test_CSPrimMethods(unittest.TestCase):
             self.assertTrue(prim.IsInside(inside), prim.GetTypeName())
             if outside is not None:
                 self.assertFalse(prim.IsInside(outside), prim.GetTypeName())
+
+    def test_polyhedron_bulk_getters(self):
+        phr = CSPrimitives.CSPrimPolyhedronReader(self.pset, self.metal)
+        phr.SetFilename(os.path.join(DATA_PATH, 'sphere.stl'))
+        self.assertTrue( phr.ReadFile() )
+
+        verts = phr.GetVertices()
+        self.assertEqual(verts.shape, (50, 3))
+        for n in range(phr.GetNumVertices()):
+            np.testing.assert_array_equal(verts[n], phr.GetVertex(n))
+
+        conn, offsets = phr.GetFaces()
+        self.assertEqual(len(offsets), 97)
+        for n in range(phr.GetNumFaces()):
+            np.testing.assert_array_equal(conn[offsets[n]:offsets[n+1]], phr.GetFace(n))
+
+        valid = phr.GetFacesValid()
+        self.assertEqual(list(valid), [phr.GetFaceValid(n) for n in range(96)])
 
 if __name__ == '__main__':
     unittest.main()

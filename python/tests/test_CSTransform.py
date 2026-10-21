@@ -70,6 +70,17 @@ class Test_CSTransform(unittest.TestCase):
         self.tr.SetMatrix(mat)
         self.assertTrue( (self.tr.GetMatrix()==mat).all() )
 
+    def test_transform_list(self):
+        self.assertEqual(self.tr.GetTransformList(), [])
+        self.tr.RotateAxis('x', 30)
+        self.tr.Translate([1, 2.5, 0])
+        self.tr.Scale(2)
+        names = [t[0] for t in self.tr.GetTransformList()]
+        self.assertEqual(names, ['Rotate_X', 'Translate', 'Scale'])
+        self.assertEqual([float(a) for a in self.tr.GetTransformList()[1][1]], [1, 2.5, 0])
+        self.tr.Reset()
+        self.assertEqual(self.tr.GetTransformList(), [])
+
     def test_invers_transform(self):
         self.tr.Translate([3, 0, 0])
         fwd = self.tr.Transform([1, 0, 0])

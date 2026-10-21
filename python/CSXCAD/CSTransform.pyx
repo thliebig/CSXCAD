@@ -153,6 +153,20 @@ cdef class CSTransform:
 
         return mat
 
+    def GetTransformList(self):
+        """ GetTransformList()
+
+        The individual transformations in the order they were added, as
+        written to the XML.
+
+        :returns: list of (name, args) -- e.g. ``[('Rotate_X', ['30']), ('Translate', ['1', '2', '3'])]``,
+                  the arguments as strings (values or parameter expressions)
+        """
+        cdef _CSTransform *ptr = self._ptr()
+        return [(ptr.GetTransformName(n).decode('UTF-8'),
+                 [a.decode('UTF-8') for a in ptr.GetTransformArguments(n)])
+                for n in range(ptr.GetNumberOfTransforms())]
+
     def AddTransform(self, transform, *args, **kw):
         """ AddTransform(transform, *args, **kw)
 
