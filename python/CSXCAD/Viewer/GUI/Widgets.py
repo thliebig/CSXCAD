@@ -229,7 +229,8 @@ class AnimationBar(QToolBar):
     def Refresh(self):
         v = self.win.viewer
         N = v.GetAnimationSteps()
-        self.setVisible(N > 0)
+        # it animates the 3D view: hidden while a figure is in front
+        self.setVisible(N > 0 and getattr(self.win, '_view_in_front', True))
         if N == 0:
             return
         a = v.GetAnimation()

@@ -111,6 +111,15 @@ class MainWindow(QMainWindow, ViewerHost):
     TITLE = 'CSXCAD Viewer'
     #: (organisation, application) of the QSettings holding the window layout
     SETTINGS = ('CSXCAD', 'csxcad-view')
+    #: toolbars that act on the 3D view only, hidden while a figure is in front
+    VIEW_TOOLBARS = ('View', 'Display', 'Grid')
+    #: docks (by name, see AddDock) that act on the 3D view only, hidden alike
+    VIEW_DOCKS = ('grid',)
+    #: action groups of the registry that act on the 3D view only
+    VIEW_GROUPS = ('View', 'Display', 'Grid', 'Animation')
+    #: the window's own actions that act on the 3D view only
+    VIEW_ACTIONS = ('screenshot_qt', 'views_qt', 'export_animation_qt', 'background', 'edge_color',
+                    'arc_resolution', 'show_all')
 
     def __init__(self, viewer, render_widget=None):
         super().__init__()
@@ -121,6 +130,8 @@ class MainWindow(QMainWindow, ViewerHost):
         self._actions = {}
         self._menus = {}
         self._toolbars = {}
+        self._view_in_front = True     # the 3D view is visible, see _SetViewControls
+        self._controls_shown = {}      # {widget: shown} of VIEW_TOOLBARS and VIEW_DOCKS while hidden
         self.setWindowTitle(self._Title())
         self.setWindowIcon(Icon('render-solid-edges'))
 
@@ -342,6 +353,39 @@ class MainWindow(QMainWindow, ViewerHost):
             self.vtk_widget.setVisible(show_3d)
             if show_3d and self.viewer.GetHost() is self:
                 self.viewer.Render()
+        self._SetViewControls(show_3d)
+        # the tree follows a tab or window chosen in the central area
+        if getattr(self, 'tree', None) is not None:   # not while building the window
+            figure = next((p for p, (sub, tb) in self._figure_subs.items() if sub is cur), None)
+            self.tree.FollowFront(figure)
+
+    def _SetViewControls(self, shown):
+        """ The toolbars and docks of the 3D view (VIEW_TOOLBARS,
+        VIEW_DOCKS, the animation bar) only while it is visible, its actions
+        (VIEW_GROUPS, VIEW_ACTIONS) disabled otherwise: with a figure in
+        front as a tab they would act on a view nobody sees. """
+        if shown == self._view_in_front:
+            return
+        self._view_in_front = shown
+        widgets = [self._toolbars.get(n) for n in self.VIEW_TOOLBARS] + \
+            [getattr(self, 'dock_' + n, None) for n in self.VIEW_DOCKS]
+        for w in widgets:
+            if w is None:
+                continue
+            if shown:
+                w.setVisible(self._controls_shown.pop(w, True))
+            else:
+                self._controls_shown[w] = not w.isHidden()   # as the user left it
+                w.setVisible(False)
+        self.anim_bar.Refresh()
+        self.RefreshActions()
+
+    def IsViewAction(self, name):
+        """ Whether the action `name` acts on the 3D view only. """
+        a = self._actions[name][0]
+        if a is None:
+            return name in self.VIEW_ACTIONS
+        return a.group in self.VIEW_GROUPS and name != 'clear_selection'   # Esc also clears the tree
 
     def FigureAdded(self, figure):
         from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
@@ -514,17 +558,23 @@ class MainWindow(QMainWindow, ViewerHost):
         self.grid_panel.Refresh()
 
     def RefreshActions(self):
-        if 'export_animation_qt' in self._actions:
-            self._actions['export_animation_qt'][1].setEnabled(self.viewer.GetAnimationSteps() > 0)
         for name, (a, qa) in self._actions.items():
+            # the actions of the 3D view are off while it is not visible
+            on = self._view_in_front or not self.IsViewAction(name)
             if a is None:
+                if name == 'export_animation_qt':
+                    on = on and self.viewer.GetAnimationSteps() > 0
+                elif name not in self.VIEW_ACTIONS:
+                    continue
+                qa.setEnabled(on)
                 continue
             if a.checkable and a.get is not None:
                 qa.blockSignals(True)
                 qa.setChecked(bool(a.get(self.viewer)))
                 qa.blockSignals(False)
             if a.enabled is not None:
-                qa.setEnabled(bool(a.enabled(self.viewer)))
+                on = on and bool(a.enabled(self.viewer))
+            qa.setEnabled(on)
 
     def Action(self, name):
         return self._actions[name][1]
@@ -941,6 +991,7 @@ class MainWindow(QMainWindow, ViewerHost):
         self.RefreshActions()
 
     def closeEvent(self, event):
+        self._SetViewControls(True)   # the layout as the user left it, not as a figure tab hid it
         self._settings.setValue('geometry', self.saveGeometry())
         self._settings.setValue('window_state', self.saveState())
         self._settings.setValue('picking', self.viewer.GetPicking())

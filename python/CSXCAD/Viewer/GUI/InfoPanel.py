@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """CSXCAD.Viewer.GUI.InfoPanel
-Read-only details of the selected property, primitive, grid or item.
+Read-only details of the selected property, primitive, grid, item or figure.
 """
 
 import html
@@ -221,6 +221,23 @@ class InfoPanel(QTextBrowser):
                 rows.append(_Row(name + ' worst ratio', '{:.3g} at {:.6g} ({} over threshold)'.format(
                     info['max_ratio'], info.get('max_ratio_at', float('nan')), info['n_over_threshold'])))
         self._Show('Grid', rows)
+
+    def ShowFigure(self, figure, curve=None):
+        """ Info of a figure (a ViewFigure), or of its curve `curve`; a
+        figure has no settings. """
+        curves = figure.GetCurves()
+        if curve is not None:
+            rows = [_Row('Figure', figure.GetName()), _Row('Visible', figure.GetCurveVisible(curve)),
+                    _Row('Artists', len(figure.GetCurveArtists(curve)))]
+            self._Show(curve, rows)
+            return
+        hidden = [c for c in curves if not figure.GetCurveVisible(c)]
+        rows = [_Row('Path', figure.GetPath()), _Row('Shown', figure.IsShown()),
+                _Row('Axes', len([ax for ax in figure.GetFigure().axes if getattr(ax, '_colorbar', None) is None])),
+                _Row('Curves', ', '.join(curves) or '-')]
+        if hidden:
+            rows.append(_Row('Hidden', ', '.join(hidden)))
+        self._Show(figure.GetName(), rows)
 
     def ShowItem(self, item):
         """ Info of a ViewItem; its settings go to the Settings dock. """

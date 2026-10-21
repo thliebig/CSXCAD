@@ -140,7 +140,10 @@ Figures
 Matplotlib figures (results, e.g.) are shown next to the 3D view with
 :meth:`~CSXCAD.Viewer.Core.Viewer.AddFigure`: in the GUI as further tabs, or
 sub-windows (``window_mode``), each figure's matplotlib toolbar in the main
-toolbar area while it is in front. The tree lists them below *Figures*, with
+toolbar area while it is in front. While a figure tab hides the 3D view, the
+toolbars and the grid dock of the 3D view are hidden and its actions
+disabled. Selecting a figure or curve row shows its info, and choosing a tab
+or window selects its figure's row. The tree lists them below *Figures*, with
 a row per curve to show or hide; selecting a row brings its figure to the
 front and draws the selected curves thicker
 (:meth:`~CSXCAD.Viewer.Core.Viewer.HighlightCurves`), selecting the

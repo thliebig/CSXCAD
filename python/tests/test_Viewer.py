@@ -1333,9 +1333,30 @@ sub, tb = w._figure_subs[vf.GetPath()]
 assert tb.iconSize() == w.Toolbar('View').iconSize()   # same height as the viewer's toolbars
 assert w.mdi.currentSubWindow() is w._view_sub
 assert not tb.isVisible()                          # the 3D view is in front
+from CSXCAD.Viewer import ViewItem
+field = v.AddItem(ViewItem('field'), group='results')
+w.tree._items['results/field'].setSelected(True)
+assert w.item_editor.item is field
+view_tbs = [w.Toolbar(n) for n in ('View', 'Display', 'Grid')]
+w.Toolbar('Grid').setVisible(False)                # as the user left it
+w.tree.clearSelection()
 w.tree._items['figures/S-parameters/S21'].setSelected(True)
 app.processEvents()
 assert w.mdi.currentSubWindow() is sub and tb.isVisible()
+assert w.item_editor.item is None                  # not the settings of the earlier row
+assert w.info.toPlainText().startswith('S21'), w.info.toPlainText()
+assert not any(t.isVisible() for t in view_tbs)    # nothing for the 3D view behind the tab
+assert not w.dock_grid.isVisible()
+assert not w.Action('fit').isEnabled() and not w.Action('screenshot_qt').isEnabled()
+assert w.Action('open').isEnabled() and w.Action('clear_selection').isEnabled()
+w.tree.clearSelection()
+w.tree._items['figures/S-parameters'].setSelected(True)
+assert w.info.toPlainText().startswith('S-parameters') and 'S11, S21' in w.info.toPlainText()
+w.tree.clearSelection()
+w.tree._items['figures'].setSelected(True)         # a group: no info of the earlier row
+assert w.info.toPlainText() == ''
+w.tree.clearSelection()
+w.tree._items['figures/S-parameters/S21'].setSelected(True)
 s21 = vf.GetCurveArtists('S21')[0]
 assert vf.GetHighlight() == ['S21'] and s21.get_linewidth() > vf.GetCurveArtists('S11')[0].get_linewidth()
 assert w.vtk_widget.isHidden()                     # a native window would paint over the tab
@@ -1345,6 +1366,21 @@ w.tree._items['properties/materials/patch'].setSelected(True)
 app.processEvents()
 assert w.mdi.currentSubWindow() is w._view_sub and not tb.isVisible()
 assert not w.vtk_widget.isHidden()
+assert [t.isVisible() for t in view_tbs] == [True, True, False]   # back as they were
+assert w.dock_grid.isVisible()
+w.tree._items['results/field'].setSelected(True)
+w.mdi.setActiveSubWindow(sub)                      # a click on the figure's tab
+app.processEvents()
+assert [i.data(0, Qt.ItemDataRole.UserRole) for i in w.tree.selectedItems()] == ['figures/S-parameters']
+assert w.item_editor.item is None and w.info.toPlainText().startswith('S-parameters')
+w.mdi.setActiveSubWindow(w._view_sub)              # and on the 3D view's: no figure row stays
+app.processEvents()
+assert w.tree.selectedItems() == [] and w.info.toPlainText() == ''
+w.tree._items['properties/materials/patch'].setSelected(True)
+w.mdi.setActiveSubWindow(w._view_sub)              # a property row stays
+assert len(w.tree.selectedItems()) == 1
+w.tree.clearSelection()
+assert w.Action('fit').isEnabled() and w.Action('screenshot_qt').isEnabled()
 row = w.tree._items['figures/S-parameters/S11']
 row.setCheckState(0, Qt.CheckState.Unchecked)     # the tree hides a curve
 assert not vf.GetCurveVisible('S11')
@@ -1352,6 +1388,7 @@ w._view_sub.close()                                # the 3D view cannot be close
 v.SetWindowMode('windows')
 v.RaiseFigure(vf)
 assert not w.vtk_widget.isHidden()                 # side by side, the 3D view stays
+assert w.Toolbar('View').isVisible() and w.Action('fit').isEnabled()   # and so do its controls
 w._view_sub.close()
 assert not w._view_sub.isHidden() and len(w.mdi.subWindowList()) == 2
 assert not (w._view_sub.windowFlags() & Qt.WindowType.WindowCloseButtonHint)

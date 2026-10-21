@@ -218,6 +218,13 @@ class SceneTree(QTreeWidget):
             self.win.info.ShowItem(v.GetItems()[v._scene.tree.Get(path).parent.path])
         elif kind == 'grid':
             self.win.info.ShowGrid()
+        elif kind == 'figure':
+            self.win.info.ShowFigure(v._figures[path])
+        elif kind == 'curve':
+            node = v._scene.tree.Get(path)
+            self.win.info.ShowFigure(v._figures[node.parent.path], node.label)
+        else:   # a group: nothing to show, not the info of an earlier row
+            self.win.info.clear()
 
     def _OnDoubleClick(self, it, column):
         kind = it.data(0, ROLE_KIND)
@@ -230,6 +237,35 @@ class SceneTree(QTreeWidget):
                 v.Focus((v._scene.Entry(it.data(0, ROLE_PATH)).name, idx))
         except (ValueError, KeyError):
             pass
+
+    def FollowFront(self, figure):
+        """ FollowFront(figure)
+
+        The selection after a tab or window was brought to the front:
+        `figure` (a tree path) selects its row, unless one of its rows is
+        selected already; the 3D view (None) drops selected figure and
+        curve rows. The info and settings follow. """
+        rows = self.selectedItems()
+        if figure is None:
+            if not any(it.data(0, ROLE_KIND) in ('figure', 'curve') for it in rows):
+                return
+            self.blockSignals(True)
+            self.clearSelection()
+            self.blockSignals(False)
+            self.viewer.HighlightCurves([])
+            self.win.info.clear()
+            return
+        it = self._items.get(figure)
+        if it is None or any(r is it or r.parent() is it for r in rows):
+            return
+        self.blockSignals(True)
+        self.clearSelection()
+        it.setSelected(True)
+        self.setCurrentItem(it)
+        self.blockSignals(False)
+        self.viewer.Highlight(None)
+        self.viewer.HighlightCurves([])
+        self.win.info.ShowFigure(self.viewer._figures[figure])
 
     def SelectItem(self, path):
         """ Select the row of an item (by path), showing its info and settings. """
