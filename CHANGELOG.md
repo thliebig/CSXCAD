@@ -26,6 +26,9 @@ there are unreleased changes. It becomes the next release entry.
   individual transformation steps (C++: `GetNumberOfTransforms()`,
   `GetTransformName()`, `GetTransformArguments()`). `GetAllPrimitives()` no
   longer fails on a user-defined primitive read from XML.
+- `ReadFromXML()` finds the `ContinuousStructure` element anywhere in the
+  document, not only directly below the root, so files that embed a structure
+  load directly.
 
 ### Changed
 

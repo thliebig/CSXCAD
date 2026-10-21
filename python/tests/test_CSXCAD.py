@@ -124,6 +124,29 @@ class Test_CSXCAD(unittest.TestCase):
         mat_prims = self.csx.GetAllPrimitives(prop_type=CSProperties.PropertyType.MATERIAL)
         self.assertEqual(len(mat_prims), 1)
 
+    def test_read_nested_xml(self):
+        # a structure embedded somewhere inside a larger document, next to a
+        # user-defined primitive that has no python class of its own
+        metal = self.csx.AddMetal('metal')
+        metal.AddBox([0, 0, 0], [1, 1, 1])
+        fn = os.path.join(tempfile.gettempdir(), 'test_nested.xml')
+        self.csx.Write2XML(fn)
+        with open(fn) as f:
+            xml = f.read()
+        xml = xml[xml.index('<ContinuousStructure'):]
+        user_def = ('<UserDefined Priority="0" CoordSystem="0"><CoordShift X="0" Y="0" Z="0"/>'
+                    '<Function>x*x+y*y+z*z-1</Function></UserDefined>')
+        xml = xml.replace('</Primitives>', user_def + '</Primitives>', 1)
+        with open(fn, 'w') as f:
+            f.write('<?xml version="1.0"?>\n<Outer><Settings/><Inner>' + xml + '</Inner></Outer>')
+
+        csx = ContinuousStructure()
+        self.assertEqual(csx.ReadFromXML(fn), '')
+        os.remove(fn)
+        prims = csx.GetAllPrimitives()
+        self.assertEqual(sorted(p.GetType() for p in prims),
+                         [CSPrimitives.PrimitiveType.BOX, CSPrimitives.PrimitiveType.USERDEFINED])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -510,10 +510,27 @@ bool ContinuousStructure::Write2XML(std::string file, bool parameterised, bool s
 	return doc.SaveFile();
 }
 
+// depth-first search for the first element with the given name below node
+static TiXmlNode* FindFirstNode(TiXmlNode* node, const char* name)
+{
+	for (TiXmlNode* child=node->FirstChild(); child!=NULL; child=child->NextSibling())
+	{
+		if (child->ToElement()==NULL)
+			continue;
+		if (strcmp(child->Value(),name)==0)
+			return child;
+		TiXmlNode* found = FindFirstNode(child, name);
+		if (found)
+			return found;
+	}
+	return NULL;
+}
+
 const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 {
 	clear();
-	TiXmlNode* root = rootNode->FirstChild("ContinuousStructure");
+	// the structure may be embedded at any depth of a larger document
+	TiXmlNode* root = FindFirstNode(rootNode, "ContinuousStructure");
 	if (root==NULL) { ErrString.append("Error: No ContinuousStructure found!!!\n"); return ErrString.c_str();}
 
 	TiXmlElement* rootElem = root->ToElement();
