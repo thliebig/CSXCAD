@@ -43,6 +43,12 @@ there are unreleased changes. It becomes the next release entry.
 - **`csxcad-view`** opens a structure file,
   or writes `--png`, `--views`, `--export` and `--describe` outputs without a
   window. AppCSXCAD's options are accepted too.
+- **Viewer GUI** (`pip install CSXCAD[gui]`, needs PySide6): toolbars and
+  menus for all viewer actions, a structure tree to show, hide, recolour and
+  change the render mode of properties, an info panel, item settings, grid
+  and section-plane controls and an animation bar. `Show(block=False)`
+  shares the Qt event loop with matplotlib; importing `CSXCAD.Viewer` before
+  the first figure starts Qt on X11 for both.
 
 ### Changed
 

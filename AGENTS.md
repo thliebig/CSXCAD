@@ -107,6 +107,34 @@ cd python/tests && python3 -m unittest
 **Build it and run the tests before reporting a change as working.** Reading
 the code is not verification, and "should work" is not a test result.
 
+## Viewer
+
+`python/CSXCAD/Viewer/` is a VTK viewer with an optional PySide6 GUI
+(`csxcad-view`, replacing AppCSXCAD). Use it to check a structure rather than
+reasoning about coordinates:
+
+```python
+from CSXCAD.Viewer import Viewer
+v = Viewer(CSX, offscreen=True)
+v.RenderViews('views.png')      # labelled images of all sides and iso
+print(v.Describe('text'))       # properties, bounds, mesh stats, unrendered primitives
+```
+
+- **Headless**: off screen it picks EGL or OSMesa itself (probed in a
+  subprocess; `CSXCAD_VIEWER_BACKEND` overrides). With
+  `CSXCAD_VIEWER_OUTPUT=<dir>` every `Show()` writes `<name>_view.png`,
+  `<name>_views.png` and `<name>_describe.json` instead of opening a window,
+  so scripts that show things run unattended.
+- **Layout**: the core (`Core.py`, `Scene.py`, ...) is Qt-free and holds the
+  logic; `GUI/` only calls it and implements `ViewerHost`. New features go
+  into the core API first; `Actions.py` feeds key bindings, menus and
+  toolbars. Property looks (colour, visibility, render mode) write through to
+  the CSX properties, everything else is view state (`ViewState.py`).
+- **Tests**: `python/tests/test_Viewer.py` imports the installed package, so
+  reinstall after a change. GL tests skip without OpenGL; GUI tests run in a
+  subprocess under `QT_QPA_PLATFORM=offscreen`. Real interaction (picking,
+  hover, window placement) still needs a check on a desktop.
+
 ## House rules
 
 - **Style**: C++17. Match the file you are editing. No trailing whitespace, no

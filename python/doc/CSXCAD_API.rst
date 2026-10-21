@@ -11,3 +11,4 @@ CSXCAD Python Interface
    CSRectGrid
    Mesh
    Utilities
+   Viewer

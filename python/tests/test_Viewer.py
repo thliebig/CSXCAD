@@ -328,6 +328,36 @@ class TestViewerState(unittest.TestCase):
             with self.assertRaises(ValueError, msg=path):
                 v.RemoveGroup(path)
 
+    def test_show_while_isolated(self):
+        # ticking a property in the tree while others are isolated shows it
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure(), isolate='patch')
+        sub = v._scene.Entry('substrate').path
+        self.assertFalse(v.GetVisible(sub))
+        v.SetVisible(sub, True)
+        self.assertTrue(v.GetVisible(sub))
+        self.assertEqual(v.GetIsolate(), ['patch', 'substrate'])
+        v.SetVisible(sub, False)
+        self.assertFalse(v.GetVisible(sub))
+
+    def test_relative_size(self):
+        from CSXCAD.Viewer import Viewer
+        v = Viewer(_Structure())
+        self.assertEqual(v.GetSize(), (800, 600))   # the default, on the reference screen
+        v.SetSize((0.5, 2.0))
+        self.assertEqual(v.GetState()['size'], [0.5, 2.0])
+        from CSXCAD.Viewer.Core import ViewerHost
+
+        class Host4K(ViewerHost):   # as a GUI on a 4K screen
+            def ScreenSize(self):
+                return (3840, 2160)
+        v.SetHost(Host4K())
+        v.SetSize((0.5, 2.0))
+        self.assertEqual(v.GetSize(), (1970, 985))
+        self.assertEqual(v.GetState()['size'], [0.5, 2.0])
+        v.SetSize((640, 480))   # pixels stay pixels
+        self.assertEqual(v.GetSize(), (640, 480))
+
     def test_item_settings(self):
         # item settings travel in the view state, also to items added later
         from CSXCAD.Viewer import Viewer, ViewItem
@@ -886,6 +916,133 @@ class TestViewerImport(unittest.TestCase):
                 'print(type(vtkActor()).__name__, type(vtkScalarBarActor()).__name__)')
         out = subprocess.run([sys.executable, '-c', code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         self.assertEqual(out.stdout.split()[0], 'vtkOpenGLActor', out.stderr)
+
+    def test_gui_extensions(self):
+        # an application adds actions, a dock and editable item settings;
+        # in a subprocess, to use Qt's offscreen platform and a scratch config
+        try:
+            import PySide6  # noqa: F401
+        except ImportError:
+            self.skipTest('PySide6 not available')
+        if not HAS_VTK:
+            self.skipTest('vtk not available')
+        import subprocess
+        import sys
+        code = """
+import sys
+sys.path.insert(0, {tests!r})
+from test_Viewer import _Structure
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QSpinBox
+app = QApplication([])
+from CSXCAD.Viewer import Viewer, ViewItem
+from CSXCAD.Viewer.Actions import Action
+from CSXCAD.Viewer.GUI.MainWindow import MainWindow
+
+class Win(MainWindow):
+    TITLE = 'App'
+    SETTINGS = ('CSXCAD-test', 'app')
+    def Customize(self):
+        self.AddDock('sim', 'Simulation', QLabel('idle'))
+
+class Field(ViewItem):
+    n = 3
+    def GetParameters(self):
+        return [dict(name='n', type='int', value=self.n, min=1, max=10, help='how many')] + [
+            dict(name='pos{{}}'.format(i), type='slider', value=0, values=[0, 1, 2], section='Planes')
+            for i in range(self.n - 3)]
+    def SetParameter(self, name, value):
+        self.n = value
+    def GetDescription(self):
+        return 'n={{}}'.format(self.n)
+    def GetActions(self):
+        return [('Reset', lambda: setattr(self, 'n', 3))]
+
+v = Viewer(_Structure(), offscreen=True)
+runs = []
+v.AddAction(Action('run', 'Run', lambda v: runs.append(1), group='Simulation'), toolbar='Simulation')
+w = Win(v, render_widget=QWidget())
+item = v.AddItem(Field('field'), group='results')
+v.AddAction(Action('stop', 'Stop', lambda v: None, group='Simulation'), toolbar='Simulation')
+assert w.windowTitle() == 'App', w.windowTitle()
+w.show()
+w.Start()
+v.SetWindowPosition((0.1, 0.2))
+a = w.screen().availableGeometry()
+assert (w.frameGeometry().x() - a.x(), w.frameGeometry().y() - a.y()) == \
+    (round(0.1 * a.width()), round(0.2 * a.height())), (w.frameGeometry(), a)
+assert v.GetState()['window_position'] == [0.1, 0.2], v.GetState()['window_position']
+assert v.GetState()['size'][0] <= 1   # relative on a screen
+assert w.dock_sim.widget().text() == 'idle'
+assert [a.text() for a in w.Toolbar('Simulation').actions()] == ['Run', 'Stop']
+assert [a.text() for a in w.Menu('Simulation').actions()] == ['Run', 'Stop']
+w.Action('run').trigger()
+assert runs == [1]
+assert not any(p.startswith('grid') for p in w.tree._items)   # the grid has its own dock
+assert all(it.treeWidget() is w.tree for it in w.tree._items.values())   # all rows shown
+w2 = Win(Viewer(_Structure(), offscreen=True, isolate='patch'), render_widget=QWidget())
+w2.Start()
+expanded = {{p: it.isExpanded() for p, it in w2.tree._items.items() if p.count('/') == 1 and it.childCount()}}
+assert expanded['properties/materials'] and not any(e for p, e in expanded.items() if p != 'properties/materials'), expanded
+from PySide6.QtWidgets import QTreeWidgetItem
+row = w.tree._items['properties/materials/patch']
+v.SetPrimitiveSelection(True)
+w.tree.Refresh()
+w.tree._OnExpanded(row)
+assert row.childCount() > 0
+v.SetPrimitiveSelection(False)
+w.tree.Refresh()
+assert row.childCount() == 0
+assert row.childIndicatorPolicy() == QTreeWidgetItem.ChildIndicatorPolicy.DontShowIndicator
+row.setSelected(True)
+assert v.GetHighlight() == ['patch'], v.GetHighlight()
+w.tree.clearSelection()   # e.g. a click on empty space in the tree
+assert v.GetHighlight() is None, v.GetHighlight()
+w.info.ShowItem(item)
+spin = w.item_editor.findChild(QSpinBox)
+assert spin.toolTip() == 'how many', spin.toolTip()
+spin.setValue(5)
+assert item.n == 5, item.n
+from CSXCAD.Viewer.GUI.Widgets import SliderField
+assert len(w.item_editor.findChildren(SliderField)) == 2   # rebuilt
+w.tree.Refresh()
+assert w.tree._items['results/field'].text(1) == 'n=5'
+w.info.clear()
+assert w.item_editor.item is None and w.dock_settings.widget() is w.item_editor
+import os, tempfile
+fn = os.path.join(tempfile.mkdtemp(), 'struct.xml')
+_Structure().Write2XML(fn)
+w3 = Win(Viewer(fn, offscreen=True), render_widget=QWidget())
+assert w3.windowTitle() == 'App - struct.xml', w3.windowTitle()
+os.remove(fn)
+w3.SaveXML()                      # to its file, no "Save as" dialog
+assert os.path.isfile(fn)
+other = _Structure()
+other.AddMetal('extra').AddBox([0, 0, 0], [1, 1, 1])
+other.Write2XML(fn)               # changed on disk
+w3.Reload()                       # reads the file again
+assert 'extra' in w3.viewer.GetPropertyNames(), w3.viewer.GetPropertyNames()
+print('ok')
+""".format(tests=os.path.dirname(os.path.abspath(__file__)))
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ, QT_QPA_PLATFORM='offscreen', XDG_CONFIG_HOME=tmp)
+            # (a timeout: a modal dialog would wait forever)
+            out = subprocess.run([sys.executable, '-c', code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=env, timeout=300)
+        self.assertEqual(out.stdout.strip(), 'ok', out.stderr)
+
+    def test_import_prepares_qt(self):
+        # imported before matplotlib starts Qt: X11 (Wayland as fallback) and PySide6
+        try:
+            import PySide6  # noqa: F401
+        except ImportError:
+            self.skipTest('PySide6 not available')
+        import subprocess
+        import sys
+        env = {k: v for k, v in os.environ.items() if k not in ('QT_QPA_PLATFORM', 'QT_API')}
+        env['DISPLAY'] = ':0'
+        code = "import os, CSXCAD.Viewer; print(os.environ.get('QT_API'), os.environ.get('QT_QPA_PLATFORM'))"
+        out = subprocess.run([sys.executable, '-c', code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, env=env)
+        expect = 'pyside6 ' + ('xcb;wayland' if sys.platform.startswith('linux') else 'None')
+        self.assertEqual(out.stdout.strip(), expect, out.stderr)
 
 
 if __name__ == '__main__':

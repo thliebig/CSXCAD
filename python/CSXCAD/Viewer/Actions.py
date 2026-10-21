@@ -222,6 +222,26 @@ def HandleKey(viewer, keysym, ctrl=False, shift=False):
     return False
 
 
+def ActionTable():
+    """ The actions as reStructuredText table (for the docs). """
+    rows = [(a.label, '``{}``'.format(a.name), '``{}``'.format(a.shortcut) if a.shortcut else '', a.group)
+            for a in ACTIONS]
+    head = ('Action', 'Name', 'Key', 'Group')
+    widths = [max(len(r[i]) for r in rows + [head]) for i in range(4)]
+    line = '  '.join('=' * w for w in widths)
+    fmt = lambda r: '  '.join(c.ljust(w) for c, w in zip(r, widths)).rstrip()
+    return '\n'.join([line, fmt(head), line] + [fmt(r) for r in rows] + [line])
+
+
+__doc__ += """
+Actions
+-------
+
+.. table::
+
+""" + '\n'.join('   ' + l for l in ActionTable().splitlines()) + '\n'
+
+
 def HelpText(viewer=None):
     """ Table of all actions (of `viewer`, if given) and their shortcuts. """
     actions = ACTIONS if viewer is None else viewer.GetActions()
