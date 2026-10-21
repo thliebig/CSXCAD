@@ -37,7 +37,7 @@ there are unreleased changes. It becomes the next release entry.
   modes with feature edges, mesh-grid planes, outline and quality overlay,
   section plane, highlight, isolate and picking; a scene tree with groups,
   and `ViewItem`s for external content, with settings kept in the view
-  state, movable colour legends, values under the mouse and an animation
+  state, parts shown and hidden on their own (`GetParts()`), movable colour legends, values under the mouse and an animation
   clock, exported as GIF, video or PNG frames; export to STL/PLY/VTP,
   glTF/GLB and SVG/PDF.
 - **`csxcad-view`** opens a structure file,

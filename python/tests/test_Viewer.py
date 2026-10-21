@@ -429,6 +429,57 @@ class TestViewerState(unittest.TestCase):
         v.SetVisible('properties', False)   # none shown: all of them, the dumps too
         self.assertEqual(v.GetStructureBounds(), (-30, 30, -30, 30, 0, 1.5))
 
+    def test_item_parts(self):
+        # parts of an item are tree rows of their own, shown and hidden on
+        # their own, also through the view state of a later viewer
+        from CSXCAD.Viewer import Viewer, ViewItem
+
+        class Cuts(ViewItem):
+            def __init__(self, name, n):
+                super().__init__(name)
+                self.n, self.hidden = n, set()
+
+            def GetParts(self):
+                return [('cut {}'.format(i), 'cut {}: z = {}'.format(i, 2 * i)) for i in range(self.n)]
+
+            def SetPartVisible(self, part, val):
+                (self.hidden.discard if val else self.hidden.add)(part)
+
+            def GetPartVisible(self, part):
+                return part not in self.hidden
+
+            def GetParameters(self):
+                return [dict(name='n', type='int', value=self.n)]
+
+            def SetParameter(self, name, value):
+                self.n = int(value)
+
+        v = Viewer(_Structure())
+        cuts = v.AddItem(Cuts('cuts', 2), group='results')
+        rows = [(r['kind'], r['path'], r['label']) for r in v.GetTree('results/cuts')['children']]
+        self.assertEqual(rows, [('part', 'results/cuts/cut 0', 'cut 0: z = 0'),
+                                ('part', 'results/cuts/cut 1', 'cut 1: z = 2')])
+        v.SetVisible('results/cuts/cut 1', False)
+        self.assertEqual(cuts.hidden, {'cut 1'})
+        self.assertEqual((v.GetVisible('results/cuts/cut 1'), v.GetVisible('results/cuts')), (False, True))
+        v.SetVisible('results', False)   # the item, not its parts
+        v.SetVisible('results', True)
+        self.assertEqual(cuts.hidden, {'cut 1'})
+        visible = v.GetState()['visible']
+        self.assertEqual((visible['results/cuts/cut 0'], visible['results/cuts/cut 1']), (True, False))
+        v.SetItemParameter(cuts, 'n', 1)   # the rows follow the parts
+        self.assertEqual([r['path'] for r in v.GetTree('results/cuts')['children']], ['results/cuts/cut 0'])
+        cuts.n = 3
+        cuts.PartsChanged()                # changed other than through a setting
+        self.assertEqual(len(v.GetTree('results/cuts')['children']), 3)
+        v.RemoveItem(cuts)
+        self.assertFalse(any(p.startswith('results/cuts') for p in v._scene.tree.nodes))
+
+        v2 = Viewer(_Structure(), visible=visible)   # before the item exists
+        cuts2 = v2.AddItem(Cuts('cuts', 2), group='results')
+        self.assertEqual(cuts2.hidden, {'cut 1'})
+        self.assertEqual(v2.GetState()['visible'], visible)
+
     def test_file_name(self):
         # a structure read from a file knows it (GUI: Reload, Save XML)
         from CSXCAD.Viewer import Viewer

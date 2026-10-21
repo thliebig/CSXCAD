@@ -213,6 +213,8 @@ class SceneTree(QTreeWidget):
             self.win.info.ShowPrimitive(e.prop.GetPrimitive(idx))
         elif kind == 'item':
             self.win.info.ShowItem(v.GetItems()[path])
+        elif kind == 'part':   # the settings of its item
+            self.win.info.ShowItem(v.GetItems()[v._scene.tree.Get(path).parent.path])
         elif kind == 'grid':
             self.win.info.ShowGrid()
 
@@ -307,7 +309,7 @@ class SceneTree(QTreeWidget):
             exp = menu.addMenu('Export')
             for fmt in ('stl', 'ply', 'vtp'):
                 exp.addAction(fmt.upper() + '...', lambda f=fmt: self.win.ExportDialog(f, prop=names))
-        elif kind in ('group', 'grid', 'item'):
+        elif kind in ('group', 'grid', 'item', 'part'):
             path = it.data(0, ROLE_PATH)
             menu.addAction('Show', lambda: (v.SetVisible(path, True), self.Refresh()))
             menu.addAction('Hide', lambda: (v.SetVisible(path, False), self.Refresh()))

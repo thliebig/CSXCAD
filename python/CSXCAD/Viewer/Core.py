@@ -887,6 +887,8 @@ class Viewer:
             if key == 'visible':
                 st[key] = dict(self._pending_visible)
                 st[key].update({p: it.GetVisible() for p, it in self._scene.items.items()})
+                st[key].update({n.path: self.GetVisible(n.path) for n in self._scene.tree.nodes.values()
+                                if n.kind == 'part'})
             elif key == 'items':
                 st[key] = {p: dict(v) for p, v in self._pending_items.items()}
                 for p, it in self._scene.items.items():
@@ -2036,6 +2038,8 @@ class Viewer:
             return self._scene.Entry(path).IsVisible()
         if node.kind == 'item':
             return self._scene.items[path].GetVisible()
+        if node.kind == 'part':
+            return self._scene.items[node.parent.path].GetPartVisible(node.part)
         if node.kind == 'figure':
             return self._figures[path].IsShown()
         if node.kind == 'curve':
@@ -2099,6 +2103,9 @@ class Viewer:
                     self._host.FigureShown(vf, val)
             elif node.kind == 'curve':
                 self._figures[node.parent.path].SetCurveVisible(node.label, val)
+            elif node.kind == 'part':
+                it = self._scene.items[node.parent.path]
+                self._CallHook(it.SetPartVisible, node.part, val)
             elif node.kind == 'grid':
                 part = path.split('/')[1] if '/' in path else None
                 if part is None:
@@ -2174,6 +2181,7 @@ class Viewer:
         pending = self._pending_items.pop(path, None)
         if pending:
             self._ApplyItemParameters(item, pending)
+        self._SyncParts(item, notify=False)
         if item.IsIncludedInBounds() and self._auto_fit:
             # a view that was only fitted so far includes the new item
             self.Fit(render=False)
@@ -2375,8 +2383,29 @@ class Viewer:
             item.SetOpacity(value)
         else:
             item.SetParameter(name, value)
+        self._SyncParts(item, notify=False)
         self._TreeChanged()
         self._Changed(render)
+
+    def _SyncParts(self, item, notify=True):
+        """ The tree rows below `item` for its parts (ViewItem.GetParts);
+        `notify` tells the host (False: the caller does). """
+        path = item.GetPath()
+        node = self._scene.tree.Get(path)
+        parts = self._CallHook(item.GetParts) or []
+        want = {JoinPath(path, EscapeName(pid)): (pid, label) for pid, label in parts}
+        for child in [c for c in node.children if c.kind == 'part' and c.path not in want]:
+            self._scene.tree.Remove(child.path)
+        for ppath, (pid, label) in want.items():
+            if ppath not in self._scene.tree.nodes:
+                n = self._scene.tree.Add(ppath, label, 'part')
+                n.part = pid
+                pending = self._pending_visible.pop(ppath, None)
+                if pending is not None:
+                    self._CallHook(item.SetPartVisible, pid, pending)
+            self._scene.tree.nodes[ppath].label = label
+        if notify:
+            self._TreeChanged()
 
     def _ApplyItemParameters(self, item, params):
         for name, value in params.items():

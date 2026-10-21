@@ -134,7 +134,9 @@ An application building on the viewer adds these kinds of things:
   :meth:`~CSXCAD.Viewer.Core.Viewer.SetItemParameter`. Every item also has an
   ``opacity``. ``GetDescription()`` fills the tree's second column,
   ``GetValueText()`` the value under the mouse, ``GetActions()`` the item's
-  context menu and ``CreateWidget()`` an own Qt widget. Colour legends go
+  context menu and ``CreateWidget()`` an own Qt widget. ``GetParts()`` lists
+  parts to show and hide on their own, e.g. the planes of a cut: tree rows
+  below the item, their visibility kept in the view state. Colour legends go
   through :meth:`~CSXCAD.Viewer.Core.Viewer.AddLegend`, which lays them out;
   the mouse drags them elsewhere, a double click puts them back.
 * **Docks, menus and toolbars** come from a

@@ -704,9 +704,10 @@ class TreeNode:
     def __init__(self, path, label, kind):
         self.path = path
         self.label = label
-        self.kind = kind     # 'group', 'property', 'grid', 'item'
+        self.kind = kind     # 'group', 'property', 'grid', 'item', 'part' (of an item), 'figure', 'curve'
         self.children = []
         self.parent = None
+        self.part = None     # a part's id (ViewItem.GetParts)
 
 
 class SceneTree:
@@ -1009,6 +1010,37 @@ class ViewItem:
         """ List of ``(label, callable)`` pairs for the item's context menu in
         the GUI tree. The callables take no arguments. """
         return []
+
+    def GetParts(self):
+        """ GetParts()
+
+        Parts of the item to show and hide on their own, e.g. the planes of
+        a cut: tree rows below the item, their visibility kept in the view
+        state. Call :meth:`PartsChanged` when they change other than through
+        a setting.
+
+        Returns
+        -------
+        list of (str, str)
+            ``(id, label)`` per part; the id is the last part of the row's
+            tree path and should stay when the part changes (e.g.
+            ``'plane 1'``), the label may say more (``'plane 1: z = 0'``).
+        """
+        return []
+
+    def SetPartVisible(self, part, val):
+        """ Show or hide the part with the id `part` (see :meth:`GetParts`)
+        and update the props; must not render. """
+        raise KeyError('item "{}" has no part "{}"'.format(self._name, part))
+
+    def GetPartVisible(self, part):
+        return True
+
+    def PartsChanged(self):
+        """ Update the tree rows of the parts, see :meth:`GetParts`. """
+        v = self.GetViewer()
+        if v is not None:
+            v._SyncParts(self)
 
     def CreateWidget(self, parent):
         """ CreateWidget(parent)
