@@ -14,7 +14,7 @@ function [binary_location] = searchBinary(name, searchpath, err_fail)
 %
 % - binary_location:
 %   - if found in searchpath:                full path of binary
-%   - if found in environment search path:   name of binary
+%   - if found in environment search path:   full path of binary
 %   - if not found:                          empty string
 %
 %
@@ -35,6 +35,12 @@ searchpath = [searchpath regexp(getenv('PATH'), pathsep, 'split')];
 
 % try all search paths
 for n=1:numel(searchpath)
+    if isempty(searchpath{n})
+        continue
+    end
+    if searchpath{n}(end) ~= filesep
+        searchpath{n} = [searchpath{n} filesep];
+    end
     binary_location = [searchpath{n} name];
     if exist(binary_location, 'file')
         return

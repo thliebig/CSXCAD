@@ -63,6 +63,8 @@ there are unreleased changes. It becomes the next release entry.
 - A broken PLY file for a polyhedron could crash or give wrong faces; it now
   fails, and the message says what is wrong. ASCII STL files with upper-case
   keywords, facets of more than three corners, or no `endsolid` now load.
+- `searchBinary.m` finds binaries on the `PATH`; it joined directory and name
+  without a separator.
 
 ### Build
 
