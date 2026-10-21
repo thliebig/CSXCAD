@@ -29,6 +29,20 @@ there are unreleased changes. It becomes the next release entry.
 - `ReadFromXML()` finds the `ContinuousStructure` element anywhere in the
   document, not only directly below the root, so files that embed a structure
   load directly.
+- **Python viewer `CSXCAD.Viewer`** (`pip install CSXCAD[viewer]`, needs
+  `vtk`): `Show(CSX, **view)` renders a structure on screen or off screen, and
+  the whole view is a dict of keyword arguments that a script can bake in.
+  Screenshots, a contact sheet of all sides (`RenderViews()`) and a
+  machine-readable summary (`Describe()`) work without a display. Render
+  modes with feature edges, mesh-grid planes, outline and quality overlay,
+  section plane, highlight, isolate and picking; a scene tree with groups,
+  and `ViewItem`s for external content, with settings kept in the view
+  state, movable colour legends, values under the mouse and an animation
+  clock, exported as GIF, video or PNG frames; export to STL/PLY/VTP,
+  glTF/GLB and SVG/PDF.
+- **`csxcad-view`** opens a structure file,
+  or writes `--png`, `--views`, `--export` and `--describe` outputs without a
+  window. AppCSXCAD's options are accepted too.
 
 ### Changed
 

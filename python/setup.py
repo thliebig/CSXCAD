@@ -222,8 +222,8 @@ setup(
   version=get_fallback_version(
       "pyproject.toml", "CSXCAD/__fallback_version__.py"
   ),
-  packages=["CSXCAD", ],
-  package_data={'CSXCAD': ['*.pxd']},
+  packages=["CSXCAD", "CSXCAD.Viewer", "CSXCAD.Viewer.GUI"],
+  package_data={'CSXCAD': ['*.pxd'], 'CSXCAD.Viewer': ['icons/*']},
   # DO NOT add any new build-time dependency in setup_requires.
   # We should use pyproject.toml exclusively. The only item
   # "cython" is meant to activate auto-Cython feature in
@@ -239,6 +239,15 @@ setup(
     # Matplotlib license (https://github.com/matplotlib/matplotlib/blob/main/LICENSE/LICENSE)
     "matplotlib >= 2.1.0"
   ],
+  extras_require={
+    # BSD 3-Clause (https://gitlab.kitware.com/vtk/vtk/-/blob/master/Copyright.txt)
+    'viewer': ['vtk'],
+    # LGPLv3 (https://pypi.org/project/PySide6/)
+    'gui': ['vtk', 'PySide6'],
+  },
+  entry_points={
+    'console_scripts': ['csxcad-view = CSXCAD.Viewer.CLI:Main'],
+  },
   ext_modules=extensions,
   **get_license()
 )

@@ -57,6 +57,15 @@ classifiers = [
     'Operating System :: Microsoft :: Windows',
 ]
 
+[project.optional-dependencies]
+# BSD 3-Clause (https://gitlab.kitware.com/vtk/vtk/-/blob/master/Copyright.txt)
+viewer = ["vtk"]
+# LGPLv3 (https://pypi.org/project/PySide6/)
+gui = ["vtk", "PySide6"]
+
+[project.scripts]
+csxcad-view = "CSXCAD.Viewer.CLI:Main"
+
 [project.urls]
 Homepage = "https://openems.de"
 Documentation = "https://docs.openems.de"
