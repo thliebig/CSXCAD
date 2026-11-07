@@ -45,6 +45,10 @@ there are unreleased changes. It becomes the next release entry.
   primitives. The surface of spheres, spherical shells, wires and the stop
   angle of a rotational polygon now count as inside too, as for boxes, and so
   do the corners of polygons. User-defined primitives ignore the tolerance.
+- The material at a point is found faster when it has no weighting function.
+  C++: `ContinuousStructure::GetPropertyByCoordPriority()` takes the list of
+  primitives as `const std::vector<CSPrimitives*>&`; rebuild code that uses
+  it.
 
 ### Fixed
 

@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
+#include <atomic>
 
 #include "ParameterObjects.h"
 #include "ParameterCoord.h"
@@ -124,9 +125,9 @@ public:
 	virtual int IsInsideBox(const double*  boundbox);
 
 	//! Check whether this primitive was used. (--> IsInside() return true) \sa SetPrimitiveUsed
-	bool GetPrimitiveUsed() {return m_Primtive_Used;}
+	bool GetPrimitiveUsed() {return m_Primtive_Used.load(std::memory_order_relaxed);}
 	//! Set the primitve uses flag. \sa GetPrimitiveUsed
-	void SetPrimitiveUsed(bool val) {m_Primtive_Used=val;}
+	void SetPrimitiveUsed(bool val) {m_Primtive_Used.store(val, std::memory_order_relaxed);}
 
 	//! Set or change the priotity for this primitive.
 	void SetPriority(int val) {iPriority=val;}
@@ -218,7 +219,7 @@ protected:
 	CSProperties* clProperty;
 	CSTransform* m_Transform;
 	std::string PrimTypeName;
-	bool m_Primtive_Used;
+	std::atomic<bool> m_Primtive_Used;   //!< atomic: the lookups may run on several threads
 
 	//internal bounding box, updated by Update(), can be used to speedup IsInside
 	bool m_BoundBoxValid;

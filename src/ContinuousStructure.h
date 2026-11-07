@@ -120,7 +120,7 @@ public:
 	 */
 	CSProperties** GetPropertiesByCoordsPriority(const double* coords, CSProperties::PropertyType type=CSProperties::ANY, bool markFoundAsUsed=false);
 
-	CSProperties* GetPropertyByCoordPriority(const double* coord, std::vector<CSPrimitives*> primList, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
+	CSProperties* GetPropertyByCoordPriority(const double* coord, const std::vector<CSPrimitives*>& primList, bool markFoundAsUsed=false, CSPrimitives** foundPrimitive=NULL);
 
 	//! Check and warn for unused primitives in properties of given type
 	void WarnUnusedPrimitves(std::ostream& stream, CSProperties::PropertyType type=CSProperties::ANY);

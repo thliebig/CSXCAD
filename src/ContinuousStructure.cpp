@@ -312,7 +312,7 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 			}
 		}
 	}
-	if ((markFoundAsUsed) && (winPrim))
+	if ((markFoundAsUsed) && (winPrim) && !winPrim->GetPrimitiveUsed())   // a read only once set: the threads keep the cache line shared
 		winPrim->SetPrimitiveUsed(true);
 	if (foundPrimitive)
 		*foundPrimitive=winPrim;
@@ -326,7 +326,7 @@ CSProperties** ContinuousStructure::GetPropertiesByCoordsPriority(const double* 
 	return NULL;
 }
 
-CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, std::vector<CSPrimitives*> primList, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
+CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coord, const std::vector<CSPrimitives*>& primList, bool markFoundAsUsed, CSPrimitives** foundPrimitive)
 {
 	CSProperties* prop = NULL;
 	// search in all given primitives if coordinate given is inside
@@ -336,7 +336,8 @@ CSProperties* ContinuousStructure::GetPropertyByCoordPriority(const double* coor
 			if (foundPrimitive)
 				*foundPrimitive = primList.at(i);
 			prop = primList.at(i)->GetProperty();
-			if (markFoundAsUsed)
+			// written only once: the setup of a solver looks up from many threads
+			if (markFoundAsUsed && !primList.at(i)->GetPrimitiveUsed())
 				primList.at(i)->SetPrimitiveUsed(true);
 			// break as soon as a primitive is found since it is expected that the vPrim vector is priority sorted!
 			break;

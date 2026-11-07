@@ -89,6 +89,9 @@ double CSPropMaterial::GetWeight(ParameterScalar *ps, int ny, const double* coor
 
 double CSPropMaterial::GetWeight(ParameterScalar &ps, const double* coords)
 {
+	// a constant weight: no coordinates to compute, the value ParameterScalar::GetEvaluated() returns
+	if (!ps.GetMode())
+		return ps.GetValue();
 	double paraVal[7];
 	if (coordInputType==1)
 	{
