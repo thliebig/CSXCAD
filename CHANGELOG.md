@@ -19,6 +19,10 @@ there are unreleased changes. It becomes the next release entry.
 - `CSPropDiscMaterial::GetPolyDataModel()` returns the discrete-material
   surface as plain point and quad arrays, in structure coordinates or in the
   mesh coordinates of the data file, and as numpy arrays in Python.
+- `LossyMetal` property (`CSPropLossyMetal`, Python `AddLossyMetal`, Matlab
+  `AddLossyMetal`): a metal with a finite conductivity and an optional surface
+  roughness (`RoughnessModel` `none` or `gradient`, rms roughness `Rq`), for
+  ordinary 3D bodies. `Thickness` is only used for 2D primitives.
 
 ### Changed
 

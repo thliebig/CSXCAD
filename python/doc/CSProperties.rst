@@ -15,6 +15,7 @@ CSProperties
     CSProperties/CSPropLumpedElement
     CSProperties/CSPropMetal
     CSProperties/CSPropConductingSheet
+    CSProperties/CSPropLossyMetal
     CSProperties/CSPropExcitation
     CSProperties/CSPropProbeBox
     CSProperties/CSPropDumpBox

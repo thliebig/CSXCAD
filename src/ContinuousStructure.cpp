@@ -42,6 +42,7 @@
 #include "CSPropLumpedElement.h"
 #include "CSPropMetal.h"
 #include "CSPropConductingSheet.h"
+#include "CSPropLossyMetal.h"
 #include "CSPropExcitation.h"
 #include "CSPropProbeBox.h"
 #include "CSPropDumpBox.h"
@@ -559,6 +560,7 @@ const char* ContinuousStructure::ReadFromXML(TiXmlNode* rootNode)
 		else if (strcmp(cProp,"LumpedElement")==0) newProp = new CSPropLumpedElement(clParaSet);
 		else if (strcmp(cProp,"Metal")==0) newProp = new CSPropMetal(clParaSet);
 		else if (strcmp(cProp,"ConductingSheet")==0) newProp = new CSPropConductingSheet(clParaSet);
+		else if (strcmp(cProp,"LossyMetal")==0) newProp = new CSPropLossyMetal(clParaSet);
 		else if (strcmp(cProp,"Excitation")==0) newProp = new CSPropExcitation(clParaSet);
 		else if (strcmp(cProp,"ProbeBox")==0) newProp = new CSPropProbeBox(clParaSet);
 		else if (strcmp(cProp,"ChargeBox")==0) newProp = new CSPropProbeBox(clParaSet); //old version support

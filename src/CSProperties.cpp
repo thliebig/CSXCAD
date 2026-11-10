@@ -25,6 +25,7 @@
 #include "CSPropLumpedElement.h"
 #include "CSPropMetal.h"
 #include "CSPropConductingSheet.h"
+#include "CSPropLossyMetal.h"
 #include "CSPropExcitation.h"
 #include "CSPropProbeBox.h"
 #include "CSPropDumpBox.h"
@@ -204,6 +205,7 @@ CSPropDebyeMaterial* CSProperties::ToDebyeMaterial() { return dynamic_cast<CSPro
 CSPropDiscMaterial* CSProperties::ToDiscMaterial() { return dynamic_cast<CSPropDiscMaterial*>(this); }
 CSPropMetal* CSProperties::ToMetal() { return dynamic_cast<CSPropMetal*>(this); }
 CSPropConductingSheet* CSProperties::ToConductingSheet() { return dynamic_cast<CSPropConductingSheet*>(this); }
+CSPropLossyMetal* CSProperties::ToLossyMetal() { return dynamic_cast<CSPropLossyMetal*>(this); }
 CSPropExcitation* CSProperties::ToExcitation() { return dynamic_cast<CSPropExcitation*>(this); }
 CSPropProbeBox* CSProperties::ToProbeBox() { return dynamic_cast<CSPropProbeBox*>(this); }
 CSPropResBox* CSProperties::ToResBox() { return dynamic_cast<CSPropResBox*>(this); }

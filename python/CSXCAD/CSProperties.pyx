@@ -79,6 +79,8 @@ cdef class CSProperties:
         prop = None
         if p_type == CONDUCTINGSHEET + METAL:
             prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+        elif p_type == LOSSYMETAL + METAL:
+            prop = CSPropLossyMetal(pset, no_init=no_init, **kw)
         elif p_type == METAL:
             prop = CSPropMetal(pset, no_init=no_init, **kw)
         elif p_type == MATERIAL:
@@ -123,6 +125,8 @@ cdef class CSProperties:
             prop = CSPropMetal(pset, no_init=no_init, **kw)
         elif type_str=='ConductingSheet':
             prop = CSPropConductingSheet(pset, no_init=no_init, **kw)
+        elif type_str=='LossyMetal':
+            prop = CSPropLossyMetal(pset, no_init=no_init, **kw)
         elif type_str=='Excitation':
             prop = CSPropExcitation(pset, no_init=no_init, **kw)
         elif type_str=='ProbeBox':
@@ -944,6 +948,7 @@ cdef class CSPropMetal(CSProperties):
     See Also
     --------
     CSPropConductingSheet : For all lossy conductor model with a finite conductivity
+    CSPropLossyMetal : A lossy and rough metal for 3D bodies
     """
     def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
         if no_init:
@@ -1000,6 +1005,85 @@ cdef class CSPropConductingSheet(CSPropMetal):
         """ GetThickness()
         """
         return (<_CSPropConductingSheet*>self._ptr()).GetThickness()
+
+###############################################################################
+cdef class CSPropLossyMetal(CSPropMetal):
+    """ Lossy metal property
+
+    A metal with a finite conductivity and an optional surface roughness,
+    for ordinary 3D bodies. A solver applies the surface impedance to the
+    faces of the body instead of meshing the skin depth.
+
+    :param conductivity:    float -- conductivity e.g. 5.8e7 (S/m)
+    :param roughness_model: str -- 'none' (default) or 'gradient'
+    :param rq:              float -- rms surface roughness, e.g. 1.8e-6 (m)
+    :param thickness:       float -- thickness (m), only used for 2D primitives
+    """
+    def __init__(self, ParameterSet pset, *args, no_init=False, **kw):
+        if no_init:
+            super(CSPropLossyMetal, self).__init__(pset, no_init=True)
+            return
+        if not self.thisptr:
+            self.thisptr = <_CSProperties*> new _CSPropLossyMetal(pset.thisptr)
+
+        if 'conductivity' in kw:
+            self.SetConductivity(kw['conductivity'])
+            del kw['conductivity']
+        if 'roughness_model' in kw:
+            self.SetRoughnessModel(kw['roughness_model'])
+            del kw['roughness_model']
+        if 'rq' in kw:
+            self.SetRq(kw['rq'])
+            del kw['rq']
+        if 'thickness' in kw:
+            self.SetThickness(kw['thickness'])
+            del kw['thickness']
+        super(CSPropLossyMetal, self).__init__(pset, *args, **kw)
+
+    def SetConductivity(self, val):
+        """ SetConductivity(val)
+        """
+        (<_CSPropLossyMetal*>self._ptr()).SetConductivity(val)
+
+    def GetConductivity(self):
+        """ GetConductivity()
+        """
+        return (<_CSPropLossyMetal*>self._ptr()).GetConductivity()
+
+    def SetRoughnessModel(self, model):
+        """ SetRoughnessModel(model)
+
+        :param model: str -- 'none' or 'gradient'
+        """
+        if not (<_CSPropLossyMetal*>self._ptr()).SetRoughnessModel(model.encode('UTF-8')):
+            raise ValueError('Unknown roughness model: {}'.format(model))
+
+    def GetRoughnessModel(self):
+        """ GetRoughnessModel()
+        """
+        return (<_CSPropLossyMetal*>self._ptr()).GetRoughnessModelName().decode('UTF-8')
+
+    def SetRq(self, val):
+        """ SetRq(val)
+
+        Set the rms surface roughness in m.
+        """
+        (<_CSPropLossyMetal*>self._ptr()).SetRq(val)
+
+    def GetRq(self):
+        """ GetRq()
+        """
+        return (<_CSPropLossyMetal*>self._ptr()).GetRq()
+
+    def SetThickness(self, val):
+        """ SetThickness(val)
+        """
+        (<_CSPropLossyMetal*>self._ptr()).SetThickness(val)
+
+    def GetThickness(self):
+        """ GetThickness()
+        """
+        return (<_CSPropLossyMetal*>self._ptr()).GetThickness()
 
 ###############################################################################
 cdef class CSPropExcitation(CSProperties):

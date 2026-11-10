@@ -288,6 +288,29 @@ class Test_CSPrimMethods(unittest.TestCase):
         self.assertEqual( prop2.GetConductivity(), 56e6)
         self.assertEqual( prop2.GetThickness(), 35e-6)
 
+    def test_lossy_metal(self):
+        prop = CSProperties.CSPropLossyMetal(self.pset, conductivity=5.8e7)
+        self.assertTrue(prop.GetMaterial())
+        self.assertEqual( prop.GetType(), CSProperties.PropertyType.LOSSYMETAL + CSProperties.PropertyType.METAL)
+        self.assertEqual( prop.GetTypeString(), 'LossyMetal')
+        self.assertEqual( prop.GetRoughnessModel(), 'none')
+        self.assertEqual( prop.GetRq(), 0)
+        self.assertEqual( prop.GetThickness(), 0)
+
+        prop.SetRoughnessModel('gradient')
+        prop.SetRq(1.8e-6)
+        prop.SetThickness(35e-6)
+        with self.assertRaises(ValueError):
+            prop.SetRoughnessModel('foo')
+        self.assertEqual( prop.GetRoughnessModel(), 'gradient')
+
+        prop2 = prop.copy()
+        self.assertEqual( prop2.GetType(), CSProperties.PropertyType.LOSSYMETAL + CSProperties.PropertyType.METAL)
+        self.assertEqual( prop2.GetConductivity(), 5.8e7)
+        self.assertEqual( prop2.GetRoughnessModel(), 'gradient')
+        self.assertEqual( prop2.GetRq(), 1.8e-6)
+        self.assertEqual( prop2.GetThickness(), 35e-6)
+
     def test_excitation(self):
         prop = CSProperties.CSPropExcitation(self.pset, exc_type=1, exc_val=[-1.0, 0, 1.0], delay=1e-9)
 

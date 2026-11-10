@@ -38,6 +38,7 @@ cdef extern from "CSXCAD/CSProperties.h":
         PROBEBOX           "CSProperties::PROBEBOX"
         RESBOX             "CSProperties::RESBOX"
         DUMPBOX            "CSProperties::DUMPBOX"
+        LOSSYMETAL         "CSProperties::LOSSYMETAL"
         DISPERSIVEMATERIAL "CSProperties::DISPERSIVEMATERIAL"
         LORENTZMATERIAL    "CSProperties::LORENTZMATERIAL"
         DEBYEMATERIAL      "CSProperties::DEBYEMATERIAL"
@@ -207,6 +208,25 @@ cdef extern from "CSXCAD/CSPropConductingSheet.h":
             double GetThickness()
 
 cdef class CSPropConductingSheet(CSPropMetal):
+    pass
+
+##############################################################################
+cdef extern from "CSXCAD/CSPropLossyMetal.h":
+    cdef cppclass _CSPropLossyMetal "CSPropLossyMetal" (_CSPropMetal):
+            _CSPropLossyMetal(_ParameterSet*) except +
+            void SetConductivity(double val)
+            double GetConductivity()
+
+            bool SetRoughnessModel(string val)
+            string GetRoughnessModelName()
+
+            void SetRq(double val)
+            double GetRq()
+
+            void SetThickness(double val)
+            double GetThickness()
+
+cdef class CSPropLossyMetal(CSPropMetal):
     pass
 
 ##############################################################################

@@ -44,7 +44,7 @@ from CSXCAD.CSObject cimport resolve_owner, STRUCTURE, BACKGROUNDMATERIAL
 from CSXCAD.Utilities import RegisterWrapperFactory
 
 from CSXCAD.CSProperties import CSPropMaterial, CSPropExcitation
-from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet
+from CSXCAD.CSProperties import CSPropMetal, CSPropConductingSheet, CSPropLossyMetal
 from CSXCAD.CSProperties import CSPropLumpedElement, CSPropProbeBox, CSPropDumpBox, CSPropAbsorbingBC
 from CSXCAD.CSProperties import CSPropDiscMaterial
 from CSXCAD.CSPrimitives import CSPrimPoint, CSPrimBox, CSPrimCylinder, CSPrimCylindricalShell
@@ -409,6 +409,19 @@ cdef class ContinuousStructure:
         CSXCAD.CSProperties.CSPropConductingSheet
         """
         return self.__CreateProperty('ConductingSheet', name, **kw)
+
+    def AddLossyMetal(self, name, **kw):
+        """ AddLossyMetal(name, **kw)
+
+        Add a lossy (and optionally rough) metal with name `name`, for
+        ordinary 3D bodies, e.g.
+        ``AddLossyMetal('cu', conductivity=5.8e7, roughness_model='gradient', rq=1.8e-6)``
+
+        See Also
+        --------
+        CSXCAD.CSProperties.CSPropLossyMetal
+        """
+        return self.__CreateProperty('LossyMetal', name, **kw)
 
     def AddExcitation(self, name, exc_type, exc_val, **kw):
         """ AddExcitation(name, exc_type, exc_val, **kw)

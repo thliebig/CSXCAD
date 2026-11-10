@@ -117,6 +117,24 @@ class TestXMLRoundTrip(unittest.TestCase):
         self.assertAlmostEqual(p2.GetThickness(),    18e-6)
 
     # ==================================================================
+    # CSPropLossyMetal
+    # ==================================================================
+
+    def test_lossy_metal(self):
+        self.csx.AddLossyMetal('cu', conductivity=5.8e7, roughness_model='gradient', rq=1.8e-6)
+        self.csx.AddLossyMetal('smooth', conductivity=4.1e7, thickness=35e-6)
+        csx2 = self._roundtrip()
+        p2 = self._prop(csx2, 'cu')
+        self.assertEqual(p2.GetTypeString(), 'LossyMetal')
+        self.assertAlmostEqual(p2.GetConductivity(), 5.8e7)
+        self.assertEqual(p2.GetRoughnessModel(), 'gradient')
+        self.assertAlmostEqual(p2.GetRq(), 1.8e-6)
+        p3 = self._prop(csx2, 'smooth')
+        self.assertEqual(p3.GetRoughnessModel(), 'none')
+        self.assertAlmostEqual(p3.GetRq(), 0)
+        self.assertAlmostEqual(p3.GetThickness(), 35e-6)
+
+    # ==================================================================
     # CSPropLumpedElement
     # ==================================================================
 
