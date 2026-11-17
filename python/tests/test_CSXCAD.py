@@ -124,6 +124,14 @@ class Test_CSXCAD(unittest.TestCase):
         mat_prims = self.csx.GetAllPrimitives(prop_type=CSProperties.PropertyType.MATERIAL)
         self.assertEqual(len(mat_prims), 1)
 
+    def test_cylindrical_mesh_primitive(self):
+        # a primitive added to a cylindrical structure tests the points as (r, a, z),
+        # not as (x, y, z)
+        csx = ContinuousStructure(CoordSystem=1)
+        cyl = csx.AddMetal('core').AddCylinder([0, 0, -1], [0, 0, 1], 0.5)
+        self.assertTrue(cyl.IsInside([0.4, 1.5, 0]))     # x/y (0.4, 1.5) would be outside
+        self.assertFalse(cyl.IsInside([0.6, 0.1, 0]))
+
 
 if __name__ == '__main__':
     unittest.main()

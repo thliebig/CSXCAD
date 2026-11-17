@@ -268,6 +268,10 @@ void CSProperties::AddPrimitive(CSPrimitives *prim)
 	}
 	prim->SetOwner(this);
 	vPrimitives.push_back(prim);
+	// the coordinate system of the mesh, as SetCoordInputType() gives it to the primitives
+	// already there: a new primitive starts Cartesian and would test the points of a
+	// cylindrical mesh as x/y/z. Without an update, the primitive is not complete yet.
+	prim->SetCoordInputType(coordInputType, false);
 	prim->SetProperty(this);
 }
 

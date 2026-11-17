@@ -55,6 +55,10 @@ there are unreleased changes. It becomes the next release entry.
 - A broken PLY file for a polyhedron could crash or give wrong faces; it now
   fails, and the message says what is wrong. ASCII STL files with upper-case
   keywords, facets of more than three corners, or no `endsolid` now load.
+- Primitives added from Python (or C++) to a structure with cylindrical
+  coordinates (`CoordSystem=1`) were tested as if the mesh were Cartesian,
+  so the geometry came out wrong; the XML they wrote, and with it a file read
+  back, was right.
 
 ### Build
 
